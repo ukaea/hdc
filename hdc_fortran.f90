@@ -4,6 +4,7 @@ module types
     type, bind(c) :: hdc_t
         type(c_ptr) :: obj
     end type hdc_t
+    integer, parameter :: DP=kind(1.0D0)
 end module types
 
 module hdc_fortran
@@ -40,6 +41,14 @@ module hdc_fortran
             type(hdc_t) :: res
         end function c_hdc_get_child
         
+        function c_hdc_get_slice(obj, path, i) result(res) bind(c,name="hdc_get_slice")
+            import
+            type(hdc_t), value :: obj
+            character(kind=c_char) :: path(*)
+            integer(kind=c_size_t) :: i
+            type(hdc_t) :: res
+        end function c_hdc_get_slice
+        
         subroutine c_hdc_set_child(obj, path, node) bind(c,name="hdc_set_child")
             import
             type(hdc_t), value:: obj
@@ -67,9 +76,15 @@ module hdc_fortran
             integer(kind=c_int8_t),value :: ndim
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
-!             integer(kind=c_long), dimension(:) :: shape_
-!             integer(kind=c_int8_t), dimension(:) :: data
         end subroutine c_hdc_set_data_int8
+        
+        subroutine c_hdc_set_data_double(obj, ndim, shape_, data) bind(c,name="hdc_set_data_double")
+            import
+            type(hdc_t), value:: obj
+            integer(kind=c_int8_t),value :: ndim
+            type(c_ptr), value :: shape_
+            type(c_ptr), value :: data
+        end subroutine c_hdc_set_data_double     
         
         function c_hdc_as_voidptr(obj) result(res) bind(c,name="hdc_as_voidptr")
             import
@@ -93,10 +108,13 @@ module hdc_fortran
      
     interface hdc_set_data
         module procedure hdc_set_data_int8_1d
+        module procedure hdc_set_data_double_1d
+        module procedure hdc_set_data_double_2d
     end interface hdc_set_data
+    
      
 
-    public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_as_int8, hdc_delete_child, hdc_set_data
+    public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_as_int8, hdc_delete_child, hdc_get_int8, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_slice
 contains
  
     subroutine hdc_add_child(this, path, node)
@@ -168,10 +186,37 @@ contains
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        print *, shape_,"A", data
+!         print *, shape_,"A", data
         call c_hdc_set_data_int8(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_data_int8_1d
+    
+    subroutine hdc_set_data_double_1d(this, data)
+        use iso_c_binding
+        type(hdc_t) :: this
+        real(kind=dp), dimension(:), target :: data
+        integer(kind=c_long), dimension(1:1), target :: shape_
+        type(c_ptr) :: data_ptr, shape_ptr
+        integer(1) :: ndim = 1
+        shape_ = shape(data)
+        data_ptr = c_loc(data)
+        shape_ptr = c_loc(shape_)
+!         print *, shape_,"A", data
+        call c_hdc_set_data_double(this, ndim, shape_ptr, data_ptr)
+    end subroutine hdc_set_data_double_1d
 
+    subroutine hdc_set_data_double_2d(this, data)
+        use iso_c_binding
+        type(hdc_t) :: this
+        real(kind=dp), dimension(:,:), target :: data
+        integer(kind=c_long), dimension(1:2), target :: shape_
+        type(c_ptr) :: data_ptr, shape_ptr
+        integer(1) :: ndim = 2
+        shape_ = shape(data)
+        data_ptr = c_loc(data)
+        shape_ptr = c_loc(shape_)
+!         print *, shape_,"A", data
+        call c_hdc_set_data_double(this, ndim, shape_ptr, data_ptr)
+    end subroutine hdc_set_data_double_2d
     
     function hdc_get_child(this, path) result(res)
         use iso_c_binding
@@ -188,6 +233,23 @@ contains
         res = c_hdc_get_child(this, c_path)
     end function hdc_get_child
     
+    function hdc_get_slice(this, path, ii) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*) :: path
+        integer(kind=c_size_t) :: ii
+        type(hdc_t) :: res
+        character(len=1, kind=c_char) :: c_path(len_trim(path) + 1)
+        integer :: N, i
+        N = len_trim(path)
+        do i = 1, N
+            c_path(i) = path(i:i)
+        end do
+        c_path(N+1) = c_null_char
+        res = c_hdc_get_slice(this, c_path, ii)
+    end function hdc_get_slice
+    
+    
     subroutine hdc_as_int8(this, res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -200,9 +262,68 @@ contains
         data_ptr = c_hdc_as_voidptr(this)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-        print *,"RES",res
+!         print *,"RES",res
     end subroutine hdc_as_int8
     
+    function hdc_get_int8(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), pointer :: shape_
+        type(c_ptr) :: shape_ptr, data_ptr
+        integer(kind=c_int8_t), dimension(:), pointer :: res
+        ndim = c_hdc_get_ndim(this)
+        shape_ptr = c_hdc_get_shape(this)
+        data_ptr = c_hdc_as_voidptr(this)
+        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
+        call c_f_pointer(data_ptr, res, shape_)
+!         print *,"RES",res
+    end function hdc_get_int8
+    
+    function hdc_get_double_1d(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), pointer :: shape_
+        type(c_ptr) :: shape_ptr, data_ptr
+        real(kind=dp), dimension(:), pointer :: res
+        ndim = c_hdc_get_ndim(this)
+        shape_ptr = c_hdc_get_shape(this)
+        data_ptr = c_hdc_as_voidptr(this)
+        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
+        call c_f_pointer(data_ptr, res, shape_)
+!         print *,"RES",res
+    end function hdc_get_double_1d
+    
+    function hdc_get_double_2d(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), pointer :: shape_
+        type(c_ptr) :: shape_ptr, data_ptr
+        real(kind=dp), dimension(:,:), pointer :: res
+        ndim = c_hdc_get_ndim(this)
+        shape_ptr = c_hdc_get_shape(this)
+        data_ptr = c_hdc_as_voidptr(this)
+        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
+        call c_f_pointer(data_ptr, res, shape_)
+!         print *,"RES",res
+    end function hdc_get_double_2d
+    
+    subroutine hdc_as_double(this, res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), pointer :: shape_
+        type(c_ptr) :: shape_ptr, data_ptr
+        real(kind=dp), dimension(:), pointer :: res
+        ndim = c_hdc_get_ndim(this)
+        shape_ptr = c_hdc_get_shape(this)
+        data_ptr = c_hdc_as_voidptr(this)
+        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
+        call c_f_pointer(data_ptr, res, shape_)
+!         print *,"RES",res
+    end subroutine hdc_as_double
  
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs

@@ -13,10 +13,10 @@
 #include "types.h"
 
 
-#define EMPTY 0
-#define NONTERMINAL 1
-#define DYND 2
-#define DYND_LIST 3
+#define HDC_EMPTY 0
+#define HDC_STRUCT 1
+#define HDC_DYND 2
+#define HDC_LIST 3
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -24,26 +24,26 @@ template<typename T> struct identity { typedef T type; };
 class hdc
 {
 public:
-    hdc();
+    hdc(); // Creates empty HDC
+    hdc(uint8_t i);
     ~hdc();
     void add_child(string path, hdc* n); // Add subnode
     void set_child(string path, hdc* n); // Set subnode
     void delete_child(string path); // Deletes subtree
     hdc* get_child(string path); // Get subnode
+    hdc* get_slice(string path, size_t i); // Get i-th subnode if HDC_LIST is the type...
+    hdc* get_slice(size_t i);
     bool has_child(string path);
     // Data manipulation methods
-//     void set_data_int8(int8_t ndim, const long int* shape, int8_t* data); // this should be the put method
     template <typename T> void set_data(int8_t ndim, const long int* shape, void* data) {
         if (this->children->size()) {
             cout << "The node has already children set..." << endl;
             return;
         }
                
-        cout << "Ndim:  " << (int)ndim << endl;
-        cout << "shape: " << (long)shape[0] << endl;
-        cout << "data:  " << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] <<endl;
-        
-        
+//         cout << "Ndim:  " << (int)ndim << endl;
+//         cout << "shape: " << (long)shape[0] << endl;
+//         cout << "data:  " << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] <<endl;
         
         dynd::nd::array arr;
         
@@ -53,10 +53,14 @@ public:
         cout << arr << endl;
         
         this->data->push_back(arr);
-        this->type = DYND;
+        //this->data = arr;
+        this->type = HDC_DYND;
         return;
     }
+    void set_list(vector<hdc*>* list);
+    void create_list(size_t n=5);
     uint8_t get_type();
+    void set_type(uint8_t i);
     bool is_empty();
     int8_t get_ndim(); // obtained from dynd::array
     long int* get_shape(); // obtained from dynd::array
@@ -67,16 +71,20 @@ public:
         }
         cout << "From get:" << this->data->at(0) << endl;
         return (T)(this->data->at(0)->data);
+        //return (T)(this->data.data());
     }
 private:
     int8_t type;
     vector<dynd::nd::array>* data;
+//     dynd::nd::array data;
+    vector<hdc*>* list_elements;
     unordered_map<string, hdc*>* children;
     
     void add_child(vector<string> vs, hdc* n);
     void set_child(vector<string> vs, hdc* n);
     void delete_child(vector<string> vs);
     hdc* get_child(vector<string> vs);
+    hdc* get_slice(vector<string> vs, size_t i);
     bool has_child(vector<string> vs);
     
 };

@@ -7,9 +7,9 @@ program test_hdc_fortran
 contains
 
     subroutine f_main()
-        type(hdc_t) :: tree, n, k, data
+        type(hdc_t) :: tree, n, k, node_int, node_double, node_double_2d
         integer(kind=c_int8_t), dimension(1:4) :: array
-        integer(kind=c_int8_t), dimension(:),pointer :: aaa
+        real(kind=dp), dimension(1:4) :: array_of_double
 
         call hello()
             
@@ -38,14 +38,20 @@ contains
         print *,"has_child: ", hdc_has_child(tree,"bbb/eee/aaa")
         
         ! test data_set
-        data = hdc_new_empty()
+        node_int = hdc_new_empty()
         array = (/1,2,3,4/)
         
-        call hdc_set_data(data,array)
+        call hdc_set_data(node_int,array)    
         
         ! test data get
-        call hdc_as_int8(data,aaa)
-        print *, aaa
+        print *,"DATA", hdc_get_int8(node_int)
+        
+        node_double = hdc_new_empty()
+        call hdc_set_data(node_double,(/1.0d0,2.0d0/))
+        print *,"1D DATA", (hdc_get_double_1d(node_double))
+        node_double_2d = hdc_new_empty()
+        call hdc_set_data(node_double_2d,reshape((/1.0d0,2.0d0,3.14d0,5.9d0/),(/2,2/)))
+        print *,"2D DATA", (hdc_get_double_2d(node_double_2d))
         
         call hdc_delete(tree)
         

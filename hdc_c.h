@@ -13,9 +13,11 @@ void hdc_add_child(struct hdc_t* tree, char* path, struct hdc_t* n);
 void hdc_set_child(struct hdc_t* tree, char* path, struct hdc_t* n);
 void hdc_delete_child(struct hdc_t* tree, char* path);
 struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path);
+struct hdc_t* hdc_get_slice(struct hdc_t* tree, char* path, size_t i);
 bool hdc_has_child(struct hdc_t* tree, char* path);
 void hdc_set_data_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);
-void hdc_set_data_int8_(struct hdc_t* tree, int8_t ndim, void* shape, void* data);
+void hdc_set_data_double(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) ;
+// void hdc_set_data_int8_(struct hdc_t* tree, int8_t ndim, void* shape, void* data);
 // void hdc_set_data(struct hdc_t* tree);
 // another data setting methods
 int8_t hdc_get_ndim(struct hdc_t* tree);

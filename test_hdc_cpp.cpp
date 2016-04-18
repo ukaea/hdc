@@ -47,7 +47,16 @@ int main(int argc, char **argv) {
     shape[0] = 4;
     data->set_data<int8_t>(1,shape,(void*)array);
     int8_t* aaa = data->as<int8_t*>();
-    cout << (int)aaa[0] << " " << (int)aaa[2] << endl; 
+    cout << (int)aaa[0] << " " << (int)aaa[2] << endl;
+    
+    hdc* list = new hdc();
+    list->create_list(10);
+    hdc* slice = list->get_slice(3);
+    int8_t* bbb = slice->as<int8_t*>();
+    cout << (int)bbb[0] << endl;
+    delete list;
+    
+    
    // data->set_data(1,shape,array);
     return 0;
 }

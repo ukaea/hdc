@@ -44,6 +44,14 @@ struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path) {
     return h;
 }
 
+struct hdc_t* hdc_get_slice(struct hdc_t* tree, char* path, size_t i) {
+    hdc* t = (hdc*)tree->obj;
+    hdc* node = t->get_slice(path, i);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
 bool hdc_has_child(struct hdc_t* tree, char* path) {
     hdc* t = (hdc*)tree->obj;
     return t->has_child(path);
@@ -51,15 +59,14 @@ bool hdc_has_child(struct hdc_t* tree, char* path) {
 
 void hdc_set_data_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
     hdc* t = (hdc*)tree->obj;
-    cout << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] << endl;
+//     cout << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] << endl;
     t->set_data<int8_t>(ndim, shape, data);
     return;
 }
 
-void hdc_set_data_int8_(struct hdc_t* tree, int8_t ndim, void* shape, void* data) {
+void hdc_set_data_double(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
     hdc* t = (hdc*)tree->obj;
-    cout << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] << endl;
-    t->set_data<int8_t>(ndim, (long int*)shape, data);
+    t->set_data<double>(ndim, shape, data);
     return;
 }
 

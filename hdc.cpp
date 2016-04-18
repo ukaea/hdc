@@ -7,9 +7,21 @@ using namespace std;
 hdc::hdc()
 {
     cout << "Creating empty node..." << endl;
-    type = 0;
+    type = HDC_EMPTY;
     data = new vector<dynd::nd::array>;
-    children = new unordered_map<string, hdc*>;  
+    children = new unordered_map<string, hdc*>;
+    //children = nullptr;
+    list_elements = nullptr;
+}
+
+hdc::hdc(uint8_t i)
+{
+    cout << "Creating empty node..." << endl;
+    type = HDC_EMPTY;
+    data = new vector<dynd::nd::array>;
+    children = new unordered_map<string, hdc*>; 
+//    children = nullptr;
+    list_elements = nullptr;
 }
 
 hdc::~hdc()
@@ -22,6 +34,11 @@ hdc::~hdc()
     } else {
         delete children;
         delete data;
+        if (list_elements != nullptr) {
+            for (size_t i;i < list_elements->size();i++) delete &list_elements[i];
+            list_elements->clear();
+            delete list_elements;
+        }
     }
 }
 
@@ -51,14 +68,24 @@ bool hdc::has_child(vector<string> vs)
 
 
 void hdc::add_child(vector<string> vs, hdc* n) {
-    
     cout << "Adding node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
+    
+    if (!(this->type == HDC_EMPTY || this->type == HDC_STRUCT)) {
+        cout << "Cannot add child to this node. Data assigned???" << endl;
+        return;
+    }
+    if (this->type == HDC_EMPTY) {
+        this->type = HDC_STRUCT;
+//        this->children = new unordered_map<string, hdc*>;
+    }
+    
     string first = vs[0];
     vs.erase(vs.begin());
     cout << "still living" << endl;
     if (vs.empty()) {
+        
         if (this->children->count(first) == 0) children->insert({first,n});
         else cout << "Error: child already exists!" << endl;
     } else {
@@ -69,6 +96,31 @@ void hdc::add_child(vector<string> vs, hdc* n) {
     }
         cout << "done" << endl;
 
+    return;
+}
+
+void hdc::set_list(vector<hdc*>* list) {
+    if (this->type != HDC_EMPTY) {
+        cout << "Cannot add list to a non-list node." << endl;
+    }
+    this->list_elements = list;
+    return;
+}
+
+void hdc::create_list(size_t n) {
+    if (this->type != HDC_EMPTY) {
+        cout << "Cannot add list to a non-list node." << endl;
+    }
+    this->type = HDC_LIST;
+    this->list_elements = new vector<hdc*>;
+    for (size_t i=0; i<n;i++) list_elements->push_back(new hdc());
+    //debuging
+    for (size_t i=0; i<n;i++) {
+        int8_t* arr = new int8_t[1];
+        arr[0] = i;
+        long shape[] = {1};
+        list_elements->at(i)->set_data<int8_t>(1,(long int*)shape,(void*)arr);    
+    }
     return;
 }
 
@@ -125,6 +177,44 @@ hdc* hdc::get_child(vector<string> vs) {
 }
 
 
+hdc* hdc::get_slice(vector<string> vs, size_t i) {
+    cout << "Getting slice: " << endl;
+    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    cout << endl;
+    
+    string first = vs[0];
+    vs.erase(vs.begin());
+    
+    if (this->children->count(first)) {
+        if (vs.empty()) {
+            if (i < 0 || i > this->list_elements->size()) {
+                cout << "Error: index out of range!" << endl;
+                return new hdc();
+            }
+            return this->list_elements->at(i);
+        }
+        else return this->children->at(first)->get_slice(vs,i);
+    } else {
+        cout << "Not found" << endl;
+        return new hdc();
+    }
+}
+
+
+hdc* hdc::get_slice(size_t i) {
+    cout << "Getting slice: " << i << endl;
+    
+//     if (i < 0 || i > this->list_elements->size()) {
+//         cout << "Error: index out of range!" << endl;
+//         return new hdc();
+//     }
+    return this->list_elements->at(i);
+}
+
+hdc* hdc::get_slice(string path, size_t i) {
+    return this->get_slice(split(path,'/'),i);
+}
+
 hdc* hdc::get_child(string path) {
     return this->get_child(split(path,'/'));
 }
@@ -153,7 +243,6 @@ void hdc::set_child(vector<string> vs, hdc* n) {
 }
 
 
-
 void hdc::set_child(string path, hdc* n) {
     this->set_child(split(path,'/'), n);
     return;
@@ -167,26 +256,39 @@ uint8_t hdc::get_type()
     return this->type;
 }
 
+void hdc::set_type(uint8_t i) {
+    // More to be added here later
+    this->type = i;
+    return;
+}
+
 int8_t hdc::get_ndim()
 {
-    if (this->type == DYND) return this->data->at(0).get_ndim();
+    if (this->type == HDC_DYND) return this->data->at(0).get_ndim();
     else return 0;
 }
 
 long int* hdc::get_shape()
 {
-    if (this->type == DYND) {
-        long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
-        for (size_t i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
-        //size_t* shape = &(size_t)(this->data->at(0)->get_shape()[0]);
-        return shape;
-        }
-    else return 0;
+    if (this->type == HDC_DYND) {
+            long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
+            for (size_t i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
+            //size_t* shape = &(size_t)(this->data->at(0)->get_shape()[0]);
+            return shape;
+    }
+    else if (this->type == HDC_LIST) {
+//        return this->data->size();
+        return 0;
+    }
+    else {
+        cout << "get_shape() method is not implemented for this type of node: " << this->type << endl;
+        return 0;
+    }
 }
 
 bool hdc::is_empty()
 {
-    return (this->type == EMPTY);
+    return (this->type == HDC_EMPTY);
 }
 
 // void hdc::set_data_int8(int8_t ndim, const long int* shape, int8_t* data)

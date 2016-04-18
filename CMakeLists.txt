@@ -18,8 +18,8 @@ target_link_libraries(test_hdc_c dynd dyndt)
 add_executable(test_hdc_fortran test_hdc_fortran.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
 target_link_libraries(test_hdc_fortran stdc++ dynd dyndt)
 
-# add_executable(test_hdc_fortran test_hdc_fortran.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
-# target_link_libraries(test_hdc_fortran stdc++ dynd dyndt)
+# add_executable(cpo_hdc cpo_hdc.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
+# target_link_libraries(cpo_hdc stdc++ dynd dyndt)
 
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")
