@@ -14,6 +14,7 @@ hdc::hdc()
     list_elements = nullptr;
 }
 
+
 hdc::hdc(uint8_t i)
 {
     cout << "Creating empty node..." << endl;
@@ -83,7 +84,6 @@ void hdc::add_child(vector<string> vs, hdc* n) {
     
     string first = vs[0];
     vs.erase(vs.begin());
-    cout << "still living" << endl;
     if (vs.empty()) {
         
         if (this->children->count(first) == 0) children->insert({first,n});
@@ -178,7 +178,7 @@ hdc* hdc::get_child(vector<string> vs) {
 
 
 hdc* hdc::get_slice(vector<string> vs, size_t i) {
-    cout << "Getting slice: " << endl;
+    cout << "Getting slice: " << i << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     
@@ -202,12 +202,6 @@ hdc* hdc::get_slice(vector<string> vs, size_t i) {
 
 
 hdc* hdc::get_slice(size_t i) {
-    cout << "Getting slice: " << i << endl;
-    
-//     if (i < 0 || i > this->list_elements->size()) {
-//         cout << "Error: index out of range!" << endl;
-//         return new hdc();
-//     }
     return this->list_elements->at(i);
 }
 
@@ -265,20 +259,23 @@ void hdc::set_type(uint8_t i) {
 int8_t hdc::get_ndim()
 {
     if (this->type == HDC_DYND) return this->data->at(0).get_ndim();
+    else if (this->type == HDC_LIST) return 1; // Currently, we support only single container list dimension
     else return 0;
 }
 
 long int* hdc::get_shape()
 {
     if (this->type == HDC_DYND) {
-            long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
-            for (size_t i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
-            //size_t* shape = &(size_t)(this->data->at(0)->get_shape()[0]);
-            return shape;
+        long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
+        for (size_t i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
+        //size_t* shape = &(size_t)(this->data->at(0)->get_shape()[0]);
+        return shape;
     }
     else if (this->type == HDC_LIST) {
-//        return this->data->size();
-        return 0;
+        long int* shape = (long int*)malloc(1 * sizeof(long int)); // Currently, we support only single container list dimension
+        shape[0] = this->list_elements->size();
+        return shape;
+//         return 0;
     }
     else {
         cout << "get_shape() method is not implemented for this type of node: " << this->type << endl;
@@ -306,6 +303,53 @@ bool hdc::is_empty()
 //     cout << arr << endl;
 //     return;
 // }
+
+//------------------ Serialization -----------------------------
+
+hdc* hdc::from_json(string filename)
+{
+    return new hdc(); // Change this
+}
+
+Json::Value hdc::to_json() {
+    Json::Value root;
+    if (this->type == HDC_DYND) {
+        root["node_type"] = "HDC_DYND";
+        root["node_data"] = dynd::format_json(this->data->at(0)).as<string>();
+        root["data_type"] = dynd::format_json(this->data->at(0).get_type()).as<string>();        
+    }
+    else if (this->type == HDC_STRUCT) {
+        root["node_type"] == "HDC_STRUCT";
+        for (auto it = this->children->begin(); it != this->children->end(); it++) {
+            Json::Value child;
+            child["name"] = it->first;
+            child["data"] = it->second->to_json();
+            it->second;
+            root["children"].append(child);
+        }
+    }
+    else if (this->type == HDC_LIST) {
+        root["node_type"] = "HDC_LIST";
+        root["size"] = (Json::Int64)(this->list_elements->size());
+        Json::Value elements;
+        for (long i=0;i<this->list_elements->size();i++) elements.append(this->list_elements->at(i)->to_json());
+        root["elements"] = elements;
+    }
+    return root;
+}
+
+void hdc::to_json(string filename)
+{
+    cout << "Saving output JSON to " << filename << endl;
+    ofstream json_file;
+    json_file.open(filename.c_str());
+    json_file << this->to_json();
+    json_file.close();
+    
+    return;
+}
+
+
 
 
 //------------------ String manipulation -----------------------------

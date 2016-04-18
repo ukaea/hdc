@@ -4,11 +4,15 @@
 #include <iostream>
 #include <dynd/array.hpp>
 #include <dynd/type.hpp>
+#include <dynd/json_formatter.hpp>
+#include <dynd/json_parser.hpp>
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
 #include <sstream>
+#include <fstream>
 #include <cstdlib>
+#include <json/json.h>
 
 #include "types.h"
 
@@ -59,6 +63,7 @@ public:
     }
     void set_list(vector<hdc*>* list);
     void create_list(size_t n=5);
+    void resize();
     uint8_t get_type();
     void set_type(uint8_t i);
     bool is_empty();
@@ -70,9 +75,15 @@ public:
             cout << "This node is not terminal" << endl;
         }
         cout << "From get:" << this->data->at(0) << endl;
+        
         return (T)(this->data->at(0)->data);
         //return (T)(this->data.data());
     }
+    // Serialization
+    void to_json(string filename);
+    Json::Value to_json();
+    hdc* from_json(string filename);
+    
 private:
     int8_t type;
     vector<dynd::nd::array>* data;

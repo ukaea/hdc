@@ -10,13 +10,13 @@ set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace
 
 
 add_executable(test_hdc_cpp test_hdc_cpp.cpp hdc.cpp)
-target_link_libraries(test_hdc_cpp dynd dyndt)
+target_link_libraries(test_hdc_cpp dynd dyndt jsoncpp)
 
 add_executable(test_hdc_c test_hdc_c.c hdc_c.cpp hdc.cpp)
-target_link_libraries(test_hdc_c dynd dyndt)
+target_link_libraries(test_hdc_c dynd dyndt jsoncpp)
 
 add_executable(test_hdc_fortran test_hdc_fortran.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
-target_link_libraries(test_hdc_fortran stdc++ dynd dyndt)
+target_link_libraries(test_hdc_fortran stdc++ dynd dyndt jsoncpp)
 
 # add_executable(cpo_hdc cpo_hdc.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
 # target_link_libraries(cpo_hdc stdc++ dynd dyndt)

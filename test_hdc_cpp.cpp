@@ -49,11 +49,17 @@ int main(int argc, char **argv) {
     int8_t* aaa = data->as<int8_t*>();
     cout << (int)aaa[0] << " " << (int)aaa[2] << endl;
     
+    //test list
     hdc* list = new hdc();
     list->create_list(10);
     hdc* slice = list->get_slice(3);
     int8_t* bbb = slice->as<int8_t*>();
     cout << (int)bbb[0] << endl;
+    
+    // JSON serialization
+    tree->add_child("data",data);
+    tree->add_child("list",list);
+    tree->to_json("json.txt");
     delete list;
     
     
