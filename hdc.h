@@ -6,6 +6,7 @@
 #include <dynd/type.hpp>
 #include <dynd/json_formatter.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/iterator.hpp>
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
@@ -13,6 +14,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <json/json.h>
+#include <algorithm>
 
 #include "types.h"
 
@@ -80,8 +82,8 @@ public:
         //return (T)(this->data.data());
     }
     // Serialization
-    void to_json(string filename);
-    Json::Value to_json();
+    void to_json(string filename, int mode = 0);
+    Json::Value to_json(int mode = 0);
     hdc* from_json(string filename);
     
 private:
@@ -102,7 +104,7 @@ private:
 
 vector<string>& split(const string &s, char delim, vector<string>& elems);
 vector<string> split(const string &s, char delim);
-
+void replace_all(std::string& str, const std::string& from, const std::string& to);
 
 
 #endif // HDC_H

@@ -311,45 +311,118 @@ hdc* hdc::from_json(string filename)
     return new hdc(); // Change this
 }
 
-Json::Value hdc::to_json() {
+Json::Value hdc::to_json(int mode) {
     Json::Value root;
-    if (this->type == HDC_DYND) {
-        root["node_type"] = "HDC_DYND";
-        root["node_data"] = dynd::format_json(this->data->at(0)).as<string>();
-        root["data_type"] = dynd::format_json(this->data->at(0).get_type()).as<string>();        
-    }
-    else if (this->type == HDC_STRUCT) {
-        root["node_type"] == "HDC_STRUCT";
-        for (auto it = this->children->begin(); it != this->children->end(); it++) {
-            Json::Value child;
-            child["name"] = it->first;
-            child["data"] = it->second->to_json();
-            it->second;
-            root["children"].append(child);
+    if (mode == 0) {
+        if (this->type == HDC_DYND) {
+            root = dynd::format_json(this->data->at(0)).as<string>();        
+        }
+        else if (this->type == HDC_STRUCT) {
+            for (auto it = this->children->begin(); it != this->children->end(); it++) {
+                Json::Value child;
+                child[it->first] = it->second->to_json(mode);
+                it->second;
+                //root.append(child);
+                root[it->first] = it->second->to_json(mode);
+            }
+        }
+        else if (this->type == HDC_LIST) {
+            Json::Value elements;
+            for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));        
         }
     }
-    else if (this->type == HDC_LIST) {
-        root["node_type"] = "HDC_LIST";
-        root["size"] = (Json::Int64)(this->list_elements->size());
-        Json::Value elements;
-        for (long i=0;i<this->list_elements->size();i++) elements.append(this->list_elements->at(i)->to_json());
-        root["elements"] = elements;
+    else if (mode == 1) {
+            if (this->type == HDC_DYND) {
+            dynd::ndt::type dt;
+            switch(this->get_ndim()) { // I really don't want to spend several hours by digging into dynd sources, sorry.
+                case 0:
+                    dt = this->data->at(0).get_type();
+                    break;
+                case 1:
+                    dt = this->data->at(0)(0).get_type();
+                    break;
+                case 2:
+                    dt = this->data->at(0)(0,0).get_type();
+                    break;
+                case 3:
+                    dt = this->data->at(0)(0,0,0).get_type();
+                    break;
+                case 4:
+                    dt = this->data->at(0)(0,0,0,0).get_type();
+                    break;
+                case 5:
+                    dt = this->data->at(0)(0,0,0,0,0).get_type();
+                    break;
+                default: // Yes, I tried more.
+                    cout << "Error: unsupported number of dimensions." << endl;
+                    break;
+            }
+            root["dtype"] = dt.str();
+            root["data"] = dynd::format_json(this->data->at(0)).as<string>();        
+        }
+        else if (this->type == HDC_STRUCT) {
+            Json::Value children;
+            for (auto it = this->children->begin(); it != this->children->end(); it++) {
+                Json::Value child;
+                child[it->first] = it->second->to_json(mode);
+                it->second;
+//                 root.append(child);
+                children[it->first] = it->second->to_json(mode);
+            }
+            root["dtype"] = "hdc_struct";
+            root["data"] = children;
+        }
+        else if (this->type == HDC_LIST) {
+            Json::Value elements;
+            for (long i=0;i<this->list_elements->size();i++) elements.append(this->list_elements->at(i)->to_json(mode));
+            root["dtype"] = "hdc_list";
+            root["data"] = elements;
+//             for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
+
+        }
+        else if (this->type == HDC_EMPTY) {
+            root["dtype"] = "hdc_empty";
+        }
     }
     return root;
 }
 
-void hdc::to_json(string filename)
+
+
+void hdc::to_json(string filename, int mode)
 {
     cout << "Saving output JSON to " << filename << endl;
     ofstream json_file;
     json_file.open(filename.c_str());
-    json_file << this->to_json();
+    // json_file << this->to_json();
+    // get rid of quotes produced by writing dynd::nd::array.as<string>
+    // see https://www.youtube.com/watch?v=SiUz_akTmcY for details...
+    stringstream tmp;
+    tmp << this->to_json(mode);
+    string tmp_str = tmp.str();
+    string la("["); // left after
+    string lb("\"["); // left before
+    replace_all(tmp_str,lb,la);
+    string ra("]"); // right after
+    string rb("]\""); // right before
+    replace_all(tmp_str,rb,ra);
+    cout << tmp_str;
+    json_file << tmp_str;
+    // end of quotes removal
     json_file.close();
-    
+
     return;
 }
 
-
+hdc* from_json(string filename) {
+    hdc* tree = new hdc();
+    Json::Value root;
+    ifstream input(filename);
+    input >> root;
+    Json::Value* pos;
+    // decision here based on the type of node, allways point to the current node, go throught all subnodes
+    return tree;
+}
 
 
 //------------------ String manipulation -----------------------------
@@ -372,3 +445,12 @@ vector<string>& split(const string &s, char delim, vector<string>& elems) {
     }
 }
 
+void replace_all(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}

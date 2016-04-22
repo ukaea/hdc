@@ -59,7 +59,8 @@ int main(int argc, char **argv) {
     // JSON serialization
     tree->add_child("data",data);
     tree->add_child("list",list);
-    tree->to_json("json.txt");
+    //tree->to_json("json.txt");
+    tree->to_json("tree.txt",1);
     delete list;
     
     
