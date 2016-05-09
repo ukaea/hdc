@@ -61,9 +61,23 @@ int main(int argc, char **argv) {
     tree->add_child("list",list);
     //tree->to_json("json.txt");
     tree->to_json("tree.txt",1);
-    delete list;
+    //delete list;
     
+    // Copy
+    tree->copy(0)->to_json("tree2.txt",1);
+    // Resize
+    hdc* resized = new hdc();
+    resized->resize(tree,1);
+    resized->to_json("resized.txt");
     
    // data->set_data(1,shape,array);
+    
+    // set string
+
+    string str = "aaa123aaa123";
+    hdc* ssss = new hdc();
+    ssss->set_string(str);
+
+
     return 0;
 }

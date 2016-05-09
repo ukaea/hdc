@@ -7,6 +7,9 @@
 #include <dynd/json_formatter.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/iterator.hpp>
+#include <dynd/string_encodings.hpp>
+#include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/string_type.hpp>
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
@@ -46,13 +49,7 @@ public:
             cout << "The node has already children set..." << endl;
             return;
         }
-               
-//         cout << "Ndim:  " << (int)ndim << endl;
-//         cout << "shape: " << (long)shape[0] << endl;
-//         cout << "data:  " << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] <<endl;
-        
         dynd::nd::array arr;
-        
         dynd::ndt::type dtype = dynd::ndt::make_type<T>();
         arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
         arr->data = (char*) data;
@@ -62,10 +59,40 @@ public:
         //this->data = arr;
         this->type = HDC_DYND;
         return;
-    }
+    };
+    template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data) {
+        hdc* t = this->get_child(path);
+        t->set_data<T>(ndim,shape,data);
+        return;
+    };
+    
+    template <typename T> void set_data(T data) {
+        if (this->children->size()) {
+            cout << "The node has already children set..." << endl;
+            return;
+        }
+        dynd::nd::array arr = data;
+        cout << arr << endl;
+        this->data->push_back(arr);
+        //this->data = arr;
+        this->type = HDC_DYND;
+        return;
+    };
+    template <typename T> void set_data(string path, T data) {
+        hdc* t = this->get_child(path);
+        t->set_data(data);
+        return;
+    };
+    
+    
+    void set_string(string str);
+    void set_json(string json);
     void set_list(vector<hdc*>* list);
     void create_list(size_t n=5);
-    void resize();
+    void resize(hdc* h, int recursively = 0);
+    hdc* copy(int copy_arrays = 0);
+    void set_slice(size_t i, hdc* h);
+    void append_slice(hdc* h);
     uint8_t get_type();
     void set_type(uint8_t i);
     bool is_empty();
@@ -81,6 +108,13 @@ public:
         return (T)(this->data->at(0)->data);
         //return (T)(this->data.data());
     }
+    
+    template<typename T> T as(string path) {
+        // returns data of given type
+        hdc* t = this->get_child(path);
+        return t->as<T>();
+    }
+    
     // Serialization
     void to_json(string filename, int mode = 0);
     Json::Value to_json(int mode = 0);
@@ -89,7 +123,7 @@ public:
 private:
     int8_t type;
     vector<dynd::nd::array>* data;
-//     dynd::nd::array data;
+    //     dynd::nd::array data;
     vector<hdc*>* list_elements;
     unordered_map<string, hdc*>* children;
     

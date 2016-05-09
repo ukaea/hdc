@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
     printf("%d %d\n",(int)aaa[0],(int)aaa[2]); 
     
     hdc_delete(tree);
-    
 
     return 0;
 }

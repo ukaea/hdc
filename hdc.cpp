@@ -53,12 +53,12 @@ bool hdc::has_child(vector<string> vs)
     cout << "Searching for: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-    
+
     string first = vs[0];
     vs.erase(vs.begin());
-    
+
     if (this->children->count(first) == 0) return false;
-    
+
     if (vs.empty()) {
         return (bool)this->children->count(first);
     } else {
@@ -253,6 +253,7 @@ uint8_t hdc::get_type()
 void hdc::set_type(uint8_t i) {
     // More to be added here later
     this->type = i;
+    if (i == HDC_LIST && this->list_elements == nullptr) this->list_elements = new vector<hdc*>;
     return;
 }
 
@@ -287,22 +288,6 @@ bool hdc::is_empty()
 {
     return (this->type == HDC_EMPTY);
 }
-
-// void hdc::set_data_int8(int8_t ndim, const long int* shape, int8_t* data)
-// {
-//     if (this->children->size()) {
-//         cout << "The node has already children set..." << endl;
-//         return;
-//     }
-//     
-//     dynd::nd::array arr;
-//     
-//     dynd::ndt::type dint = dynd::ndt::make_type<int8_t>();
-//     arr = dynd::nd::dtyped_empty(ndim,shape,dint);
-//     arr->data = (char*) data;
-//     cout << arr << endl;
-//     return;
-// }
 
 //------------------ Serialization -----------------------------
 
@@ -361,33 +346,91 @@ Json::Value hdc::to_json(int mode) {
             root["data"] = dynd::format_json(this->data->at(0)).as<string>();        
         }
         else if (this->type == HDC_STRUCT) {
-            Json::Value children;
+//             Json::Value children;
             for (auto it = this->children->begin(); it != this->children->end(); it++) {
                 Json::Value child;
                 child[it->first] = it->second->to_json(mode);
                 it->second;
-//                 root.append(child);
-                children[it->first] = it->second->to_json(mode);
+                root.append(child);
+//                 children[it->first] = it->second->to_json(mode);
             }
-            root["dtype"] = "hdc_struct";
-            root["data"] = children;
+//             root["dtype"] = "hdc_struct";
+//             root["data"] = children;
         }
         else if (this->type == HDC_LIST) {
             Json::Value elements;
-            for (long i=0;i<this->list_elements->size();i++) elements.append(this->list_elements->at(i)->to_json(mode));
-            root["dtype"] = "hdc_list";
-            root["data"] = elements;
-//             for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
+//             for (long i=0;i<this->list_elements->size();i++) elements.append(this->list_elements->at(i)->to_json(mode));
+//             root["dtype"] = "hdc_list";
+//             root["data"] = elements;
+            for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
 
         }
-        else if (this->type == HDC_EMPTY) {
-            root["dtype"] = "hdc_empty";
-        }
+//         else if (this->type == HDC_EMPTY) {
+//             root["dtype"] = "hdc_empty";
+//         }
     }
     return root;
 }
 
+void hdc::resize(hdc* h, int recursively)
+{
+    if (this->type == HDC_DYND) {
+        if (!recursively) cout << "Operation is yet not supported on the DYND node." << endl;
+        return;
+    }
+    else if (this->type == HDC_LIST) {
+        if (!recursively) cout << "Operation is yet not supported on the list node." << endl;
+        return;
+    }
+    else if (this->type == HDC_STRUCT) {
+        for (auto it = h->children->begin(); it != h->children->end(); ++it) {
+            if (!this->has_child(it->first)) this->add_child(it->first,it->second->copy(0));
+        }
+        return;
+    }
+    return;
+}
 
+
+hdc* hdc::copy(int copy_arrays)
+{
+    hdc* copy = new hdc();
+    copy->set_type(this->get_type());
+    if (this->type == HDC_STRUCT) {
+        for (auto it = this->children->begin(); it != this->children->end(); ++it) {
+            hdc* child = it->second->copy(copy_arrays);
+            copy->add_child(it->first,it->second);
+        }
+    } else if (this->type == HDC_LIST) {
+        for (size_t i = 0; i < this->list_elements->size(); i++)
+            copy->set_slice(i,this->list_elements->at(i)->copy(copy_arrays));
+    }
+    else if (this->type == HDC_DYND) {
+        if (copy_arrays) {
+            //dynd::nd::empty(<this->data->at(0).get_type()>);
+            //long size = this->data->at(0).size();
+            //char *
+            copy->data->push_back(dynd::nd::array(this->data->at(0)));
+        } else this->set_type(HDC_EMPTY);
+    }
+    return copy;
+}
+
+void hdc::set_slice(size_t i, hdc* h)
+{
+    cout << "Setting slice " << i << endl;
+    if (this->type == HDC_LIST) {
+        if (i < this->list_elements->size()) this->list_elements->at(i) = h;
+        else if (i == this->list_elements->size()) this->append_slice(h);
+        else cout << "Error in set_slice(): Array too small." << endl;
+    } else cout << "Error in set_slice(): Wrong type to call set_slice." << endl;
+    return;
+}
+
+void hdc::append_slice(hdc* h) {
+    this->list_elements->push_back(h);
+    return;
+}
 
 void hdc::to_json(string filename, int mode)
 {
@@ -414,6 +457,16 @@ void hdc::to_json(string filename, int mode)
     return;
 }
 
+void hdc::set_string(string str) {
+    cout << "Setting string: " << str << endl;
+    dynd::nd::array arr = str;
+    this->data->push_back(arr);
+    return;
+}
+
+// ------------------- JSON stuff ----------------------------
+
+
 hdc* from_json(string filename) {
     hdc* tree = new hdc();
     Json::Value root;
@@ -422,6 +475,12 @@ hdc* from_json(string filename) {
     Json::Value* pos;
     // decision here based on the type of node, allways point to the current node, go throught all subnodes
     return tree;
+}
+
+void set_json(string json) {
+    cout << "Setting JSON: " << json << endl;
+    // I don't know what to do with JSON -- If we have to parse it, we could stick up with boost::property_tree, otherwise we reinvent the wheel...
+    return;
 }
 
 

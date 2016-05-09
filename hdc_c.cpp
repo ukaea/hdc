@@ -44,7 +44,16 @@ struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path) {
     return h;
 }
 
-struct hdc_t* hdc_get_slice(struct hdc_t* tree, char* path, size_t i) {
+struct hdc_t* get_slice(struct hdc_t* tree, size_t i) {
+    hdc* t = (hdc*)tree->obj;
+    hdc* node = t->get_slice(i);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
+
+struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i) {
     hdc* t = (hdc*)tree->obj;
     hdc* node = t->get_slice(path, i);
     struct hdc_t* h = new struct hdc_t;
@@ -95,6 +104,51 @@ int* hdc_as_int_1d(struct hdc_t* tree) {
 }
 
 void hello() {cout << "Hello" << endl;}
+
+// Jakub's stuff
+
+void hdc_set_data_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<double>(path, ndim, shape, data);
+    return;
+}
+
+void hdc_set_data_double_sc_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<double>(path, ndim, shape, data);
+    return;
+}
+
+void hdc_set_data_double_scalar_path(hdc_t* tree, char* path, double data)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<double>(path, data);
+    return;
+}
+
+void hdc_set_data_double_scalar(hdc_t* tree, double data)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<double>(data);
+    return;
+}
+
+void hdc_copy(hdc_t* src, hdc_t* dest)
+{
+    hdc* t_src = (hdc*)src->obj;
+    hdc* t_dest = (hdc*)dest->obj;
+    t_dest = t_src->copy(0);
+    return;
+}
+
+
+
+// int8_t hdc_as_int8_sc_path(hdc_t* tree, char* path)
+// {
+//     hdc* t =(hdc*)tree->obj;
+//     return t->as<int8_t>();
+// }
+
 
 
 }

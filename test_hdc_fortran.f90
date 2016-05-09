@@ -7,13 +7,13 @@ program test_hdc_fortran
 contains
 
     subroutine f_main()
-        type(hdc_t) :: tree, n, k, node_int, node_double, node_double_2d
+        type(hdc_t) :: tree, n, k, node_int, node_double, node_double_2d, node_double_ad
         integer(kind=c_int8_t), dimension(1:4) :: array
         real(kind=dp), dimension(1:4) :: array_of_double
 
         call hello()
             
-        tree = hdc_new_empty()   
+        tree = hdc_new_empty()
         ! test add
         call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty())
         call hdc_add_child(tree,"aaa/bbb/eee",hdc_new_empty())
@@ -54,6 +54,9 @@ contains
         print *,"2D DATA", (hdc_get_double_2d(node_double_2d))
         
         call hdc_delete(tree)
+        
+!         node_double_ad = hdc_new_empty()
+!         call hdc_set_data(node_double_ad, reshape((/1.0d0,2.0d0,3.14d0,5.9d0/), (/2,2/)), (/2,2/) )
         
     end subroutine f_main
     
