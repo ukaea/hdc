@@ -131,7 +131,6 @@ void hdc::add_child(string path, hdc* n)
     return;
 }
 
-
 void hdc::delete_child(vector<string> vs) {
     
     cout << "Delete node: " << endl;
@@ -157,7 +156,6 @@ void hdc::delete_child(string path) {
     return;
 }
 
-
 hdc* hdc::get_child(vector<string> vs) {
     cout << "Getting node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
@@ -175,7 +173,6 @@ hdc* hdc::get_child(vector<string> vs) {
     }
     
 }
-
 
 hdc* hdc::get_slice(vector<string> vs, size_t i) {
     cout << "Getting slice: " << i << endl;
@@ -456,13 +453,13 @@ void hdc::to_json(string filename, int mode)
 
     return;
 }
-
+/*
 void hdc::set_string(string str) {
     cout << "Setting string: " << str << endl;
     dynd::nd::array arr = str;
     this->data->push_back(arr);
     return;
-}
+}*/
 
 // ------------------- JSON stuff ----------------------------
 

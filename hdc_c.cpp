@@ -44,7 +44,7 @@ struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path) {
     return h;
 }
 
-struct hdc_t* get_slice(struct hdc_t* tree, size_t i) {
+struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
     hdc* t = (hdc*)tree->obj;
     hdc* node = t->get_slice(i);
     struct hdc_t* h = new struct hdc_t;
@@ -103,6 +103,35 @@ int* hdc_as_int_1d(struct hdc_t* tree) {
     return t->as<int*>();
 }
 
+void hdc_set_data_int8_scalar(hdc_t* tree, int8_t data)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<int8_t>(data);
+    return;
+}
+
+void hdc_set_data_int8_scalar_path(hdc_t* tree, char* path, int8_t data)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<int8_t>(path, data);
+    return;
+}
+
+void hdc_set_data_int32_scalar(hdc_t* tree, int32_t data)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<int32_t>(data);
+    return;
+}
+
+void hdc_set_data_int32_scalar_path(hdc_t* tree, char* path, int32_t data)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<int32_t>(path, data);
+    return;
+}
+
+
 void hello() {cout << "Hello" << endl;}
 
 // Jakub's stuff
@@ -141,6 +170,19 @@ void hdc_copy(hdc_t* src, hdc_t* dest)
     return;
 }
 
+void hdc_set_data_string(hdc_t* tree, char* str)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data(str);
+    return;
+}
+
+void hdc_set_data_string_path(hdc_t* tree, char* path, char* str)
+{
+    hdc* t = (hdc*)tree->obj;
+    t->set_data(path,str);
+    return;
+}
 
 
 // int8_t hdc_as_int8_sc_path(hdc_t* tree, char* path)

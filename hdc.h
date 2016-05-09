@@ -85,7 +85,7 @@ public:
     };
     
     
-    void set_string(string str);
+    //void set_string(string str); not needed
     void set_json(string json);
     void set_list(vector<hdc*>* list);
     void create_list(size_t n=5);

@@ -76,8 +76,7 @@ int main(int argc, char **argv) {
 
     string str = "aaa123aaa123";
     hdc* ssss = new hdc();
-    ssss->set_string(str);
-
+    ssss->set_data(str);
 
     return 0;
 }
