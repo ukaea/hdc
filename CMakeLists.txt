@@ -10,7 +10,7 @@ set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace
 
 site_name(HOSTNAME)
 message("Hostname is: " ${HOSTNAME})
-if (${HOSTNAME} EQUAL "abacus")
+if (${HOSTNAME} STREQUAL "abacus")
     message("Setting libdynd path to /sw/libdynd...")
     link_directories(/sw/libdynd/lib)
     include_directories(/sw/libdynd/include .)
