@@ -8,18 +8,20 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fmax-errors=20 -Wno-type-lim
 # set (CMAKE_Fortran_FLAGS "-c -ffree-line-length-none")
 set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -fcheck=all -lstdc++")
 
+link_directories(/sw/libdynd/lib)
+include_directories(/sw/libdynd/include .)
 
-add_executable(test_hdc_cpp test_hdc_cpp.cpp hdc.cpp)
-target_link_libraries(test_hdc_cpp dynd dyndt jsoncpp)
+add_executable(test_hdc_cpp test_hdc_cpp.cpp hdc.cpp jsoncpp.cpp)
+target_link_libraries(test_hdc_cpp dynd)
 
-add_executable(test_hdc_c test_hdc_c.c hdc_c.cpp hdc.cpp)
-target_link_libraries(test_hdc_c dynd dyndt jsoncpp)
+add_executable(test_hdc_c test_hdc_c.c hdc_c.cpp hdc.cpp jsoncpp.cpp)
+target_link_libraries(test_hdc_c dynd)
 
-add_executable(test_hdc_fortran test_hdc_fortran.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
-target_link_libraries(test_hdc_fortran stdc++ dynd dyndt jsoncpp)
+add_executable(test_hdc_fortran test_hdc_fortran.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp jsoncpp.cpp)
+target_link_libraries(test_hdc_fortran stdc++ dynd)
 
-# add_executable(cpo_hdc cpo_hdc.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp)
-# target_link_libraries(cpo_hdc stdc++ dynd dyndt jsoncpp)
+# add_executable(cpo_hdc cpo_hdc.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp jsoncpp.cpp)
+# target_link_libraries(cpo_hdc stdc++ dynd dyndt)
 
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")
