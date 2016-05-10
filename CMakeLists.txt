@@ -19,9 +19,16 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
+
+
 add_library(hdc SHARED hdc.cpp)
-add_library(chdc SHARED hdc.cpp hdc_c.cpp)
-add_library(fhdc SHARED hdc.cpp hdc_c.cpp hdc_fortran.f90)
+target_link_libraries(hdc dynd dyndt)
+
+add_library(chdc SHARED hdc_c.cpp)
+target_link_libraries(chdc hdc dynd dyndt)
+
+add_library(fhdc SHARED hdc_fortran.f90)
+target_link_libraries(fhdc chdc hdc dynd dyndt)
 
 add_executable(test_hdc_cpp test_hdc_cpp.cpp hdc.cpp jsoncpp.cpp)
 target_link_libraries(test_hdc_cpp dynd dyndt)

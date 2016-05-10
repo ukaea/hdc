@@ -27,7 +27,7 @@ hdc::hdc(uint8_t i)
 
 hdc::~hdc()
 {
-    cout << "Desctructor called..." << endl;
+    cout << "Destructor called..." << endl;
     if (!children->empty()) {
         cout << "Deleting children..." << endl;
         for (auto it = children->begin(); it != children->end(); it++) delete it->second;

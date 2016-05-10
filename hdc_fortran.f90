@@ -222,7 +222,7 @@ module hdc_fortran
 !         module procedure hdc_get_int8
 ! !         module procedure hdc_
      end interface hdc_get
-    public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_as_int8, &
+    public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, &
     hdc_delete_child, hdc_get_int8, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, hdc_copy, hdc_get_slice, hdc_get
 contains
  
@@ -270,7 +270,6 @@ contains
         res = c_hdc_has_child(this, c_path)
     end function hdc_has_child
     
-    
     function hdc_get_ndim(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -312,22 +311,18 @@ contains
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
         shape_ = shape(data)
-        ! GFortran 4.9 is unhappy with this. For details see:
-        ! http://kynan.github.io/blog/2013/08/12/c-pointers-to-multi-dimensional-assumed-shape-fortran-arrays-with-gfortran/
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-!         data_ptr = c_loc(i8ptr(data))
-!         shape_ptr = c_loc(i32ptr(shape_))
         call c_hdc_set_data_int8(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_data_int8_1d
-    
+
     subroutine hdc_set_data_int8_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: data
         call c_hdc_set_data_int8_scalar(this, data)
     end subroutine hdc_set_data_int8_scalar
-    
+
     subroutine hdc_set_data_int8_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -343,7 +338,7 @@ contains
         c_path(N+1) = c_null_char
         call c_hdc_set_data_int8_scalar_path(this, path, data)
     end subroutine hdc_set_data_int8_scalar_path
-    
+
     subroutine hdc_set_data_int32_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -366,7 +361,6 @@ contains
         c_path(N+1) = c_null_char
         call c_hdc_set_data_int32_scalar_path(this, path, data)
     end subroutine hdc_set_data_int32_scalar_path
-    
     
     subroutine hdc_set_data_double_1d(this, data)
         use iso_c_binding
@@ -531,7 +525,13 @@ contains
         res = c_hdc_get_child(this, c_path)
     end function hdc_get_child
     
-    
+    subroutine hdc_get_child_sub(this, path, res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*) :: path
+        type(hdc_t) :: res
+        res = hdc_get_child(this, path)
+    end subroutine hdc_get_child_sub
     
     function hdc_get_slice_path(this, path, ii) result(res)
         use iso_c_binding
@@ -549,6 +549,15 @@ contains
         res = c_hdc_get_slice_path(this, c_path, ii)
     end function hdc_get_slice_path
     
+    subroutine hdc_get_slice_path_sub(this, path, ii, res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*) :: path
+        integer(kind=c_size_t) :: ii
+        type(hdc_t) :: res
+        res = hdc_get_slice_path(this, path, ii)
+    end subroutine hdc_get_slice_path_sub
+    
     function hdc_get_slice_(this, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -557,20 +566,12 @@ contains
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_
     
-    subroutine hdc_as_int8(this, res)
-        use iso_c_binding
+    subroutine hdc_get_slice(this, ii, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: ndim
-        integer(kind=c_long), dimension(:), pointer :: shape_
-        type(c_ptr) :: shape_ptr, data_ptr
-        integer(kind=c_int8_t), dimension(:), pointer :: res
-        ndim = c_hdc_get_ndim(this)
-        shape_ptr = c_hdc_get_shape(this)
-        data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
-        call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
-    end subroutine hdc_as_int8
+        integer :: ii
+        type(hdc_t) :: res
+        res = hdc_get_slice_(this, ii)
+    end subroutine hdc_get_slice
     
     function hdc_get_int8(this) result(res)
         use iso_c_binding
@@ -587,6 +588,11 @@ contains
 !         print *,"RES",res
     end function hdc_get_int8
     
+    subroutine hdc_get_int8_sub(this, res)
+        type(hdc_t) :: this
+        integer(kind=c_int8_t), dimension(:), pointer :: res
+        res = hdc_get_int8(this)
+    end subroutine hdc_get_int8_sub
     
     function hdc_get_double_1d(this) result(res)
         use iso_c_binding
@@ -603,6 +609,12 @@ contains
 !         print *,"RES",res
     end function hdc_get_double_1d
     
+    subroutine hdc_get_double_1d_sub(this, res)
+        type(hdc_t) :: this
+        real(kind=dp), dimension(:), pointer :: res
+        res = hdc_get_double_1d(this)
+    end subroutine hdc_get_double_1d_sub
+    
     function hdc_get_double_ad(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -618,6 +630,7 @@ contains
 !         print *,"RES",res
     end function hdc_get_double_ad
     
+    !!!
     
     function hdc_get_double_2d(this) result(res)
         use iso_c_binding
@@ -634,7 +647,6 @@ contains
 !         print *,"RES",res
     end function hdc_get_double_2d
     
-    
     subroutine hdc_as_double(this, res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -650,25 +662,6 @@ contains
 !         print *,"RES",res
     end subroutine hdc_as_double
 
-!     pure function i32ptr (v) result(p)
-!         integer(kind=c_long), dimension(*), target, intent(in) :: v
-!         integer(kind=c_long), target :: p
-!         p = v(1)
-!     end function i32ptr
-! 
-!     pure function i8ptr (v) result(p)
-!         integer(kind=c_int8_t), dimension(*), target, intent(in) :: v
-!         integer(kind=c_int8_t), target :: p
-!         p = v(1)
-!     end function i8ptr
-! 
-!     
-!     pure function dptr (v) result(p)
-!         double precision, dimension(*), target, intent(in) :: v
-!         double precision, target :: p
-!         p = v(1)
-!     end function dptr
-    
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
 ! https://gcc.gnu.org/onlinedocs/gfortran/Derived-Types-and-struct.html
