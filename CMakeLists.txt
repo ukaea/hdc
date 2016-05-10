@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 2.6)
 project(hdc_new)
 enable_language (Fortran)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
 
 # set (CMAKE_Fortran_FLAGS "-c -ffree-line-length-none")
-set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -fcheck=all -lstdc++")
+#set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -fcheck=all -lstdc++")
+set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
 
 site_name(HOSTNAME)
 message("Hostname is: " ${HOSTNAME})
@@ -18,7 +19,9 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-
+add_library(hdc SHARED hdc.cpp)
+add_library(chdc SHARED hdc.cpp hdc_c.cpp)
+add_library(fhdc SHARED hdc.cpp hdc_c.cpp hdc_fortran.f90)
 
 add_executable(test_hdc_cpp test_hdc_cpp.cpp hdc.cpp jsoncpp.cpp)
 target_link_libraries(test_hdc_cpp dynd dyndt)

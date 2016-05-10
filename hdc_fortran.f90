@@ -312,9 +312,12 @@ contains
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
         shape_ = shape(data)
+        ! GFortran 4.9 is unhappy with this. For details see:
+        ! http://kynan.github.io/blog/2013/08/12/c-pointers-to-multi-dimensional-assumed-shape-fortran-arrays-with-gfortran/
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-!         print *, shape_,"A", data
+!         data_ptr = c_loc(i8ptr(data))
+!         shape_ptr = c_loc(i32ptr(shape_))
         call c_hdc_set_data_int8(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_data_int8_1d
     
@@ -499,9 +502,10 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         real(kind=dp), target :: data(*)
-        integer, dimension(:), target :: shape_
+        integer(kind=c_long), dimension(:), target :: shape_
         integer(kind=c_long), dimension(1) :: s
         type(c_ptr) :: data_ptr, shape_ptr
+!         integer(kind=c_long)
         integer(1) :: ndim
 !         shape_ = shape(data)
         s = shape(shape_)
@@ -645,7 +649,26 @@ contains
         call c_f_pointer(data_ptr, res, shape_)
 !         print *,"RES",res
     end subroutine hdc_as_double
- 
+
+!     pure function i32ptr (v) result(p)
+!         integer(kind=c_long), dimension(*), target, intent(in) :: v
+!         integer(kind=c_long), target :: p
+!         p = v(1)
+!     end function i32ptr
+! 
+!     pure function i8ptr (v) result(p)
+!         integer(kind=c_int8_t), dimension(*), target, intent(in) :: v
+!         integer(kind=c_int8_t), target :: p
+!         p = v(1)
+!     end function i8ptr
+! 
+!     
+!     pure function dptr (v) result(p)
+!         double precision, dimension(*), target, intent(in) :: v
+!         double precision, target :: p
+!         p = v(1)
+!     end function dptr
+    
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
 ! https://gcc.gnu.org/onlinedocs/gfortran/Derived-Types-and-struct.html
