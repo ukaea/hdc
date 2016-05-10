@@ -12,7 +12,7 @@ contains
         real(kind=dp), dimension(1:4) :: array_of_double
 
         call hello()
-            
+
         tree = hdc_new_empty()
         ! test add
         call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty())
@@ -44,7 +44,7 @@ contains
         call hdc_set_data(node_int,array)    
         
         ! test data get
-        print *,"DATA", hdc_get_int8(node_int)
+        print *,"DATA", hdc_get_int8_1d(node_int)
         
         node_double = hdc_new_empty()
         call hdc_set_data(node_double,(/1.0d0,2.0d0/))

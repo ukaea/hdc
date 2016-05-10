@@ -19,25 +19,23 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-
-
 add_library(hdc SHARED hdc.cpp jsoncpp.cpp)
 target_link_libraries(hdc dynd dyndt)
 
 add_library(chdc SHARED hdc_c.cpp)
-target_link_libraries(chdc hdc dynd dyndt)
+target_link_libraries(chdc hdc stdc++)
 
 add_library(fhdc SHARED hdc_fortran.f90)
-target_link_libraries(fhdc chdc hdc dynd dyndt)
+target_link_libraries(fhdc chdc)
 
-add_executable(test_hdc_cpp test_hdc_cpp.cpp hdc.cpp jsoncpp.cpp)
-target_link_libraries(test_hdc_cpp dynd dyndt)
+add_executable(test_hdc_cpp test_hdc_cpp.cpp)
+target_link_libraries(test_hdc_cpp hdc)
 
-add_executable(test_hdc_c test_hdc_c.c hdc_c.cpp hdc.cpp jsoncpp.cpp)
-target_link_libraries(test_hdc_c dynd dyndt)
+add_executable(test_hdc_c test_hdc_c.c)
+target_link_libraries(test_hdc_c chdc)
 
-add_executable(test_hdc_fortran test_hdc_fortran.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp jsoncpp.cpp)
-target_link_libraries(test_hdc_fortran stdc++ dynd dyndt)
+add_executable(test_hdc_fortran test_hdc_fortran.f90)
+target_link_libraries(test_hdc_fortran fhdc)
 
 # add_executable(cpo_hdc cpo_hdc.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp jsoncpp.cpp)
 # target_link_libraries(cpo_hdc stdc++ dynd dyndt)

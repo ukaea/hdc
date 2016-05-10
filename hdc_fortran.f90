@@ -177,7 +177,7 @@ module hdc_fortran
             type(c_ptr) :: res
         end function c_hdc_get_shape
         
-    end interface 
+    end interface
      
 
     interface hdc_set_data
@@ -215,15 +215,15 @@ module hdc_fortran
 !      end interface hdc_get_double
      
      interface hdc_get
-        module procedure hdc_get_double_ad
-!         module procedure hdc_get_double_1d
-!         module procedure hdc_get_double_2d
-!         module procedure hdc_get_child
-!         module procedure hdc_get_int8
-! !         module procedure hdc_
+        module procedure hdc_get_double_1d_sub
+        module procedure hdc_get_double_2d_sub
+        module procedure hdc_get_child_sub
+        module procedure hdc_get_int8_1d_sub
+        module procedure hdc_get_int8_2d_sub
+!         module procedure hdc_
      end interface hdc_get
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, &
-    hdc_delete_child, hdc_get_int8, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, hdc_copy, hdc_get_slice, hdc_get
+    hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, hdc_copy, hdc_get_slice, hdc_get
 contains
  
     subroutine hdc_add_child(this, path, node)
@@ -573,7 +573,7 @@ contains
         res = hdc_get_slice_(this, ii)
     end subroutine hdc_get_slice
     
-    function hdc_get_int8(this) result(res)
+    function hdc_get_int8_1d(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
@@ -586,13 +586,34 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
 !         print *,"RES",res
-    end function hdc_get_int8
+    end function hdc_get_int8_1d
     
-    subroutine hdc_get_int8_sub(this, res)
+    subroutine hdc_get_int8_1d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t), dimension(:), pointer :: res
-        res = hdc_get_int8(this)
-    end subroutine hdc_get_int8_sub
+        res = hdc_get_int8_1d(this)
+    end subroutine hdc_get_int8_1d_sub
+    
+        function hdc_get_int8_2d(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), pointer :: shape_
+        type(c_ptr) :: shape_ptr, data_ptr
+        integer(kind=c_int8_t), dimension(:,:), pointer :: res
+        ndim = c_hdc_get_ndim(this)
+        shape_ptr = c_hdc_get_shape(this)
+        data_ptr = c_hdc_as_voidptr(this)
+        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
+        call c_f_pointer(data_ptr, res, shape_)
+!         print *,"RES",res
+    end function hdc_get_int8_2d
+    
+    subroutine hdc_get_int8_2d_sub(this, res)
+        type(hdc_t) :: this
+        integer(kind=c_int8_t), dimension(:,:), pointer :: res
+        res = hdc_get_int8_2d(this)
+    end subroutine hdc_get_int8_2d_sub
     
     function hdc_get_double_1d(this) result(res)
         use iso_c_binding
@@ -630,7 +651,11 @@ contains
 !         print *,"RES",res
     end function hdc_get_double_ad
     
-    !!!
+    subroutine hdc_get_double_ad_sub(this, res)
+        type(hdc_t) :: this
+        real(kind=dp), dimension(:,:), pointer :: res
+        res = hdc_get_double_ad(this)
+    end subroutine hdc_get_double_ad_sub
     
     function hdc_get_double_2d(this) result(res)
         use iso_c_binding
@@ -647,20 +672,12 @@ contains
 !         print *,"RES",res
     end function hdc_get_double_2d
     
-    subroutine hdc_as_double(this, res)
-        use iso_c_binding
+    subroutine hdc_get_double_2d_sub(this,res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: ndim
-        integer(kind=c_long), dimension(:), pointer :: shape_
-        type(c_ptr) :: shape_ptr, data_ptr
-        real(kind=dp), dimension(:), pointer :: res
-        ndim = c_hdc_get_ndim(this)
-        shape_ptr = c_hdc_get_shape(this)
-        data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
-        call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
-    end subroutine hdc_as_double
+        real(kind=dp), dimension(:,:), pointer :: res
+        res = hdc_get_double_2d(this)
+    end subroutine hdc_get_double_2d_sub
+    
 
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
