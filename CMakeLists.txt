@@ -21,7 +21,7 @@ endif()
 
 
 
-add_library(hdc SHARED hdc.cpp)
+add_library(hdc SHARED hdc.cpp jsoncpp.cpp)
 target_link_libraries(hdc dynd dyndt)
 
 add_library(chdc SHARED hdc_c.cpp)
