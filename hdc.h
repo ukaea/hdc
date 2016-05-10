@@ -98,6 +98,8 @@ public:
     bool is_empty();
     int8_t get_ndim(); // obtained from dynd::array
     long int* get_shape(); // obtained from dynd::array
+    int8_t get_ndim(string path); // obtained from dynd::array
+    long int* get_shape(string path); // obtained from dynd::array
     template<typename T> T as() {
         // returns data of given type
         if (this->children->size()) {

@@ -32,6 +32,6 @@
         print *,"Fortran: hdc_get_double_2d: ", (hdc_get_double_2d(node_double_2d))
         
         
-    end subroutine f_main
+    end subroutine change_data
     
 ! end module

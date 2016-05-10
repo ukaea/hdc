@@ -26,6 +26,8 @@ void hdc_set_data_string(struct hdc_t* tree, char* str);
 // another data setting methods
 int8_t hdc_get_ndim(struct hdc_t* tree);
 long int* hdc_get_shape(struct hdc_t* tree);
+int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path);
+long int* hdc_get_shape_path(struct hdc_t* tree, char* path);
 uint8_t hdc_get_type(struct hdc_t* tree, char* path);
 int* hdc_as_int_1d(struct hdc_t* tree); // data getting methods
 int** hdc_as_int_2d(struct hdc_t* tree);

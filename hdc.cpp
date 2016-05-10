@@ -261,6 +261,11 @@ int8_t hdc::get_ndim()
     else return 0;
 }
 
+int8_t hdc::get_ndim(string path) {
+    return this->get_child(path)->get_ndim();
+}
+
+
 long int* hdc::get_shape()
 {
     if (this->type == HDC_DYND) {
@@ -279,6 +284,10 @@ long int* hdc::get_shape()
         cout << "get_shape() method is not implemented for this type of node: " << this->type << endl;
         return 0;
     }
+}
+
+long int* hdc::get_shape(string path) {
+    return  this->get_child(path)->get_shape();
 }
 
 bool hdc::is_empty()

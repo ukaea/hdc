@@ -84,9 +84,20 @@ int8_t hdc_get_ndim(struct hdc_t* tree) {
     return t->get_ndim();
 }
 
+int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path) {
+    hdc* t = (hdc*)tree->obj;
+    return t->get_ndim(path);
+}
+
+
 long int* hdc_get_shape(struct hdc_t* tree) {
     hdc* t = (hdc*)tree->obj;
     return t->get_shape();
+}
+
+long int* hdc_get_shape_path(struct hdc_t* tree, char* path) {
+    hdc* t = (hdc*)tree->obj;
+    return t->get_shape(path);
 }
 
 uint8_t hdc_get_type(struct hdc_t* tree, char* path) {
