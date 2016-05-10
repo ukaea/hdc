@@ -53,11 +53,12 @@ contains
         call hdc_set_data(node_double_2d,reshape((/1.0d0,2.0d0,3.14d0,5.9d0/),(/2,2/)))
         print *,"2D DATA", (hdc_get_double_2d(node_double_2d))
         
+        
         call hdc_delete(tree)
         
-!         node_double_ad = hdc_new_empty()
-!         call hdc_set_data(node_double_ad, reshape((/1.0d0,2.0d0,3.14d0,5.9d0/), (/2,2/)), (/2,2/) )
-        
+        node_double_ad = hdc_new_empty()
+        call hdc_set_data_double_ad(node_double_ad, reshape((/1.0d0,2.0d0,3.14d0,5.9d0/), (/ int(2,8),int(2,8)/)), (/int(2,8),int(2,8)/) )
+        print*, "AD: ", hdc_get_double_2d(node_double_ad)
     end subroutine f_main
     
 end program test_hdc_fortran

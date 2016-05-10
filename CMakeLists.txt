@@ -4,9 +4,6 @@ enable_language (Fortran)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
-
-# set (CMAKE_Fortran_FLAGS "-c -ffree-line-length-none")
-#set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -fcheck=all -lstdc++")
 set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
 
 site_name(HOSTNAME)
@@ -37,8 +34,8 @@ target_link_libraries(test_hdc_c chdc)
 add_executable(test_hdc_fortran test_hdc_fortran.f90)
 target_link_libraries(test_hdc_fortran fhdc)
 
-# add_executable(cpo_hdc cpo_hdc.f90 hdc_fortran.f90 hdc_c.cpp hdc.cpp jsoncpp.cpp)
-# target_link_libraries(cpo_hdc stdc++ dynd dyndt)
+# add_executable(cpo_hdc cpo_hdc.f90)
+# target_link_libraries(cpo_hdc fhdc)
 
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")

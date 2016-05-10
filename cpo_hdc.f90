@@ -48,10 +48,10 @@ contains
             equilibrium_i = hdc_get_slice(equilibriumin, i)
             distsource_i = hdc_get_slice(distsourceout, i)
             !HDC this needs hdc_t write / format support -- HOW?
-! ! !             write(0,*) 'Received input time from equilibrium: ', hdc_get(equilibrium_i, 'time')
+            write(0,*) 'Received input time from equilibrium: ', hdc_get_double(equilibrium_i, 'time')
             !UAL distsourceout(i)%time = 10 + equilibriumin(i)%time
             !HDC Here, we do not need to think about data types (unless we want to do it explicitely)
-! ! !             call hdc_set(distsource_i, 'time', hdc_get(equilibrium_i, 'time'))
+            call hdc_set(distsource_i, 'time', hdc_get_double(equilibrium_i, 'time'))
 
             !UAL allocate(distsourceout(i)%source(1))
             !UAL allocate(distsourceout(i)%source(1)%profiles_1d%psi, source=equilibriumin(i)%profiles_1d%psi)
@@ -60,7 +60,7 @@ contains
 
             !HDC In HDC, we can skip the allocate statements, it will populate the tree as necessary
             !HDC This is a bit magic as we have to implemet * operator for hdc_t -- Do we want to do this?
-! ! !             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get(equilibrium_i, 'profiles_1d/psi'))
+            call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))
             !HDC The alternative, more explicit solutions are
             !HDC it seems that hdc_get_<type> functions will be handy in Fortran
 ! ! !             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))

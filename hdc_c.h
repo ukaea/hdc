@@ -30,6 +30,7 @@ uint8_t hdc_get_type(struct hdc_t* tree, char* path);
 int* hdc_as_int_1d(struct hdc_t* tree); // data getting methods
 int** hdc_as_int_2d(struct hdc_t* tree);
 void* hdc_as_voidptr(struct hdc_t* tree); // due to fortran???
+void* hdc_as_voidptr_path(struct hdc_t* tree, char* path);
 void hdc_set_data_int8_path(struct hdc_t* tree, int8_t data);
 void hdc_set_data_int8_scalar_path(struct hdc_t* tree, char* path, int8_t data);
 void hdc_set_data_int32_path(struct hdc_t* tree, int32_t data);
@@ -37,6 +38,12 @@ void hdc_set_data_int32_scalar_path(struct hdc_t* tree, char* path, int32_t data
 void hdc_set_data_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data);
 void hdc_set_data_double_scalar_path(struct hdc_t* tree, char* path, double data);
 void hdc_set_data_double_scalar(struct hdc_t* tree, double data);
+double hdc_as_double_scalar(struct hdc_t* tree);
+double hdc_as_double_scalar_path(struct hdc_t* tree, char* path);
+int8_t hdc_as_int8_scalar(struct hdc_t* tree);
+int8_t hdc_as_int8_scalar_path(struct hdc_t* tree, char* path);
+int32_t hdc_as_int32_scalar(struct hdc_t* tree);
+int32_t hdc_as_int32_scalar_path(struct hdc_t* tree, char* path);
 
 void hdc_copy(struct hdc_t* src, struct hdc_t* dest);
 

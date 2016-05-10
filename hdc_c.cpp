@@ -98,6 +98,11 @@ void* hdc_as_voidptr(struct hdc_t* tree) {
     return t->as<void*>();
 }
 
+void* hdc_as_voidptr_path(struct hdc_t* tree, char* path) {
+    hdc* t = (hdc*)tree->obj;
+    return t->as<void*>(path);
+}
+
 int* hdc_as_int_1d(struct hdc_t* tree) {
     hdc* t = (hdc*)tree->obj;
     return t->as<int*>();
@@ -182,6 +187,42 @@ void hdc_set_data_string_path(hdc_t* tree, char* path, char* str)
     hdc* t = (hdc*)tree->obj;
     t->set_data(path,str);
     return;
+}
+
+double hdc_as_double_scalar(hdc_t* tree)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->as<double*>())[0];
+}
+
+double hdc_as_double_scalar_path(hdc_t* tree, char* path)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->as<double*>(path))[0];
+}
+
+int8_t hdc_as_int8_scalar(hdc_t* tree)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->as<int8_t*>())[0];
+}
+
+int8_t hdc_as_int8_scalar_path(hdc_t* tree, char* path)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->as<int8_t*>(path))[0];
+}
+
+int32_t hdc_as_int32_scalar(hdc_t* tree)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->as<int32_t*>())[0];
+}
+
+int32_t hdc_as_int32_scalar_path(hdc_t* tree, char* path)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->as<int32_t*>(path))[0];
 }
 
 

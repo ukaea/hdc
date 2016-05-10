@@ -39,6 +39,9 @@ int main(int argc, char **argv) {
     printf("%d %d\n",(int)aaa[0],(int)aaa[2]); 
     
     hdc_delete(tree);
-
+    
+    struct hdc_t* scd = hdc_new_empty();
+    hdc_set_data_double_scalar(scd,56789.987654321);
+    printf("has_child: %f\n",hdc_as_double_scalar(scd));
     return 0;
 }
