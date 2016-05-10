@@ -215,8 +215,9 @@ module hdc_fortran
 !      end interface hdc_get_double
      
      interface hdc_get
-        module procedure hdc_get_double_1d
-        module procedure hdc_get_double_2d
+        module procedure hdc_get_double_ad
+!         module procedure hdc_get_double_1d
+!         module procedure hdc_get_double_2d
 !         module procedure hdc_get_child
 !         module procedure hdc_get_int8
 ! !         module procedure hdc_
@@ -526,6 +527,8 @@ contains
         res = c_hdc_get_child(this, c_path)
     end function hdc_get_child
     
+    
+    
     function hdc_get_slice_path(this, path, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -595,6 +598,22 @@ contains
         call c_f_pointer(data_ptr, res, shape_)
 !         print *,"RES",res
     end function hdc_get_double_1d
+    
+    function hdc_get_double_ad(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), pointer :: shape_
+        type(c_ptr) :: shape_ptr, data_ptr
+        real(kind=dp), pointer :: res
+        ndim = c_hdc_get_ndim(this)
+        shape_ptr = c_hdc_get_shape(this)
+        data_ptr = c_hdc_as_voidptr(this)
+        call c_f_pointer(shape_ptr, shape_, (/ ndim /))
+!         call c_f_pointer(data_ptr, res, shape_)
+!         print *,"RES",res
+    end function hdc_get_double_ad
+    
     
     function hdc_get_double_2d(this) result(res)
         use iso_c_binding
