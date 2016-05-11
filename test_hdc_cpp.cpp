@@ -49,6 +49,12 @@ int main(int argc, char **argv) {
     int8_t* aaa = data->as<int8_t*>();
     cout << (int)aaa[0] << " " << (int)aaa[2] << endl;
     
+    // test data rewrite
+    int8_t array2[4] = {9,8,7,6};
+    data->set_data<int8_t>(1,shape,(void*)array2);
+    int8_t* aaa2 = data->as<int8_t*>();
+    cout << (int)aaa2[0] << " " << (int)aaa2[2] << endl;
+    getchar();
     //test list
     hdc* list = new hdc();
     list->create_list(10);
@@ -73,10 +79,59 @@ int main(int argc, char **argv) {
    // data->set_data(1,shape,array);
     
     // set string
-
     string str = "aaa123aaa123";
     hdc* ssss = new hdc();
     ssss->set_data(str);
+    
+    // Test deserialization here
+    //hdc* fj = from_json("tree2.txt");
+    hdc* fi = json_to_hdc(new Json::Value(5));
+    hdc* fu = json_to_hdc(new Json::Value(5u));
+    hdc* fd = json_to_hdc(new Json::Value(5.));
+    hdc* fb = json_to_hdc(new Json::Value(true));
+    hdc* fn = json_to_hdc(new Json::Value(Json::nullValue));
+    hdc* fs = json_to_hdc(new Json::Value("aaaa"));
+    Json::Value* ar = new Json::Value();
+    ar->append(new Json::Value(8));
+    ar->append(new Json::Value(6));
+    hdc* fa = json_to_hdc(ar);
+    Json::Value* obj = new Json::Value();
+    obj->operator[]("aaa") = new Json::Value("aaaaaa");
+    obj->operator[]("bbb") = new Json::Value("bbbbbb");
+    hdc* fo = json_to_hdc(obj);
+    
+    
+//     Json::Value* a2 = new Json::Value();
+//     a2->append(ar);
+//     a2->append(ar);
+//     a2[1].append(new Json::Value(55));
+//     cout << is_jagged(a2) << endl;
+
+//     // test is_all_numeric
+//     Json::Value aa;
+//     aa.append(Json::Value(5));
+//     aa.append(Json::Value(-3));
+//     aa.append(Json::Value(5u));
+//     aa.append(Json::Value(5.));
+//     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
+//     aa.append(Json::Value("aa"));
+//     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
+//     //
+//     Json::Value bb;
+//     bb.append(Json::Value(5.));
+//     bb.append(Json::Value(5.));
+//     Json::Value a2;
+//     a2.append(bb);
+//     a2.append(bb);
+//     cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
+//     Json::Value a3;
+//     a3.append(a2);
+//     a3.append(a2);
+//     cout << a3 << endl;
+//     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+//     a3[0][0][0] = Json::Value("aa");
+//     cout << a3 << endl;
+//     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
 
     return 0;
 }

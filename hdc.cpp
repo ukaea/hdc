@@ -297,10 +297,10 @@ bool hdc::is_empty()
 
 //------------------ Serialization -----------------------------
 
-hdc* hdc::from_json(string filename)
-{
-    return new hdc(); // Change this
-}
+// hdc* hdc::from_json(string filename)
+// {
+//     return new hdc(); // Change this
+// }
 
 Json::Value hdc::to_json(int mode) {
     Json::Value root;
@@ -474,16 +474,152 @@ void hdc::set_string(string str) {
 
 
 hdc* from_json(string filename) {
+    cout << "Deserializing from JSON in file " << filename << "..." << endl;
     hdc* tree = new hdc();
-    Json::Value root;
+    Json::Value json;
     ifstream input(filename);
-    input >> root;
-    Json::Value* pos;
+    input >> json;
+    Json::Value* root = &json;
     // decision here based on the type of node, allways point to the current node, go throught all subnodes
-    hdc* curr;
+    hdc* curr = tree;
+    
+    cout << "Object: " << root->isObject() << endl;
+    cout << "null: " << root->isNull() << endl;
+    cout << "String: " << root->isString() << endl;
+    cout << "Numeric: " << root->isNumeric() << endl;
+    cout << "Double: " << root->isDouble() << endl;
+    cout << "Bool: " << root->isBool() << endl;
+    cout << "Integral: " << root->isIntegral() << endl;
+    cout << "Array: " << root->isArray() << endl;
+    cout << "AAA: " << Json::ValueType::arrayValue << endl;
+    
+// // //     if (root->isArray()) {
+// // //         cout << "size: " << root->size() << endl;
+// // //         for (size_t i=0; i < root->size(); i++) {
+// // //             
+// // //             cout << root[i] << endl;
+// // //         }
+// // //     } else if (root->isString()) {
+// // //         cout << "String: " << root;
+// // //     } else if (root->)
+// // //     
+    
     
     return tree;
 }
+
+hdc* json_to_hdc(Json::Value* root) {
+    hdc* tree = new hdc();
+    switch(root->type()) {
+        case Json::ValueType::nullValue:
+            cout << "root is null" << endl;
+            tree->set_type(HDC_EMPTY);
+            break;
+        case Json::ValueType::intValue:
+            cout << "root is int, value = " << root->asInt() << endl;
+            tree->set_data<int32_t>(root->asInt());
+            break;
+        case Json::ValueType::uintValue:
+            cout << "root is uint, value = " << root->asUInt() << endl;
+            tree->set_data<uint32_t>(root->asUInt());
+            break;
+        case Json::ValueType::realValue:
+            cout << "root is double, value = " << root->asDouble() << endl;
+            tree->set_data<double>(root->asDouble());
+            break;
+        case Json::ValueType::stringValue:
+            cout << "root is string, value = " << root->asCString() << endl;
+            tree->set_data<string>(root->asCString());
+            break;
+        case Json::ValueType::booleanValue:
+            cout << "root is bool, value = " << root->asBool() << endl;
+            tree->set_data<bool>(root->asBool());
+            break;
+        case Json::ValueType::arrayValue:
+            cout << "root is array, size = " << root->size() << endl;
+//             if (is_all_numeric(root)) {
+//                 // Save as ND array
+//                 // dimension = depth of tree
+//                 // We should test regularity of array
+//                 tree->set_type(HDC_DYND);
+// //                 tree->set_json_data
+//             } else {
+//                 // call recursively -- save list
+//                 tree->set_type(HDC_LIST);
+//                 for (int i = 0;i<root->size();i++) {
+//                     tree->append_slice(json_to_hdc(&(root->operator[](i))));
+//                 }
+//             }
+            break;
+        case Json::ValueType::objectValue:
+            cout << "root is object, children:" << endl;
+            for (Json::ValueIterator it = root->begin(); it != root->end(); it++) {
+                cout << it.key() << endl;
+            }
+            break;
+    }
+    return tree;
+}
+
+
+int64_t detect_array_type(Json::Value* root)
+{
+    return 0;
+}
+
+// bool is_all_numeric(Json::Value& root)
+// {
+//     bool ok = true;
+//     for (int i=0;i<root.size();i++) {
+//         if (!root[i].isNumeric() && !root[i].isArray()) {
+//             ok = false;
+//             break;
+//         }
+//         if (root.isArray()) {
+//             if (!is_all_numeric(root[i])) {
+//                 ok = false;
+//                 break;
+//             }
+//         }
+//     }
+//     return ok;
+// }
+
+bool is_all_numeric(Json::Value* root)
+{
+    bool ok = true;
+    for (int i=0;i<root->size();i++) {
+        if (!root->operator[](i).isNumeric() && !root->operator[](i).isArray()) {
+            ok = false;
+            break;
+        }
+        if (root->isArray()) {
+            if (!is_all_numeric(&(root->operator[](i)))) {
+                ok = false;
+                break;
+            }
+        }
+    }
+    return ok;
+}
+
+bool is_jagged(Json::Value* root)
+{
+    if (!root->isArray()) return false;
+    int dim = 0;
+    bool jagged = false;
+    dim = root->operator[](0).size();
+    for (int i=1; i<root->size();i++) {
+        if (root->operator[](i).size() != dim) {
+            return true;
+            break;
+        } else return is_jagged(&(root->operator[](i)));
+    }
+    return jagged;
+}
+
+
+
 
 void set_json(string json) {
     cout << "Setting JSON: " << json << endl;

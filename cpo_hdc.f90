@@ -58,7 +58,7 @@ contains
 
             !HDC In HDC, we can skip the allocate statements, it will populate the tree as necessary
             !HDC This is a bit magic as we have to implemet * operator for hdc_t -- Do we want to do this?
-            call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))
+! !             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_child(equilibrium_i, 'profiles_1d/psi'))
             !HDC The alternative, more explicit solutions are
             !HDC it seems that hdc_get_<type> functions will be handy in Fortran
             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))

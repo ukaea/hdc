@@ -54,7 +54,7 @@ public:
         arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
         arr->data = (char*) data;
         cout << arr << endl;
-        
+        if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
         //this->data = arr;
         this->type = HDC_DYND;
@@ -73,6 +73,7 @@ public:
         }
         dynd::nd::array arr = data;
         cout << arr << endl;
+        if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
         //this->data = arr;
         this->type = HDC_DYND;
@@ -120,7 +121,6 @@ public:
     // Serialization
     void to_json(string filename, int mode = 0);
     Json::Value to_json(int mode = 0);
-    hdc* from_json(string filename);
     
 private:
     int8_t type;
@@ -142,5 +142,12 @@ vector<string>& split(const string &s, char delim, vector<string>& elems);
 vector<string> split(const string &s, char delim);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
+hdc* from_json(string filename);
+hdc* json_to_hdc(Json::Value* root);
+// hdc* json_to_hdc(Json::Value& root);
+
+int64_t detect_array_type(Json::Value* root);
+bool is_all_numeric(Json::Value* root);
+bool is_jagged(Json::Value* root);
 
 #endif // HDC_H
