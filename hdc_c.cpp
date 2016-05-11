@@ -150,8 +150,6 @@ void hdc_set_data_int32_scalar_path(hdc_t* tree, char* path, int32_t data)
 
 void hello() {cout << "Hello" << endl;}
 
-// Jakub's stuff
-
 void hdc_set_data_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
     hdc* t = (hdc*)tree->obj;
     t->set_data<double>(path, ndim, shape, data);
@@ -173,6 +171,8 @@ void hdc_set_data_double_scalar_path(hdc_t* tree, char* path, double data)
 
 void hdc_set_data_double_scalar(hdc_t* tree, double data)
 {
+    cout << "Copying in C..." << endl;
+    getchar();
     hdc* t = (hdc*)tree->obj;
     t->set_data<double>(data);
     return;
@@ -182,7 +182,7 @@ void hdc_copy(hdc_t* src, hdc_t* dest)
 {
     hdc* t_src = (hdc*)src->obj;
     hdc* t_dest = (hdc*)dest->obj;
-    t_dest = t_src->copy(0);
+    t_dest = t_src->copy(1);
     return;
 }
 
@@ -235,14 +235,5 @@ int32_t hdc_as_int32_scalar_path(hdc_t* tree, char* path)
     hdc* t = (hdc*)tree->obj;
     return (t->as<int32_t*>(path))[0];
 }
-
-
-// int8_t hdc_as_int8_sc_path(hdc_t* tree, char* path)
-// {
-//     hdc* t =(hdc*)tree->obj;
-//     return t->as<int8_t>();
-// }
-
-
 
 }

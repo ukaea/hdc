@@ -12,8 +12,6 @@ program cpo_hdc
     call test_cpos(equilibrium, distsource)
 contains
 
-! ! ! Triple commented lines use ambiguous interface
-
     subroutine test_cpos(equilibriumin, distsourceout)
         integer :: i
 
@@ -63,9 +61,9 @@ contains
             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))
             !HDC The alternative, more explicit solutions are
             !HDC it seems that hdc_get_<type> functions will be handy in Fortran
-! ! !             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))
+            call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))
             ! or
-! ! !             psi = hdc_get(equilibrium_i, 'profiles_1d/psi')
+            call hdc_get(equilibrium_i, 'profiles_1d/psi',psi)
             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * psi)
 
             !UAL allocate(distsourceout(i)%codeparam%codename(1))   ! For a string of 132 characters max.

@@ -317,7 +317,7 @@ module hdc_fortran
 ! !         module procedure hdc_get_double_2d
 !      end interface hdc_get_double
 
-     interface hdc_get
+    interface hdc_get
         module procedure hdc_get_double_1d_sub
         module procedure hdc_get_double_2d_sub
         module procedure hdc_get_child_sub
@@ -325,9 +325,20 @@ module hdc_fortran
         module procedure hdc_get_int8_2d_sub
         module procedure hdc_get_int32_1d_sub
         module procedure hdc_get_int32_2d_sub
-     end interface hdc_get
+        module procedure hdc_get_double_sub
+
+        module procedure hdc_get_double_1d_path_sub
+        module procedure hdc_get_double_2d_path_sub
+        module procedure hdc_get_int8_1d_path_sub
+        module procedure hdc_get_int8_2d_path_sub
+        module procedure hdc_get_int32_1d_path_sub
+        module procedure hdc_get_int32_2d_path_sub
+        module procedure hdc_get_double_path_sub
+    end interface hdc_get
+
+
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_data_double_ad, &
-    hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, hdc_copy, hdc_get_slice, hdc_get
+    hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, hdc_copy, hdc_get_slice, hdc_get, hdc_get_double
 contains
 
     subroutine hdc_add_child(this, path, node)

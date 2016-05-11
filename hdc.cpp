@@ -480,12 +480,14 @@ hdc* from_json(string filename) {
     input >> root;
     Json::Value* pos;
     // decision here based on the type of node, allways point to the current node, go throught all subnodes
+    hdc* curr;
+    
     return tree;
 }
 
 void set_json(string json) {
     cout << "Setting JSON: " << json << endl;
-    // I don't know what to do with JSON -- If we have to parse it, we could stick up with boost::property_tree, otherwise we reinvent the wheel...
+    // I don't know what to do with JSON yet.
     return;
 }
 
