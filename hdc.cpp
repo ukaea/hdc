@@ -281,8 +281,9 @@ long int* hdc::get_shape()
 //         return 0;
     }
     else {
-        cout << "get_shape() method is not implemented for this type of node: " << this->type << endl;
-        return 0;
+        cerr << "get_shape() method is not implemented for this type of node: " << (int)this->type << endl;
+        exit(-1);
+//         return 0;
     }
 }
 
@@ -603,6 +604,17 @@ bool is_all_numeric(Json::Value* root)
     return ok;
 }
 
+bool is_double(Json::Value* root)
+{
+    if(!is_all_numeric(root)) return false;
+    if (root->isDouble() && !(root->isInt64() || root->isInt())) return true;
+    else if (root->isArray()) {
+        for (int i=0;i<root->size();i++) {
+            if (is_double(&(root->operator[](i)))) return true;
+        }
+    } else return false;
+}
+
 bool is_jagged(Json::Value* root)
 {
     if (!root->isArray()) return false;
@@ -617,7 +629,6 @@ bool is_jagged(Json::Value* root)
     }
     return jagged;
 }
-
 
 
 
