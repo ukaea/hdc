@@ -1,4 +1,4 @@
-#include "hdc.h"
+#include "hdc.hpp"
 
 using namespace std;
 
@@ -158,7 +158,7 @@ void hdc::delete_child(string path) {
 
 hdc* hdc::get_child(vector<string> vs) {
     cout << "Getting node: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "::";
     cout << endl;
     
     string first = vs[0];
@@ -169,6 +169,7 @@ hdc* hdc::get_child(vector<string> vs) {
         else return this->children->at(first)->get_child(vs);
     } else {
         cout << "Not found" << endl;
+        exit(-1);
         return new hdc();
     }
     

@@ -1,5 +1,5 @@
-#ifndef HDC_H
-#define HDC_H
+#ifndef HDC_HPP
+#define HDC_HPP
 
 #include <iostream>
 #include <dynd/array.hpp>
@@ -151,4 +151,4 @@ bool is_all_numeric(Json::Value* root);
 bool is_double(Json::Value* root);
 bool is_jagged(Json::Value* root);
 
-#endif // HDC_H
+#endif // HDC_HPP

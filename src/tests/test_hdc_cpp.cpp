@@ -1,5 +1,5 @@
 #include <iostream>
-#include "hdc.h"
+#include "hdc.hpp"
 
 using namespace std;
 

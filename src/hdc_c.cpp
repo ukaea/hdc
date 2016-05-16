@@ -1,5 +1,5 @@
 #include "hdc_c.h"
-#include "hdc.h"
+#include "hdc.hpp"
 #include "types.h"
 struct hdc_t {
     void* obj;

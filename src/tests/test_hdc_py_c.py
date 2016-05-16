@@ -2,7 +2,7 @@
 
 import ctypes
 import numpy as np
-
+import sys
 
 class HDC_T(ctypes.Structure):
     pass
@@ -27,8 +27,8 @@ HDC_T_P = ctypes.POINTER(HDC_T)
 
 # chdc.obj_dump(tree)
 
-# chdc = ctypes.cdll.LoadLibrary('./build/libchdc.so')
-chdc = ctypes.cdll.LoadLibrary('libchdc.so')
+chdc = ctypes.cdll.LoadLibrary('./build/libchdc.so')
+# chdc = ctypes.cdll.LoadLibrary('./libchdc.so')
 
 # function return values
 hdc_new_empty = chdc.hdc_new_empty
@@ -75,10 +75,13 @@ print(hdc_has_child(tree, path))
 # Fortran
 print("Python -> Fortran")
 
-fhdc = ctypes.cdll.LoadLibrary('libfhdc.so')
+# fhdc = ctypes.cdll.LoadLibrary('libfhdc.so')
+fhdc = ctypes.cdll.LoadLibrary('build/libfhdc.so')
 fhdc.hello()
 
-fmodule = ctypes.cdll.LoadLibrary('./hdc_fortran_module.so')
+# fmodule = ctypes.cdll.LoadLibrary('./hdc_fortran_module.so')
+fmodule = ctypes.cdll.LoadLibrary('build/libhdc_fortran_module.so')
+
 change_data = fmodule.change_data
 change_data.restype = ctypes.c_void_p
 change_data.argtypes = (HDC_T_P, )
@@ -86,9 +89,13 @@ change_data.argtypes = (HDC_T_P, )
 print(hdc_has_child(tree, path))
 
 change_data(tree)
-
+print('here???')
+sys.exit(0)
 node1 = hdc_get_child(tree, path)
 cdata_test = hdc_as_int_1d(node1)
+
+
+
 pydata_test = np.asarray(cdata_test[:pydata.size], dtype=pydata.dtype)
 # assert np.all(pydata_test == pydata)
 

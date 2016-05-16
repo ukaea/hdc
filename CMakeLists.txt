@@ -2,9 +2,17 @@ cmake_minimum_required(VERSION 2.6)
 project(hdc_new)
 enable_language (Fortran)
 
+set(hdc_new_SOURCE_DIR "${hdc_new_SOURCE_DIR}/src")
+set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
 set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
+
+find_package(PythonLibs REQUIRED)
+# message(${PYTHON_INCLUDE_DIRS})
+# message(${PYTHON_LIBRARIES})
+include_directories(${PYTHON_INCLUDE_DIRS})
 
 site_name(HOSTNAME)
 message("Hostname is: " ${HOSTNAME})
@@ -16,29 +24,12 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-add_library(hdc SHARED hdc.cpp jsoncpp.cpp)
-target_link_libraries(hdc dynd dyndt)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_library(chdc SHARED hdc_c.cpp)
-target_link_libraries(chdc hdc stdc++)
-
-add_library(fhdc SHARED hdc_fortran.f90)
-target_link_libraries(fhdc chdc)
-
-add_executable(test_hdc_cpp test_hdc_cpp.cpp)
-target_link_libraries(test_hdc_cpp hdc)
-
-add_executable(test_hdc_c test_hdc_c.c)
-target_link_libraries(test_hdc_c chdc)
-
-add_executable(test_hdc_fortran test_hdc_fortran.f90)
-target_link_libraries(test_hdc_fortran fhdc)
-
-add_executable(cpo_hdc cpo_hdc.f90)
-target_link_libraries(cpo_hdc fhdc)
-
-
-set(CMAKE_INSTALL_RPATH "/usr/local/lib")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-install(TARGETS test_hdc_cpp RUNTIME DESTINATION bin)
+message("Binary dir is: ${hdc_BINARY_DIR}")
+message("Source dir is: ${hdc_SOURCE_DIR}")
+include_directories(inc)
+add_subdirectory(src)
+add_subdirectory(src/tests)
