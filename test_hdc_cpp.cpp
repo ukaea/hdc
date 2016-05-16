@@ -101,13 +101,13 @@ int main(int argc, char **argv) {
     hdc* fo = json_to_hdc(obj);
     
     
+    // test is_jagged()
 //     Json::Value* a2 = new Json::Value();
 //     a2->append(ar);
 //     a2->append(ar);
 //     a2[1].append(new Json::Value(55));
 //     cout << is_jagged(a2) << endl;
-
-//     // test is_all_numeric
+//     // test is_all_numeric()
 //     Json::Value aa;
 //     aa.append(Json::Value(5));
 //     aa.append(Json::Value(-3));
@@ -117,21 +117,32 @@ int main(int argc, char **argv) {
 //     aa.append(Json::Value("aa"));
 //     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
 //     //
-//     Json::Value bb;
-//     bb.append(Json::Value(5.));
-//     bb.append(Json::Value(5.));
-//     Json::Value a2;
-//     a2.append(bb);
-//     a2.append(bb);
-//     cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
-//     Json::Value a3;
-//     a3.append(a2);
-//     a3.append(a2);
-//     cout << a3 << endl;
-//     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-//     a3[0][0][0] = Json::Value("aa");
-//     cout << a3 << endl;
-//     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-
+    Json::Value bb;
+    bb.append(Json::Value(5.));
+    bb.append(Json::Value(5.));
+    Json::Value a2;
+    a2.append(bb);
+    a2.append(bb);
+    cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
+    Json::Value a3;
+    a3.append(a2);
+    a3.append(a2);
+    cout << a3 << endl;
+    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+    a3[0][0][0] = Json::Value("aa");
+    cout << a3 << endl;
+    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+    // test is_double()
+    cout << "is_double: " << is_double(new Json::Value(5.1)) << endl;
+    cout << "is_double: " << is_double(new Json::Value(5)) << endl;
+    cout << "is_double: " << is_double(new Json::Value("aaa")) << endl;
+    cout << "is_double: " << is_double(&a3) << endl;
+    a3[0][0][0] = Json::Value(5.5);
+    cout << "is_double: " << is_double(&a3) << endl;
+    a3[0][0][0] = Json::Value(5);
+    cout << "is_double: " << is_double(&a3) << endl;
+    //test array deserialization:
+    
+    
     return 0;
 }

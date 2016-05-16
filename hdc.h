@@ -148,6 +148,7 @@ hdc* json_to_hdc(Json::Value* root);
 
 int64_t detect_array_type(Json::Value* root);
 bool is_all_numeric(Json::Value* root);
+bool is_double(Json::Value* root);
 bool is_jagged(Json::Value* root);
 
 #endif // HDC_H
