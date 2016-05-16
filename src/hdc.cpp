@@ -669,3 +669,9 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
 }
+
+
+void hello__() {
+    cout << "Hello from c++" << endl;
+    return;
+}

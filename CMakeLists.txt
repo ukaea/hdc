@@ -10,8 +10,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -fmax-errors=20 -Wno-type-
 set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
 
 find_package(PythonLibs REQUIRED)
-# message(${PYTHON_INCLUDE_DIRS})
-# message(${PYTHON_LIBRARIES})
+message(${PYTHON_INCLUDE_DIRS})
+message(${PYTHON_LIBRARIES})
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 site_name(HOSTNAME)

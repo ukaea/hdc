@@ -151,4 +151,6 @@ bool is_all_numeric(Json::Value* root);
 bool is_double(Json::Value* root);
 bool is_jagged(Json::Value* root);
 
+void hello__();
+
 #endif // HDC_HPP
