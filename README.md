@@ -13,8 +13,7 @@ make
 
 for python on Abacus:
 
-cmake -DPYTHON_LIBRARY=/sw/python2/anaconda/lib/libpython2.7.so -DPYTHON_INCLUDE_DIR=/sw/python2/anaconda/include/python2.7/ ..
-
+cmake -DPYTHON_LIBRARY=/sw/python2/anaconda3/lib/libpython3.4m.so -DPYTHON_INCLUDE_DIR=/sw/python2/anaconda3/include/python3.4m/ ..
 
 cmake gives us this:
 
