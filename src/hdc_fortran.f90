@@ -27,10 +27,11 @@ module hdc_fortran
             type(hdc_t), value :: obj
         end subroutine hdc_delete
 
-        subroutine hdc_copy(src, dest) bind(c,name="hdc_copy")
+        function c_hdc_copy(src) result(obj) bind(c,name="hdc_copy")
             import
-            type(hdc_t), value :: src,dest
-        end subroutine hdc_copy
+            type(hdc_t), value :: src
+            type(hdc_t) :: obj
+        end function c_hdc_copy
 
         subroutine c_hdc_add_child(obj, path, node) bind(c,name="hdc_add_child")
             import
@@ -100,7 +101,7 @@ module hdc_fortran
         subroutine c_hdc_set_data_double_scalar(obj, data) bind(c,name="hdc_set_data_double_scalar")
             import
             type(hdc_t), value:: obj
-            type(c_ptr), value :: data
+            double precision, value :: data
         end subroutine c_hdc_set_data_double_scalar
 
         subroutine c_hdc_set_data_double_scalar_path(obj, path, data) bind(c,name="hdc_set_data_double_scalar_path")
@@ -251,10 +252,13 @@ module hdc_fortran
      interface hdc_set
         module procedure hdc_set_data_double_1d
         module procedure hdc_set_data_double_1d_path
+        module procedure hdc_set_data_double_2d
+!         module procedure hdc_set_data_double_2d_path
+        module procedure hdc_set_data_double_scalar
         module procedure hdc_set_data_double_scalar_path
+!         module procedure hdc_set_data_double_scalar
         module procedure hdc_set_data_int32_scalar
         module procedure hdc_set_data_int32_scalar_path
-        module procedure hdc_set_data_double_2d
         module procedure hdc_set_child
         module procedure hdc_set_data_string
         module procedure hdc_set_data_string_path
@@ -338,7 +342,8 @@ module hdc_fortran
 
 
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_data_double_ad, &
-    hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, hdc_copy, hdc_get_slice, hdc_get, hdc_get_double
+    hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, &
+    hdc_get_slice, hdc_get, hdc_get_double, hdc_copy
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -460,6 +465,12 @@ contains
         integer(kind=c_int32_t) :: data
         call c_hdc_set_data_int32_scalar(this, data)
     end subroutine hdc_set_data_int32_scalar
+
+    subroutine hdc_copy(src, dest)
+        use iso_c_binding
+        type(hdc_t) :: src, dest
+        dest = c_hdc_copy(src)
+    end subroutine hdc_copy
     
     subroutine hdc_set_data_int32_scalar_path(this, path, data)
         use iso_c_binding
@@ -531,6 +542,14 @@ contains
         ! end path stuff
         call c_hdc_set_data_double_scalar_path(this, c_path, data)
     end subroutine hdc_set_data_double_scalar_path
+    
+    
+    subroutine hdc_set_data_double_scalar(this, data)
+        use iso_c_binding
+        type(hdc_t) :: this
+        real(kind=dp) :: data
+        call c_hdc_set_data_double_scalar(this, data)
+    end subroutine hdc_set_data_double_scalar
     
     subroutine hdc_set_data_string_path(this, path, str)
         use iso_c_binding

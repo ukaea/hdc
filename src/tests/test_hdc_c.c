@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include "types.h"
 #include "hdc_c.h"
 
@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
     hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty());
     hdc_add_child(tree,"aaa/bbb/eee",hdc_new_empty());
     hdc_add_child(tree,"bbb/eee/aaa",hdc_new_empty());
+    hdc_add_child(tree,"123/123/123",hdc_new_empty());
     
     // test get
     struct hdc_t* n = hdc_get_child(tree,"aaa/bbb");
@@ -38,7 +39,9 @@ int main(int argc, char **argv) {
     int8_t* aaa = (int8_t*)hdc_as_int_1d(data);
     printf("%d %d\n",(int)aaa[0],(int)aaa[2]); 
     
+    struct hdc_t* new = hdc_copy(tree);
     hdc_delete(tree);
+    printf("has_child: %d\n",hdc_has_child(new,"123/123/123"));
     
     struct hdc_t* scd = hdc_new_empty();
     hdc_set_data_double_scalar(scd,56789.987654321);

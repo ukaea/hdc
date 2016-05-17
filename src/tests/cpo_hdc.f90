@@ -8,7 +8,6 @@ program cpo_hdc
     equilibrium = hdc_new_empty()
     call hdc_set(equilibrium, 'time', 1.1d0)
     call hdc_set(equilibrium, 'profiles_1d/psi', (/0.1d0, 0.2d0, 0.3d0/))
-
     call test_cpos(equilibrium, distsource)
 contains
 
@@ -28,18 +27,19 @@ contains
         integer(kind=c_long), dimension(:), pointer :: shape_
 
         !UAL write(0,*) 'size of input CPO = ',size(equilibriumin)
-        write(0,*) 'size of input CPO = ', hdc_get_shape(equilibriumin)
+! ! !         write(0,*) 'size of input CPO = ', hdc_get_shape(equilibriumin)
 
         !UAL allocate(distsourceout(size(equilibriumin)))
         !HDC we explicitely create a new container
         distsourceout = hdc_new_empty()
         !HDC resize will create empty containers
         !call hdc_resize(distsourceout, source=equilibriumin) resize is not in dynd
-        call hdc_copy(distsourceout, equilibriumin)
+
+        call hdc_copy(equilibriumin, distsourceout)
 
         !UAL do i=1,size(equilibriumin)
         !HDC we assume here that ndim = 1
-        shape_ = hdc_get_shape(equilibriumin)
+! ! !         shape_ = hdc_get_shape(equilibriumin) ! Thin does not make sense - neither list, nor array
         do i=1,shape_(1)
             !UAL write(0,*) 'Received input time from equilibrium : ', equilibriumin(i)%time
             !HDC We probably need get_slice to avoid complicated string operations in fortran

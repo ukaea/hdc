@@ -70,36 +70,38 @@ int main(int argc, char **argv) {
     //delete list;
     
     // Copy
-    tree->copy(0)->to_json("tree2.txt",1);
+    tree->copy(1)->to_json("tree2.txt",1);
+    
+    
     // Resize
     hdc* resized = new hdc();
     resized->resize(tree,1);
     resized->to_json("resized.txt");
     
-   // data->set_data(1,shape,array);
-    
-    // set string
-    string str = "aaa123aaa123";
-    hdc* ssss = new hdc();
-    ssss->set_data(str);
-    
-    // Test deserialization here
-    //hdc* fj = from_json("tree2.txt");
-    hdc* fi = json_to_hdc(new Json::Value(5));
-    hdc* fu = json_to_hdc(new Json::Value(5u));
-    hdc* fd = json_to_hdc(new Json::Value(5.));
-    hdc* fb = json_to_hdc(new Json::Value(true));
-    hdc* fn = json_to_hdc(new Json::Value(Json::nullValue));
-    hdc* fs = json_to_hdc(new Json::Value("aaaa"));
-    Json::Value* ar = new Json::Value();
-    ar->append(new Json::Value(8));
-    ar->append(new Json::Value(6));
-    hdc* fa = json_to_hdc(ar);
-    Json::Value* obj = new Json::Value();
-    obj->operator[]("aaa") = new Json::Value("aaaaaa");
-    obj->operator[]("bbb") = new Json::Value("bbbbbb");
-    hdc* fo = json_to_hdc(obj);
-    
+//    // data->set_data(1,shape,array);
+//     
+//     // set string
+//     string str = "aaa123aaa123";
+//     hdc* ssss = new hdc();
+//     ssss->set_data(str);
+//     
+//     // Test deserialization here
+//     //hdc* fj = from_json("tree2.txt");
+//     hdc* fi = json_to_hdc(new Json::Value(5));
+//     hdc* fu = json_to_hdc(new Json::Value(5u));
+//     hdc* fd = json_to_hdc(new Json::Value(5.));
+//     hdc* fb = json_to_hdc(new Json::Value(true));
+//     hdc* fn = json_to_hdc(new Json::Value(Json::nullValue));
+//     hdc* fs = json_to_hdc(new Json::Value("aaaa"));
+//     Json::Value* ar = new Json::Value();
+//     ar->append(new Json::Value(8));
+//     ar->append(new Json::Value(6));
+//     hdc* fa = json_to_hdc(ar);
+//     Json::Value* obj = new Json::Value();
+//     obj->operator[]("aaa") = new Json::Value("aaaaaa");
+//     obj->operator[]("bbb") = new Json::Value("bbbbbb");
+//     hdc* fo = json_to_hdc(obj);
+//     
     
     // test is_jagged()
 //     Json::Value* a2 = new Json::Value();
@@ -117,32 +119,32 @@ int main(int argc, char **argv) {
 //     aa.append(Json::Value("aa"));
 //     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
 //     //
-    Json::Value bb;
-    bb.append(Json::Value(5.));
-    bb.append(Json::Value(5.));
-    Json::Value a2;
-    a2.append(bb);
-    a2.append(bb);
-    cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
-    Json::Value a3;
-    a3.append(a2);
-    a3.append(a2);
-    cout << a3 << endl;
-    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-    a3[0][0][0] = Json::Value("aa");
-    cout << a3 << endl;
-    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-    // test is_double()
-    cout << "is_double: " << is_double(new Json::Value(5.1)) << endl;
-    cout << "is_double: " << is_double(new Json::Value(5)) << endl;
-    cout << "is_double: " << is_double(new Json::Value("aaa")) << endl;
-    cout << "is_double: " << is_double(&a3) << endl;
-    a3[0][0][0] = Json::Value(5.5);
-    cout << "is_double: " << is_double(&a3) << endl;
-    a3[0][0][0] = Json::Value(5);
-    cout << "is_double: " << is_double(&a3) << endl;
-    //test array deserialization:
-    
-    
+// //     Json::Value bb;
+// //     bb.append(Json::Value(5.));
+// //     bb.append(Json::Value(5.));
+// //     Json::Value a2;
+// //     a2.append(bb);
+// //     a2.append(bb);
+// //     cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
+// //     Json::Value a3;
+// //     a3.append(a2);
+// //     a3.append(a2);
+// //     cout << a3 << endl;
+// //     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+// //     a3[0][0][0] = Json::Value("aa");
+// //     cout << a3 << endl;
+// //     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+// //     // test is_double()
+// //     cout << "is_double: " << is_double(new Json::Value(5.1)) << endl;
+// //     cout << "is_double: " << is_double(new Json::Value(5)) << endl;
+// //     cout << "is_double: " << is_double(new Json::Value("aaa")) << endl;
+// //     cout << "is_double: " << is_double(&a3) << endl;
+// //     a3[0][0][0] = Json::Value(5.5);
+// //     cout << "is_double: " << is_double(&a3) << endl;
+// //     a3[0][0][0] = Json::Value(5);
+// //     cout << "is_double: " << is_double(&a3) << endl;
+// //     //test array deserialization:
+// //     
+// //     
     return 0;
 }

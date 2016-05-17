@@ -171,19 +171,17 @@ void hdc_set_data_double_scalar_path(hdc_t* tree, char* path, double data)
 
 void hdc_set_data_double_scalar(hdc_t* tree, double data)
 {
-    cout << "Copying in C..." << endl;
-    getchar();
     hdc* t = (hdc*)tree->obj;
     t->set_data<double>(data);
     return;
 }
 
-void hdc_copy(hdc_t* src, hdc_t* dest)
+struct hdc_t* hdc_copy(hdc_t* src)
 {
-    hdc* t_src = (hdc*)src->obj;
-    hdc* t_dest = (hdc*)dest->obj;
-    t_dest = t_src->copy(1);
-    return;
+    hdc* t_src = (hdc*)(src->obj);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)(t_src->copy(1));
+    return h;
 }
 
 void hdc_set_data_string(hdc_t* tree, char* str)

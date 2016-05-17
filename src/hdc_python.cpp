@@ -20,6 +20,7 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("get_child", (hdc* (hdc::*)(std::string)) &hdc::get_child, "Gets node from tree")
         .def("delete_child", (void (hdc::*)(std::string)) &hdc::delete_child, "Deletes node from tree")
         .def("has_child", (bool (hdc::*)(std::string)) &hdc::has_child, "Returns True if the child with given address exists.")
+        .def("as_void_ptr", (void* (hdc::*)()) &hdc::as_void_ptr, "Returns C pointer to self")
         /*.def("as_int8", (T (hdc::*)()) &hdc::as, "as int8")*/
         .def("__repr__", [](const hdc &t) {return "<libhdc.hdc>";});
     return m.ptr();

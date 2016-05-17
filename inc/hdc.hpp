@@ -61,6 +61,10 @@ public:
         return;
     };
     template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data) {
+        if (!this->has_child(path)) {
+            this->add_child(path, new hdc());
+            cout << "not found, adding..." << endl;
+        }
         hdc* t = this->get_child(path);
         t->set_data<T>(ndim,shape,data);
         return;
@@ -80,6 +84,10 @@ public:
         return;
     };
     template <typename T> void set_data(string path, T data) {
+        if (!this->has_child(path)) {
+            this->add_child(path, new hdc());
+            cout << "not found, adding..." << endl;
+        }
         hdc* t = this->get_child(path);
         t->set_data(data);
         return;
@@ -122,6 +130,8 @@ public:
     void to_json(string filename, int mode = 0);
     Json::Value to_json(int mode = 0);
     
+    // Python specific
+    void* as_void_ptr();
 private:
     int8_t type;
     vector<dynd::nd::array>* data;
@@ -135,7 +145,6 @@ private:
     hdc* get_child(vector<string> vs);
     hdc* get_slice(vector<string> vs, size_t i);
     bool has_child(vector<string> vs);
-    
 };
 
 vector<string>& split(const string &s, char delim, vector<string>& elems);

@@ -47,7 +47,7 @@ int8_t hdc_as_int8_scalar_path(struct hdc_t* tree, char* path);
 int32_t hdc_as_int32_scalar(struct hdc_t* tree);
 int32_t hdc_as_int32_scalar_path(struct hdc_t* tree, char* path);
 
-void hdc_copy(struct hdc_t* src, struct hdc_t* dest);
+struct hdc_t*  hdc_copy(struct hdc_t* src);
 
 
 int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path);

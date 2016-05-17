@@ -169,7 +169,7 @@ hdc* hdc::get_child(vector<string> vs) {
         else return this->children->at(first)->get_child(vs);
     } else {
         cout << "Not found" << endl;
-        exit(-1);
+//         exit(-1);
         return new hdc();
     }
     
@@ -266,6 +266,10 @@ int8_t hdc::get_ndim(string path) {
     return this->get_child(path)->get_ndim();
 }
 
+void* hdc::as_void_ptr() {
+    return (void*)this;
+}
+
 
 long int* hdc::get_shape()
 {
@@ -283,8 +287,8 @@ long int* hdc::get_shape()
     }
     else {
         cerr << "get_shape() method is not implemented for this type of node: " << (int)this->type << endl;
-        exit(-1);
-//         return 0;
+//        exit(-1);
+         return 0;
     }
 }
 
@@ -402,25 +406,29 @@ void hdc::resize(hdc* h, int recursively)
 
 hdc* hdc::copy(int copy_arrays)
 {
+    cout << "Called copy()" << endl;
     hdc* copy = new hdc();
     copy->set_type(this->get_type());
+    cout << (int)(this->get_type()) << endl;
     if (this->type == HDC_STRUCT) {
-        for (auto it = this->children->begin(); it != this->children->end(); ++it) {
-            hdc* child = it->second->copy(copy_arrays);
-            copy->add_child(it->first,it->second);
+        for (auto it = this->children->begin(); it != this->children->end(); it++) {
+            copy->add_child(it->first,it->second->copy(copy_arrays));
+            cout << it->first << " copied" << endl;
         }
     } else if (this->type == HDC_LIST) {
         for (size_t i = 0; i < this->list_elements->size(); i++)
             copy->set_slice(i,this->list_elements->at(i)->copy(copy_arrays));
     }
     else if (this->type == HDC_DYND) {
-        if (copy_arrays) {
+        if (copy_arrays == 1) {
             //dynd::nd::empty(<this->data->at(0).get_type()>);
             //long size = this->data->at(0).size();
             //char *
             copy->data->push_back(dynd::nd::array(this->data->at(0)));
+            cout << "copy: " << copy->data->at(0) << endl;
         } else this->set_type(HDC_EMPTY);
     }
+    cout << "copy() Done" << endl;
     return copy;
 }
 
