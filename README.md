@@ -11,6 +11,11 @@ cd build
 cmake ..
 make
 
+for python on Abacus:
+
+cmake -DPYTHON_LIBRARY=/sw/python2/anaconda/lib/libpython2.7.so -DPYTHON_INCLUDE_DIR=/sw/python2/anaconda/include/python2.7/ ..
+
+
 cmake gives us this:
 
 c++ -g -std=c++14  -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fPIC -I/sw/libdynd/include -I.    -o hdc.cpp.o -c hdc.cpp

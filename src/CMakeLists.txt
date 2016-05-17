@@ -7,7 +7,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(PythonLibs REQUIRED)
+#include_directories(${hdc_new_BINARY_DIR}/src)
 include_directories(${PYTHON_INCLUDE_DIRS})
+#include_directories(/sw/python2/anaconda/include/)
+#include_directories(/compass/home/fridrich/workspace/pybind11/include/)
 
 include_directories(inc)
 link_directories(${hdc_SOURCE_DIR}/src)
