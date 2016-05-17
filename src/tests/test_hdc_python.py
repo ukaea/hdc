@@ -1,8 +1,26 @@
 # to be run from the same folder where libhdc_fortran is
 import libhdc_python as hdc
+import ctypes
 
 hdc.hello__()
-h = hdc.hdc()
+h = hdc.HDC()
+h['group/data'] = np.random.rand(3, 4)
+
+fmodule = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
+
+change_data = fmodule.change_data
+change_data.restype = ctypes.c_void_p
+change_data.argtypes = (hdc.hdc_t, )
+
+# call fortran
+change_data(h.c_ptr)
+print(h['new_dataset'])
+
+# create hdc in fortran
+hdc_ptr_f = hdc_new_empty()
+# to python object
+g = hdc.from_c_ptr(hdc_ptr_f)
+
 g = hdc.hdc()
 h.add_child("aaa/bbb",g)
 h.set_data_double("aaa/bbb", 55.5)
