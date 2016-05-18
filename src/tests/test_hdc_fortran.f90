@@ -10,6 +10,8 @@ contains
         type(hdc_t) :: tree, n, k, node_int, node_double, node_double_2d, node_double_ad
         integer(kind=c_int8_t), dimension(1:4) :: array
         real(kind=dp), dimension(1:4) :: array_of_double
+        real(kind=dp), dimension(:), pointer :: arr
+        integer(kind=c_int8_t), dimension(:), pointer :: arri
 
         call hello()
 
@@ -59,6 +61,18 @@ contains
         node_double_ad = hdc_new_empty()
         call hdc_set_data_double_ad(node_double_ad, reshape((/1.0d0,2.0d0,3.14d0,5.9d0/), (/ int(2,8),int(2,8)/)), (/int(2,8),int(2,8)/) )
         print*, "AD: ", hdc_get_double_2d(node_double_ad)
+        
+        tree = hdc_new_empty()
+        
+!         call hdc_set(tree,"aaa/ccc",11)
+!         arri =  hdc_get_int8_1d(tree,trim("aaa/ccc"))
+!         print *, arri
+        
+        
+        call hdc_set(tree,trim("aaa/bbb"),(/1.0d0,2.0d0,3.3d0,8.8d0/))
+        call hdc_get(tree,trim("aaa/bbb"),arr)
+        arr = hdc_get_double_1d(tree,trim("aaa/bbb"))
+        print *, arr
     end subroutine f_main
     
 end program test_hdc_fortran
