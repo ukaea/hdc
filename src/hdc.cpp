@@ -185,6 +185,7 @@ hdc* hdc::get_slice(vector<string> vs, size_t i) {
     
     if (this->children->count(first)) {
         if (vs.empty()) {
+            if (this->type != HDC_LIST) return this;
             if (i < 0 || i > this->list_elements->size()) {
                 cout << "Error: index out of range!" << endl;
                 return new hdc();
@@ -200,7 +201,8 @@ hdc* hdc::get_slice(vector<string> vs, size_t i) {
 
 
 hdc* hdc::get_slice(size_t i) {
-    return this->list_elements->at(i);
+    if (this->type == HDC_LIST) return this->list_elements->at(i);
+    else return this; // return this if not list
 }
 
 hdc* hdc::get_slice(string path, size_t i) {
@@ -259,7 +261,7 @@ int8_t hdc::get_ndim()
 {
     if (this->type == HDC_DYND) return this->data->at(0).get_ndim();
     else if (this->type == HDC_LIST) return 1; // Currently, we support only single container list dimension
-    else return 0;
+    else return 1;
 }
 
 int8_t hdc::get_ndim(string path) {
@@ -283,17 +285,25 @@ long int* hdc::get_shape()
         long int* shape = (long int*)malloc(1 * sizeof(long int)); // Currently, we support only single container list dimension
         shape[0] = this->list_elements->size();
         return shape;
-//         return 0;
+//         return {(long)this->list_elements->size()};
     }
     else {
-        cerr << "get_shape() method is not implemented for this type of node: " << (int)this->type << endl;
+//         cerr << "get_shape() method is not implemented for this type of node: " << (int)this->type << endl;
 //        exit(-1);
-         return 0;
+        cout << "Warning: shape called on non list node" << endl;
+//          return {0};
+        long int* shape = (long int*)malloc(1 * sizeof(long int)); // Currently, we support only single container list dimension
+        shape[0] = 1;
+        return shape;
     }
 }
 
 long int* hdc::get_shape(string path) {
-    return  this->get_child(path)->get_shape();
+    if (!this->has_child(path)) {
+        cerr << "Not found (get_shape): " << path << endl;
+        exit(-1);
+    }
+    return this->get_child(path)->get_shape();
 }
 
 bool hdc::is_empty()
@@ -447,6 +457,54 @@ void hdc::append_slice(hdc* h) {
     this->list_elements->push_back(h);
     return;
 }
+
+string hdc::get_type_str() {
+    string type_str;
+    if (this->type == HDC_EMPTY) type_str = "null";
+    else if (this->type == HDC_LIST || this->type == HDC_STRUCT) type_str = "hdc";
+    else {
+        dynd::ndt::type dt;
+        switch(this->get_ndim()) {
+            case 0:
+                dt = this->data->at(0).get_type();
+                break;
+            case 1:
+                dt = this->data->at(0)(0).get_type();
+                break;
+            case 2:
+                dt = this->data->at(0)(0,0).get_type();
+                break;
+            case 3:
+                dt = this->data->at(0)(0,0,0).get_type();
+                break;
+            case 4:
+                dt = this->data->at(0)(0,0,0,0).get_type();
+                break;
+            case 5:
+                dt = this->data->at(0)(0,0,0,0,0).get_type();
+                break;
+            default: // Yes, I tried more.
+                cout << "Error: unsupported number of dimensions." << endl;
+                break;
+        }
+        type_str = dt.str();
+    }
+    return type_str;
+}
+
+
+string hdc::get_datashape_str() {
+    string type_str;
+    if (this->type == HDC_EMPTY) type_str = "null";
+    else if (this->type == HDC_LIST || this->type == HDC_STRUCT) type_str = "hdc";
+    else {
+        dynd::ndt::type dt;
+        dt = this->data->at(0).get_type();
+        type_str = dt.str();
+    }
+    return type_str;
+}
+
 
 void hdc::to_json(string filename, int mode)
 {

@@ -121,6 +121,7 @@ public:
     }
     
     template<typename T> T as(string path) {
+        cout << "as<T>(" << path << ")" << endl;
         // returns data of given type
         hdc* t = this->get_child(path);
         return t->as<T>();
@@ -132,6 +133,10 @@ public:
     
     // Python specific
     void* as_void_ptr();
+    
+    //get types
+    string get_type_str();
+    string get_datashape_str();
 private:
     int8_t type;
     vector<dynd::nd::array>* data;

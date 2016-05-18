@@ -146,5 +146,17 @@ int main(int argc, char **argv) {
 // //     //test array deserialization:
 // //     
 // //     
+    
+    
+    
+    cout << "--- Testing get_type_str" << endl;
+    hdc* t = new hdc();
+    cout << "type: " << t->get_type_str() << endl;
+    t->add_child("a",new hdc());
+    cout << "type: " << t->get_type_str() << endl;
+    hdc *tt = new hdc();
+    tt->set_data<int8_t>(1,shape,(void*)array);
+    cout << "type: " << tt->get_type_str() << endl;
+    cout << "type: " << tt->get_datashape_str() << endl;
     return 0;
 }
