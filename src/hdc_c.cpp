@@ -52,13 +52,24 @@ struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
     return h;
 }
 
-
 struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i) {
     hdc* t = (hdc*)tree->obj;
     hdc* node = t->get_slice(path, i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
+}
+
+void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n) {
+    hdc* t = (hdc*)tree->obj;
+    t->set_slice(i, (hdc*)n->obj);
+    return;    
+}
+
+void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n) {
+    hdc* t = (hdc*)tree->obj;
+    t->append_slice((hdc*)n->obj);
+    return;
 }
 
 bool hdc_has_child(struct hdc_t* tree, char* path) {

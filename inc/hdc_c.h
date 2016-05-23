@@ -15,6 +15,8 @@ void hdc_delete_child(struct hdc_t* tree, char* path);
 struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path);
 struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i);
 struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i);
+void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n);
+void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n);
 
 bool hdc_has_child(struct hdc_t* tree, char* path);
 void hdc_set_data_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);
