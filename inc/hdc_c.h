@@ -54,6 +54,8 @@ int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path);
 // double* hdc_as_int8_sc_path(struct hdc_t* tree, char* path);
 
 
+void test_str(char* str);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

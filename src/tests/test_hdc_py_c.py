@@ -6,8 +6,6 @@ import sys
 
 class HDC_T(ctypes.Structure):
     pass
-
-
 HDC_T_P = ctypes.POINTER(HDC_T)
 
 # chdc = ctypes.cdll.LoadLibrary('./libobj.so')
@@ -27,7 +25,7 @@ HDC_T_P = ctypes.POINTER(HDC_T)
 
 # chdc.obj_dump(tree)
 
-chdc = ctypes.cdll.LoadLibrary('./build/libchdc.so')
+chdc = ctypes.cdll.LoadLibrary('./libchdc.so')
 # chdc = ctypes.cdll.LoadLibrary('./libchdc.so')
 
 # function return values
@@ -59,7 +57,7 @@ pydata_test = np.asarray(cdata_test[:pydata.size], dtype=pydata.dtype)
 assert np.all(pydata_test == pydata)
 
 print('Python: hdc_add_child')
-path = "group1/int8_data"
+path = b"group1/int8_data"
 chdc.hdc_add_child(tree, path, data)
 
 print('Python: hdc_get_child')
@@ -71,16 +69,15 @@ assert np.all(pydata_test == pydata)
 print('Python: hdc_has_child')
 print(hdc_has_child(tree, path))
 
-
 # Fortran
 print("Python -> Fortran")
 
 # fhdc = ctypes.cdll.LoadLibrary('libfhdc.so')
-fhdc = ctypes.cdll.LoadLibrary('build/libfhdc.so')
+fhdc = ctypes.cdll.LoadLibrary('./libfhdc.so')
 fhdc.hello()
 
 # fmodule = ctypes.cdll.LoadLibrary('./hdc_fortran_module.so')
-fmodule = ctypes.cdll.LoadLibrary('build/libhdc_fortran_module.so')
+fmodule = ctypes.cdll.LoadLibrary('./libhdc_fortran_module.so')
 
 change_data = fmodule.change_data
 change_data.restype = ctypes.c_void_p
@@ -99,5 +96,5 @@ cdata_test = hdc_as_int_1d(node1)
 pydata_test = np.asarray(cdata_test[:pydata.size], dtype=pydata.dtype)
 # assert np.all(pydata_test == pydata)
 
-path2 = "group1/double_2d_data"
+path2 = b"group1/double_2d_data"
 node2 = hdc_get_child(tree, path2)

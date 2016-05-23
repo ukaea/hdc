@@ -148,7 +148,7 @@ void hdc_set_data_int32_scalar_path(hdc_t* tree, char* path, int32_t data)
 }
 
 
-void hello() {cout << "Hello" << endl;}
+void hello() {cout << "Hello" << endl; return;}
 
 void hdc_set_data_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
     hdc* t = (hdc*)tree->obj;
@@ -232,6 +232,11 @@ int32_t hdc_as_int32_scalar_path(hdc_t* tree, char* path)
 {
     hdc* t = (hdc*)tree->obj;
     return (t->as<int32_t*>(path))[0];
+}
+
+void test_str(char* str) {
+    cout << "test_str(): " << (string)str << endl;
+    return;
 }
 
 }

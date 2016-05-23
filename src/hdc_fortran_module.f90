@@ -35,13 +35,12 @@
         ! print *, tree%obj
         print *, hdc_has_child(tree, "group1/int8_data")
         node_int = hdc_get_child(tree, "group1/int8_data")
-
 read *
         print *, "Reading data in Fortran"
         array = hdc_get_int8_1d(node_int)
         ! test data get
         print *,"Data: ", array
-
+read *
         array = array + 1
         print *, "Fortran: modified data: ", array
         print *, "Fortran: call hdc_set_data "
