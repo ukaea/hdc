@@ -1,4 +1,8 @@
 #include "hdc.hpp"
+struct hdc_t {
+    void* obj;
+};
+
 
 using namespace std;
 
@@ -456,6 +460,12 @@ void hdc::set_slice(size_t i, hdc* h)
 void hdc::append_slice(hdc* h) {
     this->list_elements->push_back(h);
     return;
+}
+
+hdc_t* hdc::as_hdc_ptr() {
+    hdc_t* wrap = new struct hdc_t;
+    wrap->obj = (void*) this;
+    return wrap;
 }
 
 string hdc::get_type_str() {

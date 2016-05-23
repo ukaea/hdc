@@ -126,6 +126,15 @@ public:
         hdc* t = this->get_child(path);
         return t->as<T>();
     }
+    double as_double() {
+        return this->as<double*>()[0];
+    }
+    double as_double(string path) {
+        return this->as<double*>(path)[0];
+    }
+    
+    hdc_t* as_hdc_ptr();
+    
     
     // Serialization
     void to_json(string filename, int mode = 0);

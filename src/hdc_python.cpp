@@ -1,5 +1,8 @@
 #include "hdc.hpp"
 #include <pybind11/pybind11.h>
+struct hdc_t {
+    void* obj;
+};
 
 namespace py = pybind11;
 
@@ -20,8 +23,13 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("get_child", (hdc* (hdc::*)(std::string)) &hdc::get_child, "Gets node from tree")
         .def("delete_child", (void (hdc::*)(std::string)) &hdc::delete_child, "Deletes node from tree")
         .def("has_child", (bool (hdc::*)(std::string)) &hdc::has_child, "Returns True if the child with given address exists.")
-        .def("as_void_ptr", (void* (hdc::*)()) &hdc::as_void_ptr, "Returns C pointer to self")
-        /*.def("as_int8", (T (hdc::*)()) &hdc::as, "as int8")*/
+        .def("as_void_ptr", (void* (hdc::*)()) &hdc::as_void_ptr, "Returns C pointer to self (Pycapsule stuff)")
+        .def("as_int8_ptr", (int8_t* (hdc::*)()) &hdc::as<int8_t*>, "as int8")
+        .def("as_int32_ptr", (int32_t* (hdc::*)()) &hdc::as<int32_t*>, "as int32")
+        .def("as_double_ptr", (double* (hdc::*)()) &hdc::as<double*>, "as double")
+        .def("as_double", (double (hdc::*)()) &hdc::as_double, "as double")
+        .def("as_double", (double (hdc::*)(std::string)) &hdc::as_double, "as double")
+        .def("as_hdc_ptr", (struct hdc_t* (hdc::*)()) &hdc::as_hdc_ptr, "as HDC ptr")
         .def("__repr__", [](const hdc &t) {return "<libhdc.hdc>";});
     return m.ptr();
 }

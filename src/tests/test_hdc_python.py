@@ -3,7 +3,8 @@ import libhdc_python as hdc
 import ctypes
 
 hdc.hello__()
-h = hdc.HDC()
+#h = hdc.HDC()
+h = hdc.hdc()
 h['group/data'] = np.random.rand(3, 4)
 
 fmodule = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
@@ -24,5 +25,17 @@ g = hdc.from_c_ptr(hdc_ptr_f)
 g = hdc.hdc()
 h.add_child("aaa/bbb",g)
 h.set_data_double("aaa/bbb", 55.5)
+d = h.as_double("aaa/bbb")
+print(d)
 k = h.get_child("aaa")
 k.set_data_int32("bbb",323232)
+
+
+# Get pointer from PyCapsuleObject:
+hh = hdc.hdc()
+ptr = hh.as_void_ptr()
+
+from ctypes import pythonapi
+pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+pythonapi.PyCapsule_GetPointer(ptr,None)
