@@ -71,8 +71,9 @@ contains
         
         call hdc_set(tree,trim("aaa/bbb"),(/1.0d0,2.0d0,3.3d0,8.8d0/))
         call hdc_get(tree,trim("aaa/bbb"),arr)
-        arr = hdc_get_double_1d(tree,trim("aaa/bbb"))
         print *, arr
+!         array_of_double = hdc_get_double_1d(tree,trim("aaa/bbb"))
+!         print *, array_of_double
     end subroutine f_main
     
 end program test_hdc_fortran

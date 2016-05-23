@@ -23,11 +23,10 @@ contains
         type(hdc_t), intent(in) :: equilibriumin
         type(hdc_t), intent(out) :: distsourceout
         type(hdc_t) :: distsource_i, equilibrium_i
-        real(kind=DP), pointer :: psi
-        integer(kind=c_long), dimension(:), pointer :: shape_
+        real(kind=DP), dimension(:), pointer :: psi
 
         !UAL write(0,*) 'size of input CPO = ',size(equilibriumin)
-! ! !         write(0,*) 'size of input CPO = ', hdc_get_shape(equilibriumin)
+        write(0,*) 'size of input CPO = ', hdc_get_shape(equilibriumin)
 
         !UAL allocate(distsourceout(size(equilibriumin)))
         !HDC we explicitely create a new container
@@ -39,8 +38,10 @@ contains
 
         !UAL do i=1,size(equilibriumin)
         !HDC we assume here that ndim = 1
-! ! !         shape_ = hdc_get_shape(equilibriumin) ! Thin does not make sense - neither list, nor array
-        do i=1,shape_(1)
+
+        equilibrium_i = equilibriumin
+        distsource_i = distsourceout
+        do i=1,hdc_get_shape(equilibriumin,1)
             !UAL write(0,*) 'Received input time from equilibrium : ', equilibriumin(i)%time
             !HDC We probably need get_slice to avoid complicated string operations in fortran
             equilibrium_i = hdc_get_slice(equilibriumin, i)
@@ -61,7 +62,11 @@ contains
 ! !             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_child(equilibrium_i, 'profiles_1d/psi'))
             !HDC The alternative, more explicit solutions are
             !HDC it seems that hdc_get_<type> functions will be handy in Fortran
-            call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double(equilibrium_i, 'profiles_1d/psi'))
+! read *
+! print *,hdc_get_double_1d(equilibrium_i, 'profiles_1d/psi')
+! read *
+
+            call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_get_double_1d(equilibrium_i, 'profiles_1d/psi'))
             ! or
             call hdc_get(equilibrium_i, 'profiles_1d/psi',psi)
             call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * psi)
