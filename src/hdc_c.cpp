@@ -187,14 +187,14 @@ struct hdc_t* hdc_copy(hdc_t* src)
 void hdc_set_data_string(hdc_t* tree, char* str)
 {
     hdc* t = (hdc*)tree->obj;
-    t->set_data(str);
+    t->set_data((string)str);
     return;
 }
 
 void hdc_set_data_string_path(hdc_t* tree, char* path, char* str)
 {
     hdc* t = (hdc*)tree->obj;
-    t->set_data(path,str);
+    t->set_data(path,(string)str);
     return;
 }
 
