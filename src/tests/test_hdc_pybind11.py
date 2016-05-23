@@ -29,4 +29,8 @@ change_data = fmodule.change_data
 change_data.restype = ctypes.c_void_p
 change_data.argtypes = (HDC_T_P,)
 
+# prepare some tree
+
+hh["group1/int8_data"] = [1, 8, 2]
+
 change_data(hdc_t)

@@ -44,6 +44,32 @@ public:
     hdc* get_slice(size_t i);
     bool has_child(string path);
     // Data manipulation methods
+    template <typename T> void set_data(vector<T> data) {
+        if (this->children->size()) {
+            cout << "The node has already children set..." << endl;
+            return;
+        }
+        //dynd::nd::array arr;
+        //dynd::ndt::type dtype = dynd::ndt::make_type<T>();
+        //arr->data = (char*) data;
+        dynd::nd::array arr = data;
+        cout << arr << endl;
+        if (this->data->size()) this->data->clear();
+        this->data->push_back(arr);
+        //this->data = arr;
+        this->type = HDC_DYND;
+        return;
+    };
+    template <typename T> void set_data(string path, vector<T> data) {
+        if (!this->has_child(path)) {
+            this->add_child(path, new hdc());
+            cout << "not found, adding..." << endl;
+        }
+        hdc* t = this->get_child(path);
+        t->set_data<T>(data);
+        return;
+    };
+    
     template <typename T> void set_data(int8_t ndim, const long int* shape, void* data) {
         if (this->children->size()) {
             cout << "The node has already children set..." << endl;
@@ -115,11 +141,11 @@ public:
             cout << "This node is not terminal" << endl;
         }
         cout << "From get:" << this->data->at(0) << endl;
-        
+
         return (T)(this->data->at(0)->data);
         //return (T)(this->data.data());
     }
-    
+
     template<typename T> T as(string path) {
         cout << "as<T>(" << path << ")" << endl;
         // returns data of given type

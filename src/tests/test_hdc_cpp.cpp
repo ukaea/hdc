@@ -1,6 +1,8 @@
 #include <iostream>
 #include "hdc.hpp"
 
+#include <vector>
+
 using namespace std;
 
 
@@ -158,5 +160,12 @@ int main(int argc, char **argv) {
     tt->set_data<int8_t>(1,shape,(void*)array);
     cout << "type: " << tt->get_type_str() << endl;
     cout << "type: " << tt->get_datashape_str() << endl;
+    
+    getchar();
+    cout << "Testing dynd compatibility with stl::vector" << endl;
+    hdc* from_vector = new hdc();
+    vector<double> v = {1.,2.,-333.3,};
+//     from_vector->set_data(v);
+//     vector<double> v = from_vector.as_vector<double>();
     return 0;
 }
