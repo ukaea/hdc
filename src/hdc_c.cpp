@@ -79,6 +79,12 @@ void hdc_set_data_double(struct hdc_t* tree, int8_t ndim, const long int* shape,
     return;
 }
 
+void hdc_set_data_int32(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<int32_t>(ndim, shape, data);
+    return;
+}
+
 int8_t hdc_get_ndim(struct hdc_t* tree) {
     hdc* t = (hdc*)tree->obj;
     return t->get_ndim();
@@ -239,4 +245,11 @@ void test_str(char* str) {
     return;
 }
 
+const char* hdc_get_type_str(hdc_t* tree)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->get_type_str().c_str());
+}
+
+// end exter C
 }
