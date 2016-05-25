@@ -1,4 +1,8 @@
 #include "hdc.hpp"
+#include <dynd/json_parser.hpp>
+#include <json/value.h>
+#include <fstream>
+
 struct hdc_t {
     void* obj;
 };
@@ -27,6 +31,15 @@ hdc::hdc(uint8_t i)
     children = new unordered_map<string, hdc*>; 
 //    children = nullptr;
     list_elements = nullptr;
+}
+
+hdc::hdc(dynd::nd::array arr) {
+    cout << "Creating DyND node..." << endl;
+    type = HDC_DYND;
+    data = new vector<dynd::nd::array>;
+    children = new unordered_map<string, hdc*>; 
+    list_elements = nullptr;
+    data->push_back(arr);
 }
 
 hdc::~hdc()
@@ -162,7 +175,7 @@ void hdc::delete_child(string path) {
 
 hdc* hdc::get_child(vector<string> vs) {
     cout << "Getting node: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "::";
+    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     
     string first = vs[0];
@@ -317,10 +330,23 @@ bool hdc::is_empty()
 
 //------------------ Serialization -----------------------------
 
-// hdc* hdc::from_json(string filename)
-// {
-//     return new hdc(); // Change this
-// }
+hdc* from_json(const string& filename)
+{
+    hdc* tree;
+    ifstream file;
+    file.exceptions(ifstream::failbit | ifstream::badbit);
+    try {
+        file.open(filename);
+        Json::Value root;
+        file >> root;
+        tree = json_to_hdc(root);
+    }
+    catch (ifstream::failure e) {
+        cout << "Error reading / opening file." << endl;
+    }
+    file.close();
+    return tree;
+}
 
 Json::Value hdc::to_json(int mode) {
     Json::Value root;
@@ -416,6 +442,13 @@ void hdc::resize(hdc* h, int recursively)
     }
     return;
 }
+
+void hdc::set_dynd(dynd::nd::array array) {
+    if (this->type != HDC_EMPTY) return;
+    this->data->push_back(array);
+    return;
+}
+
 
 
 hdc* hdc::copy(int copy_arrays)
@@ -550,42 +583,6 @@ void hdc::set_string(string str) {
 
 // ------------------- JSON stuff ----------------------------
 
-
-hdc* from_json(string filename) {
-    cout << "Deserializing from JSON in file " << filename << "..." << endl;
-    hdc* tree = new hdc();
-    Json::Value json;
-    ifstream input(filename);
-    input >> json;
-    Json::Value* root = &json;
-    // decision here based on the type of node, allways point to the current node, go throught all subnodes
-    hdc* curr = tree;
-    
-    cout << "Object: " << root->isObject() << endl;
-    cout << "null: " << root->isNull() << endl;
-    cout << "String: " << root->isString() << endl;
-    cout << "Numeric: " << root->isNumeric() << endl;
-    cout << "Double: " << root->isDouble() << endl;
-    cout << "Bool: " << root->isBool() << endl;
-    cout << "Integral: " << root->isIntegral() << endl;
-    cout << "Array: " << root->isArray() << endl;
-    cout << "AAA: " << Json::ValueType::arrayValue << endl;
-    
-// // //     if (root->isArray()) {
-// // //         cout << "size: " << root->size() << endl;
-// // //         for (size_t i=0; i < root->size(); i++) {
-// // //             
-// // //             cout << root[i] << endl;
-// // //         }
-// // //     } else if (root->isString()) {
-// // //         cout << "String: " << root;
-// // //     } else if (root->)
-// // //     
-    
-    
-    return tree;
-}
-
 hdc* json_to_hdc(Json::Value* root) {
     hdc* tree = new hdc();
     switch(root->type()) {
@@ -615,26 +612,226 @@ hdc* json_to_hdc(Json::Value* root) {
             break;
         case Json::ValueType::arrayValue:
             cout << "root is array, size = " << root->size() << endl;
-//             if (is_all_numeric(root)) {
-//                 // Save as ND array
-//                 // dimension = depth of tree
-//                 // We should test regularity of array
-//                 tree->set_type(HDC_DYND);
-// //                 tree->set_json_data
-//             } else {
-//                 // call recursively -- save list
-//                 tree->set_type(HDC_LIST);
-//                 for (int i = 0;i<root->size();i++) {
-//                     tree->append_slice(json_to_hdc(&(root->operator[](i))));
-//                 }
-//             }
+            if (is_all_numeric(root)) {
+                int8_t ndim = get_ndim(root);
+                long* shape = get_shape(root);
+                stringstream ss;
+                ss << *root;
+                getchar();
+                dynd::ndt::type dt;
+                if (is_double(root)) dt = dynd::ndt::make_type<double>();
+                else dt = dynd::ndt::make_type<int32_t>();
+                dynd::nd::array array = dynd::nd::dtyped_ones(ndim,shape,dt);
+
+                switch(ndim) {
+                    case 1:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++) array(i).assign(root->operator[](i).asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++) array(i).assign(root->operator[](i).asInt());
+                        }
+                        break;
+                    case 2:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    array(i,j).assign(root->operator[](i).operator[](j).asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    array(i,j).assign(root->operator[](i).operator[](j).asInt());
+                        }
+                        break;
+                    case 3:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        array(i,j,k).assign(root->operator[](i).operator[](j).operator[](k).asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        array(i,j,k).assign(root->operator[](i).operator[](j).operator[](k).asInt());
+                        }
+                        break;
+                    case 4:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            array(i,j,k,l).assign(root->operator[](i).operator[](j).operator[](k).operator[](l).asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            array(i,j,k,l).assign(root->operator[](i).operator[](j).operator[](k).operator[](l).asInt());
+                        }
+                        break;
+                    case 5:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            for (int m = 0; m < shape[3]; m++)
+                                                array(i,j,k,l,m).assign(root->operator[](i).operator[](j).operator[](k).operator[](l).operator[](m).asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            for (int m = 0; m < shape[3]; m++)
+                                                array(i,j,k,l,m).assign(root->operator[](i).operator[](j).operator[](k).operator[](l).operator[](m).asInt());
+                        }
+                        break;
+                }
+                tree->set_dynd(array);
+                tree->set_type(HDC_DYND);
+            } else {
+                // call recursively -- save list
+                tree->set_type(HDC_LIST);
+                for (int i = 0;i<root->size();i++) {
+                    tree->append_slice(json_to_hdc(&(root->operator[](i))));
+                }
+            }
             break;
         case Json::ValueType::objectValue:
             cout << "root is object, children:" << endl;
             for (Json::ValueIterator it = root->begin(); it != root->end(); it++) {
                 cout << it.key() << endl;
+                tree->add_child(it.key().asCString(),json_to_hdc(&it));
             }
             break;
+    }
+    return tree;
+}
+
+
+hdc* json_to_hdc(const Json::Value& root) {
+    hdc* tree = new hdc();
+    switch(root.type()) {
+        case Json::ValueType::nullValue:
+            cout << "root is null" << endl;
+            tree->set_type(HDC_EMPTY);
+            break;
+        case Json::ValueType::intValue:
+            cout << "root is int, value = " << root.asInt() << endl;
+            tree->set_data<int32_t>(root.asInt());
+            break;
+        case Json::ValueType::uintValue:
+            cout << "root is uint, value = " << root.asUInt() << endl;
+            tree->set_data<uint32_t>(root.asUInt());
+            break;
+        case Json::ValueType::realValue:
+            cout << "root is double, value = " << root.asDouble() << endl;
+            tree->set_data<double>(root.asDouble());
+            break;
+        case Json::ValueType::stringValue:
+            cout << "root is string, value = " << root.asCString() << endl;
+            tree->set_data<string>(root.asCString());
+            break;
+        case Json::ValueType::booleanValue:
+            cout << "root is bool, value = " << root.asBool() << endl;
+            tree->set_data<bool>(root.asBool());
+            break;
+        case Json::ValueType::arrayValue:
+            cout << "root is array, size = " << root.size() << endl;
+            if (is_all_numeric(root)) {
+                int8_t ndim = get_ndim(root);
+                long* shape = get_shape(root);
+                stringstream ss;
+                ss << root;
+                getchar();
+                dynd::ndt::type dt;
+                if (is_double(root)) dt = dynd::ndt::make_type<double>();
+                else dt = dynd::ndt::make_type<int32_t>();
+                dynd::nd::array array = dynd::nd::dtyped_ones(ndim,shape,dt);
+
+                switch(ndim) {
+                    case 1:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++) array(i).assign(root[i].asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++) array(i).assign(root[i].asInt());
+                        }
+                        break;
+                    case 2:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    array(i,j).assign(root[i][j].asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    array(i,j).assign(root[i][j].asInt());
+                        }
+                        break;
+                    case 3:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        array(i,j,k).assign(root[i][j][k].asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        array(i,j,k).assign(root[i][j][k].asInt());
+                        }
+                        break;
+                    case 4:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            array(i,j,k,l).assign(root[i][j][k][l].asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            array(i,j,k,l).assign(root[i][j][k][l].asInt());
+                        }
+                        break;
+                    case 5:
+                        if (is_double(root)) {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            for (int m = 0; m < shape[3]; m++)
+                                                array(i,j,k,l,m).assign(root[i][j][k][l][m].asDouble());
+                        } else {
+                            for (int i = 0; i < shape[0]; i++)
+                                for (int j = 0; j < shape[1]; j++)
+                                    for (int k = 0; k < shape[2]; k++)
+                                        for (int l = 0; l < shape[3]; l++)
+                                            for (int m = 0; m < shape[3]; m++)
+                                                array(i,j,k,l,m).assign(root[i][j][k][l][m].asInt());
+                        }
+                        break;
+                }
+                tree->set_dynd(array);
+                tree->set_type(HDC_DYND);
+            } else {
+                // call recursively -- save list
+                tree->set_type(HDC_LIST);
+                for (int i = 0;i<root.size();i++) {
+                    tree->append_slice(json_to_hdc(&(root[i])));
+                }
+            }
+            break;
+                    case Json::ValueType::objectValue:
+                        cout << "root is object, children:" << endl;
+                        for (Json::ValueConstIterator it = root.begin(); it != root.end(); it++) {
+                            cout << it.key() << endl;
+                            tree->add_child(it.key().asCString(),json_to_hdc(*it));
+                        }
+                        break;
     }
     return tree;
 }
@@ -644,24 +841,6 @@ int64_t detect_array_type(Json::Value* root)
 {
     return 0;
 }
-
-// bool is_all_numeric(Json::Value& root)
-// {
-//     bool ok = true;
-//     for (int i=0;i<root.size();i++) {
-//         if (!root[i].isNumeric() && !root[i].isArray()) {
-//             ok = false;
-//             break;
-//         }
-//         if (root.isArray()) {
-//             if (!is_all_numeric(root[i])) {
-//                 ok = false;
-//                 break;
-//             }
-//         }
-//     }
-//     return ok;
-// }
 
 bool is_all_numeric(Json::Value* root)
 {
@@ -681,6 +860,25 @@ bool is_all_numeric(Json::Value* root)
     return ok;
 }
 
+bool is_all_numeric(const Json::Value& root)
+{
+    bool ok = true;
+    for (int i=0;i<root.size();i++) {
+        if (!root[i].isNumeric() && !root[i].isArray()) {
+            ok = false;
+            break;
+        }
+        if (root.isArray()) {
+            if (!is_all_numeric(&(root[i]))) {
+                ok = false;
+                break;
+            }
+        }
+    }
+    return ok;
+}
+
+
 bool is_double(Json::Value* root)
 {
     if(!is_all_numeric(root)) return false;
@@ -691,6 +889,18 @@ bool is_double(Json::Value* root)
         }
     } else return false;
 }
+
+bool is_double(const Json::Value& root)
+{
+    if(!is_all_numeric(root)) return false;
+    if (root.isDouble() && !(root.isInt64() || root.isInt())) return true;
+    else if (root.isArray()) {
+        for (int i=0;i<root.size();i++) {
+            if (is_double(root[i])) return true;
+        }
+    } else return false;
+}
+
 
 bool is_jagged(Json::Value* root)
 {
@@ -707,6 +917,81 @@ bool is_jagged(Json::Value* root)
     return jagged;
 }
 
+bool is_jagged(const Json::Value& root)
+{
+    if (!root.isArray()) return false;
+    int dim = 0;
+    bool jagged = false;
+    dim = root[0].size();
+    for (int i=1; i<root.size();i++) {
+        if (root[i].size() != dim) {
+            return true;
+            break;
+        } else return is_jagged(root[i]);
+    }
+    return jagged;
+}
+
+
+long* get_shape(Json::Value* root) {
+    if (!root->isArray()) return 0;
+    int dim = 0;
+    std::vector<long> shape;
+    Json::Value* curr = root;
+    while (curr->isArray()) {
+        shape.push_back(curr->size());
+        curr = &(curr->operator[](0));
+        dim++;
+    }
+    cout << "Dimension: " << dim << endl;
+    cout << "Shape: (" << shape[0];
+    for (int i=1; i<dim; i++) cout << ", " << shape[i];
+    cout << ")" << endl;
+    long* res = new long[dim];
+    for (int i=0;i<dim;i++) res[i] = shape[i];
+    return res;
+}
+
+long* get_shape(const Json::Value& root) {
+    if (!root.isArray()) return 0;
+    int dim = 0;
+    std::vector<long> shape;
+    Json::Value curr = root;
+    while (curr.isArray()) {
+        shape.push_back(curr.size());
+        curr = curr[0];
+        dim++;
+    }
+    cout << "Dimension: " << dim << endl;
+    cout << "Shape: (" << shape[0];
+    for (int i=1; i<dim; i++) cout << ", " << shape[i];
+    cout << ")" << endl;
+    long* res = new long[dim];
+    for (int i=0;i<dim;i++) res[i] = shape[i];
+    return res;
+}
+
+int8_t get_ndim(Json::Value* root) {
+    if (!root->isArray()) return 0;
+    int dim = 0;
+    Json::Value* curr = root;
+    while (curr->isArray()) {
+        curr = &(curr->operator[](0));
+        dim++;
+    }
+    return dim;
+}
+
+int8_t get_ndim(const Json::Value& root) {
+    if (!root.isArray()) return 0;
+    int dim = 0;
+    Json::Value curr = root;
+    while (curr.isArray()) {
+        curr = curr[0];
+        dim++;
+    }
+    return dim;
+}
 
 
 void set_json(string json) {
@@ -714,7 +999,6 @@ void set_json(string json) {
     // I don't know what to do with JSON yet.
     return;
 }
-
 
 //------------------ String manipulation -----------------------------
 

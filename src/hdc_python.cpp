@@ -39,7 +39,7 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("as_double", (double (hdc::*)()) &hdc::as_double, "as double")
         .def("as_double", (double (hdc::*)(std::string)) &hdc::as_double, "as double")
         .def("as_hdc_ptr", (struct hdc_t* (hdc::*)()) &hdc::as_hdc_ptr, "as HDC ptr")
-        .def("__repr__", [](const hdc &t) {return "<libhdc.hdc>";})
+        .def("__repr__", []() {return "<libhdc.hdc>";})
         .def("__getitem__", (hdc* (hdc::*)(std::string path)) &hdc::get_child, "Returns C pointer to self (Pycapsule stuff)");
     return m.ptr();
 }

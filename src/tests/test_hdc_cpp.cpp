@@ -21,7 +21,6 @@ int main(int argc, char **argv) {
         cout << vs[0] << endl; 
         vs.erase(vs.begin());
     }
-        
     hdc* tree = new hdc();
     // test add
     tree->add_child("aaa/bbb/ccc",new hdc());
@@ -68,7 +67,10 @@ int main(int argc, char **argv) {
     tree->add_child("data",data);
     tree->add_child("list",list);
     //tree->to_json("json.txt");
-    tree->to_json("tree.txt",1);
+    tree->to_json("tree.txt",0);
+    hdc* fj = from_json("pokus.txt");
+    fj->to_json("back.txt",0);
+    exit(0);
     //delete list;
     
     // Copy
@@ -80,31 +82,29 @@ int main(int argc, char **argv) {
     resized->resize(tree,1);
     resized->to_json("resized.txt");
     
-//    // data->set_data(1,shape,array);
-//     
-//     // set string
-//     string str = "aaa123aaa123";
-//     hdc* ssss = new hdc();
-//     ssss->set_data(str);
-//     
-//     // Test deserialization here
-//     //hdc* fj = from_json("tree2.txt");
-//     hdc* fi = json_to_hdc(new Json::Value(5));
-//     hdc* fu = json_to_hdc(new Json::Value(5u));
-//     hdc* fd = json_to_hdc(new Json::Value(5.));
-//     hdc* fb = json_to_hdc(new Json::Value(true));
-//     hdc* fn = json_to_hdc(new Json::Value(Json::nullValue));
-//     hdc* fs = json_to_hdc(new Json::Value("aaaa"));
-//     Json::Value* ar = new Json::Value();
-//     ar->append(new Json::Value(8));
-//     ar->append(new Json::Value(6));
-//     hdc* fa = json_to_hdc(ar);
-//     Json::Value* obj = new Json::Value();
-//     obj->operator[]("aaa") = new Json::Value("aaaaaa");
-//     obj->operator[]("bbb") = new Json::Value("bbbbbb");
-//     hdc* fo = json_to_hdc(obj);
-//     
+    // data->set_data(1,shape,array);
+    // set string
+    string str = "aaa123aaa123";
+    hdc* ssss = new hdc();
+    ssss->set_data(str);
     
+    // Test deserialization here
+    //hdc* fj = from_json("tree2.txt");
+    hdc* fi = json_to_hdc(new Json::Value(5));
+    hdc* fu = json_to_hdc(new Json::Value(5u));
+    hdc* fd = json_to_hdc(new Json::Value(5.));
+    hdc* fb = json_to_hdc(new Json::Value(true));
+    hdc* fn = json_to_hdc(new Json::Value(Json::nullValue));
+    hdc* fs = json_to_hdc(new Json::Value("aaaa"));
+    Json::Value* ar = new Json::Value();
+    ar->append(new Json::Value(8));
+    ar->append(new Json::Value(6));
+    hdc* fa = json_to_hdc(ar);
+    Json::Value* obj = new Json::Value();
+    obj->operator[]("aaa") = new Json::Value("aaaaaa");
+    obj->operator[]("bbb") = new Json::Value("bbbbbb");
+    hdc* fo = json_to_hdc(obj);
+
     // test is_jagged()
 //     Json::Value* a2 = new Json::Value();
 //     a2->append(ar);
@@ -120,51 +120,55 @@ int main(int argc, char **argv) {
 //     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
 //     aa.append(Json::Value("aa"));
 //     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
-//     //
-// //     Json::Value bb;
-// //     bb.append(Json::Value(5.));
-// //     bb.append(Json::Value(5.));
-// //     Json::Value a2;
-// //     a2.append(bb);
-// //     a2.append(bb);
-// //     cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
-// //     Json::Value a3;
-// //     a3.append(a2);
-// //     a3.append(a2);
-// //     cout << a3 << endl;
-// //     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-// //     a3[0][0][0] = Json::Value("aa");
-// //     cout << a3 << endl;
-// //     cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-// //     // test is_double()
-// //     cout << "is_double: " << is_double(new Json::Value(5.1)) << endl;
-// //     cout << "is_double: " << is_double(new Json::Value(5)) << endl;
-// //     cout << "is_double: " << is_double(new Json::Value("aaa")) << endl;
-// //     cout << "is_double: " << is_double(&a3) << endl;
-// //     a3[0][0][0] = Json::Value(5.5);
-// //     cout << "is_double: " << is_double(&a3) << endl;
-// //     a3[0][0][0] = Json::Value(5);
-// //     cout << "is_double: " << is_double(&a3) << endl;
-// //     //test array deserialization:
-// //     
-// //     
-    
-    
-    
-    cout << "--- Testing get_type_str" << endl;
-    hdc* t = new hdc();
-    cout << "type: " << t->get_type_str() << endl;
-    t->add_child("a",new hdc());
-    cout << "type: " << t->get_type_str() << endl;
-    hdc *tt = new hdc();
-    tt->set_data<int8_t>(1,shape,(void*)array);
-    cout << "type: " << tt->get_type_str() << endl;
-    cout << "type: " << tt->get_datashape_str() << endl;
-    
+    //
+    Json::Value bb;
+    bb.append(Json::Value(5.));
+    bb.append(Json::Value(5.));
+    Json::Value a2;
+    a2.append(bb);
+    a2.append(bb);
+    cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
+    Json::Value a3;
+    a3.append(a2);
+    a3.append(a2);
+    cout << a3 << endl;
+    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+    a3[0][0][0] = Json::Value("aa");
+    cout << a3 << endl;
+    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
+    // test is_double()
+    cout << "is_double: " << is_double(new Json::Value(5.1)) << endl;
+    cout << "is_double: " << is_double(new Json::Value(5)) << endl;
+    cout << "is_double: " << is_double(new Json::Value("aaa")) << endl;
+    cout << "is_double: " << is_double(&a3) << endl;
+    a3[0][0][0] = Json::Value(5.5);
+    cout << "is_double: " << is_double(&a3) << endl;
+    a3[0][0][0] = Json::Value(5);
+    cout << "is_double: " << is_double(&a3) << endl;
+//     test array deserialization:
+    cout << "-------- Deserialization --------" << endl;
     getchar();
-    cout << "Testing dynd compatibility with stl::vector" << endl;
-    hdc* from_vector = new hdc();
-    vector<double> v = {1.,2.,-333.3,};
+    int8_t dim = get_ndim(&a3);
+    long* shape__ = get_shape(&a3);
+    cout << shape__[0] << " " << shape__[1] << " " << shape__[2] << endl;
+    //cout << a3 << endl;
+    hdc* tr = json_to_hdc(&a3);
+    cout << "aaa: " << (int32_t)tr->as<int32_t*>()[0] << endl;
+    
+// // //     cout << "--- Testing get_type_str" << endl;
+// // //     hdc* t = new hdc();
+// // //     cout << "type: " << t->get_type_str() << endl;
+// // //     t->add_child("a",new hdc());
+// // //     cout << "type: " << t->get_type_str() << endl;
+// // //     hdc *tt = new hdc();
+// // //     tt->set_data<int8_t>(1,shape,(void*)array);
+// // //     cout << "type: " << tt->get_type_str() << endl;
+// // //     cout << "type: " << tt->get_datashape_str() << endl;
+// // //     
+// // //     getchar();
+// // //     cout << "Testing dynd compatibility with stl::vector" << endl;
+// // //     hdc* from_vector = new hdc();
+// // //     vector<double> v = {1.,2.,-333.3,};
 //     from_vector->set_data(v);
 //     vector<double> v = from_vector.as_vector<double>();
     return 0;

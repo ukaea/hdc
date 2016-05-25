@@ -26,6 +26,7 @@
 #define HDC_STRUCT 1
 #define HDC_DYND 2
 #define HDC_LIST 3
+#define HDC_ERROR 4
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -35,6 +36,7 @@ class hdc
 public:
     hdc(); // Creates empty HDC
     hdc(uint8_t i);
+    hdc(dynd::nd::array arr);
     ~hdc();
     void add_child(string path, hdc* n); // Add subnode
     void set_child(string path, hdc* n); // Set subnode
@@ -118,10 +120,10 @@ public:
         t->set_data(data);
         return;
     };
-    
-    
+
     //void set_string(string str); not needed
     void set_json(string json);
+    void set_dynd(dynd::nd::array array);
     void set_list(vector<hdc*>* list);
     void create_list(size_t n=5);
     void resize(hdc* h, int recursively = 0);
@@ -191,14 +193,25 @@ vector<string>& split(const string &s, char delim, vector<string>& elems);
 vector<string> split(const string &s, char delim);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
-hdc* from_json(string filename);
+hdc* from_json(const string& filename);
 hdc* json_to_hdc(Json::Value* root);
-// hdc* json_to_hdc(Json::Value& root);
+hdc* json_to_hdc(const Json::Value& root);
 
 int64_t detect_array_type(Json::Value* root);
 bool is_all_numeric(Json::Value* root);
 bool is_double(Json::Value* root);
 bool is_jagged(Json::Value* root);
+long* get_shape(Json::Value* root);
+int8_t get_ndim(Json::Value* root);
+
+int64_t detect_array_type(const Json::Value& root);
+bool is_all_numeric(const Json::Value& root);
+bool is_double(const Json::Value& root);
+bool is_jagged(const Json::Value& root);
+long* get_shape(const Json::Value& root);
+int8_t get_ndim(const Json::Value& root);
+
+
 
 void hello__();
 
