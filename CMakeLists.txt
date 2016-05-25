@@ -5,8 +5,8 @@ enable_language (Fortran)
 set(hdc_new_SOURCE_DIR "${hdc_new_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -fmax-errors=20 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
 set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
 
 find_package(PythonLibs REQUIRED)

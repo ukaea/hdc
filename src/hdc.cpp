@@ -1,6 +1,5 @@
 #include "hdc.hpp"
 #include <dynd/json_parser.hpp>
-#include <json/value.h>
 #include <fstream>
 
 struct hdc_t {
