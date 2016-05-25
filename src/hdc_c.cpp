@@ -52,13 +52,24 @@ struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
     return h;
 }
 
-
 struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i) {
     hdc* t = (hdc*)tree->obj;
     hdc* node = t->get_slice(path, i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
+}
+
+void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n) {
+    hdc* t = (hdc*)tree->obj;
+    t->set_slice(i, (hdc*)n->obj);
+    return;    
+}
+
+void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n) {
+    hdc* t = (hdc*)tree->obj;
+    t->append_slice((hdc*)n->obj);
+    return;
 }
 
 bool hdc_has_child(struct hdc_t* tree, char* path) {
@@ -76,6 +87,12 @@ void hdc_set_data_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, v
 void hdc_set_data_double(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
     hdc* t = (hdc*)tree->obj;
     t->set_data<double>(ndim, shape, data);
+    return;
+}
+
+void hdc_set_data_int32(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
+    hdc* t = (hdc*)tree->obj;
+    t->set_data<int32_t>(ndim, shape, data);
     return;
 }
 
@@ -239,4 +256,11 @@ void test_str(char* str) {
     return;
 }
 
+const char* hdc_get_type_str(hdc_t* tree)
+{
+    hdc* t = (hdc*)tree->obj;
+    return (t->get_type_str().c_str());
+}
+
+// end exter C
 }

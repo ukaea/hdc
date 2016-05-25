@@ -24,7 +24,7 @@ hdc_t_p = HDC_T_P(hdc_t)
 
 # Now load the function and call it
 
-fmodule = ctypes.cdll.LoadLibrary('./libhdc_fortran_module.so')
+fmodule = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
 change_data = fmodule.change_data
 change_data.restype = ctypes.c_void_p
 change_data.argtypes = (HDC_T_P,)
@@ -32,5 +32,7 @@ change_data.argtypes = (HDC_T_P,)
 # prepare some tree
 
 hh["group1/int8_data"] = [1, 8, 2]
+
+assert(hh["group1/int8_data"].get_type_str() == 'int8')
 
 change_data(hdc_t)

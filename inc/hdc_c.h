@@ -15,10 +15,13 @@ void hdc_delete_child(struct hdc_t* tree, char* path);
 struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path);
 struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i);
 struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i);
+void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n);
+void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n);
 
 bool hdc_has_child(struct hdc_t* tree, char* path);
 void hdc_set_data_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);
 void hdc_set_data_double(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);
+void hdc_set_data_int32(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);
 void hdc_set_data_string_path(struct hdc_t* tree, char* path, char* str);
 void hdc_set_data_string(struct hdc_t* tree, char* str);
 // void hdc_set_data_int8_(struct hdc_t* tree, int8_t ndim, void* shape, void* data);
@@ -52,7 +55,7 @@ struct hdc_t*  hdc_copy(struct hdc_t* src);
 
 int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path);
 // double* hdc_as_int8_sc_path(struct hdc_t* tree, char* path);
-
+const char* hdc_get_type_str(struct hdc_t* tree);
 
 void test_str(char* str);
 
