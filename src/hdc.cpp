@@ -282,22 +282,30 @@ long int* hdc::get_shape()
     if (this->type == HDC_DYND) {
         long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
         for (size_t i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
-        //size_t* shape = &(size_t)(this->data->at(0)->get_shape()[0]);
         return shape;
     }
     else if (this->type == HDC_LIST) {
         long int* shape = (long int*)malloc(1 * sizeof(long int)); // Currently, we support only single container list dimension
         shape[0] = this->list_elements->size();
         return shape;
-//         return {(long)this->list_elements->size()};
+    }
+    else if (this->type == HDC_EMPTY) {
+        long int* shape = (long int*)malloc(1 * sizeof(long int)); 
+        // empty shape = (0, )
+        shape[0] = 0;
+        return shape;
+    }
+    else if (this->type == HDC_STRUCT) {
+        long int* shape = (long int*)malloc(1 * sizeof(long int)); 
+        // container type has (1, ) shape
+        shape[0] = 1;
+        return shape;
     }
     else {
-//         cerr << "get_shape() method is not implemented for this type of node: " << (int)this->type << endl;
-//        exit(-1);
-        cout << "Warning: shape called on non list node" << endl;
-//          return {0};
-        long int* shape = (long int*)malloc(1 * sizeof(long int)); // Currently, we support only single container list dimension
-        shape[0] = 1;
+        // error, should not get here
+        cout << "Unknow type" << endl;
+        long int* shape = (long int*)malloc(1 * sizeof(long int)); 
+        shape[0] = -1;
         return shape;
     }
 }
@@ -458,7 +466,15 @@ void hdc::set_slice(size_t i, hdc* h)
 }
 
 void hdc::append_slice(hdc* h) {
-    this->list_elements->push_back(h);
+    if (this->type == HDC_EMPTY) {
+        this->set_type(HDC_LIST);
+    }
+    if (this->type == HDC_LIST) {
+        this->list_elements->push_back(h);
+    } else {
+        cout << "Error: append_slice not supported for HDC_STRUCT" << endl;
+        exit(-1);
+    }
     return;
 }
 
