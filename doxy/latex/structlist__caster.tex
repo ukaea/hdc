@@ -1,0 +1,37 @@
+\hypertarget{structlist__caster}{}\section{list\+\_\+caster$<$ Type, Value $>$ Struct Template Reference}
+\label{structlist__caster}\index{list\+\_\+caster$<$ Type, Value $>$@{list\+\_\+caster$<$ Type, Value $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef Type {\bfseries type}\hypertarget{structlist__caster_a347fc8b677e2399b5fbe35f3f26400ad}{}\label{structlist__caster_a347fc8b677e2399b5fbe35f3f26400ad}
+
+\item 
+typedef \hyperlink{classtype__caster}{type\+\_\+caster}$<$ typename \hyperlink{structintrinsic__type}{intrinsic\+\_\+type}$<$ Value $>$\+::type $>$ {\bfseries value\+\_\+conv}\hypertarget{structlist__caster_a2d5b1805a94ca0afb0a3bbf193bfff07}{}\label{structlist__caster_a2d5b1805a94ca0afb0a3bbf193bfff07}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries load} (\hyperlink{classhandle}{handle} src, bool convert)\hypertarget{structlist__caster_a6f4b4e4679fc465e40ef9f45480c3467}{}\label{structlist__caster_a6f4b4e4679fc465e40ef9f45480c3467}
+
+\item 
+{\footnotesize template$<$typename T  = Type, typename std\+::enable\+\_\+if$<$ std\+::is\+\_\+same$<$ decltype(std\+::declval$<$ T $>$().\+reserve(0)), void $>$\+::value, int $>$\+::type  = 0$>$ }\\void {\bfseries reserve\+\_\+maybe} (\hyperlink{classlist}{list} l, Type $\ast$)\hypertarget{structlist__caster_a7a15e8f1e9199d52c0ed9a03d75aa826}{}\label{structlist__caster_a7a15e8f1e9199d52c0ed9a03d75aa826}
+
+\item 
+void {\bfseries reserve\+\_\+maybe} (\hyperlink{classlist}{list}, void $\ast$)\hypertarget{structlist__caster_a1ba6972136b940a6262d27a99089b413}{}\label{structlist__caster_a1ba6972136b940a6262d27a99089b413}
+
+\item 
+{\bfseries P\+Y\+B\+I\+N\+D11\+\_\+\+T\+Y\+P\+E\+\_\+\+C\+A\+S\+T\+ER} (Type, \+\_\+(\char`\"{}list$<$\char`\"{})+value\+\_\+conv\+::name()+\+\_\+(\char`\"{}$>$\char`\"{}))\hypertarget{structlist__caster_a67901b27e2b43491e126980cc568d2ab}{}\label{structlist__caster_a67901b27e2b43491e126980cc568d2ab}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classhandle}{handle} {\bfseries cast} (const Type \&src, return\+\_\+value\+\_\+policy policy, \hyperlink{classhandle}{handle} parent)\hypertarget{structlist__caster_abaf1ddf8e27240a3c480cbd0b19b96ed}{}\label{structlist__caster_abaf1ddf8e27240a3c480cbd0b19b96ed}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/david/projects/hdc\+\_\+new/inc/pybind11/stl.\+h\end{DoxyCompactItemize}

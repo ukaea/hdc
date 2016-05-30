@@ -1,0 +1,9 @@
+<map id="hdc::copy" name="hdc::copy">
+<area shape="rect" id="node2" href="$classhdc.html#a6d1d1064db92be176775481eb6ca9fd3" title="hdc::set_type" alt="" coords="135,5,236,32"/>
+<area shape="rect" id="node3" href="$classhdc.html#a6ae2658ee66a5f4fb0d0d6535b36c5b2" title="hdc::add_child" alt="" coords="132,56,239,83"/>
+<area shape="rect" id="node8" href="$classhdc.html#a3d4c2ba09c79e2dfbe7be7bd59bd811e" title="hdc::set_slice" alt="" coords="134,107,237,133"/>
+<area shape="rect" id="node4" href="$classhdc.html#af2b7f95b9cf36d26e0fc20dd1c0465ba" title="hdc::delete_child" alt="" coords="287,56,407,83"/>
+<area shape="rect" id="node5" href="$classhdc.html#aafcd7c001cf4d3e2d61dbbf6efef6e08" title="hdc::get_child" alt="" coords="455,31,557,57"/>
+<area shape="rect" id="node7" href="$classhdc.html#a580b1c84ebb50da63e2682ddceb6010a" title="hdc::get_slice" alt="" coords="455,81,557,108"/>
+<area shape="rect" id="node6" href="$classhdc.html#acde60e58222d3b7d2b2a53b14289f500" title="hdc::set_child" alt="" coords="605,31,708,57"/>
+</map>

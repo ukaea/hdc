@@ -1,0 +1,8 @@
+<map id="type_caster&lt; std::reference_wrapper&lt; type &gt; &gt;" name="type_caster&lt; std::reference_wrapper&lt; type &gt; &gt;">
+<area shape="rect" id="node2" href="$classtype__caster__base.html" title="Generic type caster for objects stored on the heap. " alt="" coords="9,260,184,287"/>
+<area shape="rect" id="node3" href="$classtype__caster__generic.html" title="type_caster_generic" alt="" coords="27,184,166,211"/>
+<area shape="rect" id="node4" href="$structtype__info.html" title="Additional type information which does not fit into the PyTypeObject. " alt="" coords="13,95,87,121"/>
+<area shape="rect" id="node5" href="$structbuffer__info.html" title="Information record describing a Python buffer object. " alt="" coords="7,5,90,32"/>
+<area shape="rect" id="node6" href="$classobject.html" title="Holds a reference to a Python object (with reference counting) " alt="" coords="115,95,172,121"/>
+<area shape="rect" id="node7" href="$classhandle.html" title="Holds a reference to a Python object (no reference counting) " alt="" coords="115,5,175,32"/>
+</map>

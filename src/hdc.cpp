@@ -21,22 +21,11 @@ hdc::hdc()
     list_elements = nullptr;
 }
 
-
-hdc::hdc(uint8_t i)
-{
-    cout << "Creating empty node..." << endl;
-    type = HDC_EMPTY;
-    data = new vector<dynd::nd::array>;
-    children = new unordered_map<string, hdc*>; 
-//    children = nullptr;
-    list_elements = nullptr;
-}
-
 hdc::hdc(dynd::nd::array arr) {
     cout << "Creating DyND node..." << endl;
     type = HDC_DYND;
     data = new vector<dynd::nd::array>;
-    children = new unordered_map<string, hdc*>; 
+    children = new unordered_map<string, hdc*>;
     list_elements = nullptr;
     data->push_back(arr);
 }
@@ -632,7 +621,6 @@ hdc* json_to_hdc(Json::Value* root) {
                 long* shape = get_shape(root);
                 stringstream ss;
                 ss << *root;
-                getchar();
                 dynd::ndt::type dt;
                 if (is_double(root)) dt = dynd::ndt::make_type<double>();
                 else dt = dynd::ndt::make_type<int32_t>();
@@ -759,7 +747,6 @@ hdc* json_to_hdc(const Json::Value& root) {
                 long* shape = get_shape(root);
                 stringstream ss;
                 ss << root;
-                getchar();
                 dynd::ndt::type dt;
                 if (is_double(root)) dt = dynd::ndt::make_type<double>();
                 else dt = dynd::ndt::make_type<int32_t>();
@@ -1006,13 +993,6 @@ int8_t get_ndim(const Json::Value& root) {
         dim++;
     }
     return dim;
-}
-
-
-void set_json(string json) {
-    cout << "Setting JSON: " << json << endl;
-    // I don't know what to do with JSON yet.
-    return;
 }
 
 //------------------ String manipulation -----------------------------

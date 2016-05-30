@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structinstance__essentials.html" title="Core part of the &#39;instance&#39; type which POD (needed to be able to use &#39;offsetof&#39;) " alt="" coords="5,5,143,47"/>
+<area shape="rect" id="node2" href="$structinstance.html" title="PyObject wrapper around generic types, includes a special holder type that is responsible for lifetim..." alt="" coords="191,5,341,47"/>
+</map>

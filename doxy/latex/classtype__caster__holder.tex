@@ -1,0 +1,73 @@
+\hypertarget{classtype__caster__holder}{}\section{type\+\_\+caster\+\_\+holder$<$ type, holder\+\_\+type $>$ Class Template Reference}
+\label{classtype__caster__holder}\index{type\+\_\+caster\+\_\+holder$<$ type, holder\+\_\+type $>$@{type\+\_\+caster\+\_\+holder$<$ type, holder\+\_\+type $>$}}
+
+
+Type caster for holder types like std\+::shared\+\_\+ptr, etc.  
+
+
+
+
+{\ttfamily \#include $<$cast.\+h$>$}
+
+
+
+Inheritance diagram for type\+\_\+caster\+\_\+holder$<$ type, holder\+\_\+type $>$\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=211pt]{classtype__caster__holder__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for type\+\_\+caster\+\_\+holder$<$ type, holder\+\_\+type $>$\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=213pt]{classtype__caster__holder__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries load} (\hyperlink{classhandle}{handle} src, bool convert)\hypertarget{classtype__caster__holder_a6345f3139ddbc0b78b483a0813549bde}{}\label{classtype__caster__holder_a6345f3139ddbc0b78b483a0813549bde}
+
+\item 
+{\bfseries operator type $\ast$} ()\hypertarget{classtype__caster__holder_a89e7a89f272b0f68f9cbc8a51908db3e}{}\label{classtype__caster__holder_a89e7a89f272b0f68f9cbc8a51908db3e}
+
+\item 
+{\bfseries operator type \&} ()\hypertarget{classtype__caster__holder_a42a05296202279a448088b08c7cd5f6e}{}\label{classtype__caster__holder_a42a05296202279a448088b08c7cd5f6e}
+
+\item 
+{\bfseries operator holder\+\_\+type $\ast$} ()\hypertarget{classtype__caster__holder_a07ff28f45127c97f47a4fd5b842a396a}{}\label{classtype__caster__holder_a07ff28f45127c97f47a4fd5b842a396a}
+
+\item 
+{\bfseries operator holder\+\_\+type \&} ()\hypertarget{classtype__caster__holder_ab76458fefec0b3290cd9db5e2b4da0ec}{}\label{classtype__caster__holder_ab76458fefec0b3290cd9db5e2b4da0ec}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classhandle}{handle} {\bfseries cast} (const holder\+\_\+type \&src, return\+\_\+value\+\_\+policy, \hyperlink{classhandle}{handle})\hypertarget{classtype__caster__holder_a632a31722a5b7142444494a030f18402}{}\label{classtype__caster__holder_a632a31722a5b7142444494a030f18402}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+holder\+\_\+type {\bfseries holder}\hypertarget{classtype__caster__holder_ab8cf1dd21a8b7e6ea8d1c31f0cfb7755}{}\label{classtype__caster__holder_ab8cf1dd21a8b7e6ea8d1c31f0cfb7755}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename type, typename holder\+\_\+type$>$\\*
+class type\+\_\+caster\+\_\+holder$<$ type, holder\+\_\+type $>$}
+
+Type caster for holder types like std\+::shared\+\_\+ptr, etc. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/david/projects/hdc\+\_\+new/inc/pybind11/cast.\+h\end{DoxyCompactItemize}

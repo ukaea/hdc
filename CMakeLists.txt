@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.6)
 project(hdc_new)
 enable_language (Fortran)
 
+# set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+# find_package(Sphinx REQUIRED)
+
 set(hdc_new_SOURCE_DIR "${hdc_new_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
@@ -31,5 +34,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 message("Binary dir is: ${hdc_BINARY_DIR}")
 message("Source dir is: ${hdc_SOURCE_DIR}")
 include_directories(inc)
+# add_subdirectory(docs)
+add_subdirectory(doxy)
 add_subdirectory(src)
 add_subdirectory(src/tests)

@@ -1,0 +1,84 @@
+\hypertarget{classclass__}{}\section{class\+\_\+$<$ type, holder\+\_\+type $>$ Class Template Reference}
+\label{classclass__}\index{class\+\_\+$<$ type, holder\+\_\+type $>$@{class\+\_\+$<$ type, holder\+\_\+type $>$}}
+
+
+Inheritance diagram for class\+\_\+$<$ type, holder\+\_\+type $>$\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=185pt]{classclass____inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for class\+\_\+$<$ type, holder\+\_\+type $>$\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=185pt]{classclass____coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef detail\+::instance$<$ type, holder\+\_\+type $>$ {\bfseries instance\+\_\+type}\hypertarget{classclass___aa8e40e4d7e5ef0d12823226984b85b5b}{}\label{classclass___aa8e40e4d7e5ef0d12823226984b85b5b}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Extra$>$ }\\{\bfseries class\+\_\+} (\hyperlink{classhandle}{handle} \hyperlink{structscope}{scope}, const char $\ast$\hyperlink{structname}{name}, const Extra \&...extra)\hypertarget{classclass___a563122227b351316c955987072cd4278}{}\label{classclass___a563122227b351316c955987072cd4278}
+
+\item 
+{\footnotesize template$<$typename Func , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def} (const char $\ast$name\+\_\+, Func \&\&f, const Extra \&...extra)\hypertarget{classclass___af0d57dd9c94f96b924e21ce33748d164}{}\label{classclass___af0d57dd9c94f96b924e21ce33748d164}
+
+\item 
+{\footnotesize template$<$typename Func , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+static} (const char $\ast$name\+\_\+, Func f, const Extra \&...extra)\hypertarget{classclass___abd6fe0a6c30bd403d25d1a8bf84b80ae}{}\label{classclass___abd6fe0a6c30bd403d25d1a8bf84b80ae}
+
+\item 
+{\footnotesize template$<$detail\+::op\+\_\+id id, detail\+::op\+\_\+type ot, typename L , typename R , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def} (const detail\+::op\+\_\+$<$ id, ot, L, R $>$ \&op, const Extra \&...extra)\hypertarget{classclass___ae9b2f5344f72456c528671f9c4978cf4}{}\label{classclass___ae9b2f5344f72456c528671f9c4978cf4}
+
+\item 
+{\footnotesize template$<$detail\+::op\+\_\+id id, detail\+::op\+\_\+type ot, typename L , typename R , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+cast} (const detail\+::op\+\_\+$<$ id, ot, L, R $>$ \&op, const Extra \&...extra)\hypertarget{classclass___a444f4de6d9ab4de757c6904c5ef6332e}{}\label{classclass___a444f4de6d9ab4de757c6904c5ef6332e}
+
+\item 
+{\footnotesize template$<$typename... Args, typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def} (const detail\+::init$<$ Args... $>$ \&\hyperlink{structinit}{init}, const Extra \&...extra)\hypertarget{classclass___a299becdbb4bb40a1b40f2c38ef967531}{}\label{classclass___a299becdbb4bb40a1b40f2c38ef967531}
+
+\item 
+{\footnotesize template$<$typename Func $>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+buffer} (Func \&\&func)\hypertarget{classclass___ae4c961b7a308f541e913db5d5f905195}{}\label{classclass___ae4c961b7a308f541e913db5d5f905195}
+
+\item 
+{\footnotesize template$<$typename C , typename D , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+readwrite} (const char $\ast$\hyperlink{structname}{name}, D C\+::$\ast$pm, const Extra \&...extra)\hypertarget{classclass___a8c5d3c7eae54f53082c4f22ec74e7bbc}{}\label{classclass___a8c5d3c7eae54f53082c4f22ec74e7bbc}
+
+\item 
+{\footnotesize template$<$typename C , typename D , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+readonly} (const char $\ast$\hyperlink{structname}{name}, const D C\+::$\ast$pm, const Extra \&...extra)\hypertarget{classclass___a543a81e183fc9f004b61ac177cea5929}{}\label{classclass___a543a81e183fc9f004b61ac177cea5929}
+
+\item 
+{\footnotesize template$<$typename D , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+readwrite\+\_\+static} (const char $\ast$\hyperlink{structname}{name}, D $\ast$pm, const Extra \&...extra)\hypertarget{classclass___aa92a77a8c44fb25ddc154ebdfee53dd6}{}\label{classclass___aa92a77a8c44fb25ddc154ebdfee53dd6}
+
+\item 
+{\footnotesize template$<$typename D , typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+readonly\+\_\+static} (const char $\ast$\hyperlink{structname}{name}, const D $\ast$pm, const Extra \&...extra)\hypertarget{classclass___a608269129c33d7f524e94096382efdb6}{}\label{classclass___a608269129c33d7f524e94096382efdb6}
+
+\item 
+{\footnotesize template$<$typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+property\+\_\+readonly} (const char $\ast$\hyperlink{structname}{name}, const \hyperlink{classcpp__function}{cpp\+\_\+function} \&fget, const Extra \&...extra)\hypertarget{classclass___a2c0a989148ada660c8a43bc6a2ee049a}{}\label{classclass___a2c0a989148ada660c8a43bc6a2ee049a}
+
+\item 
+{\footnotesize template$<$typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+property\+\_\+readonly\+\_\+static} (const char $\ast$\hyperlink{structname}{name}, const \hyperlink{classcpp__function}{cpp\+\_\+function} \&fget, const Extra \&...extra)\hypertarget{classclass___a3a8781d6c4df15fc3054d9fb27bcdd86}{}\label{classclass___a3a8781d6c4df15fc3054d9fb27bcdd86}
+
+\item 
+{\footnotesize template$<$typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+property} (const char $\ast$\hyperlink{structname}{name}, const \hyperlink{classcpp__function}{cpp\+\_\+function} \&fget, const \hyperlink{classcpp__function}{cpp\+\_\+function} \&fset, const Extra \&...extra)\hypertarget{classclass___a87f8298be2bd9ef3802225575511a8d9}{}\label{classclass___a87f8298be2bd9ef3802225575511a8d9}
+
+\item 
+{\footnotesize template$<$typename... Extra$>$ }\\\hyperlink{classclass__}{class\+\_\+} \& {\bfseries def\+\_\+property\+\_\+static} (const char $\ast$\hyperlink{structname}{name}, const \hyperlink{classcpp__function}{cpp\+\_\+function} \&fget, const \hyperlink{classcpp__function}{cpp\+\_\+function} \&fset, const Extra \&...extra)\hypertarget{classclass___aa193a7c07eed17a4efca57d7077b20e0}{}\label{classclass___aa193a7c07eed17a4efca57d7077b20e0}
+
+\item 
+{\footnotesize template$<$typename target $>$ }\\\hyperlink{classclass__}{class\+\_\+} {\bfseries alias} ()\hypertarget{classclass___a395207adafcb1204be4ecd710180a73f}{}\label{classclass___a395207adafcb1204be4ecd710180a73f}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/david/projects/hdc\+\_\+new/inc/pybind11/pybind11.\+h\end{DoxyCompactItemize}

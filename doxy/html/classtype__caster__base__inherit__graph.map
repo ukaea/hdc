@@ -1,0 +1,6 @@
+<map id="type_caster_base&lt; type &gt;" name="type_caster_base&lt; type &gt;">
+<area shape="rect" id="node3" href="$classtype__caster.html" title="type_caster\&lt; type \&gt;" alt="" coords="437,5,575,32"/>
+<area shape="rect" id="node4" href="$classtype__caster_3_01std_1_1reference__wrapper_3_01type_01_4_01_4.html" title="type_caster\&lt; std::reference\l_wrapper\&lt; type \&gt; \&gt;" alt="" coords="415,57,597,98"/>
+<area shape="rect" id="node5" href="$classtype__caster__holder.html" title="Type caster for holder types like std::shared_ptr, etc. " alt="" coords="440,122,572,163"/>
+<area shape="rect" id="node2" href="$classtype__caster__generic.html" title="type_caster_generic" alt="" coords="5,64,144,91"/>
+</map>

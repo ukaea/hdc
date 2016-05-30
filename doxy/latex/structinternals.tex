@@ -1,0 +1,34 @@
+\hypertarget{structinternals}{}\section{internals Struct Reference}
+\label{structinternals}\index{internals@{internals}}
+
+
+Internal data struture used to track registered instances and types.  
+
+
+
+
+{\ttfamily \#include $<$common.\+h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::unordered\+\_\+map$<$ std\+::type\+\_\+index, void $\ast$ $>$ {\bfseries registered\+\_\+types\+\_\+cpp}\hypertarget{structinternals_a2b4726741668ea9e472a9db0e27fd29e}{}\label{structinternals_a2b4726741668ea9e472a9db0e27fd29e}
+
+\item 
+std\+::unordered\+\_\+map$<$ const void $\ast$, void $\ast$ $>$ {\bfseries registered\+\_\+types\+\_\+py}\hypertarget{structinternals_a3947b20a70713c31752e09728d5c3e82}{}\label{structinternals_a3947b20a70713c31752e09728d5c3e82}
+
+\item 
+std\+::unordered\+\_\+map$<$ const void $\ast$, void $\ast$ $>$ {\bfseries registered\+\_\+instances}\hypertarget{structinternals_a2fc7d2613e587ab33def3b598bc0f9ed}{}\label{structinternals_a2fc7d2613e587ab33def3b598bc0f9ed}
+
+\item 
+std\+::unordered\+\_\+set$<$ std\+::pair$<$ const Py\+Object $\ast$, const char $\ast$ $>$, \hyperlink{structoverload__hash}{overload\+\_\+hash} $>$ {\bfseries inactive\+\_\+overload\+\_\+cache}\hypertarget{structinternals_a46a3096ec216e6229e944bbc6cff7b3d}{}\label{structinternals_a46a3096ec216e6229e944bbc6cff7b3d}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Internal data struture used to track registered instances and types. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/david/projects/hdc\+\_\+new/inc/pybind11/common.\+h\end{DoxyCompactItemize}

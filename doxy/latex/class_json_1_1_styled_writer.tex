@@ -1,0 +1,119 @@
+\hypertarget{class_json_1_1_styled_writer}{}\section{Json\+:\+:Styled\+Writer Class Reference}
+\label{class_json_1_1_styled_writer}\index{Json\+::\+Styled\+Writer@{Json\+::\+Styled\+Writer}}
+
+
+Writes a \hyperlink{class_json_1_1_value}{Value} in \href{http://www.json.org}{\tt J\+S\+ON} format in a human friendly way.  
+
+
+
+
+{\ttfamily \#include $<$json.\+h$>$}
+
+
+
+Inheritance diagram for Json\+:\+:Styled\+Writer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=178pt]{class_json_1_1_styled_writer__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Json\+:\+:Styled\+Writer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=178pt]{class_json_1_1_styled_writer__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+J\+S\+O\+N\+C\+P\+P\+\_\+\+S\+T\+R\+I\+NG \hyperlink{class_json_1_1_styled_writer_a5efab19b9746da9920c29cdae3a6b404}{write} (const \hyperlink{class_json_1_1_value}{Value} \&root) J\+S\+O\+N\+C\+P\+P\+\_\+\+O\+V\+E\+R\+R\+I\+DE
+\begin{DoxyCompactList}\small\item\em Serialize a \hyperlink{class_json_1_1_value}{Value} in \href{http://www.json.org}{\tt J\+S\+ON} format. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Writes a \hyperlink{class_json_1_1_value}{Value} in \href{http://www.json.org}{\tt J\+S\+ON} format in a human friendly way. 
+
+The rules for line break and indent are as follow\+:
+\begin{DoxyItemize}
+\item Object value\+:
+\begin{DoxyItemize}
+\item if empty then print \{\} without indent and line break
+\item if not empty the print \textquotesingle{}\{\textquotesingle{}, line break \& indent, print one value per line and then unindent and line break and print \textquotesingle{}\}\textquotesingle{}.
+\end{DoxyItemize}
+\item Array value\+:
+\begin{DoxyItemize}
+\item if empty then print \mbox{[}\mbox{]} without indent and line break
+\item if the array contains no object value, empty array or some other value types, and all the values fit on one lines, then print the array on a single line.
+\item otherwise, it the values do not fit on one line, or the array contains object or non empty array, then print one value per line.
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+If the \hyperlink{class_json_1_1_value}{Value} have comments then they are outputed according to their \hyperlink{namespace_json_a4fc417c23905b2ae9e2c47d197a45351}{Comment\+Placement}.
+
+\begin{DoxySeeAlso}{See also}
+\hyperlink{class_json_1_1_reader}{Reader}, \hyperlink{class_json_1_1_value}{Value}, \hyperlink{class_json_1_1_value_a29f3a30f7e5d3af6f38d57999bf5b480}{Value\+::set\+Comment()} 
+\end{DoxySeeAlso}
+\begin{DoxyRefDesc}{Deprecated}
+\item[\hyperlink{deprecated__deprecated000009}{Deprecated}]Use \hyperlink{class_json_1_1_stream_writer_builder}{Stream\+Writer\+Builder}. \end{DoxyRefDesc}
+
+
+\subsection{Member Function Documentation}
+\index{Json\+::\+Styled\+Writer@{Json\+::\+Styled\+Writer}!write@{write}}
+\index{write@{write}!Json\+::\+Styled\+Writer@{Json\+::\+Styled\+Writer}}
+\subsubsection[{\texorpdfstring{write(const Value \&root) J\+S\+O\+N\+C\+P\+P\+\_\+\+O\+V\+E\+R\+R\+I\+DE}{write(const Value &root) JSONCPP_OVERRIDE}}]{\setlength{\rightskip}{0pt plus 5cm}J\+S\+O\+N\+C\+P\+P\+\_\+\+S\+T\+R\+I\+NG Json\+::\+Styled\+Writer\+::write (
+\begin{DoxyParamCaption}
+\item[{const {\bf Value} \&}]{root}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{class_json_1_1_styled_writer_a5efab19b9746da9920c29cdae3a6b404}{}\label{class_json_1_1_styled_writer_a5efab19b9746da9920c29cdae3a6b404}
+
+
+Serialize a \hyperlink{class_json_1_1_value}{Value} in \href{http://www.json.org}{\tt J\+S\+ON} format. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em root} & \hyperlink{class_json_1_1_value}{Value} to serialize. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+String containing the J\+S\+ON document that represents the root value. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{class_json_1_1_writer}{Json\+::\+Writer}.
+
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_json_1_1_styled_writer_a5efab19b9746da9920c29cdae3a6b404_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_json_1_1_styled_writer_a5efab19b9746da9920c29cdae3a6b404_icgraph}
+\end{center}
+\end{figure}
+
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/david/projects/hdc\+\_\+new/inc/json/json.\+h\item 
+/home/david/projects/hdc\+\_\+new/src/jsoncpp.\+cpp\end{DoxyCompactItemize}
