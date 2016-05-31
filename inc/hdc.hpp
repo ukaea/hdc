@@ -34,18 +34,28 @@ template<typename T> struct identity { typedef T type; };
 class HDC
 {
 public:
-    HDC(); /** Default constructor. Creates empty HDC */
-    HDC(dynd::nd::array arr); /** Creates HDC with data from DyND array object. */
-    ~HDC(); /** Desctructor */
-    void add_child(string path, HDC* n); /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
-    void set_child(string path, HDC* n); /** Sets HDC subtree to given path. */
-    void delete_child(string path); /** Deletes HDC subtree. */
-    HDC* get_child(string path); /** Returns subtree by path. */
-    HDC* get_slice(string path, size_t i); /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC* get_slice(size_t i); /** Returns i-th subnode if HDC_LIST is the type. */
-    bool has_child(string path); /** Returns true if subtree with given path with exists and false otherwise. */
-    // Data manipulation methods
-    template <typename T> void set_data(vector<T> data) /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
+    /** Default constructor. Creates empty HDC */
+    HDC();
+    /** Creates HDC with data from DyND array object. */
+    HDC(dynd::nd::array arr);
+    /** Desctructor */
+    ~HDC();
+    /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
+    void add_child(string path, HDC* n);
+    /** Sets HDC subtree to given path. */
+    void set_child(string path, HDC* n);
+    /** Deletes HDC subtree. */
+    void delete_child(string path);
+    /** Returns subtree by path. */
+    HDC* get_child(string path);
+    /** Returns i-th subnode if HDC_LIST is the type. */
+    HDC* get_slice(string path, size_t i); 
+    /** Returns i-th subnode if HDC_LIST is the type. */
+    HDC* get_slice(size_t i); 
+    /** Returns true if subtree with given path with exists and false otherwise. */
+    bool has_child(string path); 
+    /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
+    template <typename T> void set_data(vector<T> data) 
     {
         if (this->children->size()) {
             cout << "The node has already children set..." << endl;
@@ -62,7 +72,8 @@ public:
         this->type = HDC_DYND;
         return;
     };
-    template <typename T> void set_data(string path, vector<T> data) /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
+    /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
+    template <typename T> void set_data(string path, vector<T> data) 
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
@@ -72,8 +83,8 @@ public:
         t->set_data<T>(data);
         return;
     };
-    
-    template <typename T> void set_data(int8_t ndim, const long int* shape, void* data) /** Sets array data to current node. */
+    /** Sets array data to current node. */
+    template <typename T> void set_data(int8_t ndim, const long int* shape, void* data) 
     {
         if (this->children->size()) {
             cout << "The node has already children set..." << endl;
@@ -91,7 +102,8 @@ public:
         this->type = HDC_DYND;
         return;
     };
-    template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data) /** Sets array data to node on given path. */
+    /** Sets array data to node on given path. */
+    template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data) 
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
@@ -101,8 +113,8 @@ public:
         t->set_data<T>(ndim,shape,data);
         return;
     };
-    
-    template <typename T> void set_data(T data) /** Sets scalar data to current node. */
+    /** Sets scalar data to current node. */
+    template <typename T> void set_data(T data) 
     {
         if (this->children->size()) {
             cout << "The node has already children set..." << endl;
@@ -116,7 +128,8 @@ public:
         this->type = HDC_DYND;
         return;
     };
-    template <typename T> void set_data(string path, T data) /** Sets scalar data to node on given path. */
+    /** Sets scalar data to node on given path. */
+    template <typename T> void set_data(string path, T data) 
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
@@ -126,22 +139,38 @@ public:
         t->set_data(data);
         return;
     };
-
-    void set_dynd(dynd::nd::array array); /** Sets DyND object to current node. */
-    void set_list(vector<HDC*>* list); /** Sets DHC_LIST from std::vector<HDC*> data.*/
-    void create_list(size_t n=5); /** Creates list with some data in nodes - just for testing some ideas. */
-    void resize(HDC* h, int recursively = 0); /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
-    HDC* copy(int copy_arrays = 0); /** Returns copy of current object. */
-    void set_slice(size_t i, HDC* h); /** Sets node to i-th slice of current node. */
-    void append_slice(HDC* h); /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
-    uint8_t get_type(); /** Returns type of current node. */
-    void set_type(uint8_t i); /** Sets HDC type of current node. */
-    bool is_empty(); /** Returns true if node is empty. */
-    int8_t get_ndim(); /** Returns number of dimensions of current node. */
-    long int* get_shape(); /** Shape of array. */
-    int8_t get_ndim(string path); /** Returns number of dimensions of node under path. */
-    long int* get_shape(string path); /** Returns shape of node under path. */
-    template<typename T> T as() /** Returns pointer to data of this node. */
+    
+    /** Sets DyND object to current node. */
+    void set_dynd(dynd::nd::array array); 
+    /** Sets HDC_LIST from std::vector<HDC*> data.*/
+    void set_list(vector<HDC*>* list); 
+    /** Creates list with some data in nodes - just for testing some ideas. */
+    void create_list(size_t n=5); 
+    /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
+    void resize(HDC* h, int recursively = 0); 
+    /** Returns copy of current object. */
+    HDC* copy(int copy_arrays = 0); 
+    /** Sets node to i-th slice of current node. */
+    void set_slice(size_t i, HDC* h); 
+    /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
+    void append_slice(HDC* h); 
+    /** Returns type of current node. */
+    uint8_t get_type(); 
+    /** Sets HDC type of current node. */
+    void set_type(uint8_t i); 
+    /** Returns true if node is empty. */
+    bool is_empty(); 
+    /** Returns number of dimensions of current node. */
+    int8_t get_ndim(); 
+    /** Shape of array. */
+    long int* get_shape(); 
+    /** Returns number of dimensions of node under path. */
+    int8_t get_ndim(string path); 
+    /** Returns shape of node under path. */
+    long int* get_shape(string path); 
+    
+    /** Returns pointer to data of this node. */
+    template<typename T> T as() 
     {
         // returns data of given type
         if (this->children->size()) {
@@ -153,36 +182,38 @@ public:
         
         //return (T)(this->data.data());
     }
-
-    template<typename T> T as(string path) /** Returns pointer to data of node under given path. */
+    /** Returns pointer to data of node under given path. */
+    template<typename T> T as(string path) 
     {
         cout << "as<T>(" << path << ")" << endl;
         // returns data of given type
         HDC* t = this->get_child(path);
         return t->as<T>();
     }
-    double as_double() /** Returns double. */
+    /** Returns double. */
+    double as_double() 
     {
         return this->as<double*>()[0];
     }
-    double as_double(string path) /** Returns double. */
+    /** Returns double. */
+    double as_double(string path) 
     {
         return this->as<double*>(path)[0];
     }
+    /** Returns pointer to self. */
+    hdc_t* as_hdc_ptr(); 
     
-    hdc_t* as_hdc_ptr(); /** Returns pointer to self. */
-    
-    
-    // Serialization
-    void to_json(string filename, int mode = 0); /** Serialization to JSON file. */
-    Json::Value to_json(int mode = 0); /** Serialization to Json::Value object. */
-    
-    // Python specific
-    void* as_void_ptr(); /** Returns void pointer to data. */
-    
-    //get types
-    string get_type_str(); /** Returns string representing data/node type. */
-    string get_datashape_str(); /** Returns datashape desctiption string. */
+    /** Serialization to JSON file. */
+    void to_json(string filename, int mode = 0);
+    /** Serialization to Json::Value object. */
+    Json::Value to_json(int mode = 0); 
+
+    /** Returns void pointer to data. */
+    void* as_void_ptr();
+    /** Returns string representing data/node type. */
+    string get_type_str();
+    /** Returns datashape desctiption string. */
+    string get_datashape_str();
 private:
     int8_t type;
     vector<dynd::nd::array>* data; /*!< dynd::array storage*/
@@ -202,8 +233,11 @@ vector<string>& split(const string &s, char delim, vector<string>& elems);
 vector<string> split(const string &s, char delim);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
-HDC* from_json(const string& filename); /** Loads tree from JSON file. */
-HDC* json_to_hdc(Json::Value* root); /** Loads tree from Json::Value object */
+/** Loads tree from JSON file. */
+HDC* from_json(const string& filename); 
+/** Loads tree from Json::Value object */
+HDC* json_to_hdc(Json::Value* root);
+/** Loads tree from Json::Value object */
 HDC* json_to_hdc(const Json::Value& root);
 
 int64_t detect_array_type(Json::Value* root);

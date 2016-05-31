@@ -577,15 +577,6 @@ void HDC::to_json(string filename, int mode)
 
     return;
 }
-/*
-void HDC::set_string(string str) {
-    cout << "Setting string: " << str << endl;
-    dynd::nd::array arr = str;
-    this->data->push_back(arr);
-    return;
-}*/
-
-// ------------------- JSON stuff ----------------------------
 
 HDC* json_to_hdc(Json::Value* root) {
     HDC* tree = new HDC();

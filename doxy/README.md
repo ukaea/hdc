@@ -16,7 +16,7 @@ To build HDC, you will need:
 - libDyND library
 - Python 2.7 or any Python 3 (tested only with 3.4 and 3.5)
 - CMake >= 2.8.11
-- Doxygen for Documentation building
+- Doxygen for documentation building
 
 Building libDyND
 ----------------
@@ -60,6 +60,7 @@ Basic ideas
 
 Examples
 ========
+Very simple examples follow. More complete examples can be found in src/test folder
 
 Example in C++
 --------------

@@ -17,22 +17,26 @@ module hdc_fortran
             use iso_c_binding
         end subroutine hello
 
+        !> Default constructor. This is interface to C.
         function hdc_new_empty() result(obj) bind(c,name="hdc_new_empty")
             import
             type(hdc_t) :: obj
         end function hdc_new_empty
 
+        !> Desctructor. This is interface to C.
         subroutine hdc_delete(obj) bind(c,name="hdc_delete")
             import
             type(hdc_t), value :: obj
         end subroutine hdc_delete
 
+        !> Performs deep copy of current node. This is interface to C.
         function c_hdc_copy(src) result(obj) bind(c,name="hdc_copy")
             import
             type(hdc_t), value :: src
             type(hdc_t) :: obj
         end function c_hdc_copy
 
+        !> Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. This is interface to C.
         subroutine c_hdc_add_child(obj, path, node) bind(c,name="hdc_add_child")
             import
             type(hdc_t), value:: obj
@@ -40,6 +44,7 @@ module hdc_fortran
             type(hdc_t), value:: node
         end subroutine c_hdc_add_child
 
+        !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get_child")
             import
             type(hdc_t), value :: obj
@@ -47,6 +52,7 @@ module hdc_fortran
             type(hdc_t) :: res
         end function c_hdc_get_child
 
+        !> Returns HDC subtree by given path and slice index. This is interface to C.
         function c_hdc_get_slice_path(obj, path, i) result(res) bind(c,name="hdc_get_slice_path")
             import
             type(hdc_t), value :: obj
@@ -54,34 +60,34 @@ module hdc_fortran
             integer(kind=c_size_t) :: i
             type(hdc_t) :: res
         end function c_hdc_get_slice_path
-
+        !> Returns HDC subtree by given slice index.  This is interface to C.
         function c_hdc_get_slice(obj, i) result(res) bind(c,name="hdc_get_slice")
             import
             type(hdc_t), value :: obj
             integer(kind=c_size_t) :: i
             type(hdc_t) :: res
         end function c_hdc_get_slice
-
+        !> Sets HDC subtree to given path.
         subroutine c_hdc_set_child(obj, path, node) bind(c,name="hdc_set_child")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value:: node
         end subroutine c_hdc_set_child  
-
+        !> Recursively deletes subtree at given path. This is interface to C.
         subroutine c_hdc_delete_child(obj, path) bind(c,name="hdc_delete_child")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
         end subroutine c_hdc_delete_child  
-
+        !> Returns true if subtree with given path exists. 
         function c_hdc_has_child(obj, path) result(res) bind(c,name="hdc_has_child")
             import
             type(hdc_t), value :: obj
             character(kind=c_char), intent(in) :: path(*)
             logical(kind=c_bool) :: res ! change this to c_bool later
         end function c_hdc_has_child
-
+        !> Sets array of int8. 
         subroutine c_hdc_set_data_int8(obj, ndim, shape_, data) bind(c,name="hdc_set_data_int8")
             import
             type(hdc_t), value:: obj
@@ -89,7 +95,7 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_data_int8
-
+        !> Sets array of double. 
         subroutine c_hdc_set_data_double(obj, ndim, shape_, data) bind(c,name="hdc_set_data_double")
             import
             type(hdc_t), value:: obj
@@ -97,59 +103,59 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_data_double
-
+        !> Stes scalar double.
         subroutine c_hdc_set_data_double_scalar(obj, data) bind(c,name="hdc_set_data_double_scalar")
             import
             type(hdc_t), value:: obj
             double precision, value :: data
         end subroutine c_hdc_set_data_double_scalar
-
+        !> Sets scalar double to given path. 
         subroutine c_hdc_set_data_double_scalar_path(obj, path, data) bind(c,name="hdc_set_data_double_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             double precision, value :: data
         end subroutine c_hdc_set_data_double_scalar_path
-
+        !> Sets scalar int32.
         subroutine c_hdc_set_data_int32_scalar(obj, data) bind(c,name="hdc_set_data_int32_scalar")
             import
             type(hdc_t), value:: obj
             integer, value :: data
         end subroutine c_hdc_set_data_int32_scalar
-
+        !> Sets scalar int32 to given path. 
         subroutine c_hdc_set_data_int32_scalar_path(obj, path, data) bind(c,name="hdc_set_data_int32_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             integer, value :: data
         end subroutine c_hdc_set_data_int32_scalar_path
-
+        !> Sets scalar int8. 
         subroutine c_hdc_set_data_int8_scalar(obj, data) bind(c,name="hdc_set_data_int8_scalar")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t), value :: data
         end subroutine c_hdc_set_data_int8_scalar
-
+        !>  Sets scalar int8 to given path. 
         subroutine c_hdc_set_data_int8_scalar_path(obj, path, data) bind(c,name="hdc_set_data_int8_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             integer(kind=c_int8_t), value :: data
         end subroutine c_hdc_set_data_int8_scalar_path
-
+        !> Sets string to given path.
         subroutine c_hdc_set_data_string_path(obj, path, str) bind(c,name="hdc_set_data_string_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             character(kind=c_char), intent(in) :: str(*)
         end subroutine c_hdc_set_data_string_path
-
+        !> Sets string.
         subroutine c_hdc_set_data_string(obj, str) bind(c,name="hdc_set_data_string")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: str(*)
         end subroutine c_hdc_set_data_string
-
+        !> Sets double array to given path.
         subroutine c_hdc_set_data_double_path(obj, path, ndim, shape_, data) bind(c,name="hdc_set_data_double_path")
             import
             type(hdc_t), value:: obj
@@ -158,39 +164,39 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_data_double_path
-
+        !> Sets arbitrary data casted to void pointer.
         function c_hdc_as_voidptr(obj) result(res) bind(c,name="hdc_as_voidptr")
             import
             type(hdc_t), value:: obj
             type(c_ptr) :: res
         end function c_hdc_as_voidptr
-
+        !> Sets arbitrary data casted to void pointer to given path.
         function c_hdc_as_voidptr_path(obj, path) result(res) bind(c,name="hdc_as_voidptr_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             type(c_ptr) :: res
         end function c_hdc_as_voidptr_path
-
+        !> Returns array dimension.
         function c_hdc_get_ndim(obj) result(res) bind(c,name="hdc_get_ndim")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t) :: res
         end function c_hdc_get_ndim
-
+        !> Returns array dimension at give path.
         function c_hdc_get_ndim_path(obj, path) result(res) bind(c,name="hdc_get_ndim_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             integer(kind=c_int8_t) :: res
         end function c_hdc_get_ndim_path
-
+        !> Returns array shape.
         function c_hdc_get_shape(obj) result(res) bind(c,name="hdc_get_shape")
             import
             type(hdc_t), value:: obj
             type(c_ptr) :: res
         end function c_hdc_get_shape
-
+        !> Returns array shape at given path.
         function c_hdc_get_shape_path(obj, path) result(res) bind(c,name="hdc_get_shape_path")
             import
             type(hdc_t), value:: obj
