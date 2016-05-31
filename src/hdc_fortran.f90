@@ -2,7 +2,7 @@ module types
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        type(c_ptr) :: obj
+        type(c_ptr) :: obj !< void pointer to HDC container
     end type hdc_t
     integer, parameter :: DP=kind(1.0D0)
 end module types

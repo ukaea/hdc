@@ -11,26 +11,26 @@ using namespace std;
 
 //---------------------------- Tree manipulation -----------------------------------
 
-hdc::hdc()
+HDC::HDC()
 {
     cout << "Creating empty node..." << endl;
     type = HDC_EMPTY;
     data = new vector<dynd::nd::array>;
-    children = new unordered_map<string, hdc*>;
+    children = new unordered_map<string, HDC*>;
     //children = nullptr;
     list_elements = nullptr;
 }
 
-hdc::hdc(dynd::nd::array arr) {
+HDC::HDC(dynd::nd::array arr) {
     cout << "Creating DyND node..." << endl;
     type = HDC_DYND;
     data = new vector<dynd::nd::array>;
-    children = new unordered_map<string, hdc*>;
+    children = new unordered_map<string, HDC*>;
     list_elements = nullptr;
     data->push_back(arr);
 }
 
-hdc::~hdc()
+HDC::~HDC()
 {
     cout << "Destructor called..." << endl;
     if (!children->empty()) {
@@ -48,12 +48,12 @@ hdc::~hdc()
     }
 }
 
-bool hdc::has_child(string path)
+bool HDC::has_child(string path)
 {
     return this->has_child(split(path,'/'));
 }
 
-bool hdc::has_child(vector<string> vs)
+bool HDC::has_child(vector<string> vs)
 {
     cout << "Searching for: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
@@ -73,7 +73,7 @@ bool hdc::has_child(vector<string> vs)
 }
 
 
-void hdc::add_child(vector<string> vs, hdc* n) {
+void HDC::add_child(vector<string> vs, HDC* n) {
     cout << "Adding node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
@@ -84,7 +84,7 @@ void hdc::add_child(vector<string> vs, hdc* n) {
     }
     if (this->type == HDC_EMPTY) {
         this->type = HDC_STRUCT;
-//        this->children = new unordered_map<string, hdc*>;
+//        this->children = new unordered_map<string, HDC*>;
     }
     
     string first = vs[0];
@@ -95,7 +95,7 @@ void hdc::add_child(vector<string> vs, hdc* n) {
         else cout << "Error: child already exists!" << endl;
     } else {
         if (this->children->count(first) == 0) {
-            children->insert({first,new hdc()});
+            children->insert({first,new HDC()});
         }
         children->at(first)->add_child(vs,n);
     }
@@ -104,7 +104,7 @@ void hdc::add_child(vector<string> vs, hdc* n) {
     return;
 }
 
-void hdc::set_list(vector<hdc*>* list) {
+void HDC::set_list(vector<HDC*>* list) {
     if (this->type != HDC_EMPTY) {
         cout << "Cannot add list to a non-list node." << endl;
     }
@@ -112,13 +112,13 @@ void hdc::set_list(vector<hdc*>* list) {
     return;
 }
 
-void hdc::create_list(size_t n) {
+void HDC::create_list(size_t n) {
     if (this->type != HDC_EMPTY) {
         cout << "Cannot add list to a non-list node." << endl;
     }
     this->type = HDC_LIST;
-    this->list_elements = new vector<hdc*>;
-    for (size_t i=0; i<n;i++) list_elements->push_back(new hdc());
+    this->list_elements = new vector<HDC*>;
+    for (size_t i=0; i<n;i++) list_elements->push_back(new HDC());
     //debuging
     for (size_t i=0; i<n;i++) {
         int8_t* arr = new int8_t[1];
@@ -129,14 +129,14 @@ void hdc::create_list(size_t n) {
     return;
 }
 
-void hdc::add_child(string path, hdc* n)
+void HDC::add_child(string path, HDC* n)
 {
     cout << "Adding child: " << path << endl;
     add_child(split(path,'/'),n);
     return;
 }
 
-void hdc::delete_child(vector<string> vs) {
+void HDC::delete_child(vector<string> vs) {
     
     cout << "Delete node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
@@ -156,12 +156,12 @@ void hdc::delete_child(vector<string> vs) {
     return;
 }
 
-void hdc::delete_child(string path) {
+void HDC::delete_child(string path) {
     this->delete_child(split(path,'/'));
     return;
 }
 
-hdc* hdc::get_child(vector<string> vs) {
+HDC* HDC::get_child(vector<string> vs) {
     cout << "Getting node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
@@ -175,12 +175,12 @@ hdc* hdc::get_child(vector<string> vs) {
     } else {
         cout << "Not found" << endl;
 //         exit(-1);
-        return new hdc();
+        return new HDC();
     }
     
 }
 
-hdc* hdc::get_slice(vector<string> vs, size_t i) {
+HDC* HDC::get_slice(vector<string> vs, size_t i) {
     cout << "Getting slice: " << i << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
@@ -193,33 +193,33 @@ hdc* hdc::get_slice(vector<string> vs, size_t i) {
             if (this->type != HDC_LIST) return this;
             if (i < 0 || i > this->list_elements->size()) {
                 cout << "Error: index out of range!" << endl;
-                return new hdc();
+                return new HDC();
             }
             return this->list_elements->at(i);
         }
         else return this->children->at(first)->get_slice(vs,i);
     } else {
         cout << "Not found" << endl;
-        return new hdc();
+        return new HDC();
     }
 }
 
 
-hdc* hdc::get_slice(size_t i) {
+HDC* HDC::get_slice(size_t i) {
     if (this->type == HDC_LIST) return this->list_elements->at(i);
     else return this; // return this if not list
 }
 
-hdc* hdc::get_slice(string path, size_t i) {
+HDC* HDC::get_slice(string path, size_t i) {
     return this->get_slice(split(path,'/'),i);
 }
 
-hdc* hdc::get_child(string path) {
+HDC* HDC::get_child(string path) {
     return this->get_child(split(path,'/'));
 }
 
 
-void hdc::set_child(vector<string> vs, hdc* n) {
+void HDC::set_child(vector<string> vs, HDC* n) {
     // not sure now, what should this do....
     cout << "Setting node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
@@ -242,7 +242,7 @@ void hdc::set_child(vector<string> vs, hdc* n) {
 }
 
 
-void hdc::set_child(string path, hdc* n) {
+void HDC::set_child(string path, HDC* n) {
     this->set_child(split(path,'/'), n);
     return;
 }
@@ -250,35 +250,35 @@ void hdc::set_child(string path, hdc* n) {
 
 //------------------ Data manipulation -------------------------------
 
-uint8_t hdc::get_type()
+uint8_t HDC::get_type()
 {
     return this->type;
 }
 
-void hdc::set_type(uint8_t i) {
+void HDC::set_type(uint8_t i) {
     // More to be added here later
     this->type = i;
-    if (i == HDC_LIST && this->list_elements == nullptr) this->list_elements = new vector<hdc*>;
+    if (i == HDC_LIST && this->list_elements == nullptr) this->list_elements = new vector<HDC*>;
     return;
 }
 
-int8_t hdc::get_ndim()
+int8_t HDC::get_ndim()
 {
     if (this->type == HDC_DYND) return this->data->at(0).get_ndim();
     else if (this->type == HDC_LIST) return 1; // Currently, we support only single container list dimension
     else return 1;
 }
 
-int8_t hdc::get_ndim(string path) {
+int8_t HDC::get_ndim(string path) {
     return this->get_child(path)->get_ndim();
 }
 
-void* hdc::as_void_ptr() {
+void* HDC::as_void_ptr() {
     return (void*)this;
 }
 
 
-long int* hdc::get_shape()
+long int* HDC::get_shape()
 {
     if (this->type == HDC_DYND) {
         long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
@@ -311,7 +311,7 @@ long int* hdc::get_shape()
     }
 }
 
-long int* hdc::get_shape(string path) {
+long int* HDC::get_shape(string path) {
     if (!this->has_child(path)) {
         cerr << "Not found (get_shape): " << path << endl;
         exit(-1);
@@ -319,16 +319,16 @@ long int* hdc::get_shape(string path) {
     return this->get_child(path)->get_shape();
 }
 
-bool hdc::is_empty()
+bool HDC::is_empty()
 {
     return (this->type == HDC_EMPTY);
 }
 
 //------------------ Serialization -----------------------------
 
-hdc* from_json(const string& filename)
+HDC* from_json(const string& filename)
 {
-    hdc* tree;
+    HDC* tree;
     ifstream file;
     file.exceptions(ifstream::failbit | ifstream::badbit);
     try {
@@ -344,7 +344,7 @@ hdc* from_json(const string& filename)
     return tree;
 }
 
-Json::Value hdc::to_json(int mode) {
+Json::Value HDC::to_json(int mode) {
     Json::Value root;
     if (mode == 0) {
         if (this->type == HDC_DYND) {
@@ -420,7 +420,7 @@ Json::Value hdc::to_json(int mode) {
     return root;
 }
 
-void hdc::resize(hdc* h, int recursively)
+void HDC::resize(HDC* h, int recursively)
 {
     if (this->type == HDC_DYND) {
         if (!recursively) cout << "Operation is yet not supported on the DYND node." << endl;
@@ -439,7 +439,7 @@ void hdc::resize(hdc* h, int recursively)
     return;
 }
 
-void hdc::set_dynd(dynd::nd::array array) {
+void HDC::set_dynd(dynd::nd::array array) {
     if (this->type != HDC_EMPTY) return;
     this->data->push_back(array);
     return;
@@ -447,10 +447,10 @@ void hdc::set_dynd(dynd::nd::array array) {
 
 
 
-hdc* hdc::copy(int copy_arrays)
+HDC* HDC::copy(int copy_arrays)
 {
     cout << "Called copy()" << endl;
-    hdc* copy = new hdc();
+    HDC* copy = new HDC();
     copy->set_type(this->get_type());
     cout << (int)(this->get_type()) << endl;
     if (this->type == HDC_STRUCT) {
@@ -475,7 +475,7 @@ hdc* hdc::copy(int copy_arrays)
     return copy;
 }
 
-void hdc::set_slice(size_t i, hdc* h)
+void HDC::set_slice(size_t i, HDC* h)
 {
     cout << "Setting slice " << i << endl;
     if (this->type == HDC_LIST) {
@@ -486,7 +486,7 @@ void hdc::set_slice(size_t i, hdc* h)
     return;
 }
 
-void hdc::append_slice(hdc* h) {
+void HDC::append_slice(HDC* h) {
     if (this->type == HDC_EMPTY) {
         this->set_type(HDC_LIST);
     }
@@ -499,13 +499,13 @@ void hdc::append_slice(hdc* h) {
     return;
 }
 
-hdc_t* hdc::as_hdc_ptr() {
+hdc_t* HDC::as_hdc_ptr() {
     hdc_t* wrap = new struct hdc_t;
     wrap->obj = (void*) this;
     return wrap;
 }
 
-string hdc::get_type_str() {
+string HDC::get_type_str() {
     string type_str;
     if (this->type == HDC_EMPTY) type_str = "null";
     else if (this->type == HDC_LIST || this->type == HDC_STRUCT) type_str = "hdc";
@@ -540,7 +540,7 @@ string hdc::get_type_str() {
 }
 
 
-string hdc::get_datashape_str() {
+string HDC::get_datashape_str() {
     string type_str;
     if (this->type == HDC_EMPTY) type_str = "null";
     else if (this->type == HDC_LIST || this->type == HDC_STRUCT) type_str = "hdc";
@@ -553,7 +553,7 @@ string hdc::get_datashape_str() {
 }
 
 
-void hdc::to_json(string filename, int mode)
+void HDC::to_json(string filename, int mode)
 {
     cout << "Saving output JSON to " << filename << endl;
     ofstream json_file;
@@ -578,7 +578,7 @@ void hdc::to_json(string filename, int mode)
     return;
 }
 /*
-void hdc::set_string(string str) {
+void HDC::set_string(string str) {
     cout << "Setting string: " << str << endl;
     dynd::nd::array arr = str;
     this->data->push_back(arr);
@@ -587,8 +587,8 @@ void hdc::set_string(string str) {
 
 // ------------------- JSON stuff ----------------------------
 
-hdc* json_to_hdc(Json::Value* root) {
-    hdc* tree = new hdc();
+HDC* json_to_hdc(Json::Value* root) {
+    HDC* tree = new HDC();
     switch(root->type()) {
         case Json::ValueType::nullValue:
             cout << "root is null" << endl;
@@ -713,8 +713,8 @@ hdc* json_to_hdc(Json::Value* root) {
 }
 
 
-hdc* json_to_hdc(const Json::Value& root) {
-    hdc* tree = new hdc();
+HDC* json_to_hdc(const Json::Value& root) {
+    HDC* tree = new HDC();
     switch(root.type()) {
         case Json::ValueType::nullValue:
             cout << "root is null" << endl;

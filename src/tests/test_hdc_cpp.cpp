@@ -21,14 +21,14 @@ int main(int argc, char **argv) {
         cout << vs[0] << endl; 
         vs.erase(vs.begin());
     }
-    hdc* tree = new hdc();
+    HDC* tree = new HDC();
     // test add
-    tree->add_child("aaa/bbb/ccc",new hdc());
-    tree->add_child("aaa/bbb/eee",new hdc());
-    tree->add_child("bbb/eee/aaa",new hdc());
+    tree->add_child("aaa/bbb/ccc",new HDC());
+    tree->add_child("aaa/bbb/eee",new HDC());
+    tree->add_child("bbb/eee/aaa",new HDC());
     // test get
-    hdc* n = tree->get_child("aaa/bbb");
-    hdc* k = n->get_child("ccc");
+    HDC* n = tree->get_child("aaa/bbb");
+    HDC* k = n->get_child("ccc");
     // test has
     cout << tree->has_child("aaa/bbb/ccc") << endl;
     cout << tree->has_child("aaa/bbb/ddd") << endl;
@@ -37,12 +37,12 @@ int main(int argc, char **argv) {
     tree->delete_child("aaa/bbb");
     cout << tree->has_child("aaa/bbb") << endl;
     // test set
-    tree->set_child("bbb/eee/aaa",new hdc());
-    tree->set_child("bbb",new hdc());
+    tree->set_child("bbb/eee/aaa",new HDC());
+    tree->set_child("bbb",new HDC());
     cout << tree->has_child("bbb/eee/aaa") << endl;
     
     // test data_set
-    hdc* data = new hdc();
+    HDC* data = new HDC();
     int8_t array[4] = {1,2,3,4};
     long int shape[1];
     shape[0] = 4;
@@ -57,9 +57,9 @@ int main(int argc, char **argv) {
     cout << (int)aaa2[0] << " " << (int)aaa2[2] << endl;
     getchar();
     //test list
-    hdc* list = new hdc();
+    HDC* list = new HDC();
     list->create_list(10);
-    hdc* slice = list->get_slice(3);
+    HDC* slice = list->get_slice(3);
     int8_t* bbb = slice->as<int8_t*>();
     cout << (int)bbb[0] << endl;
     
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     tree->add_child("list",list);
     //tree->to_json("json.txt");
     tree->to_json("tree.txt",0);
-    hdc* fj = from_json("pokus.txt");
+    HDC* fj = from_json("pokus.txt");
     fj->to_json("back.txt",0);
     exit(0);
     //delete list;
@@ -78,32 +78,32 @@ int main(int argc, char **argv) {
     
     
     // Resize
-    hdc* resized = new hdc();
+    HDC* resized = new HDC();
     resized->resize(tree,1);
     resized->to_json("resized.txt");
     
     // data->set_data(1,shape,array);
     // set string
     string str = "aaa123aaa123";
-    hdc* ssss = new hdc();
+    HDC* ssss = new HDC();
     ssss->set_data(str);
     
     // Test deserialization here
-    //hdc* fj = from_json("tree2.txt");
-    hdc* fi = json_to_hdc(new Json::Value(5));
-    hdc* fu = json_to_hdc(new Json::Value(5u));
-    hdc* fd = json_to_hdc(new Json::Value(5.));
-    hdc* fb = json_to_hdc(new Json::Value(true));
-    hdc* fn = json_to_hdc(new Json::Value(Json::nullValue));
-    hdc* fs = json_to_hdc(new Json::Value("aaaa"));
+    //HDC* fj = from_json("tree2.txt");
+    HDC* fi = json_to_hdc(new Json::Value(5));
+    HDC* fu = json_to_hdc(new Json::Value(5u));
+    HDC* fd = json_to_hdc(new Json::Value(5.));
+    HDC* fb = json_to_hdc(new Json::Value(true));
+    HDC* fn = json_to_hdc(new Json::Value(Json::nullValue));
+    HDC* fs = json_to_hdc(new Json::Value("aaaa"));
     Json::Value* ar = new Json::Value();
     ar->append(new Json::Value(8));
     ar->append(new Json::Value(6));
-    hdc* fa = json_to_hdc(ar);
+    HDC* fa = json_to_hdc(ar);
     Json::Value* obj = new Json::Value();
     obj->operator[]("aaa") = new Json::Value("aaaaaa");
     obj->operator[]("bbb") = new Json::Value("bbbbbb");
-    hdc* fo = json_to_hdc(obj);
+    HDC* fo = json_to_hdc(obj);
 
     // test is_jagged()
 //     Json::Value* a2 = new Json::Value();
@@ -152,22 +152,22 @@ int main(int argc, char **argv) {
     long* shape__ = get_shape(&a3);
     cout << shape__[0] << " " << shape__[1] << " " << shape__[2] << endl;
     //cout << a3 << endl;
-    hdc* tr = json_to_hdc(&a3);
+    HDC* tr = json_to_hdc(&a3);
     cout << "aaa: " << (int32_t)tr->as<int32_t*>()[0] << endl;
     
 // // //     cout << "--- Testing get_type_str" << endl;
-// // //     hdc* t = new hdc();
+// // //     HDC* t = new HDC();
 // // //     cout << "type: " << t->get_type_str() << endl;
-// // //     t->add_child("a",new hdc());
+// // //     t->add_child("a",new HDC());
 // // //     cout << "type: " << t->get_type_str() << endl;
-// // //     hdc *tt = new hdc();
+// // //     HDC *tt = new HDC();
 // // //     tt->set_data<int8_t>(1,shape,(void*)array);
 // // //     cout << "type: " << tt->get_type_str() << endl;
 // // //     cout << "type: " << tt->get_datashape_str() << endl;
 // // //     
 // // //     getchar();
 // // //     cout << "Testing dynd compatibility with stl::vector" << endl;
-// // //     hdc* from_vector = new hdc();
+// // //     HDC* from_vector = new HDC();
 // // //     vector<double> v = {1.,2.,-333.3,};
 //     from_vector->set_data(v);
 //     vector<double> v = from_vector.as_vector<double>();
