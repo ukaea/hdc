@@ -79,8 +79,7 @@ public:
             this->add_child(path, new HDC());
             cout << "not found, adding..." << endl;
         }
-        HDC* t = this->get_child(path);
-        t->set_data<T>(data);
+        this->get_child(path)->set_data<T>(data);
         return;
     };
     /** Sets array data to current node. */
@@ -109,8 +108,7 @@ public:
             this->add_child(path, new HDC());
             cout << "not found, adding..." << endl;
         }
-        HDC* t = this->get_child(path);
-        t->set_data<T>(ndim,shape,data);
+        this->get_child(path)->set_data<T>(ndim,shape,data);
         return;
     };
     /** Sets scalar data to current node. */
@@ -124,7 +122,6 @@ public:
         cout << arr << endl;
         if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
-        //this->data = arr;
         this->type = HDC_DYND;
         return;
     };
@@ -135,11 +132,9 @@ public:
             this->add_child(path, new HDC());
             cout << "not found, adding..." << endl;
         }
-        HDC* t = this->get_child(path);
-        t->set_data(data);
+        this->get_child(path)->set_data(data);
         return;
     };
-    
     /** Sets DyND object to current node. */
     void set_dynd(dynd::nd::array array); 
     /** Sets HDC_LIST from std::vector<HDC*> data.*/
