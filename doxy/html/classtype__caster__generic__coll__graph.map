@@ -1,6 +1,0 @@
-<map id="type_caster_generic" name="type_caster_generic">
-<area shape="rect" id="node2" href="$structtype__info.html" title="Additional type information which does not fit into the PyTypeObject. " alt="" coords="11,95,85,121"/>
-<area shape="rect" id="node3" href="$structbuffer__info.html" title="Information record describing a Python buffer object. " alt="" coords="5,5,88,32"/>
-<area shape="rect" id="node4" href="$classobject.html" title="Holds a reference to a Python object (with reference counting) " alt="" coords="113,95,170,121"/>
-<area shape="rect" id="node5" href="$classhandle.html" title="Holds a reference to a Python object (no reference counting) " alt="" coords="113,5,173,32"/>
-</map>

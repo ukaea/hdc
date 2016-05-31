@@ -1,6 +1,0 @@
-<map id="Json::Reader::parse" name="Json::Reader::parse">
-<area shape="rect" id="node2" href="$class_json_1_1_value.html#a29f3a30f7e5d3af6f38d57999bf5b480" title="Json::Value::setComment" alt="" coords="195,5,369,32"/>
-<area shape="rect" id="node3" href="$namespace_json.html#a0ab7ff7f99788262d92d9ff3d924e065" title="used internally " alt="" coords="199,56,365,83"/>
-<area shape="rect" id="node4" href="$class_json_1_1_value.html#a5263476047f20e2fc6de470e4de34fe5" title="Swap values but leave comments and source offsets in place. " alt="" coords="193,107,371,133"/>
-<area shape="rect" id="node5" href="$class_json_1_1_value.html#a5b7da48b163bcec63b1424f1608b7da6" title="Embedded zeroes could cause you trouble! " alt="" coords="203,157,361,184"/>
-</map>

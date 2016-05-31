@@ -1,7 +1,0 @@
-<map id="hdc::has_child" name="hdc::has_child">
-<area shape="rect" id="node2" href="$a00003.html#a6ae2658ee66a5f4fb0d0d6535b36c5b2" title="Desctructor. " alt="" coords="160,31,267,57"/>
-<area shape="rect" id="node3" href="$a00003.html#af2b7f95b9cf36d26e0fc20dd1c0465ba" title="Sets HDC subtree to given path. " alt="" coords="315,31,435,57"/>
-<area shape="rect" id="node4" href="$a00003.html#aafcd7c001cf4d3e2d61dbbf6efef6e08" title="Deletes HDC subtree. " alt="" coords="483,5,585,32"/>
-<area shape="rect" id="node6" href="$a00003.html#a580b1c84ebb50da63e2682ddceb6010a" title="Returns subtree by path. " alt="" coords="483,56,585,83"/>
-<area shape="rect" id="node5" href="$a00003.html#acde60e58222d3b7d2b2a53b14289f500" title="Adds HDC subtree as child with given path. " alt="" coords="633,5,736,32"/>
-</map>

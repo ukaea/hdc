@@ -1,5 +1,0 @@
-<map id="cpp_function" name="cpp_function">
-<area shape="rect" id="node2" href="$classfunction.html" title="function" alt="" coords="19,155,87,181"/>
-<area shape="rect" id="node3" href="$classobject.html" title="Holds a reference to a Python object (with reference counting) " alt="" coords="25,80,82,107"/>
-<area shape="rect" id="node4" href="$classhandle.html" title="Holds a reference to a Python object (no reference counting) " alt="" coords="23,5,83,32"/>
-</map>

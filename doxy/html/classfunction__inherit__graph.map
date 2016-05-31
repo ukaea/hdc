@@ -1,5 +1,0 @@
-<map id="function" name="function">
-<area shape="rect" id="node4" href="$classcpp__function.html" title="Wraps an arbitrary C++ function/method/lambda function/.. into a callable Python object. " alt="" coords="5,229,101,256"/>
-<area shape="rect" id="node2" href="$classobject.html" title="Holds a reference to a Python object (with reference counting) " alt="" coords="25,80,82,107"/>
-<area shape="rect" id="node3" href="$classhandle.html" title="Holds a reference to a Python object (no reference counting) " alt="" coords="23,5,83,32"/>
-</map>

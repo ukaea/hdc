@@ -1,6 +1,0 @@
-<map id="array" name="array">
-<area shape="rect" id="node5" href="$classarray__t.html" title="array_t\&lt; T, ExtraFlags \&gt;" alt="" coords="5,304,171,331"/>
-<area shape="rect" id="node2" href="$classbuffer.html" title="buffer" alt="" coords="61,155,115,181"/>
-<area shape="rect" id="node3" href="$classobject.html" title="Holds a reference to a Python object (with reference counting) " alt="" coords="59,80,117,107"/>
-<area shape="rect" id="node4" href="$classhandle.html" title="Holds a reference to a Python object (no reference counting) " alt="" coords="58,5,118,32"/>
-</map>

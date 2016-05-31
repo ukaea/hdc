@@ -1,5 +1,0 @@
-<map id="Json::Value::resize" name="Json::Value::resize">
-<area shape="rect" id="node2" href="$class_json_1_1_value.html#ada6ba1369448fb0240bccc36efaa46f7" title="Create a default Value of the given type. " alt="" coords="188,5,320,32"/>
-<area shape="rect" id="node3" href="$class_json_1_1_value.html#a4ca8ee6c48a34ca6c2f131956bab5e05" title="Number of values in array or object. " alt="" coords="193,56,315,83"/>
-<area shape="rect" id="node4" href="$class_json_1_1_value.html#a501a4d67e6c875255c2ecc03ccd2019b" title="Json::Value::clear" alt="" coords="191,107,317,133"/>
-</map>

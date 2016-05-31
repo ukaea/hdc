@@ -1,6 +1,0 @@
-<map id="hdc::delete_child" name="hdc::delete_child">
-<area shape="rect" id="node2" href="$classhdc.html#a6ae2658ee66a5f4fb0d0d6535b36c5b2" title="hdc::add_child" alt="" coords="173,56,280,83"/>
-<area shape="rect" id="node3" href="$classhdc.html#aee70cadad065fa643d8313e068734e59" title="hdc::has_child" alt="" coords="328,5,435,32"/>
-<area shape="rect" id="node4" href="$classhdc.html#af5d54732a2d9d34f7f2f8453acda21d6" title="hdc::copy" alt="" coords="342,56,421,83"/>
-<area shape="rect" id="node5" href="$classhdc.html#af7684e94ec717ae6e9de1ba1f0e6bff0" title="hdc::to_json" alt="" coords="335,107,428,133"/>
-</map>

@@ -33,6 +33,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("Binary dir is: ${hdc_BINARY_DIR}")
 message("Source dir is: ${hdc_SOURCE_DIR}")
+
+# file(COPY inc DESTINATION ${CMAKE_BINARY_DIR}/inc)
+
 include_directories(inc)
 # add_subdirectory(docs)
 add_subdirectory(doxy)
