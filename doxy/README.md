@@ -65,16 +65,16 @@ Example in C++
 --------------
 ```
 // Create empty tree
-hdc* tree = new hdc();
+HDC* tree = new HDC();
 // Add some node
-tree->add_child("aaa/bbb/ccc",new hdc());
+tree->add_child("aaa/bbb/ccc",new HDC());
 // Store data to terminal node
 int8_t array[4] = {1,2,3,4};
 long int shape[1];
 shape[0] = 4;
 tree->set_data<int8_t>("aaa/bbb/ccc",1,shape,(void*)array);
 // Get subtree
-hdc* subtree = tree->get_child("aaa/bbb");
+HDC* subtree = tree->get_child("aaa/bbb");
 // Get data from subtree
 int8_t* array2 = subtree->as<int8_t>("ccc");
 // Delete tree
