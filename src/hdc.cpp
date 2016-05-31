@@ -1,7 +1,7 @@
 #include "hdc.hpp"
 #include <dynd/json_parser.hpp>
 #include <fstream>
-
+//#define DEBUG
 struct hdc_t {
     void* obj;
 };
@@ -13,7 +13,9 @@ using namespace std;
 
 HDC::HDC()
 {
+    #ifdef DEBUG
     cout << "Creating empty node..." << endl;
+    #endif
     type = HDC_EMPTY;
     data = new vector<dynd::nd::array>;
     children = new unordered_map<string, HDC*>;
@@ -22,7 +24,9 @@ HDC::HDC()
 }
 
 HDC::HDC(dynd::nd::array arr) {
+    #ifdef DEBUG
     cout << "Creating DyND node..." << endl;
+    #endif
     type = HDC_DYND;
     data = new vector<dynd::nd::array>;
     children = new unordered_map<string, HDC*>;
@@ -32,9 +36,13 @@ HDC::HDC(dynd::nd::array arr) {
 
 HDC::~HDC()
 {
+    #ifdef DEBUG
     cout << "Destructor called..." << endl;
+    #endif
     if (!children->empty()) {
+        #ifdef DEBUG
         cout << "Deleting children..." << endl;
+        #endif
         for (auto it = children->begin(); it != children->end(); it++) delete it->second;
         children->clear();
     } else {
@@ -55,10 +63,11 @@ bool HDC::has_child(string path)
 
 bool HDC::has_child(vector<string> vs)
 {
+    #ifdef DEBUG
     cout << "Searching for: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-
+    #endif
     string first = vs[0];
     vs.erase(vs.begin());
 
@@ -74,10 +83,11 @@ bool HDC::has_child(vector<string> vs)
 
 
 void HDC::add_child(vector<string> vs, HDC* n) {
+    #ifdef DEBUG
     cout << "Adding node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-    
+    #endif
     if (!(this->type == HDC_EMPTY || this->type == HDC_STRUCT)) {
         cout << "Cannot add child to this node. Data assigned???" << endl;
         return;
@@ -86,11 +96,10 @@ void HDC::add_child(vector<string> vs, HDC* n) {
         this->type = HDC_STRUCT;
 //        this->children = new unordered_map<string, HDC*>;
     }
-    
+
     string first = vs[0];
     vs.erase(vs.begin());
     if (vs.empty()) {
-        
         if (this->children->count(first) == 0) children->insert({first,n});
         else cout << "Error: child already exists!" << endl;
     } else {
@@ -99,8 +108,9 @@ void HDC::add_child(vector<string> vs, HDC* n) {
         }
         children->at(first)->add_child(vs,n);
     }
-        cout << "done" << endl;
-
+    #ifdef DEBUG
+    cout << "done" << endl;
+    #endif
     return;
 }
 
@@ -131,22 +141,25 @@ void HDC::create_list(size_t n) {
 
 void HDC::add_child(string path, HDC* n)
 {
+    #ifdef DEBUG
     cout << "Adding child: " << path << endl;
+    #endif
+    
     add_child(split(path,'/'),n);
     return;
 }
 
 void HDC::delete_child(vector<string> vs) {
-    
+
+    #ifdef DEBUG
     cout << "Delete node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
+    #endif
     
     string first = vs[0];
     vs.erase(vs.begin());
-    
-    if (this->children->count(first) == 0) return; // Nothing to do here
-    
+    if (!this->has_child(vs)) return;
     if (!vs.empty()) {
         delete this->children->at(first);
         this->children->erase(first);
@@ -162,29 +175,29 @@ void HDC::delete_child(string path) {
 }
 
 HDC* HDC::get_child(vector<string> vs) {
+    #ifdef DEBUG
     cout << "Getting node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-    
+    #endif
     string first = vs[0];
     vs.erase(vs.begin());
-    
+
     if (this->children->count(first)) {
         if (vs.empty()) return this->children->at(first);
         else return this->children->at(first)->get_child(vs);
     } else {
         cout << "Not found" << endl;
-//         exit(-1);
         return new HDC();
     }
-    
 }
 
 HDC* HDC::get_slice(vector<string> vs, size_t i) {
+    #ifdef DEBUG
     cout << "Getting slice: " << i << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-    
+    #endif
     string first = vs[0];
     vs.erase(vs.begin());
     
@@ -220,11 +233,11 @@ HDC* HDC::get_child(string path) {
 
 
 void HDC::set_child(vector<string> vs, HDC* n) {
-    // not sure now, what should this do....
+    #ifdef DEBUG
     cout << "Setting node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-    
+    #endif
     if (!this->has_child(vs)) { // Nothing to set
         cout << "Nothing to set, maybe you want to add..." << endl;
         return;
@@ -246,7 +259,6 @@ void HDC::set_child(string path, HDC* n) {
     this->set_child(split(path,'/'), n);
     return;
 }
-
 
 //------------------ Data manipulation -------------------------------
 
@@ -449,14 +461,18 @@ void HDC::set_dynd(dynd::nd::array array) {
 
 HDC* HDC::copy(int copy_arrays)
 {
+    #ifdef DEBUG
     cout << "Called copy()" << endl;
+    #endif
     HDC* copy = new HDC();
     copy->set_type(this->get_type());
     cout << (int)(this->get_type()) << endl;
     if (this->type == HDC_STRUCT) {
         for (auto it = this->children->begin(); it != this->children->end(); it++) {
             copy->add_child(it->first,it->second->copy(copy_arrays));
+            #ifdef DEBUG
             cout << it->first << " copied" << endl;
+            #endif
         }
     } else if (this->type == HDC_LIST) {
         for (size_t i = 0; i < this->list_elements->size(); i++)
@@ -468,16 +484,22 @@ HDC* HDC::copy(int copy_arrays)
             //long size = this->data->at(0).size();
             //char *
             copy->data->push_back(dynd::nd::array(this->data->at(0)));
+            #ifdef DEBUG
             cout << "copy: " << copy->data->at(0) << endl;
+            #endif
         } else this->set_type(HDC_EMPTY);
     }
+    #ifdef DEBUG
     cout << "copy() Done" << endl;
+    #endif
     return copy;
 }
 
 void HDC::set_slice(size_t i, HDC* h)
 {
+    #ifdef DEBUG
     cout << "Setting slice " << i << endl;
+    #endif
     if (this->type == HDC_LIST) {
         if (i < this->list_elements->size()) this->list_elements->at(i) = h;
         else if (i == this->list_elements->size()) this->append_slice(h);
@@ -539,6 +561,15 @@ string HDC::get_type_str() {
     return type_str;
 }
 
+string HDC::get_type_str(string path) {
+    HDC* t = this->get_child(path);
+    return t->get_type_str();
+}
+
+string HDC::get_datashape_str(string path) {
+    HDC* t = this->get_child(path);
+    return t->get_datashape_str();
+}
 
 string HDC::get_datashape_str() {
     string type_str;
@@ -555,7 +586,9 @@ string HDC::get_datashape_str() {
 
 void HDC::to_json(string filename, int mode)
 {
+    #ifdef DEBUG
     cout << "Saving output JSON to " << filename << endl;
+    #endif
     ofstream json_file;
     json_file.open(filename.c_str());
     // json_file << this->to_json();
@@ -570,7 +603,9 @@ void HDC::to_json(string filename, int mode)
     string ra("]"); // right after
     string rb("]\""); // right before
     replace_all(tmp_str,rb,ra);
+    #ifdef DEBUG
     cout << tmp_str;
+    #endif
     json_file << tmp_str;
     // end of quotes removal
     json_file.close();
@@ -582,31 +617,45 @@ HDC* json_to_hdc(Json::Value* root) {
     HDC* tree = new HDC();
     switch(root->type()) {
         case Json::ValueType::nullValue:
+            #ifdef DEBUG
             cout << "root is null" << endl;
+            #endif
             tree->set_type(HDC_EMPTY);
             break;
         case Json::ValueType::intValue:
+            #ifdef DEBUG
             cout << "root is int, value = " << root->asInt() << endl;
+            #endif
             tree->set_data<int32_t>(root->asInt());
             break;
         case Json::ValueType::uintValue:
+            #ifdef DEBUG
             cout << "root is uint, value = " << root->asUInt() << endl;
+            #endif
             tree->set_data<uint32_t>(root->asUInt());
             break;
         case Json::ValueType::realValue:
+            #ifdef DEBUG
             cout << "root is double, value = " << root->asDouble() << endl;
+            #endif
             tree->set_data<double>(root->asDouble());
             break;
         case Json::ValueType::stringValue:
+            #ifdef DEBUG
             cout << "root is string, value = " << root->asCString() << endl;
+            #endif
             tree->set_data<string>(root->asCString());
             break;
         case Json::ValueType::booleanValue:
+            #ifdef DEBUG
             cout << "root is bool, value = " << root->asBool() << endl;
+            #endif
             tree->set_data<bool>(root->asBool());
             break;
         case Json::ValueType::arrayValue:
+            #ifdef DEBUG
             cout << "root is array, size = " << root->size() << endl;
+            #endif
             if (is_all_numeric(root)) {
                 int8_t ndim = get_ndim(root);
                 long* shape = get_shape(root);
@@ -693,9 +742,13 @@ HDC* json_to_hdc(Json::Value* root) {
             }
             break;
         case Json::ValueType::objectValue:
+            #ifdef DEBUG
             cout << "root is object, children:" << endl;
+            #endif
             for (Json::ValueIterator it = root->begin(); it != root->end(); it++) {
+                #ifdef DEBUG
                 cout << it.key() << endl;
+                #endif
                 tree->add_child(it.key().asCString(),json_to_hdc(&it));
             }
             break;
@@ -708,31 +761,45 @@ HDC* json_to_hdc(const Json::Value& root) {
     HDC* tree = new HDC();
     switch(root.type()) {
         case Json::ValueType::nullValue:
+            #ifdef DEBUG
             cout << "root is null" << endl;
+            #endif
             tree->set_type(HDC_EMPTY);
             break;
         case Json::ValueType::intValue:
+            #ifdef DEBUG
             cout << "root is int, value = " << root.asInt() << endl;
+            #endif
             tree->set_data<int32_t>(root.asInt());
             break;
         case Json::ValueType::uintValue:
+            #ifdef DEBUG
             cout << "root is uint, value = " << root.asUInt() << endl;
+            #endif
             tree->set_data<uint32_t>(root.asUInt());
             break;
         case Json::ValueType::realValue:
+            #ifdef DEBUG
             cout << "root is double, value = " << root.asDouble() << endl;
+            #endif
             tree->set_data<double>(root.asDouble());
             break;
         case Json::ValueType::stringValue:
+            #ifdef DEBUG
             cout << "root is string, value = " << root.asCString() << endl;
+            #endif
             tree->set_data<string>(root.asCString());
             break;
         case Json::ValueType::booleanValue:
+            #ifdef DEBUG
             cout << "root is bool, value = " << root.asBool() << endl;
+            #endif
             tree->set_data<bool>(root.asBool());
             break;
         case Json::ValueType::arrayValue:
+            #ifdef DEBUG
             cout << "root is array, size = " << root.size() << endl;
+            #endif
             if (is_all_numeric(root)) {
                 int8_t ndim = get_ndim(root);
                 long* shape = get_shape(root);
@@ -819,9 +886,13 @@ HDC* json_to_hdc(const Json::Value& root) {
             }
             break;
                     case Json::ValueType::objectValue:
+                        #ifdef DEBUG
                         cout << "root is object, children:" << endl;
+                        #endif
                         for (Json::ValueConstIterator it = root.begin(); it != root.end(); it++) {
+                            #ifdef DEBUG
                             cout << it.key() << endl;
+                            #endif
                             tree->add_child(it.key().asCString(),json_to_hdc(*it));
                         }
                         break;
@@ -936,10 +1007,12 @@ long* get_shape(Json::Value* root) {
         curr = &(curr->operator[](0));
         dim++;
     }
+    #ifdef DEBUG
     cout << "Dimension: " << dim << endl;
     cout << "Shape: (" << shape[0];
     for (int i=1; i<dim; i++) cout << ", " << shape[i];
     cout << ")" << endl;
+    #endif
     long* res = new long[dim];
     for (int i=0;i<dim;i++) res[i] = shape[i];
     return res;
@@ -955,10 +1028,12 @@ long* get_shape(const Json::Value& root) {
         curr = curr[0];
         dim++;
     }
+    #ifdef DEBUG
     cout << "Dimension: " << dim << endl;
     cout << "Shape: (" << shape[0];
     for (int i=1; i<dim; i++) cout << ", " << shape[i];
     cout << ")" << endl;
+    #endif
     long* res = new long[dim];
     for (int i=0;i<dim;i++) res[i] = shape[i];
     return res;

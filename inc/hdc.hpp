@@ -170,25 +170,24 @@ public:
     long int* get_shape(string path); 
     
     /** Returns pointer to data of this node. */
-    template<typename T> T as() 
+    template<typename T> T as()
     {
         // returns data of given type
         if (this->children->size()) {
             cout << "This node is not terminal" << endl;
         }
+        #ifdef DEBUG
         cout << "From get:" << this->data->at(0) << endl;
-//         return (T)(this->data->at(0)->data);
-        return (T)(this->data->at(0).get());
-        
-        //return (T)(this->data.data());
+        #endif
+        return (T)(this->data->at(0)->data);
     }
     /** Returns pointer to data of node under given path. */
-    template<typename T> T as(string path) 
+    template<typename T> T as(string path)
     {
+        #ifdef DEBUG
         cout << "as<T>(" << path << ")" << endl;
-        // returns data of given type
-        HDC* t = this->get_child(path);
-        return t->as<T>();
+        #endif
+        return this->get_child(path)->as<T>();
     }
     /** Returns double. */
     double as_double() 
@@ -214,6 +213,10 @@ public:
     string get_type_str();
     /** Returns datashape desctiption string. */
     string get_datashape_str();
+    /** Returns string representing data/node type. */
+    string get_type_str(string path);
+    /** Returns datashape desctiption string. */
+    string get_datashape_str(string path);
 private:
     int8_t type;
     vector<dynd::nd::array>* data; /*!< dynd::array storage*/
