@@ -562,11 +562,11 @@ string HDC::get_type_str() {
 }
 
 string HDC::get_type_str(string path) {
-    HDC* t = this->get_child(path)->get_type_str();
+    return this->get_child(path)->get_type_str();
 }
 
 string HDC::get_datashape_str(string path) {
-    HDC* t = this->get_child(path)->get_datashape_str();
+    return this->get_child(path)->get_datashape_str();
 }
 
 string HDC::get_datashape_str() {
