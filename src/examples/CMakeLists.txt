@@ -9,14 +9,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(inc)
 
-add_executable(test_hdc_cpp test_hdc_cpp.cpp)
-target_link_libraries(test_hdc_cpp hdc)
+add_executable(example_cpp example_cpp.cpp)
+target_link_libraries(example_cpp hdc)
 
-add_executable(test_hdc_c test_hdc_c.c)
-target_link_libraries(test_hdc_c chdc)
+add_executable(example_c example_c.c)
+target_link_libraries(example_c chdc)
 
-add_executable(test_hdc_fortran test_hdc_fortran.f90)
-target_link_libraries(test_hdc_fortran fhdc)
+add_executable(example_fortran example_fortran.f90)
+target_link_libraries(example_fortran fhdc)
+
+add_executable(cpo_hdc cpo_hdc.f90)
+target_link_libraries(cpo_hdc fhdc)
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
