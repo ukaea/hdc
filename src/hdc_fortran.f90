@@ -237,6 +237,11 @@ module hdc_fortran
             integer(kind=c_int32_t) :: res
         end function c_hdc_as_int32_scalar_path
 
+        subroutine hdc_dump(obj) bind(c,name="hdc_dump")
+            import
+            type(hdc_t), value:: obj
+        end subroutine hdc_dump
+        
     end interface
 
     !> Generic set_data interface.
@@ -345,7 +350,7 @@ module hdc_fortran
 
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_data_double_ad, &
     hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, &
-    hdc_get_slice, hdc_get, hdc_get_double, hdc_copy, hdc_t, dp
+    hdc_get_slice, hdc_get, hdc_get_double, hdc_copy, hdc_t, dp, hdc_dump
 contains
 
     subroutine hdc_add_child(this, path, node)

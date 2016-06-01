@@ -6,9 +6,9 @@ program test_hdc_fortran
 contains
 
     subroutine f_main()
-        type(hdc_t),pointer :: tree, subtree, data
+        type(hdc_t) :: tree, subtree, data
         integer, dimension(1:4) :: array
-        integer, dimension(:) :: array2
+        integer, dimension(:), pointer:: array2
         integer :: ndim2, shape2
 
         ! Create new HDC tree
@@ -28,6 +28,8 @@ contains
         ! Delete subtree
         call hdc_delete_child(tree,"aaa/eee")
 
+        call hdc_dump(tree)
+        
         ! Prepare some data
         array = (/7,2,3,4/)
         

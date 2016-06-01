@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
     
     //Serialize data to JSON
     hdc_to_json(tree,"tree.txt",0);
-    
+    // Dump to screen
+    hdc_dump(tree);
     return 0;
 }

@@ -304,5 +304,11 @@ void hdc_to_json(hdc_t* tree, char* filename, int mode) {
     return;
 }
 
+void hdc_dump(hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    t->dump();
+    return;
+}
+
 // end exter C
 }

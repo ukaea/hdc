@@ -207,7 +207,8 @@ public:
     void to_json(string filename, int mode = 0);
     /** Serialization to Json::Value object. */
     Json::Value to_json(int mode = 0);
-
+    /** Dumps JSON to cout */
+    void dump();
     /** Returns void pointer to data. */
     void* as_void_ptr();
     /** Returns string representing data/node type. */

@@ -52,6 +52,7 @@ int32_t hdc_as_int32_scalar_path(struct hdc_t* tree, char* path); /** Returns sc
 
 struct hdc_t*  hdc_copy(struct hdc_t* src); /** Makes deep copy of HDC tree. */
 void hdc_to_json(struct hdc_t* tree, char* path, int mode); /** Performs serialization of tree to JSON*/
+void hdc_dump(struct hdc_t* tree);
 const char* hdc_get_datashape_str(struct hdc_t* tree);
 
 int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path); /**  */

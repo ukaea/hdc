@@ -432,6 +432,12 @@ Json::Value HDC::to_json(int mode) {
     return root;
 }
 
+void HDC::dump() {
+    cout << this->to_json(0) << endl;
+    return;
+}
+
+
 void HDC::resize(HDC* h, int recursively)
 {
     if (this->type == HDC_DYND) {

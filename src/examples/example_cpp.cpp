@@ -53,6 +53,7 @@ int main(int argc, char **argv) {
 
     //Serialize data to JSON
     tree->to_json("tree.txt",0);
-
+    // On screen
+    tree->dump();
     return 0;
 }
