@@ -206,7 +206,7 @@ public:
     /** Serialization to JSON file. */
     void to_json(string filename, int mode = 0);
     /** Serialization to Json::Value object. */
-    Json::Value to_json(int mode = 0); 
+    Json::Value to_json(int mode = 0);
 
     /** Returns void pointer to data. */
     void* as_void_ptr();
