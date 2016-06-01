@@ -1,16 +1,10 @@
-module types
+module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
         type(c_ptr) :: obj !< void pointer to HDC container
     end type hdc_t
     integer, parameter :: DP=kind(1.0D0)
-end module types
-
-module hdc_fortran
-    use types
-    use iso_c_binding
-    implicit none
     private
     interface
         subroutine hello() bind(c,name="hello")
@@ -275,6 +269,7 @@ module hdc_fortran
      
      interface hdc_get_slice
         module procedure hdc_get_slice_
+        module procedure hdc_get_slice_l
         module procedure hdc_get_slice_path
      end interface hdc_get_slice
 
@@ -350,7 +345,7 @@ module hdc_fortran
 
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_data_double_ad, &
     hdc_delete_child, hdc_get_int8_1d, hdc_get_int8_2d, hdc_set_data, hdc_get_double_1d, hdc_get_double_2d, hdc_get_shape, hdc_set, &
-    hdc_get_slice, hdc_get, hdc_get_double, hdc_copy
+    hdc_get_slice, hdc_get, hdc_get_double, hdc_copy, hdc_t, dp
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -601,6 +596,15 @@ contains
         res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
     end function hdc_get_slice_path
     
+    function hdc_get_slice_l_path(this, path, ii) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*), intent(in) :: path
+        integer(kind=8) :: ii
+        type(hdc_t) :: res
+        res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
+    end function hdc_get_slice_l_path
+    
     subroutine hdc_get_slice_path_sub(this, path, ii, res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -617,6 +621,14 @@ contains
         type(hdc_t) :: res
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_
+    
+    function hdc_get_slice_l(this, ii) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=8) :: ii
+        type(hdc_t) :: res
+        res = c_hdc_get_slice(this, int(ii,c_long))
+    end function hdc_get_slice_l
     
     subroutine hdc_get_slice_sub(this, ii, res)
         type(hdc_t) :: this

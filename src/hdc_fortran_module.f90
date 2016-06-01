@@ -1,23 +1,14 @@
 ! gfortran  -fPIC -g -O0 -ffree-line-length-none -pedantic -fbacktrace -std=f2008 -shared -o hdc_fortran_module.so hdc_fortran_module.f90 -I$PWD/build -L$PWD/build -lfhdc
-
-
 ! module hdc_fortran_module
-
 ! contains
 
     subroutine hello_f_module() bind(c, name="hello_f_module")
-
+        use hdc_fortran
         use iso_c_binding
-
         implicit none
-
         print *, 'hello_f_module'
-
     end subroutine
-
     subroutine change_data(tree) bind(c, name="change_data")
-
-    use types
     use hdc_fortran
     use iso_c_binding
     implicit none

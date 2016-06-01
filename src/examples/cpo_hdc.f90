@@ -1,5 +1,4 @@
 program cpo_hdc
-    use types
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -13,7 +12,6 @@ contains
 
     subroutine test_cpos(equilibriumin, distsourceout)
         integer :: i
-
         !UAL ! Always describe cpo as array 
         !UAL ! In case of time slice, the size of the input cpo is 1
         !UAL type (type_equilibrium),pointer :: equilibriumin(:)

@@ -1,5 +1,4 @@
 program test_hdc_fortran
-    use types
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -7,9 +6,9 @@ program test_hdc_fortran
 contains
 
     subroutine f_main()
-        type(hdc_t) :: tree, subtree, data
+        type(hdc_t),pointer :: tree, subtree, data
         integer, dimension(1:4) :: array
-        integer, dimension(:), pointer :: array2
+        integer, dimension(:) :: array2
         integer :: ndim2, shape2
 
         ! Create new HDC tree
