@@ -106,6 +106,9 @@ class HDC(object):
             res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
             return res
 
+    def append(self, data):
+        libchdc.hdc_append_slice(self.c_ptr, data.c_ptr)
+
     def set_data(self, data):
         """Store data into the container
         """
