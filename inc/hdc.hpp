@@ -65,7 +65,9 @@ public:
         //dynd::ndt::type dtype = dynd::ndt::make_type<T>();
         //arr->data = (char*) data;
         dynd::nd::array arr = data;
+        #ifdef DEBUG
         cout << arr << endl;
+        #endif
         if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
         //this->data = arr;
@@ -94,7 +96,9 @@ public:
         arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
         arr->data = (char*) data;
 //         arr.assign(data); // New versions of DyND
+        #ifdef DEBUG
         cout << arr << endl;
+        #endif
         if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
         //this->data = arr;
@@ -119,7 +123,9 @@ public:
             return;
         }
         dynd::nd::array arr = data;
+        #ifdef DEBUG
         cout << arr << endl;
+        #endif
         if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
         this->type = HDC_DYND;

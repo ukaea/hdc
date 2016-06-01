@@ -21,24 +21,24 @@ void hdc_delete(struct hdc_t* tree) {
 
 void hdc_add_child(struct hdc_t* tree, char* path, struct hdc_t* n) {
     HDC* t = (HDC*)tree->obj;
-    t->add_child(path,(HDC*)n->obj);
+    t->add_child((string)path,(HDC*)n->obj);
     return;
 }
 
 void hdc_set_child(struct hdc_t* tree, char* path, struct hdc_t* n) {
     HDC* t = (HDC*)tree->obj;
-    t->set_child(path, (HDC*)n->obj);
+    t->set_child((string)path, (HDC*)n->obj);
     return;
 }
 void hdc_delete_child(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    t->delete_child(path);
+    t->delete_child((string)path);
     return;
 }
 
 struct hdc_t* hdc_get_child(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_child(path);
+    HDC* node = t->get_child((string)path);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -54,7 +54,7 @@ struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
 
 struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i) {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_slice(path, i);
+    HDC* node = t->get_slice((string)path, i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -74,7 +74,7 @@ void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n) {
 
 bool hdc_has_child(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    return t->has_child(path);
+    return t->has_child((string)path);
 }
 
 void hdc_set_data_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
@@ -96,6 +96,13 @@ void hdc_set_data_int32(struct hdc_t* tree, int8_t ndim, const long int* shape, 
     return;
 }
 
+void hdc_set_data_int32_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
+    HDC* t = (HDC*)tree->obj;
+    t->set_data<int32_t>((string)path, ndim, shape, data);
+    return;
+}
+
+
 int8_t hdc_get_ndim(struct hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     return t->get_ndim();
@@ -103,7 +110,7 @@ int8_t hdc_get_ndim(struct hdc_t* tree) {
 
 int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    return t->get_ndim(path);
+    return t->get_ndim((string)path);
 }
 
 
@@ -114,7 +121,7 @@ long int* hdc_get_shape(struct hdc_t* tree) {
 
 long int* hdc_get_shape_path(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    return t->get_shape(path);
+    return t->get_shape((string)path);
 }
 
 uint8_t hdc_get_type(struct hdc_t* tree, char* path) {
@@ -131,10 +138,26 @@ void* hdc_as_voidptr_path(struct hdc_t* tree, char* path) {
     return t->as<void*>(path);
 }
 
-int* hdc_as_int_1d(struct hdc_t* tree) {
+int32_t* hdc_as_int32_1d(struct hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
-    return t->as<int*>();
+    return t->as<int32_t*>();
 }
+
+int32_t** hdc_as_int32_2d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int32_t**>();
+}
+
+int32_t* hdc_as_int32_1d_path(struct hdc_t* tree, char* path) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int32_t*>((string)path);
+}
+
+int32_t** hdc_as_int32_2d_path(struct hdc_t* tree, char* path) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int32_t**>((string)path);
+}
+
 
 void hdc_set_data_int8_scalar(hdc_t* tree, int8_t data)
 {
@@ -146,7 +169,7 @@ void hdc_set_data_int8_scalar(hdc_t* tree, int8_t data)
 void hdc_set_data_int8_scalar_path(hdc_t* tree, char* path, int8_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data<int8_t>(path, data);
+    t->set_data<int8_t>((string)path, data);
     return;
 }
 
@@ -160,7 +183,7 @@ void hdc_set_data_int32_scalar(hdc_t* tree, int32_t data)
 void hdc_set_data_int32_scalar_path(hdc_t* tree, char* path, int32_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data<int32_t>(path, data);
+    t->set_data<int32_t>((string)path, data);
     return;
 }
 
@@ -169,20 +192,20 @@ void hello() {cout << "Hello" << endl; return;}
 
 void hdc_set_data_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
     HDC* t = (HDC*)tree->obj;
-    t->set_data<double>(path, ndim, shape, data);
+    t->set_data<double>((string)path, ndim, shape, data);
     return;
 }
 
 void hdc_set_data_double_sc_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data) {
     HDC* t = (HDC*)tree->obj;
-    t->set_data<double>(path, ndim, shape, data);
+    t->set_data<double>((string)path, ndim, shape, data);
     return;
 }
 
 void hdc_set_data_double_scalar_path(hdc_t* tree, char* path, double data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data<double>(path, data);
+    t->set_data<double>((string)path, data);
     return;
 }
 
@@ -224,7 +247,7 @@ double hdc_as_double_scalar(hdc_t* tree)
 double hdc_as_double_scalar_path(hdc_t* tree, char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<double*>(path))[0];
+    return (t->as<double*>((string)path))[0];
 }
 
 int8_t hdc_as_int8_scalar(hdc_t* tree)
@@ -236,7 +259,7 @@ int8_t hdc_as_int8_scalar(hdc_t* tree)
 int8_t hdc_as_int8_scalar_path(hdc_t* tree, char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<int8_t*>(path))[0];
+    return (t->as<int8_t*>((string)path))[0];
 }
 
 int32_t hdc_as_int32_scalar(hdc_t* tree)
@@ -248,7 +271,7 @@ int32_t hdc_as_int32_scalar(hdc_t* tree)
 int32_t hdc_as_int32_scalar_path(hdc_t* tree, char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<int32_t*>(path))[0];
+    return (t->as<int32_t*>((string)path))[0];
 }
 
 void test_str(char* str) {
@@ -260,6 +283,25 @@ const char* hdc_get_type_str(hdc_t* tree)
 {
     HDC* t = (HDC*)tree->obj;
     return (t->get_type_str().c_str());
+}
+
+const char* hdc_get_type_str_path(hdc_t* tree, char* path)
+{
+    HDC* t = (HDC*)tree->obj;
+    return (t->get_type_str((string)path).c_str());
+}
+
+
+const char* hdc_get_datashape_str(hdc_t* tree)
+{
+    HDC* t = (HDC*)tree->obj;
+    return (t->get_datashape_str().c_str());
+}
+
+void hdc_to_json(hdc_t* tree, char* filename, int mode) {
+    HDC* t = (HDC*)tree->obj;
+    t->to_json((string)filename, mode);
+    return;
 }
 
 // end exter C

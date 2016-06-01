@@ -316,7 +316,7 @@ long int* HDC::get_shape()
     }
     else {
         // error, should not get here
-        cout << "Unknow type" << endl;
+        cout << "Unknown type" << endl;
         long int* shape = (long int*)malloc(1 * sizeof(long int)); 
         shape[0] = -1;
         return shape;
@@ -466,7 +466,9 @@ HDC* HDC::copy(int copy_arrays)
     #endif
     HDC* copy = new HDC();
     copy->set_type(this->get_type());
+    #ifdef DEBUG
     cout << (int)(this->get_type()) << endl;
+    #endif
     if (this->type == HDC_STRUCT) {
         for (auto it = this->children->begin(); it != this->children->end(); it++) {
             copy->add_child(it->first,it->second->copy(copy_arrays));
@@ -562,11 +564,11 @@ string HDC::get_type_str() {
 }
 
 string HDC::get_type_str(string path) {
-    HDC* t = this->get_child(path)->get_type_str();
+    return this->get_child(path)->get_type_str();
 }
 
 string HDC::get_datashape_str(string path) {
-    HDC* t = this->get_child(path)->get_datashape_str();
+    return this->get_child(path)->get_datashape_str();
 }
 
 string HDC::get_datashape_str() {

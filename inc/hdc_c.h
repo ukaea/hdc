@@ -25,18 +25,21 @@ void hdc_set_data_string(struct hdc_t* tree, char* str);  /**  */
 
 
 int8_t hdc_get_ndim(struct hdc_t* tree);  /**  */
-long int* hdc_get_shape(struct hdc_t* tree);  /**  */
+long int* hdc_get_shape(struct hdc_t* tree);  /** Returns shape of array of node. */
 int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path);  /**  */
-long int* hdc_get_shape_path(struct hdc_t* tree, char* path);  /**  */
+long int* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape of array at given path. */
 uint8_t hdc_get_type(struct hdc_t* tree, char* path);  /**  */
-int* hdc_as_int_1d(struct hdc_t* tree); /**  */
-int** hdc_as_int_2d(struct hdc_t* tree); /**  */
+int32_t* hdc_as_int32_1d(struct hdc_t* tree); /**  */
+int32_t** hdc_as_int32_2d(struct hdc_t* tree); /**  */
+int32_t* hdc_as_int32_1d_path(struct hdc_t* tree, char* path); /**  */
+int32_t** hdc_as_int32_2d_path(struct hdc_t* tree, char* path); /**  */
 void* hdc_as_voidptr(struct hdc_t* tree);  /**  */
 void* hdc_as_voidptr_path(struct hdc_t* tree, char* path); /**  */
 void hdc_set_data_int8_path(struct hdc_t* tree, int8_t data); /**  */
 void hdc_set_data_int8_scalar_path(struct hdc_t* tree, char* path, int8_t data); /**  */
-void hdc_set_data_int32_path(struct hdc_t* tree, int32_t data); /**  */
 void hdc_set_data_int32_scalar_path(struct hdc_t* tree, char* path, int32_t data); /**  */
+void hdc_set_data_int32_scalar(struct hdc_t* tree, int32_t data); /**  */
+void hdc_set_data_int32_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data);
 void hdc_set_data_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data); /**  */
 void hdc_set_data_double_scalar_path(struct hdc_t* tree, char* path, double data); /**  */
 void hdc_set_data_double_scalar(struct hdc_t* tree, double data); /**  */
@@ -48,10 +51,12 @@ int32_t hdc_as_int32_scalar(struct hdc_t* tree); /** Returns scalar int32.  */
 int32_t hdc_as_int32_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int32.  */
 
 struct hdc_t*  hdc_copy(struct hdc_t* src); /** Makes deep copy of HDC tree. */
-
+void hdc_to_json(struct hdc_t* tree, char* path, int mode); /** Performs serialization of tree to JSON*/
+const char* hdc_get_datashape_str(struct hdc_t* tree);
 
 int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path); /**  */
 const char* hdc_get_type_str(struct hdc_t* tree); /**  */
+const char* hdc_get_type_str_path(struct hdc_t* tree, char* path); /**  */
 
 void test_str(char* str);
 
