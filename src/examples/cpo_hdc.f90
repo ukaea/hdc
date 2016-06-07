@@ -85,6 +85,10 @@ contains
             call hdc_set(distsource_i, 'codeparam/output_diag', 'Made in Python')
             call hdc_set(distsource_i, 'codeparam/output_flag', 0)
 
+            write(*,*)'DUMP: '
+            call hdc_dump(distsource_i)
+
+
 ! ! !             !HDC User (code-specific) data (in JSON document)
 ! ! !             hdc_set_json(distsource_i, 'userspace', '{"params": {"string": "my params", "date": "2016-04-14T17:13:37.101511", "numbers": [1, 2, 3.5]}}')
 
