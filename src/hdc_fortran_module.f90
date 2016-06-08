@@ -30,7 +30,7 @@ implicit none
     node_int = hdc_get_child(tree, "group1/int8_data")
 
     print *, "Reading data in Fortran"
-    array = hdc_get_int8_1d(node_int)
+    array = hdc_as_int8_1d(node_int)
     ! test data get
     print *,"Data: ", array
 
@@ -43,7 +43,7 @@ implicit none
     ! node_int = hdc_get_child(tree, "group1/int8_data")
 
     print *, "Reading data in Fortran"
-    array = hdc_get_int8_1d(node_int)
+    array = hdc_as_int8_1d(node_int)
     ! test data get
     print *,"Data: ", array
 
@@ -51,7 +51,7 @@ implicit none
     node_double_2d = hdc_new_empty()
     call hdc_set_data(node_double_2d, reshape((/1.0d0,2.0d0,3.14d0,5.9d0/),(/2,2/)))
     call hdc_add_child(tree, "group1/double_2d_data", node_double_2d)
-    print *,"Fortran: hdc_get_double_2d: ", (hdc_get_double_2d(node_double_2d))
+    print *,"Fortran: hdc_as_double_2d: ", (hdc_as_double_2d(node_double_2d))
 
 end subroutine change_data
 
@@ -71,9 +71,9 @@ subroutine c_test_cpos(equilibriumin) bind(c, name="c_test_cpos")
     call hdc_dump(equilibriumin)
 
     write(0,*) 'size of input CPO = ', hdc_get_shape(equilibriumin)
-    write(0,*) 'Received input time from equilibrium: ', hdc_get_double(equilibriumin, 'time')
+    write(0,*) 'Received input time from equilibrium: ', hdc_as_double(equilibriumin, 'time')
 
-    time = hdc_get_double(equilibriumin, 'time')
+    time = hdc_as_double(equilibriumin, 'time')
     ! call hdc_get(equilibriumin, 'time', time)
     write(0, *)'timein', time
 
@@ -82,7 +82,7 @@ subroutine c_test_cpos(equilibriumin) bind(c, name="c_test_cpos")
 
     write(*,*)'get equilibriumin/profiles_1d_psi'
     call hdc_get(equilibriumin, 'profiles_1d_psi', psi)
-    ! psi => hdc_get_double_1d(equilibriumin, 'profiles_1d_psi')
+    ! psi => hdc_as_double_1d(equilibriumin, 'profiles_1d_psi')
     write(*,*)psi
 
     call test_cpos(equilibriumin, distsourceout)
@@ -134,7 +134,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
 
     ! call hdc_get(equilibrium_i, 'time', time)
     write(0, *) '-- get time ---'
-    time = hdc_get_double(equilibriumin, 'time')
+    time = hdc_as_double(equilibriumin, 'time')
     write(0, *) time
     write(0, *) '-- before hdc_copy ---'
     call hdc_copy(equilibriumin, distsourceout)
@@ -156,14 +156,14 @@ subroutine test_cpos(equilibriumin, distsourceout)
         ! distsource_i = hdc_get_slice(distsourceout, i)
 
         !HDC this needs hdc_t write / format support -- HOW?
-        ! write(0,*) 'Received input time from equilibrium: ', hdc_get_double(equilibrium_i, 'time')
+        ! write(0,*) 'Received input time from equilibrium: ', hdc_as_double(equilibrium_i, 'time')
         
         ! call hdc_get(equilibrium_i, 'time', time)
-        time = hdc_get_double(equilibrium_i, 'time')
+        time = hdc_as_double(equilibrium_i, 'time')
         write(0,*) 'Received input time from equilibrium: ', time
         !UAL distsourceout(i)%time = 10 + equilibriumin(i)%time
         !HDC Here, we do not need to think about data types (unless we want to do it explicitely)
-        call hdc_set(distsource_i, 'time', hdc_get_double(equilibrium_i, 'time'))
+        call hdc_set(distsource_i, 'time', hdc_as_double(equilibrium_i, 'time'))
 
         !UAL allocate(distsourceout(i)%source(1))
         !UAL allocate(distsourceout(i)%source(1)%profiles_1d%psi, source=equilibriumin(i)%profiles_1d%psi)
@@ -176,25 +176,25 @@ subroutine test_cpos(equilibriumin, distsourceout)
         !HDC The alternative, more explicit solutions are
         !HDC it seems that hdc_get_<type> functions will be handy in Fortran
 ! read *
-! print *,hdc_get_double_1d(equilibrium_i, 'profiles_1d_psi')
+! print *,hdc_as_double_1d(equilibrium_i, 'profiles_1d_psi')
 ! read *
 
         write(*,*)'set distsource_i/source/profiles_1d_psi'
         ! or
         write(*,*)'get equilibrium_i/profiles_1d_psi'
         call hdc_get(equilibrium_i, 'profiles_1d_psi', psi)
-        ! psi = hdc_get_double(equilibrium_i, 'profiles_1d_psi')
+        ! psi = hdc_as_double(equilibrium_i, 'profiles_1d_psi')
         write(*,*)'psi=', psi
         write(*,*)'set distsource_i/source/profiles_1d_psi'
 
-        ! call hdc_set(distsource_i, 'source/profiles_1d_psi', 2 * hdc_get_double_1d(equilibrium_i, 'profiles_1d_psi'))
+        ! call hdc_set(distsource_i, 'source/profiles_1d_psi', 2 * hdc_as_double_1d(equilibrium_i, 'profiles_1d_psi'))
         psi_test = (/-1.d0, -2.d0, 3.d0, 4.4d0/)
         ! call hdc_set(distsource_i, 'source/profiles_1d_psi', -3 * psi(:))  ! doesn work
         call hdc_set(distsource_i, 'source/profiles_1d_psi', psi_test)  ! this works as expected
         write(*,*) 2*psi
 
         call hdc_get(distsource_i, 'source/profiles_1d_psi', psi)
-        ! psi = hdc_get_double(equilibrium_i, 'profiles_1d_psi')
+        ! psi = hdc_as_double(equilibrium_i, 'profiles_1d_psi')
         ! write(*,*)'psi (distsource_i) =', psi
 
 
@@ -239,7 +239,7 @@ subroutine test_test_cpo_hdc()
     call hdc_set(equilibrium, 'time', 1.1d0)
     write(*,*)'hdc_get'
     ! call hdc_get(equilibrium, 'time', time)
-    write(*,*)hdc_get_double(equilibrium, 'time')
+    write(*,*)hdc_as_double(equilibrium, 'time')
     call hdc_set(equilibrium, 'profiles_1d_psi', (/0.1d0, 0.2d0, 0.3d0/))
     write(*,*)'call test_cpos'
     call test_cpos(equilibrium, distsource)
