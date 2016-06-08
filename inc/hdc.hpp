@@ -28,6 +28,8 @@
 #define HDC_LIST 3
 #define HDC_ERROR 4
 
+#define DEBUG
+
 using namespace std;
 template<typename T> struct identity { typedef T type; };
 
@@ -47,7 +49,7 @@ public:
     /** Deletes HDC subtree. */
     void delete_child(string path);
     /** Returns subtree by path. */
-    HDC* get_child(string path);
+    HDC* get(string path);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice(string path, size_t i); 
     /** Returns i-th subnode if HDC_LIST is the type. */
@@ -81,7 +83,7 @@ public:
             this->add_child(path, new HDC());
             cout << "not found, adding..." << endl;
         }
-        this->get_child(path)->set_data<T>(data);
+        this->get(path)->set_data<T>(data);
         return;
     };
     /** Sets array data to current node. */
@@ -112,7 +114,7 @@ public:
             this->add_child(path, new HDC());
             cout << "not found, adding..." << endl;
         }
-        this->get_child(path)->set_data<T>(ndim,shape,data);
+        this->get(path)->set_data<T>(ndim,shape,data);
         return;
     };
     /** Sets scalar data to current node. */
@@ -138,7 +140,7 @@ public:
             this->add_child(path, new HDC());
             cout << "not found, adding..." << endl;
         }
-        this->get_child(path)->set_data(data);
+        this->get(path)->set_data(data);
         return;
     };
     /** Sets DyND object to current node. */
@@ -188,7 +190,7 @@ public:
         #ifdef DEBUG
         cout << "as<T>(" << path << ")" << endl;
         #endif
-        return this->get_child(path)->as<T>();
+        return this->get(path)->as<T>();
     }
     /** Returns double. */
     double as_double() 
@@ -229,7 +231,7 @@ private:
     void add_child(vector<string> vs, HDC* n);
     void set_child(vector<string> vs, HDC* n);
     void delete_child(vector<string> vs);
-    HDC* get_child(vector<string> vs);
+    HDC* get(vector<string> vs);
     HDC* get_slice(vector<string> vs, size_t i);
     bool has_child(vector<string> vs);
 };
