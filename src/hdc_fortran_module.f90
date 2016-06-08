@@ -94,22 +94,30 @@ subroutine c_test_cpos(equilibriumin) bind(c, name="c_test_cpos")
 end subroutine
 
 
-subroutine test_cpos_f2c(equilibriumin, tree) bind(c, name="test_cpos_f2c")
+subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
     use hdc_fortran
     use iso_c_binding
     implicit none
     ! type(hdc_t), value :: equilibriumin
-    type(hdc_t), value :: equilibriumin, tree
+    type(hdc_t), value :: equilibriumin, tree_out
+    type(hdc_t) :: distsourceout
+    
+
 
     write(*,*)'=== test_cpos_f2c START ==='
     write(*,*)'equilibriumin'
     call hdc_dump(equilibriumin)
 
     write(*,*)'--- call test_cpos ---'
-    call test_cpos(equilibriumin, tree)
+    call test_cpos(equilibriumin, distsourceout)
 
-    write(*,*)'distsourceout:'
-    call hdc_dump(tree)
+    write(*,*)'--- set output ---'
+    ! call hdc_set(tree,_out 'distsourceout', distsourceout)
+    call hdc_add_child(tree_out, 'distsourceout', distsourceout)
+
+    write(*,*)'output tree:'
+    call hdc_dump(tree_out)
+    call hdc_to_json(tree_out, "./tree_out.json", 0)
 
     write(*,*)'=== END test_cpos_f2c ==='
 end subroutine
@@ -158,9 +166,9 @@ subroutine test_cpos(equilibriumin, distsourceout)
     time = hdc_as_double(equilibriumin, 'time')
     write(0, *) time
 
-    ! write(0, *) '-- before hdc_copy ---'
-    ! call hdc_copy(equilibriumin, distsourceout)
-    ! write(0, *) '-- hdc_copy done ---'
+    write(0, *) '-- before hdc_copy ---'
+    call hdc_copy(equilibriumin, distsourceout)
+    write(0, *) '-- hdc_copy done ---'
 
     !UAL do i=1,size(equilibriumin)
     !HDC we assume here that ndim = 1

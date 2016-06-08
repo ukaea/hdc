@@ -107,6 +107,7 @@ if __name__ == '__main__':
     print("=== Python dump")
     tree.dump()
 
-    print('tree["source/profiles_1d_psi"] %s' % tree["source/profiles_1d_psi"].as_array())
+    print('tree["distsourceout/source/profiles_1d_psi"] %s' %
+          tree["distsourceout/source/profiles_1d_psi"].as_array())
 
     # distsource = test_cpos(equilibrium)
