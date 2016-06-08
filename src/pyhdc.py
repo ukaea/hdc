@@ -30,8 +30,8 @@ _hdc_new_empty.restype = _HDC_T_P
 # _hdc_as_int_1d.restype = ctypes.POINTER(ctypes.c_long)
 _hdc_as_voidptr = libchdc.hdc_as_voidptr
 _hdc_as_voidptr.restype = ctypes.c_void_p
-_hdc_get_child = libchdc.hdc_get_child
-_hdc_get_child.restype = ctypes.POINTER(ctypes.c_int8)
+_hdc_get = libchdc.hdc_get
+_hdc_get.restype = ctypes.POINTER(ctypes.c_int8)
 _hdc_has_child = libchdc.hdc_has_child
 _hdc_has_child.restype = ctypes.c_bool
 _hdc_get_type = libchdc.hdc_get_type
@@ -99,7 +99,7 @@ class HDC(object):
             ckey = key.encode()
             if not _hdc_has_child(self._c_ptr, ckey):
                 raise KeyError('key not found')
-            res = self.from_c_ptr(_hdc_get_child(self._c_ptr, ckey))
+            res = self.from_c_ptr(_hdc_get(self._c_ptr, ckey))
             return res
         else:
             ckey = ctypes.c_size_t(key)
@@ -122,16 +122,16 @@ class HDC(object):
             cndim = ctypes.c_int8(data.ndim)
             if np.issubdtype(data.dtype, np.int8):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_int8))
-                libchdc.hdc_set_data_int8(self._c_ptr, cndim, byref(cshape), cdata)
+                libchdc.hdc_set_int8(self._c_ptr, cndim, byref(cshape), cdata)
             elif np.issubdtype(data.dtype, np.int32):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_int32))
-                libchdc.hdc_set_data_int32(self._c_ptr, cndim, byref(cshape), cdata)
+                libchdc.hdc_set_int32(self._c_ptr, cndim, byref(cshape), cdata)
             elif np.issubdtype(data.dtype, np.int64):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_int64))
-                libchdc.hdc_set_data_int64(self._c_ptr, cndim, byref(cshape), cdata)
+                libchdc.hdc_set_int64(self._c_ptr, cndim, byref(cshape), cdata)
             elif np.issubdtype(data.dtype, np.float_):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-                libchdc.hdc_set_data_double(self._c_ptr, cndim, byref(cshape), cdata)
+                libchdc.hdc_set_double(self._c_ptr, cndim, byref(cshape), cdata)
             # TODO temporary solution - keep reference to the original numpy object
             #      so that the memory bleck does not get deallocated
             self._push_np_ref(self._c_ptr, data)
