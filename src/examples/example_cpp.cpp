@@ -17,7 +17,9 @@ int main(int argc, char **argv) {
     tree->add_child("bbb/eee/aaa",new HDC());
 
     // Get subtree
-    HDC* subtree = tree->get_child("aaa/bbb");
+    HDC* subtree = tree->get("aaa/bbb");
+    // Get node
+    HDC* node = subtree->get("ccc");
 
     // Ask whether child exists
     cout << "has_child: " << tree->has_child("aaa/bbb/ccc") << endl;
@@ -38,15 +40,15 @@ int main(int argc, char **argv) {
     tree->set_data<int32_t>("aaa/bbb/ccc",1,shape,(void*)array);
 
     // Ask on some data details, use subtree to shorten the path
-    int32_t ndim2 = subtree->get_ndim("ccc");
-    long int* shape2 = subtree->get_shape("ccc");
+    int32_t ndim2 = node->get_ndim();
+    long int* shape2 = node->get_shape();
     cout << "Dimension: " << (int)ndim2 << endl << "Shape: ";
     for (int i=0; i<ndim2; i++) cout << (int)shape2[i] << " ";
     cout << endl;
-    cout << "dtype: " << subtree->get_type_str("ccc") << endl;
+    cout << "dtype: " << node->get_type_str() << endl;
 
     // Get data back from tree
-    int32_t* array2 = subtree->as<int32_t*>("ccc");
+    int32_t* array2 = node->as<int32_t*>();
     cout << "Data: ";
     for (int i=0; i<shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;

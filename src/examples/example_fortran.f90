@@ -6,11 +6,15 @@ program test_hdc_fortran
 contains
 
     subroutine f_main()
-        type(hdc_t) :: tree, subtree, data
+        type(hdc_t), pointer :: tree, subtree, data, node
         integer, dimension(1:4) :: array
         integer, dimension(:), pointer:: array2
-        integer :: ndim2, shape2
-
+        integer(kind=c_long), dimension(1:1) :: shape2
+        integer :: ndim2
+        allocate(tree)
+        allocate(subtree)
+        allocate(data)
+        allocate(node)
         ! Create new HDC tree
         tree = hdc_new_empty()
 
@@ -21,6 +25,8 @@ contains
         
         ! Get subtree
         subtree = hdc_get_child(tree,"aaa/bbb")
+        ! Get node
+        node = hdc_get_child(subtree,"ccc")
         
         ! Ask whether child exists
         print *,"has_child: ", hdc_has_child(tree,"aaa/bbb/ccc")
@@ -33,22 +39,27 @@ contains
         ! Prepare some data
         array = (/7,2,3,4/)
         
-!         ! Add data to a single node
-!         data = hdc_new_empty()
-!         call hdc_set_data(data,array)
-!         
-!         ! Add data to subtree
-!         call hdc_set_data(tree,"aaa/bbb/ccc",array)
-!         
-!         ! Ask on some data details, use subtree to shorten path
-!         ndim2 = hdc_get_ndim(subtree,"ccc")
-!         shape2 = hdc_get_shape(subtree,"ccc")
-!         print *,"Dimension: ", ndim2
-!         print *,"Shape: ", shape2
-!         print *, "dtype: ", hdc_get_type_str
-
-!BIG TODO
-
+        ! Add data to a single node
+        data = hdc_new_empty()
+        call hdc_set_data(data,array)
+        
+        ! Add data to subtree
+        call hdc_set_data(tree,"aaa/bbb/ccc",array)
+        
+        ! Ask on some data details, use subtree to shorten path
+        ndim2 = hdc_get_ndim(node)
+        shape2 = hdc_get_shape(node)
+        print *,"Dimension: ", ndim2
+        print *,"Shape: ", shape2
+        call hdc_print_type_str(node)
+        call hdc_get(node,array2)
+        print *,array2
+        
+        
+        ! Serialize data to JSON
+        call hdc_to_json(tree,"tree.txt",0)
+        ! test dump
+        call hdc_dump(tree)
     end subroutine f_main
     
 end program test_hdc_fortran

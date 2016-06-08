@@ -13,7 +13,9 @@ int main(int argc, char **argv) {
     hdc_add_child(tree,"bbb/eee/aaa",hdc_new_empty());
     
     // Get subtree
-    struct hdc_t* subtree = hdc_get_child(tree,"aaa/bbb");
+    struct hdc_t* subtree = hdc_get(tree,"aaa/bbb");
+    // Get node
+    struct hdc_t* node = hdc_get(subtree,"ccc");
     
     // Ask whether child exists
     printf("has_child: %d\n", hdc_has_child(tree,"aaa/bbb/ccc"));
@@ -28,21 +30,21 @@ int main(int argc, char **argv) {
     
     // Add data to a single node
     struct hdc_t* data = hdc_new_empty();
-    hdc_set_data_int32(data,1,shape,(void*)array);
+    hdc_set_int32(data,1,shape,(void*)array);
     
     // Add data to a subtree
-    hdc_set_data_int32_path(tree,"aaa/bbb/ccc",1,shape,(void*)array);
+    hdc_set_int32_path(tree,"aaa/bbb/ccc",1,shape,(void*)array);
     
     // Ask on some data details, use subtree to shorten the path
-    int32_t ndim2 = hdc_get_ndim_path(subtree,"ccc");
-    long int* shape2 = hdc_get_shape_path(subtree,"ccc");
+    int32_t ndim2 = hdc_get_ndim(node);
+    long int* shape2 = hdc_get_shape(node);
     printf("Dimension: %d\nShape: ", ndim2);
     for (int i=0; i<ndim2; i++) printf("%d ",shape2[i]);
     printf("\n");
-    printf("dtype: %s\n",hdc_get_type_str_path(subtree,"ccc"));
+    printf("dtype: %s\n",hdc_get_type_str(node));
     
     // Get data back from tree
-    int32_t* array2 = hdc_as_int32_1d_path(subtree,"ccc");
+    int32_t* array2 = hdc_as_int32_1d(node);
     printf("Data: ");
     for (int i=0; i<shape2[0]; i++) printf("%d ",array2[i]);
     printf("\n");
