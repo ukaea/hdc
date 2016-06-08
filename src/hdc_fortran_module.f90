@@ -28,7 +28,7 @@
         node_int = hdc_get_child(tree, "group1/int8_data")
 
         print *, "Reading data in Fortran"
-        array = hdc_get_int8_1d(node_int)
+        array = hdc_as_int8_1d(node_int)
         ! test data get
         print *,"Data: ", array
 
@@ -38,10 +38,10 @@
         call hdc_set_data(node_int, array)
 
         ! print *, "Fortran: get_child again"
-        ! node_int = hdc_get_child(tree, "group1/int8_data")
+        ! node_int = hdc_get(tree, "group1/int8_data")
 
         print *, "Reading data in Fortran"
-        array = hdc_get_int8_1d(node_int)
+        array = hdc_as_int8_1d(node_int)
         ! test data get
         print *,"Data: ", array
 
@@ -49,7 +49,7 @@
         node_double_2d = hdc_new_empty()
         call hdc_set_data(node_double_2d, reshape((/1.0d0,2.0d0,3.14d0,5.9d0/),(/2,2/)))
         call hdc_add_child(tree, "group1/double_2d_data", node_double_2d)
-        print *,"Fortran: hdc_get_double_2d: ", (hdc_get_double_2d(node_double_2d))
+        print *,"Fortran: hdc_get_double_2d: ", (hdc_as_double_2d(node_double_2d))
 
     end subroutine change_data
     

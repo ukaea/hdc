@@ -87,6 +87,9 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     cout << "Adding node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
+    /////////////
+    cout << this->get_type_str() << endl;
+    /////////////
     #endif
     if (!(this->type == HDC_EMPTY || this->type == HDC_STRUCT)) {
         cout << "Cannot add child to this node. Data assigned???" << endl;
@@ -174,7 +177,7 @@ void HDC::delete_child(string path) {
     return;
 }
 
-HDC* HDC::get_child(vector<string> vs) {
+HDC* HDC::get(vector<string> vs) {
     #ifdef DEBUG
     cout << "Getting node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
@@ -185,7 +188,7 @@ HDC* HDC::get_child(vector<string> vs) {
 
     if (this->children->count(first)) {
         if (vs.empty()) return this->children->at(first);
-        else return this->children->at(first)->get_child(vs);
+        else return this->children->at(first)->get(vs);
     } else {
         cout << "Not found" << endl;
         return new HDC();
@@ -227,8 +230,8 @@ HDC* HDC::get_slice(string path, size_t i) {
     return this->get_slice(split(path,'/'),i);
 }
 
-HDC* HDC::get_child(string path) {
-    return this->get_child(split(path,'/'));
+HDC* HDC::get(string path) {
+    return this->get(split(path,'/'));
 }
 
 
@@ -282,7 +285,7 @@ int8_t HDC::get_ndim()
 }
 
 int8_t HDC::get_ndim(string path) {
-    return this->get_child(path)->get_ndim();
+    return this->get(path)->get_ndim();
 }
 
 void* HDC::as_void_ptr() {
@@ -328,7 +331,7 @@ long int* HDC::get_shape(string path) {
         cerr << "Not found (get_shape): " << path << endl;
         exit(-1);
     }
-    return this->get_child(path)->get_shape();
+    return this->get(path)->get_shape();
 }
 
 bool HDC::is_empty()
@@ -463,8 +466,6 @@ void HDC::set_dynd(dynd::nd::array array) {
     return;
 }
 
-
-
 HDC* HDC::copy(int copy_arrays)
 {
     #ifdef DEBUG
@@ -570,11 +571,11 @@ string HDC::get_type_str() {
 }
 
 string HDC::get_type_str(string path) {
-    return this->get_child(path)->get_type_str();
+    return this->get(path)->get_type_str();
 }
 
 string HDC::get_datashape_str(string path) {
-    return this->get_child(path)->get_datashape_str();
+    return this->get(path)->get_datashape_str();
 }
 
 string HDC::get_datashape_str() {

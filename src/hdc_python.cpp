@@ -29,7 +29,7 @@ PYBIND11_PLUGIN(libHDC_python) {
         .def("set_data_double", (void (HDC::*)(vector<double> data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(std::string path, vector<double> data)) &HDC::set_data, "Sets data to node")
         .def("add_child", (void (HDC::*)(std::string, HDC* h)) &HDC::add_child, "Adds an empty node to tree")
-        .def("get_child", (HDC* (HDC::*)(std::string)) &HDC::get_child, "Gets node from tree")
+        .def("get", (HDC* (HDC::*)(std::string)) &HDC::get, "Gets node from tree")
         .def("delete_child", (void (HDC::*)(std::string)) &HDC::delete_child, "Deletes node from tree")
         .def("has_child", (bool (HDC::*)(std::string)) &HDC::has_child, "Returns True if the child with given address exists.")
         .def("as_void_ptr", (void* (HDC::*)()) &HDC::as_void_ptr, "Returns C pointer to self (Pycapsule stuff)")
@@ -40,7 +40,7 @@ PYBIND11_PLUGIN(libHDC_python) {
         .def("as_double", (double (HDC::*)(std::string)) &HDC::as_double, "as double")
         .def("as_hdc_ptr", (struct hdc_t* (HDC::*)()) &HDC::as_hdc_ptr, "as HDC ptr")
         .def("__repr__", []() {return "<libHDC.HDC>";})
-        .def("__getitem__", (HDC* (HDC::*)(std::string path)) &HDC::get_child, "Returns C pointer to self (Pycapsule stuff)")
+        .def("__getitem__", (HDC* (HDC::*)(std::string path)) &HDC::get, "Returns C pointer to self (Pycapsule stuff)")
         .def("get_type_str", (std::string (HDC::*)()) &HDC::get_type_str, "get_type_str");
     return m.ptr();
 }
