@@ -5,7 +5,7 @@ module hdc_fortran
         type(c_ptr) :: obj !< void pointer to HDC container
     end type hdc_t
 
-    integer, parameter :: DP=kind(1.0D0)
+    integer, parameter :: dp=kind(1.0D0)
     private
     interface
         subroutine hello() bind(c,name="hello")
@@ -163,14 +163,14 @@ module hdc_fortran
         subroutine c_hdc_set_double_scalar(obj, data) bind(c,name="hdc_set_double_scalar")
             import
             type(hdc_t), value:: obj
-            double precision, value :: data
+            real(kind=dp), value :: data
         end subroutine c_hdc_set_double_scalar
         !> Sets scalar double to given path. This is interface to C.
         subroutine c_hdc_set_double_scalar_path(obj, path, data) bind(c,name="hdc_set_double_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            double precision, value :: data
+            real(kind=dp), value :: data
         end subroutine c_hdc_set_double_scalar_path
         !> Sets scalar int32.This is interface to C.
         subroutine c_hdc_set_int32_scalar(obj, data) bind(c,name="hdc_set_int32_scalar")
@@ -263,14 +263,14 @@ module hdc_fortran
         function c_hdc_as_double_scalar(obj) result(res) bind(c,name="hdc_as_double_scalar")
             import
             type(hdc_t), value:: obj
-            double precision :: res
+            real(kind=dp) :: res
         end function c_hdc_as_double_scalar
         !> Returns scalar double from given path. This is interface to C.
         function c_hdc_as_double_scalar_path(obj, path) result(res) bind(c,name="hdc_as_double_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            double precision :: res
+            real(kind=dp) :: res
         end function c_hdc_as_double_scalar_path
         !> Returns scalar int8. 
         function c_hdc_as_int8_scalar(obj) result(res) bind(c,name="hdc_as_int8_scalar")
