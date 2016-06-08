@@ -60,66 +60,11 @@ Basic ideas
 
 Examples
 ========
-Very simple examples follow. More complete examples can be found in src/test folder
+The basic examples can be found in src/examples folder. The executables are built in CMAKE_BUILD_DIR/bin directory.
 
-Example in C++
---------------
+The Python examples can be run from any arbitraty folder, the only necessary thing is to set LD_LIBRARY_PATH properly:
+
 ```
-// Create empty tree
-HDC* tree = new HDC();
-// Add some node
-tree->add_child("aaa/bbb/ccc",new HDC());
-// Store data to terminal node
-int8_t array[4] = {1,2,3,4};
-long int shape[1];
-shape[0] = 4;
-tree->set_data<int8_t>("aaa/bbb/ccc",1,shape,(void*)array);
-// Get subtree
-HDC* subtree = tree->get_child("aaa/bbb");
-// Get data from subtree
-int8_t* array2 = subtree->as<int8_t>("ccc");
-// Delete tree
-delete tree;
+LD_LIBRARY_PATH="../build/lib/" ipython hdc_fortran_module.py
 ```
 
-Example in C
-------------
-```
-// Create empty tree
-struct hdc_t* tree = hdc_new_empty();
-// Add some node
-hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty());
-// Store data to terminal node
-int8_t array[4] = {1,2,3,4};
-long int shape[1];
-shape[0] = 4;
-hdc_set_data_int8(data,1,shape,(void*)array);
-// Get subtree
-struct hdc_t* subtree = hdc_get_child(tree,"aaa/bbb");
-// Get data from subtree
-int8_t* array2 = (int8_t*)hdc_as_int_1d(subtree,"ccc");
-// Delete tree
-hdc_delete(tree);
-```
-
-Example in Fortran
-------------------
-```
-type(hdc_t) :: tree, subtree
-integer(kind=c_int8_t), dimension(1:4) :: array, array2
-integer, dimension(1:1) :: shape_
-! Create empty tree
-tree = hdc_new_empty()
-! Add some node
-call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty())
-! Store data to terminal node
-array = (/1,2,3,4/)
-shape_(1) = 4
-call hdc_set_data(tree,1,shape,array)
-! Get subtree
-subtree = hdc_get_child(tree,"aaa/bbb")
-! Get data from subtree
-array2 = hdc_get_int8_1d(subtree,"ccc")
-! Or
-call hdc_get(subtree,"ccc",array2)
-```
