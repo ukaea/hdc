@@ -2,3 +2,4 @@ build
 
 /.project
 hdc_new.kdev4
+src/__pycache__
