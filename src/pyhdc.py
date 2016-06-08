@@ -26,8 +26,8 @@ _HDC_T_P = ctypes.POINTER(_HDC_T)
 libchdc = ctypes.cdll.LoadLibrary('libchdc.so')
 _hdc_new_empty = libchdc.hdc_new_empty
 _hdc_new_empty.restype = _HDC_T_P
-_hdc_as_int_1d = libchdc.hdc_as_int_1d
-_hdc_as_int_1d.restype = ctypes.POINTER(ctypes.c_long)
+# _hdc_as_int_1d = libchdc.hdc_as_int_1d
+# _hdc_as_int_1d.restype = ctypes.POINTER(ctypes.c_long)
 _hdc_as_voidptr = libchdc.hdc_as_voidptr
 _hdc_as_voidptr.restype = ctypes.c_void_p
 _hdc_get_child = libchdc.hdc_get_child
@@ -48,6 +48,8 @@ _hdc_get_type_str.restype = ctypes.c_char_p
 
 class HDC(object):
     """HDC Python binding"""
+
+    _NP_REFS = {}
 
     def __init__(self, data=None):
         super(HDC, self).__init__()
@@ -82,7 +84,8 @@ class HDC(object):
             ckey = key.encode()
             if not _hdc_has_child(self._c_ptr, ckey):
                 new_hdc = self.__class__(value)
-                # ckey = ctypes.c_char_p(key.encode())
+                # TODO this is the problem - new_hdc gets lost from Python
+                # we have to explain numpy not to deallocate the buffer
                 libchdc.hdc_add_child(self._c_ptr, ckey, new_hdc._c_ptr)
             else:
                 self[key].set_data(value)
@@ -103,13 +106,19 @@ class HDC(object):
             res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
             return res
 
+    def append(self, data):
+        libchdc.hdc_append_slice(self.c_ptr, data.c_ptr)
+
     def set_data(self, data):
         """Store data into the container
         """
-        self.pydata = data
         if isinstance(data, np.ndarray):
             # cdata = np.ctypeslib.as_ctypes(data)
-            cshape = np.ctypeslib.as_ctypes(np.array(data.shape, dtype=np.int64))
+            data = np.require(data, requirements=('C', 'O'))
+            data.setflags(write=False)
+            # data = np.ascontiguousarray(data)
+            cshape = np.ctypeslib.as_ctypes(np.array(data.shape,
+                                                     dtype=np.int64))
             cndim = ctypes.c_int8(data.ndim)
             if np.issubdtype(data.dtype, np.int8):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_int8))
@@ -123,6 +132,13 @@ class HDC(object):
             elif np.issubdtype(data.dtype, np.float_):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
                 libchdc.hdc_set_data_double(self._c_ptr, cndim, byref(cshape), cdata)
+            # TODO temporary solution - keep reference to the original numpy object
+            #      so that the memory bleck does not get deallocated
+            self._push_np_ref(self._c_ptr, data)
+
+    @classmethod
+    def _push_np_ref(cls, hdc_c_ptr, np_obj):
+        cls._NP_REFS[ctypes.addressof(hdc_c_ptr.contents)] = np_obj
 
     def get_type_str(self):
         return _hdc_get_type_str(self._c_ptr).decode()
@@ -164,11 +180,9 @@ if __name__ == '__main__':
         tree = HDC()
         pydata = np.arange(1, 8, 2, dtype=dtype)
         tree["data"] = pydata
-        assert np.all(pydata == tree["data"].as_array())
-        assert pydata.dtype == tree["data"].as_array().dtype
-
-    fmodule = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
-
-    # change_data = fmodule.change_data
-    # change_data.restype = ctypes.c_void_p
-    # change_data.argtypes = (hdc.hdc_t, )
+        del pydata
+        data = tree["data"].as_array()
+        print(data)
+        pydata = np.arange(1, 8, 2, dtype=dtype)
+        assert np.all(pydata == data)
+        assert pydata.dtype == data.dtype
