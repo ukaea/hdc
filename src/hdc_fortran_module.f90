@@ -94,6 +94,27 @@ subroutine c_test_cpos(equilibriumin) bind(c, name="c_test_cpos")
 end subroutine
 
 
+subroutine test_cpos_f2c(equilibriumin, tree) bind(c, name="test_cpos_f2c")
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    ! type(hdc_t), value :: equilibriumin
+    type(hdc_t), value :: equilibriumin, tree
+
+    write(*,*)'=== test_cpos_f2c START ==='
+    write(*,*)'equilibriumin'
+    call hdc_dump(equilibriumin)
+
+    write(*,*)'--- call test_cpos ---'
+    call test_cpos(equilibriumin, tree)
+
+    write(*,*)'distsourceout:'
+    call hdc_dump(tree)
+
+    write(*,*)'=== END test_cpos_f2c ==='
+end subroutine
+
+
 subroutine test_cpos(equilibriumin, distsourceout) 
     use hdc_fortran
     use iso_c_binding
@@ -109,7 +130,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
 
     !HDC arrays (of CPO's) are internal in HDC containers
     type(hdc_t), intent(in) :: equilibriumin
-    type(hdc_t), intent(out) :: distsourceout
+    type(hdc_t), intent(inout) :: distsourceout
     ! type(hdc_t), value :: equilibriumin
     ! type(hdc_t), value :: distsourceout
     type(hdc_t) :: distsource_i, equilibrium_i
@@ -127,7 +148,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
     !UAL allocate(distsourceout(size(equilibriumin)))
     !HDC we explicitely create a new container
 
-    distsourceout = hdc_new_empty()
+    ! distsourceout = hdc_new_empty()
 
     !HDC resize will create empty containers
     !call hdc_resize(distsourceout, source=equilibriumin) resize is not in dynd
@@ -136,9 +157,10 @@ subroutine test_cpos(equilibriumin, distsourceout)
     write(0, *) '-- get time ---'
     time = hdc_as_double(equilibriumin, 'time')
     write(0, *) time
-    write(0, *) '-- before hdc_copy ---'
-    call hdc_copy(equilibriumin, distsourceout)
-    write(0, *) '-- hdc_copy done ---'
+
+    ! write(0, *) '-- before hdc_copy ---'
+    ! call hdc_copy(equilibriumin, distsourceout)
+    ! write(0, *) '-- hdc_copy done ---'
 
     !UAL do i=1,size(equilibriumin)
     !HDC we assume here that ndim = 1
@@ -190,7 +212,8 @@ subroutine test_cpos(equilibriumin, distsourceout)
         ! call hdc_set(distsource_i, 'source/profiles_1d_psi', 2 * hdc_as_double_1d(equilibrium_i, 'profiles_1d_psi'))
         psi_test = (/-1.d0, -2.d0, 3.d0, 4.4d0/)
         ! call hdc_set(distsource_i, 'source/profiles_1d_psi', -3 * psi(:))  ! doesn work
-        call hdc_set(distsource_i, 'source/profiles_1d_psi', psi_test)  ! this works as expected
+        ! call hdc_set(distsource_i, 'source/profiles_1d_psi', psi_test)  ! this works only in current scope (subroutine / function)
+        call hdc_set(distsource_i, 'source/profiles_1d_psi', psi)  ! this works as expected
         write(*,*) 2*psi
 
         call hdc_get(distsource_i, 'source/profiles_1d_psi', psi)

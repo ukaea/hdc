@@ -75,6 +75,15 @@ def test_test_cpos():
             # return equilibrium
 
 
+def test_cpos_f2c(equilibriumin):
+
+    tree = HDC()
+
+    fmodule.test_cpos_f2c(equilibriumin.c_ptr, tree.c_ptr)
+
+    return tree
+
+
 if __name__ == '__main__':
     # equilibrium = test_test_cpos()
 
@@ -89,8 +98,15 @@ if __name__ == '__main__':
     print("equilibrium['time'] -> {}".format(equilibrium['time'].as_array()))
     print("equilibrium['profiles_1d_psi'] -> {}".format(equilibrium['profiles_1d_psi'].as_array()))
 
-    print('py call c_test_cpos')
-    fmodule.c_test_cpos(equilibrium.c_ptr)
-    print('-- py call c_test_cpos end --')
+    # print('py call c_test_cpos')
+    # fmodule.c_test_cpos(equilibrium.c_ptr)
+    # print('-- py call c_test_cpos end --')
+
+    tree = test_cpos_f2c(equilibrium)
+
+    print("=== Python dump")
+    tree.dump()
+
+    print('tree["source/profiles_1d_psi"] %s' % tree["source/profiles_1d_psi"].as_array())
 
     # distsource = test_cpos(equilibrium)
