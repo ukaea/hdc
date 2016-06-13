@@ -42,6 +42,8 @@ Building HDC
 cd hdc_new
 mkdir build cd build
 cmake ..
+# In order to build with debug output run the following line:
+# cmake -DDEBUG=ON
 make
 # Optionally build documentation
 make doc
