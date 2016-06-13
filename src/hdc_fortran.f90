@@ -330,7 +330,6 @@ module hdc_fortran
 !         module procedure hdc_set_double_2d_path
         module procedure hdc_set_double_scalar
         module procedure hdc_set_double_scalar_path
-!         module procedure hdc_set_double_scalar
         module procedure hdc_set_int32_scalar
         module procedure hdc_set_int32_scalar_path
         module procedure hdc_set_child
@@ -640,7 +639,6 @@ contains
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-!         print *, shape_,"A", data
         call c_hdc_set_int8_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_int8_1d_path
     
@@ -655,7 +653,6 @@ contains
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-!         print *, shape_,"A", data
         call c_hdc_set_int32_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_int32_1d_path
     
@@ -670,7 +667,6 @@ contains
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-!         print *, shape_,"A", data
         call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_double_2d
     
@@ -689,7 +685,6 @@ contains
         ndim = int(s(1),1)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-!         print *, shape_,"A", data
         call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_double_ad
     
@@ -771,7 +766,6 @@ contains
         data_ptr = c_hdc_as_voidptr(this)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int8_1d_
     
     subroutine hdc_as_int8_1d_sub(this, res)
@@ -799,7 +793,6 @@ contains
         data_ptr = c_hdc_as_voidptr(this)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int8_2d_
     
     subroutine hdc_as_int8_2d_sub(this, res)
@@ -827,7 +820,6 @@ contains
         data_ptr = c_hdc_as_voidptr(this)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int32_1d_
     
     subroutine hdc_as_int32_1d_sub(this, res)
@@ -855,7 +847,6 @@ contains
         data_ptr = c_hdc_as_voidptr(this)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int32_2d_
     
     subroutine hdc_as_int32_2d_sub(this, res)
@@ -1000,7 +991,6 @@ contains
         data_ptr = c_hdc_as_voidptr(this)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_double_2d_
 
     subroutine hdc_as_double_2d_sub(this,res)
@@ -1029,7 +1019,6 @@ contains
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_double_2d_path
 
     subroutine hdc_as_double_2d_path_sub(this,path,res)
@@ -1059,7 +1048,6 @@ contains
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_double_1d_path
 
     subroutine hdc_as_double_1d_path_sub(this,path,res)
@@ -1089,7 +1077,6 @@ contains
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int8_2d_path
 
     subroutine hdc_as_int8_2d_path_sub(this,path,res)
@@ -1119,7 +1106,6 @@ contains
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int8_1d_path
 
     subroutine hdc_as_int8_1d_path_sub(this,path,res)
@@ -1178,7 +1164,6 @@ contains
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
-!         print *,"RES",res
     end function hdc_as_int32_1d_path
 
     subroutine hdc_as_int32_1d_path_sub(this,path,res)
