@@ -360,7 +360,8 @@ Json::Value HDC::to_json(int mode) {
     Json::Value root;
     if (mode == 0) {
         if (this->type == HDC_DYND) {
-            root = dynd::format_json(this->data->at(0)).as<string>();        
+            root = dynd::format_json(this->data->at(0)).as<string>();
+            
         }
         else if (this->type == HDC_STRUCT) {
             for (auto it = this->children->begin(); it != this->children->end(); it++) {
@@ -373,7 +374,7 @@ Json::Value HDC::to_json(int mode) {
         }
         else if (this->type == HDC_LIST) {
             Json::Value elements;
-            for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));        
+            for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
         }
     }
     else if (mode == 1) {
@@ -398,7 +399,7 @@ Json::Value HDC::to_json(int mode) {
                 case 5:
                     dt = this->data->at(0)(0,0,0,0,0).get_type();
                     break;
-                default: // Yes, I tried more.
+                default:
                     cout << "Error: unsupported number of dimensions." << endl;
                     break;
             }
@@ -433,7 +434,18 @@ Json::Value HDC::to_json(int mode) {
 }
 
 void HDC::dump() {
-    cout << this->to_json(0) << endl;
+    
+    // get rid of quotes produced by writing dynd::nd::array.as<string>
+    stringstream tmp;
+    tmp << this->to_json(0);
+    string tmp_str = tmp.str();
+    string la("["); // left after
+    string lb("\"["); // left before
+    replace_all(tmp_str,lb,la);
+    string ra("]"); // right after
+    string rb("]\""); // right before
+    replace_all(tmp_str,rb,ra);
+    cout << tmp_str;
     return;
 }
 
