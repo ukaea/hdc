@@ -37,7 +37,7 @@ contains
         call hdc_dump(tree)
         
         ! Prepare some data
-        array = (/7,2,3,4/)
+        array = (/7,20,3,4/)
         
         ! Add data to a single node
         data = hdc_new_empty()
@@ -54,8 +54,11 @@ contains
         call hdc_print_type_str(node)
         call hdc_get(node,array2)
         print *,array2
-        
-        
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        call hdc_set_data(node,3*array2(:))
+        call hdc_get(node,array2)
+        print *,array2
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ! Serialize data to JSON
         call hdc_to_json(tree,"tree.txt",0)
         ! test dump

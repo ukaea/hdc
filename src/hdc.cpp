@@ -87,9 +87,6 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     cout << "Adding node: " << endl;
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
-    /////////////
-    cout << this->get_type_str() << endl;
-    /////////////
     #endif
     if (!(this->type == HDC_EMPTY || this->type == HDC_STRUCT)) {
         cout << "Cannot add child to this node. Data assigned???" << endl;

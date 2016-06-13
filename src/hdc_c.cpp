@@ -92,7 +92,6 @@ bool hdc_has_child(struct hdc_t* tree, char* path) {
 
 void hdc_set_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data) {
     HDC* t = (HDC*)tree->obj;
-//     cout << (int)((int8_t*)data)[0] << (int)((int8_t*)data)[1] << (int)((int8_t*)data)[2] << (int)((int8_t*)data)[3] << endl;
     t->set_data<int8_t>(ndim, shape, data);
     return;
 }

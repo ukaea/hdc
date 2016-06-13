@@ -28,7 +28,7 @@
 #define HDC_LIST 3
 #define HDC_ERROR 4
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -95,15 +95,16 @@ public:
         }
         dynd::nd::array arr;
         dynd::ndt::type dtype = dynd::ndt::make_type<T>();
+        char* data2 = (char*)malloc(16);
+        memcpy(data2,data,16);
         arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
-        arr->data = (char*) data;
+        arr->data = (char*) data2;
 //         arr.assign(data); // New versions of DyND
         #ifdef DEBUG
         cout << arr << endl;
         #endif
         if (this->data->size()) this->data->clear();
         this->data->push_back(arr);
-        //this->data = arr;
         this->type = HDC_DYND;
         return;
     };
@@ -117,6 +118,7 @@ public:
         this->get(path)->set_data<T>(ndim,shape,data);
         return;
     };
+    
     /** Sets scalar data to current node. */
     template <typename T> void set_data(T data) 
     {
@@ -179,9 +181,9 @@ public:
         if (this->children->size()) {
             cout << "This node is not terminal" << endl;
         }
-        #ifdef DEBUG
+        //#ifdef DEBUG
         cout << "From get:" << this->data->at(0) << endl;
-        #endif
+        //#endif
         return (T)(this->data->at(0)->data);
     }
     /** Returns pointer to data of node under given path. */
