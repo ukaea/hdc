@@ -183,9 +183,9 @@ public:
         if (this->children->size()) {
             cout << "This node is not terminal" << endl;
         }
-        //#ifdef DEBUG
+        #ifdef DEBUG
         cout << "From get:" << this->data->at(0) << endl;
-        //#endif
+        #endif
         return (T)(this->data->at(0)->data);
     }
     /** Returns pointer to data of node under given path. */
