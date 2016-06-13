@@ -14,6 +14,30 @@ struct hdc_t* hdc_new_empty() {
     return h;
 }
 
+hdc_t* hdc_new_int8(int8_t ndim, long int* shape)
+{
+    HDC* node = hdc_empty_array<int8_t>(ndim, shape);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
+hdc_t* hdc_new_int32(int8_t ndim, long int* shape)
+{
+    HDC* node = hdc_empty_array<int32_t>(ndim, shape);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
+hdc_t* hdc_new_double(int8_t ndim, long int* shape)
+{
+    HDC* node = hdc_empty_array<double>(ndim, shape);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
 void* hdc_new_void_ptr() {
     return (void*) new HDC();
 }

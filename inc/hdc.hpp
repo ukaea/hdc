@@ -240,6 +240,13 @@ private:
     bool has_child(vector<string> vs);
 };
 
+
+template <typename T> HDC* hdc_empty_array(int8_t ndim, long* shape) {
+    dynd::ndt::type dtype = dynd::ndt::make_type<T>();
+    dynd::nd::array arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
+    return new HDC(arr);
+}
+
 vector<string>& split(const string &s, char delim, vector<string>& elems);
 vector<string> split(const string &s, char delim);
 void replace_all(std::string& str, const std::string& from, const std::string& to);

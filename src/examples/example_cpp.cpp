@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     // Add data to a subtree
     tree->set_data<int32_t>("aaa/bbb/ccc",1,shape,(void*)array);
 
-    // Ask on some data details, use subtree to shorten the path
+    // Ask for some data details, use subtree to shorten the path
     int32_t ndim2 = node->get_ndim();
     long int* shape2 = node->get_shape();
     cout << "Dimension: " << (int)ndim2 << endl << "Shape: ";

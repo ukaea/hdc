@@ -303,7 +303,7 @@ long int* HDC::get_shape()
         return shape;
     }
     else if (this->type == HDC_EMPTY) {
-        long int* shape = (long int*)malloc(1 * sizeof(long int)); 
+        long int* shape = (long int*)malloc(1 * sizeof(long int));
         // empty shape = (0, )
         shape[0] = 0;
         return shape;
@@ -379,7 +379,7 @@ Json::Value HDC::to_json(int mode) {
     else if (mode == 1) {
             if (this->type == HDC_DYND) {
             dynd::ndt::type dt;
-            switch(this->get_ndim()) { // I really don't want to spend several hours by digging into dynd sources, sorry.
+            switch(this->get_ndim()) {
                 case 0:
                     dt = this->data->at(0).get_type();
                     break;
@@ -597,7 +597,6 @@ void HDC::to_json(string filename, int mode)
     json_file.open(filename.c_str());
     // json_file << this->to_json();
     // get rid of quotes produced by writing dynd::nd::array.as<string>
-    // see https://www.youtube.com/watch?v=SiUz_akTmcY for details...
     stringstream tmp;
     tmp << this->to_json(mode);
     string tmp_str = tmp.str();
@@ -1065,6 +1064,8 @@ int8_t get_ndim(const Json::Value& root) {
     return dim;
 }
 
+
+
 //------------------ String manipulation -----------------------------
 
 vector<string> split(const string &s, char delim) {
@@ -1094,7 +1095,6 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
 }
-
 
 void hello__() {
     cout << "Hello from c++" << endl;

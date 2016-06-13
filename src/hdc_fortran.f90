@@ -34,6 +34,21 @@ module hdc_fortran
             type(c_ptr), value :: obj
         end subroutine hdc_delete_ptr
         
+        function hdc_new_int8() result(obj) bind(c,name="hdc_new_int8")
+            import
+            type(hdc_t) :: obj
+        end function hdc_new_int8
+        
+        function hdc_new_int32() result(obj) bind(c,name="hdc_new_int32")
+            import
+            type(hdc_t) :: obj
+        end function hdc_new_int32
+        
+        function hdc_new_double() result(obj) bind(c,name="hdc_new_double")
+            import
+            type(hdc_t) :: obj
+        end function hdc_new_double
+        
         !> Desctructor. This is interface to C.
         subroutine hdc_delete(obj) bind(c,name="hdc_delete")
             import
