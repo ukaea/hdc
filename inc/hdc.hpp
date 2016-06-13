@@ -95,8 +95,10 @@ public:
         }
         dynd::nd::array arr;
         dynd::ndt::type dtype = dynd::ndt::make_type<T>();
-        char* data2 = (char*)malloc(16);
-        memcpy(data2,data,16);
+        size_t size = sizeof(T);
+        for (int8_t i = 0;i<ndim;i++) size = size * shape[i];
+        char* data2 = (char*)malloc(size);
+        memcpy(data2,data,size);
         arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
         arr->data = (char*) data2;
 //         arr.assign(data); // New versions of DyND
