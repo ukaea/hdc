@@ -49,8 +49,6 @@ _hdc_get_type_str.restype = ctypes.c_char_p
 class HDC(object):
     """HDC Python binding"""
 
-    _NP_REFS = {}
-
     def __init__(self, data=None):
         super(HDC, self).__init__()
         self._c_ptr = _hdc_new_empty()
@@ -132,13 +130,6 @@ class HDC(object):
             elif np.issubdtype(data.dtype, np.float_):
                 cdata = data.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
                 libchdc.hdc_set_double(self._c_ptr, cndim, byref(cshape), cdata)
-            # TODO temporary solution - keep reference to the original numpy object
-            #      so that the memory bleck does not get deallocated
-            self._push_np_ref(self._c_ptr, data)
-
-    @classmethod
-    def _push_np_ref(cls, hdc_c_ptr, np_obj):
-        cls._NP_REFS[ctypes.addressof(hdc_c_ptr.contents)] = np_obj
 
     def get_type_str(self):
         return _hdc_get_type_str(self._c_ptr).decode()
