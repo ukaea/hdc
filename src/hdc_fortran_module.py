@@ -26,7 +26,9 @@ if __name__ == '__main__':
     # equilibrium = test_test_cpos()
 
     equilibrium = HDC()
-    equilibrium['profiles_1d/psi'] = np.linspace(0, 1, 5)
+    psi = np.linspace(0, 1, 5)
+    equilibrium['profiles_1d/psi'] = psi
+    del psi
     # equilibrium['profiles_1d/psi'] = np.array(4.5)
     # libchdc.hdc_set_data_double_path(
     #     equilibrium.c_ptr, "time".encode(), ctypes.c_int8(0),

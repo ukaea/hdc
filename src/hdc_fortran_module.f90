@@ -128,10 +128,9 @@ subroutine test_cpos(equilibriumin, distsourceout)
 
         ! call hdc_set(distsource_i, 'source/profiles_1d/psi', 2 * hdc_as_double_1d(equilibrium_i, 'profiles_1d/psi'))
         psi_test = (/-1.d0, -2.d0, 3.d0, 4.4d0/)
-        ! call hdc_set(distsource_i, 'source/profiles_1d/psi', -3 * psi(:))  ! doesn work
-        ! call hdc_set(distsource_i, 'source/profiles_1d/psi', psi_test)  ! this works only in current scope (subroutine / function)
-        call hdc_set(distsource_i, 'source/profiles_1d/psi', psi)  ! this works as expected
-        write(*,*) 2*psi
+        call hdc_set(distsource_i, 'source/profiles_1d/psi', -3 * psi(:))
+        ! call hdc_set(distsource_i, 'source/profiles_1d/psi', psi_test)
+        ! call hdc_set(distsource_i, 'source/profiles_1d/psi', psi)
 
         call hdc_get(distsource_i, 'source/profiles_1d/psi', psi)
         ! psi = hdc_as_double(equilibrium_i, 'profiles_1d/psi')
