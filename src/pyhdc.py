@@ -173,6 +173,11 @@ class HDC(object):
 
         return res
 
+    def dump(self):
+        """Dump the continer
+        """
+        libchdc.hdc_dump(self.c_ptr)
+
 
 if __name__ == '__main__':
 
