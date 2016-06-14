@@ -137,6 +137,7 @@ public:
         this->type = HDC_DYND;
         return;
     };
+
     /** Sets scalar data to node on given path. */
     template <typename T> void set_data(string path, T data) 
     {
@@ -175,19 +176,37 @@ public:
     int8_t get_ndim(string path); 
     /** Returns shape of node under path. */
     long int* get_shape(string path); 
-    
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
-        // returns data of given type
         if (this->children->size()) {
             cout << "This node is not terminal" << endl;
         }
         #ifdef DEBUG
-        cout << "From get:" << this->data->at(0) << endl;
+        cout << "From as:" << this->data->at(0) << endl;
         #endif
         return (T)(this->data->at(0)->data);
     }
+    /** Returns string. Needs to have separate function */
+    std::string as_string() {
+        if (this->children->size()) {
+            cout << "This node is not terminal" << endl;
+        }
+        #ifdef DEBUG
+        cout << "From as_string:" << this->data->at(0) << endl;
+        #endif
+        return this->data->at(0).as<std::string>();
+    }
+    
+    /** Returns string of node under given path. Needs to have separate function */
+    std::string as_string(string path)
+    {
+        #ifdef DEBUG
+        cout << "as<T>(" << path << ")" << endl;
+        #endif
+        return this->get(path)->as_string();
+    }
+    
     /** Returns pointer to data of node under given path. */
     template<typename T> T as(string path)
     {
@@ -196,6 +215,7 @@ public:
         #endif
         return this->get(path)->as<T>();
     }
+    
     /** Returns double. */
     double as_double() 
     {

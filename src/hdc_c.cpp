@@ -285,6 +285,19 @@ double hdc_as_double_scalar(hdc_t* tree)
     return (t->as<double*>())[0];
 }
 
+const char* hdc_as_string(hdc_t* tree)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->as_string().c_str();
+}
+
+const char* hdc_as_string_path(hdc_t* tree, char* path)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->as_string(path).c_str();
+}
+
+
 double hdc_as_double_scalar_path(hdc_t* tree, char* path)
 {
     HDC* t = (HDC*)tree->obj;

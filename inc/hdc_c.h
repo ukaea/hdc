@@ -32,7 +32,8 @@ void hdc_set_double(struct hdc_t* tree, int8_t ndim, const long int* shape, void
 void hdc_set_int32(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);  /**  */
 void hdc_set_string_path(struct hdc_t* tree, char* path, char* str);  /**  */
 void hdc_set_string(struct hdc_t* tree, char* str);  /**  */
-
+const char* hdc_as_string_path(struct hdc_t* tree, char* path);
+const char* hdc_as_string(struct hdc_t* tree);
 
 int8_t hdc_get_ndim(struct hdc_t* tree);  /**  */
 long int* hdc_get_shape(struct hdc_t* tree);  /** Returns shape of array of node. */
