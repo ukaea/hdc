@@ -54,8 +54,6 @@ HDC::~HDC()
             delete list_elements;
         }
     }
-    // set type back to empty if the only child was deleted.
-    if (children->empty()) this->set_type(HDC_EMPTY);
 }
 
 bool HDC::has_child(string path)
@@ -158,7 +156,6 @@ void HDC::delete_child(vector<string> vs) {
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
-    
     string first = vs[0];
     vs.erase(vs.begin());
     if (!this->has_child(vs)) return;
@@ -168,6 +165,8 @@ void HDC::delete_child(vector<string> vs) {
     } else {
         this->children->at(first)->delete_child(vs);
     }
+    // set type back to empty if the only child was deleted.
+    if (children->empty()) this->set_type(HDC_EMPTY);
     return;
 }
 
