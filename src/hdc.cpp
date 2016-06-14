@@ -146,7 +146,7 @@ void HDC::create_list(size_t n) {
 void HDC::add_child(string path, HDC* n)
 {
     #ifdef DEBUG
-    cout << "Adding child: " << path << endl;
+    cout << "Adding node: " << path << endl;
     #endif
     
     add_child(split(path,'/'),n);
@@ -450,6 +450,9 @@ void HDC::dump() {
     string ra("]"); // right after
     string rb("]\""); // right before
     replace_all(tmp_str,rb,ra);
+    string sa(""); // slash after
+    string sb("\\\""); // slash before
+    replace_all(tmp_str,sb,sa);
     cout << tmp_str;
     return;
 }
@@ -651,6 +654,9 @@ void HDC::to_json(string filename, int mode)
     string ra("]"); // right after
     string rb("]\""); // right before
     replace_all(tmp_str,rb,ra);
+    string sa(""); // slash after
+    string sb("\\\""); // slash before
+    replace_all(tmp_str,sb,sa);
     #ifdef DEBUG
     cout << tmp_str;
     #endif
