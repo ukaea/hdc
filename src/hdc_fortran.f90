@@ -17,38 +17,38 @@ module hdc_fortran
             import
             type(hdc_t) :: obj
         end function hdc_new_empty
-        
+
         function c_hdc_new_void_ptr() result(obj) bind(c, name="hdc_new_void_ptr")
             import
             type(c_ptr) :: obj
         end function c_hdc_new_void_ptr
-        
+
         function hdc_get_ptr(tree) result(ptr) bind(c, name="hdc_get_ptr")
             import
             type(hdc_t) :: tree
             type(c_ptr) :: ptr
         end function hdc_get_ptr
-        
+
         subroutine hdc_delete_ptr(obj) bind(c,name="hdc_delete")
             import
             type(c_ptr), value :: obj
         end subroutine hdc_delete_ptr
-        
+
         function hdc_new_int8() result(obj) bind(c,name="hdc_new_int8")
             import
             type(hdc_t) :: obj
         end function hdc_new_int8
-        
+
         function hdc_new_int32() result(obj) bind(c,name="hdc_new_int32")
             import
             type(hdc_t) :: obj
         end function hdc_new_int32
-        
+
         function hdc_new_double() result(obj) bind(c,name="hdc_new_double")
             import
             type(hdc_t) :: obj
         end function hdc_new_double
-        
+
         !> Desctructor. This is interface to C.
         subroutine hdc_delete(obj) bind(c,name="hdc_delete")
             import
@@ -75,14 +75,14 @@ module hdc_fortran
             import
             type(hdc_t), value :: obj
         end subroutine hdc_print_type_str
-        
+
         subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
             import
             type(hdc_t), value :: obj
             character(kind=c_char), intent(in) :: path(*)
             integer, value :: mode
         end subroutine c_hdc_to_json
-        
+
         !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
             import
@@ -126,7 +126,7 @@ module hdc_fortran
             character(kind=c_char), intent(in) :: path(*)
             logical(kind=c_bool) :: res ! change this to c_bool later
         end function c_hdc_has_child
-        
+
         !> Sets array of int8. This is interface to C.
         subroutine c_hdc_set_int8(obj, ndim, shape_, data) bind(c,name="hdc_set_int8")
             import
@@ -135,7 +135,7 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_int8
-        
+
         !> Sets array of int32. This is interface to C.
         subroutine c_hdc_set_int32(obj, ndim, shape_, data) bind(c,name="hdc_set_int32")
             import
@@ -144,7 +144,7 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_int32
-        
+
         !> Sets array of int32. This is interface to C.
         subroutine c_hdc_set_int32_path(obj, path, ndim, shape_, data) bind(c,name="hdc_set_int32_path")
             import
@@ -154,7 +154,7 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_int32_path
-        
+
         !> Sets array of int8. This is interface to C.
         subroutine c_hdc_set_int8_path(obj, path, ndim, shape_, data) bind(c,name="hdc_set_int8_path")
             import
@@ -164,8 +164,8 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_int8_path
-        
-        
+
+
         !> Sets array of double. This is interface to C.
         subroutine c_hdc_set_double(obj, ndim, shape_, data) bind(c,name="hdc_set_double")
             import
@@ -318,7 +318,7 @@ module hdc_fortran
             import
             type(hdc_t), value:: obj
         end subroutine hdc_dump
-        
+
     end interface
 
     !> Generic set interface.
@@ -351,7 +351,7 @@ module hdc_fortran
         module procedure hdc_set_string
         module procedure hdc_set_string_path
      end interface hdc_set
-     
+ 
      interface hdc_get_slice
         module procedure hdc_get_slice_
         module procedure hdc_get_slice_l
@@ -422,7 +422,7 @@ module hdc_fortran
         module procedure hdc_as_int32_2d_path_sub
         module procedure hdc_as_double_path_sub
     end interface hdc_get
-    
+
     interface hdc_get_shape
         module procedure hdc_get_shape_
         module procedure hdc_get_shape_pos
@@ -431,7 +431,7 @@ module hdc_fortran
     interface hdc_get_ptr_f
         module procedure hdc_get_ptr_f
     end interface hdc_get_ptr_f
-    
+
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json
@@ -444,7 +444,7 @@ contains
         type(hdc_t) :: node
         call c_hdc_add_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_add_child
-    
+
     subroutine hdc_delete_child(this, path)
         use iso_c_binding
         type(hdc_t) :: this
@@ -452,7 +452,7 @@ contains
         type(hdc_t) :: node
         call c_hdc_delete_child(this, trim(path)//c_null_char)
     end subroutine hdc_delete_child
-    
+
     function hdc_has_child(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -460,14 +460,14 @@ contains
         logical(kind=c_bool) :: res
         res = c_hdc_has_child(this, trim(path)//c_null_char)
     end function hdc_has_child
-    
+
     function hdc_get_ndim(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: res
         res = c_hdc_get_ndim(this)
     end function hdc_get_ndim
-    
+
     function hdc_get_ndim_path(this,path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -475,7 +475,7 @@ contains
         integer(kind=c_int8_t) :: res
         res = c_hdc_get_ndim_path(this, trim(path)//c_null_char)
     end function hdc_get_ndim_path
-    
+
     function hdc_get_shape_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -487,7 +487,7 @@ contains
         shape_ptr = c_hdc_get_shape(this)
         call c_f_pointer(shape_ptr, res, (/ ndim /))
     end function hdc_get_shape_
-    
+
     function hdc_get_shape_path(this,path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -499,7 +499,7 @@ contains
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         call c_f_pointer(shape_ptr, res, (/ ndim /))
     end function hdc_get_shape_path
-    
+
     function hdc_get_shape_pos(this, pos) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -513,7 +513,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         res = shape_(pos)
     end function hdc_get_shape_pos
-    
+
     subroutine hdc_set_child(this, path, node)
         use iso_c_binding
         type(hdc_t) :: this
@@ -547,7 +547,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_int32(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_int32_1d
-    
+
     subroutine hdc_set_int8_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -576,7 +576,7 @@ contains
         type(hdc_t) :: src, dest
         dest = c_hdc_copy(src)
     end subroutine hdc_copy
-    
+
     subroutine hdc_set_int32_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -584,7 +584,7 @@ contains
         character(len=*), intent(in) :: path
         call c_hdc_set_int32_scalar_path(this, trim(path)//c_null_char, data)
     end subroutine hdc_set_int32_scalar_path
-    
+
     subroutine hdc_set_double_1d(this, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -597,7 +597,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_double_1d
-    
+
     subroutine hdc_set_double_1d_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -611,7 +611,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_double_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_double_1d_path
-    
+
     subroutine hdc_set_double_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -620,29 +620,29 @@ contains
         character(len=*), intent(in) :: path
         call c_hdc_set_double_scalar_path(this, trim(path)//c_null_char, data)
     end subroutine hdc_set_double_scalar_path
-    
-    
+
+
     subroutine hdc_set_double_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
         real(kind=dp) :: data
         call c_hdc_set_double_scalar(this, data)
     end subroutine hdc_set_double_scalar
-    
+
     subroutine hdc_set_string_path(this, path, str)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path, str
         call c_hdc_set_string_path(this, trim(path)//c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string_path
-    
+
     subroutine hdc_set_string(this, str)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*) :: str
         call c_hdc_set_string(this, trim(str)//c_null_char)
     end subroutine hdc_set_string
-    
+
     subroutine hdc_set_int8_1d_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -656,7 +656,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_int8_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_int8_1d_path
-    
+
     subroutine hdc_set_int32_1d_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
@@ -670,7 +670,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_int32_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_int32_1d_path
-    
+
 
     subroutine hdc_set_double_2d(this, data)
         use iso_c_binding
@@ -684,7 +684,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_double_2d
-    
+
     subroutine hdc_set_double_ad(this, data, shape_)
     !Arbitrary dimension array as argument - shape has to be provided
         use iso_c_binding
@@ -702,7 +702,7 @@ contains
         shape_ptr = c_loc(shape_)
         call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_double_ad
-    
+
     function hdc_get_child(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -710,7 +710,7 @@ contains
         type(hdc_t) :: res
         res = c_hdc_get_child(this, trim(path)//c_null_char)
     end function hdc_get_child
-    
+
     subroutine hdc_get_child_sub(this, path, res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -718,7 +718,7 @@ contains
         type(hdc_t) :: res
         res = hdc_get_child(this, trim(path)//c_null_char)
     end subroutine hdc_get_child_sub
-    
+
     function hdc_get_slice_path(this, path, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -727,7 +727,7 @@ contains
         type(hdc_t) :: res
         res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
     end function hdc_get_slice_path
-    
+
     function hdc_get_slice_l_path(this, path, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -736,7 +736,7 @@ contains
         type(hdc_t) :: res
         res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
     end function hdc_get_slice_l_path
-    
+
     subroutine hdc_get_slice_path_sub(this, path, ii, res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -745,7 +745,7 @@ contains
         type(hdc_t) :: res
         res = hdc_get_slice_path(this, trim(path)//c_null_char, ii)
     end subroutine hdc_get_slice_path_sub
-    
+
     function hdc_get_slice_(this, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -753,7 +753,7 @@ contains
         type(hdc_t) :: res
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_
-    
+
     function hdc_get_slice_l(this, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -761,14 +761,14 @@ contains
         type(hdc_t) :: res
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_l
-    
+
     subroutine hdc_get_slice_sub(this, ii, res)
         type(hdc_t) :: this
         integer :: ii
         type(hdc_t) :: res
         res = hdc_get_slice_(this, ii)
     end subroutine hdc_get_slice_sub
-    
+
     function hdc_as_int8_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -782,7 +782,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int8_1d_
-    
+
     subroutine hdc_as_int8_1d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
@@ -795,7 +795,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_1d_sub
-    
+
     function hdc_as_int8_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -809,7 +809,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int8_2d_
-    
+
     subroutine hdc_as_int8_2d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
@@ -822,7 +822,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_2d_sub
-    
+
     function hdc_as_int32_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -836,7 +836,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int32_1d_
-    
+
     subroutine hdc_as_int32_1d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
@@ -849,7 +849,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_1d_sub
-    
+
     function hdc_as_int32_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -863,7 +863,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int32_2d_
-    
+
     subroutine hdc_as_int32_2d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
@@ -884,13 +884,13 @@ contains
         real(kind=dp) :: res
         res = c_hdc_as_double_scalar(this)
     end function hdc_as_double_
-    
+
     subroutine hdc_as_double_sub(this, res)
         type(hdc_t) :: this
         real(kind=dp) :: res
         res = hdc_as_double_(this)
     end subroutine hdc_as_double_sub
-    
+
     function hdc_as_double_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -899,14 +899,14 @@ contains
         real(kind=dp) :: res
         res = c_hdc_as_double_scalar_path(this, trim(path)//c_null_char)
     end function hdc_as_double_path
-    
+
     subroutine hdc_as_double_path_sub(this, path, res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         real(kind=dp) :: res
         res = hdc_as_double_(this)
     end subroutine hdc_as_double_path_sub
-    
+
     function hdc_as_int8_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -915,14 +915,14 @@ contains
         integer(kind=c_int8_t) :: res
         res = c_hdc_as_int8_scalar_path(this, trim(path)//c_null_char)
     end function hdc_as_int8_path
-    
+
     subroutine hdc_as_int8_path_sub(this, path, res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         integer(kind=c_int8_t) :: res
         res = hdc_as_int8_path(this,trim(path)//c_null_char)
     end subroutine hdc_as_int8_path_sub
-    
+
     function hdc_as_int32_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -931,14 +931,14 @@ contains
         integer(kind=c_int32_t) :: res
         res = c_hdc_as_int32_scalar_path(this, trim(path)//c_null_char)
     end function hdc_as_int32_path
-    
+
     subroutine hdc_as_int32_path_sub(this, path, res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         integer(kind=c_int32_t) :: res
         res = hdc_as_int32_path(this,trim(path)//c_null_char)
     end subroutine hdc_as_int32_path_sub
-    
+
     function hdc_as_int8_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -946,13 +946,13 @@ contains
         integer(kind=c_int8_t) :: res
         res = c_hdc_as_int8_scalar(this)
     end function hdc_as_int8_
-    
+
     subroutine hdc_as_int8_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: res
         res = hdc_as_int8_(this)
     end subroutine hdc_as_int8_sub
-    
+
     function hdc_as_int32_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -960,13 +960,13 @@ contains
         integer(kind=c_int32_t) :: res
         res = c_hdc_as_int32_scalar(this)
     end function hdc_as_int32_
-    
+
     subroutine hdc_as_int32_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int32_t) :: res
         res = hdc_as_int32_(this)
     end subroutine hdc_as_int32_sub
-    
+
     function hdc_as_double_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -980,7 +980,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_double_1d_
-    
+
     subroutine hdc_as_double_1d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
@@ -993,7 +993,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_double_1d_sub
-    
+
     function hdc_as_double_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -1049,7 +1049,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_double_2d_path_sub
-    
+
     function hdc_as_double_1d_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -1136,7 +1136,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_1d_path_sub
-    
+
         function hdc_as_int32_2d_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -1165,7 +1165,7 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_2d_path_sub
-    
+
     function hdc_as_int32_1d_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -1201,7 +1201,7 @@ contains
         integer :: mode
         call c_hdc_to_json(this,trim(path)//c_null_char, mode)
     end subroutine hdc_to_json
-    
+
 
     subroutine hdc_new_pokus(res)
         use iso_c_binding
@@ -1210,7 +1210,7 @@ contains
         node = hdc_new_empty()
         res = c_loc(node)
     end subroutine hdc_new_pokus
-    
+
     function hdc_new_ptr() result(res)
         use iso_c_binding
         type(hdc_t), pointer :: struct
@@ -1219,18 +1219,18 @@ contains
         struct%obj = c_hdc_new_void_ptr()
         res = c_loc(struct)
     end function hdc_new_ptr
-    
+
     subroutine hello_fort()
         print *, "Hello from fortran..."
     end subroutine hello_fort
-    
+
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding
         type(hdc_t), target :: tree
         type(c_ptr) :: res
         res = c_loc(tree)
     end function hdc_get_ptr_f
-    
+
     function c_to_f_string(s) result(str)
         use iso_c_binding
         character(kind=c_char,len=1), intent(in) :: s(*)
@@ -1245,7 +1245,7 @@ contains
         allocate(character(len=nchars) :: str)
         str = transfer(s(1:nchars), str)
     end function c_to_f_string
-    
+
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
 ! https://gcc.gnu.org/onlinedocs/gfortran/Derived-Types-and-struct.html
