@@ -43,7 +43,10 @@ HDC::~HDC()
         #ifdef DEBUG
         cout << "Deleting children..." << endl;
         #endif
-        for (auto it = children->begin(); it != children->end(); it++) delete it->second;
+        for (auto it = children->begin(); it != children->end(); it++) {
+            delete it->second;
+            cout << "Remove: " << it->first << endl;
+        }
         children->clear();
     } else {
         delete children;
@@ -68,6 +71,7 @@ bool HDC::has_child(vector<string> vs)
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
+    if(vs.empty()) return false; //TODO: re-do this!!!
     string first = vs[0];
     vs.erase(vs.begin());
 
@@ -156,11 +160,12 @@ void HDC::delete_child(vector<string> vs) {
     for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
+    if (!this->has_child(vs) || vs.empty())  {
+        return;
+    }
     string first = vs[0];
     vs.erase(vs.begin());
-    if (!this->has_child(vs)) return;
-    if (!vs.empty()) {
-        delete this->children->at(first);
+    if (vs.empty()) {
         this->children->erase(first);
     } else {
         this->children->at(first)->delete_child(vs);
