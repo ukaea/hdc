@@ -935,7 +935,7 @@ HDC* json_to_hdc(const Json::Value& root) {
                 // call recursively -- save list
                 tree->set_type(HDC_LIST);
                 for (int i = 0;i<root.size();i++) {
-                    tree->append_slice(json_to_hdc(&(root[i])));
+                    tree->append_slice(json_to_hdc((root[i])));
                 }
             }
             break;

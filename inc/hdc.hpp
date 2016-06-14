@@ -82,7 +82,9 @@ public:
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
-            cout << "not found, adding..." << endl;
+            #ifdef DEBUG
+            cout << "\"" << path << "\" not found, adding..." << endl;
+            #endif
         }
         this->get(path)->set_data<T>(data);
         return;
@@ -116,7 +118,9 @@ public:
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
+            #ifdef DEBUG
             cout << "not found, adding..." << endl;
+            #endif
         }
         this->get(path)->set_data<T>(ndim,shape,data);
         return;
@@ -144,7 +148,9 @@ public:
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
+            #ifdef DEBUG
             cout << "not found, adding..." << endl;
+            #endif
         }
         this->get(path)->set_data(data);
         return;
