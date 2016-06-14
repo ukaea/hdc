@@ -54,6 +54,8 @@ HDC::~HDC()
             delete list_elements;
         }
     }
+    // set type back to empty if the only child was deleted.
+    if (children->empty()) this->set_type(HDC_EMPTY);
 }
 
 bool HDC::has_child(string path)
@@ -570,7 +572,7 @@ string HDC::get_type_str() {
             case 5:
                 dt = this->data->at(0)(0,0,0,0,0).get_type();
                 break;
-            default: // Yes, I tried more.
+            default:
                 cout << "Error: unsupported number of dimensions." << endl;
                 break;
         }
