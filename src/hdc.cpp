@@ -118,11 +118,11 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     return;
 }
 
-void HDC::set_list(vector<HDC*>* list) {
+void HDC::set_list(deque<HDC*>* lst) {
     if (this->type != HDC_EMPTY) {
         cout << "Cannot add list to a non-list node." << endl;
     }
-    this->list_elements = list;
+    this->list_elements = lst;
     return;
 }
 
@@ -131,7 +131,7 @@ void HDC::create_list(size_t n) {
         cout << "Cannot add list to a non-list node." << endl;
     }
     this->type = HDC_LIST;
-    this->list_elements = new vector<HDC*>;
+    this->list_elements = new deque<HDC*>;
     for (size_t i=0; i<n;i++) list_elements->push_back(new HDC());
     //debuging
     for (size_t i=0; i<n;i++) {
@@ -206,7 +206,6 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
     #endif
     string first = vs[0];
     vs.erase(vs.begin());
-    
     if (this->children->count(first)) {
         if (vs.empty()) {
             if (this->type != HDC_LIST) return this;
@@ -276,7 +275,7 @@ uint8_t HDC::get_type()
 void HDC::set_type(uint8_t i) {
     // More to be added here later
     this->type = i;
-    if (i == HDC_LIST && this->list_elements == nullptr) this->list_elements = new vector<HDC*>;
+    if (i == HDC_LIST && this->list_elements == nullptr) this->list_elements = new deque<HDC*>;
     return;
 }
 
@@ -500,7 +499,7 @@ HDC* HDC::copy(int copy_arrays)
         }
     } else if (this->type == HDC_LIST) {
         for (size_t i = 0; i < this->list_elements->size(); i++)
-            copy->set_slice(i,this->list_elements->at(i)->copy(copy_arrays));
+            copy->insert_slice(i,this->list_elements->at(i)->copy(copy_arrays));
     }
     else if (this->type == HDC_DYND) {
         if (copy_arrays == 1) {
@@ -519,18 +518,46 @@ HDC* HDC::copy(int copy_arrays)
     return copy;
 }
 
+void HDC::insert_slice(size_t i, HDC* h)
+{
+    #ifdef DEBUG
+    cout << "Setting slice " << i << endl;
+    #endif
+    switch (this->type) {
+        case HDC_EMPTY:
+            this->set_type(HDC_LIST);
+        case HDC_LIST:
+            this->list_elements->emplace(this->list_elements->begin()+i,h);
+            break;
+        //TODO: Add support for HDC_STRUCT here? How?
+        default:
+            cout << "Error in insert_slice(): Wrong type to call insert_slice." << endl;
+            break;
+    }
+    return;
+}
+
 void HDC::set_slice(size_t i, HDC* h)
 {
     #ifdef DEBUG
     cout << "Setting slice " << i << endl;
     #endif
-    if (this->type == HDC_LIST) {
-        if (i < this->list_elements->size()) this->list_elements->at(i) = h;
-        else if (i == this->list_elements->size()) this->append_slice(h);
-        else cout << "Error in set_slice(): Array too small." << endl;
-    } else cout << "Error in set_slice(): Wrong type to call set_slice." << endl;
+    switch (this->type) {
+        case HDC_LIST:
+            if (i >= this->list_elements->size()) {
+                cout << "Error in set_slice: Index " << i << " >= list size." << endl;
+                return;
+            }
+            this->list_elements->at(i) = h;
+            break;
+            //TODO: Add support for HDC_STRUCT here? How?
+        default:
+            cout << "Error in insert_slice(): Wrong type to call insert_slice." << endl;
+            break;
+    }
     return;
 }
+
 
 void HDC::append_slice(HDC* h) {
     if (this->type == HDC_EMPTY) {

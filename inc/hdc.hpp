@@ -12,6 +12,7 @@
 #include <dynd/types/string_type.hpp>
 #include <cstdint>
 #include <vector>
+#include <deque>
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
@@ -150,16 +151,18 @@ public:
     };
     /** Sets DyND object to current node. */
     void set_dynd(dynd::nd::array array); 
-    /** Sets HDC_LIST from std::vector<HDC*> data.*/
-    void set_list(vector<HDC*>* list); 
+    /** Sets HDC_LIST from std::deque<HDC*> data.*/
+    void set_list(deque<HDC*>* list); 
     /** Creates list with some data in nodes - just for testing some ideas. */
     void create_list(size_t n=5); 
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
     void resize(HDC* h, int recursively = 0); 
     /** Returns copy of current object. */
     HDC* copy(int copy_arrays = 0); 
+    /** Inserts node to i-th slice of current node. */
+    void insert_slice(size_t i, HDC* h);
     /** Sets node to i-th slice of current node. */
-    void set_slice(size_t i, HDC* h); 
+    void set_slice(size_t i, HDC* h);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
     void append_slice(HDC* h); 
     /** Returns type of current node. */
@@ -249,7 +252,7 @@ private:
     int8_t type;
     vector<dynd::nd::array>* data; /*!< dynd::array storage*/
     //     dynd::nd::array data;
-    vector<HDC*>* list_elements; /*!< dynd::array storage - list type*/
+    deque<HDC*>* list_elements; /*!< dynd::array storage - list type*/
     unordered_map<string, HDC*>* children; /*!< dynd::array storage - struct type*/
     
     void add_child(vector<string> vs, HDC* n);

@@ -71,6 +71,29 @@ module hdc_fortran
             type(hdc_t), value :: node
         end subroutine c_hdc_add_child
 
+        !> Sets slice to a given position. This is interface to C.
+        subroutine hdc_set_slice(obj, pos, node) bind(c,name="hdc_set_slice")
+            import
+            type(hdc_t), value :: obj
+            integer, value     :: pos
+            type(hdc_t), value :: node
+        end subroutine hdc_set_slice
+
+        !> Inserts slice to a given position. This is interface to C.
+        subroutine hdc_insert_slice(obj, pos, node) bind(c,name="hdc_insert_slice")
+            import
+            type(hdc_t), value :: obj
+            integer, value     :: pos
+            type(hdc_t), value :: node
+        end subroutine hdc_insert_slice
+
+        !> Appends slice to the end of list. This is interface to C.
+        subroutine hdc_append_slice(obj, node) bind(c,name="hdc_append_slice")
+            import
+            type(hdc_t), value :: obj
+            type(hdc_t), value :: node
+        end subroutine hdc_append_slice
+
         subroutine hdc_print_type_str(obj) bind(c,name="hdc_print_type_str")
             import
             type(hdc_t), value :: obj
@@ -351,7 +374,7 @@ module hdc_fortran
         module procedure hdc_set_string
         module procedure hdc_set_string_path
      end interface hdc_set
- 
+
      interface hdc_get_slice
         module procedure hdc_get_slice_
         module procedure hdc_get_slice_l
@@ -434,7 +457,7 @@ module hdc_fortran
 
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
-    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json
+    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice
 contains
 
     subroutine hdc_add_child(this, path, node)
