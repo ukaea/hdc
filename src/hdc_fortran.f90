@@ -451,7 +451,6 @@ module hdc_fortran
         module procedure hdc_get_shape_pos
     end interface hdc_get_shape
 
-
     interface hdc_get_ptr_f
         module procedure hdc_get_ptr_f
     end interface hdc_get_ptr_f

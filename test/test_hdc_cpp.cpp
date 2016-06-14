@@ -1,175 +1,186 @@
-#include <iostream>
 #include "hdc.hpp"
+#include "gtest/gtest.h"
+#include <string>
 
-#include <vector>
+TEST(HDC,EmptyNode) {
+    HDC* h = new HDC();
+    EXPECT_EQ(0,h->get_shape()[0]);
+    EXPECT_EQ(1,h->get_ndim());
+    EXPECT_EQ(HDC_EMPTY,h->get_type());
+    EXPECT_EQ("null",h->get_type_str());
+    EXPECT_EQ(false,h->has_child("aaa"));
+}
 
-using namespace std;
-
-
-int main(int argc, char **argv) {
-    cout << "Hello, world!" << endl;
-    
-    string s = "aaa/bbb/ccc/ddd";
-    stringstream ss(s);
-    string first;
-    getline(ss,first,'/');
-    cout << first << "   :   " << s  << endl;
-    
-    vector<string> vs;
-    split(s,'/',vs);
-    while(!vs.empty()) {
-        cout << vs[0] << endl; 
-        vs.erase(vs.begin());
-    }
+TEST(HDC,NodeManipulation) {
     HDC* tree = new HDC();
-    // test add
-    tree->add_child("aaa/bbb/ccc",new HDC());
-    tree->add_child("aaa/bbb/eee",new HDC());
-    tree->add_child("bbb/eee/aaa",new HDC());
-    // test get
-    HDC* n = tree->get_child("aaa/bbb");
-    HDC* k = n->get_child("ccc");
-    // test has
-    cout << tree->has_child("aaa/bbb/ccc") << endl;
-    cout << tree->has_child("aaa/bbb/ddd") << endl;
-    cout << tree->has_child("aaa/bbb") << endl;
-    // test delete
+    HDC* n1 = new HDC();
+    HDC* n2 = new HDC();
+    tree->add_child("aaa/bbb",n1);
+    EXPECT_EQ(HDC_STRUCT,tree->get_type());
+    EXPECT_EQ("hdc",tree->get_type_str());
+    EXPECT_EQ(true,tree->has_child("aaa/bbb"));
+    EXPECT_EQ(true,tree->has_child("aaa"));
+    EXPECT_EQ(n1,tree->get("aaa/bbb"));
+    EXPECT_NE(n2,tree->get("aaa/bbb"));
+    // Try subtree
+    HDC* sub = tree->get("aaa");
+    EXPECT_EQ(true,sub->has_child("bbb"));
+    EXPECT_EQ(n1,sub->get("bbb"));
+    // Test set
+    tree->set_child("aaa/bbb",n2);
+    EXPECT_EQ(true,sub->has_child("bbb"));
+    EXPECT_EQ(n2,sub->get("bbb"));
+    EXPECT_NE(n1,tree->get("aaa/bbb"));
+    // Test delete
     tree->delete_child("aaa/bbb");
-    cout << tree->has_child("aaa/bbb") << endl;
-    // test set
-    tree->set_child("bbb/eee/aaa",new HDC());
-    tree->set_child("bbb",new HDC());
-    cout << tree->has_child("bbb/eee/aaa") << endl;
-    
-    // test data_set
-    HDC* data = new HDC();
-    int8_t array[4] = {1,2,3,4};
-    long int shape[1];
-    shape[0] = 4;
-    data->set_data<int8_t>(1,shape,(void*)array);
-    int8_t* aaa = data->as<int8_t*>();
-    cout << (int)aaa[0] << " " << (int)aaa[2] << endl;
-    
-    // test data rewrite
-    int8_t array2[4] = {9,8,7,6};
-    data->set_data<int8_t>(1,shape,(void*)array2);
-    int8_t* aaa2 = data->as<int8_t*>();
-    cout << (int)aaa2[0] << " " << (int)aaa2[2] << endl;
-    getchar();
-    //test list
-    HDC* list = new HDC();
-    list->create_list(10);
-    HDC* slice = list->get_slice(3);
-    int8_t* bbb = slice->as<int8_t*>();
-    cout << (int)bbb[0] << endl;
-    
-    // JSON serialization
-    tree->add_child("data",data);
-    tree->add_child("list",list);
-    //tree->to_json("json.txt");
-    tree->to_json("tree.txt",0);
-    HDC* fj = from_json("pokus.txt");
-    fj->to_json("back.txt",0);
-    exit(0);
-    //delete list;
-    
-    // Copy
-    tree->copy(1)->to_json("tree2.txt",1);
-    
-    
-    // Resize
-    HDC* resized = new HDC();
-    resized->resize(tree,1);
-    resized->to_json("resized.txt");
-    
-    // data->set_data(1,shape,array);
-    // set string
-    string str = "aaa123aaa123";
-    HDC* ssss = new HDC();
-    ssss->set_data(str);
-    
-    // Test deserialization here
-    //HDC* fj = from_json("tree2.txt");
-    HDC* fi = json_to_hdc(new Json::Value(5));
-    HDC* fu = json_to_hdc(new Json::Value(5u));
-    HDC* fd = json_to_hdc(new Json::Value(5.));
-    HDC* fb = json_to_hdc(new Json::Value(true));
-    HDC* fn = json_to_hdc(new Json::Value(Json::nullValue));
-    HDC* fs = json_to_hdc(new Json::Value("aaaa"));
-    Json::Value* ar = new Json::Value();
-    ar->append(new Json::Value(8));
-    ar->append(new Json::Value(6));
-    HDC* fa = json_to_hdc(ar);
-    Json::Value* obj = new Json::Value();
-    obj->operator[]("aaa") = new Json::Value("aaaaaa");
-    obj->operator[]("bbb") = new Json::Value("bbbbbb");
-    HDC* fo = json_to_hdc(obj);
+    EXPECT_EQ(false,tree->has_child("aaa/bbb"));
+    EXPECT_EQ(true,tree->has_child("aaa"));
+    tree->add_child("aaa/bbb",n1);
+    tree->delete_child("aaa");
+    EXPECT_EQ(false,tree->has_child("aaa"));
+    EXPECT_EQ(HDC_EMPTY,tree->get_type());
+}
 
-    // test is_jagged()
-//     Json::Value* a2 = new Json::Value();
-//     a2->append(ar);
-//     a2->append(ar);
-//     a2[1].append(new Json::Value(55));
-//     cout << is_jagged(a2) << endl;
-//     // test is_all_numeric()
-//     Json::Value aa;
-//     aa.append(Json::Value(5));
-//     aa.append(Json::Value(-3));
-//     aa.append(Json::Value(5u));
-//     aa.append(Json::Value(5.));
-//     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
-//     aa.append(Json::Value("aa"));
-//     cout << "is_all_numeric: " << is_all_numeric(&aa) << endl;
-    //
-    Json::Value bb;
-    bb.append(Json::Value(5.));
-    bb.append(Json::Value(5.));
-    Json::Value a2;
-    a2.append(bb);
-    a2.append(bb);
-    cout << "is_all_numeric: " << is_all_numeric(&a2) << endl;
-    Json::Value a3;
-    a3.append(a2);
-    a3.append(a2);
-    cout << a3 << endl;
-    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-    a3[0][0][0] = Json::Value("aa");
-    cout << a3 << endl;
-    cout << "is_all_numeric: " << is_all_numeric(&a3) << endl;
-    // test is_double()
-    cout << "is_double: " << is_double(new Json::Value(5.1)) << endl;
-    cout << "is_double: " << is_double(new Json::Value(5)) << endl;
-    cout << "is_double: " << is_double(new Json::Value("aaa")) << endl;
-    cout << "is_double: " << is_double(&a3) << endl;
-    a3[0][0][0] = Json::Value(5.5);
-    cout << "is_double: " << is_double(&a3) << endl;
-    a3[0][0][0] = Json::Value(5);
-    cout << "is_double: " << is_double(&a3) << endl;
-//     test array deserialization:
-    cout << "-------- Deserialization --------" << endl;
-    getchar();
-    int8_t dim = get_ndim(&a3);
-    long* shape__ = get_shape(&a3);
-    cout << shape__[0] << " " << shape__[1] << " " << shape__[2] << endl;
-    //cout << a3 << endl;
-    HDC* tr = json_to_hdc(&a3);
-    cout << "aaa: " << (int32_t)tr->as<int32_t*>()[0] << endl;
+
+TEST(HDC,Int8DataManipulation) {
+    int8_t ndim = 1;
+    long shape[] = {4};
+    int8_t data[] = {7,20,3,5};
+    HDC* h = new HDC();
+    h->set_data<int8_t>(ndim,shape,data);
+    EXPECT_EQ(HDC_DYND,h->get_type());
+    EXPECT_EQ(1,h->get_ndim());
+    EXPECT_EQ(4,h->get_shape()[0]);
+    EXPECT_EQ("int8",h->get_type_str());
+    int8_t* data2 = h->as<int8_t*>();
+    for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    data[3] = 120;
+    h->set_data<int8_t>(ndim,shape,data);
+    data2 = h->as<int8_t*>();
+    EXPECT_EQ(120,data2[3]);
+}
+
+TEST(HDC,Int32DataManipulation) {
+    int8_t ndim = 1;
+    long shape[] = {4};
+    int32_t data[] = {777,20202020,3333,555555};
+    HDC* h = new HDC();
+    h->set_data<int32_t>(ndim,shape,data);
+    EXPECT_EQ(HDC_DYND,h->get_type());
+    EXPECT_EQ(1,h->get_ndim());
+    EXPECT_EQ(4,h->get_shape()[0]);
+    EXPECT_EQ("int32",h->get_type_str());
+    int32_t* data2 = h->as<int32_t*>();
+    for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    data[3] = 666;
+    h->set_data<int32_t>(ndim,shape,data);
+    data2 = h->as<int32_t*>();
+    EXPECT_EQ(666,data2[3]);
+}
+
+
+TEST(HDC,DoubleDataManipulation) {
+    int8_t ndim = 1;
+    long shape[] = {4};
+    double data[] = {0.0,1000.0,1.0e-200,1.0e200};
+    HDC* h = new HDC();
+    h->set_data<double>(ndim,shape,data);
+    EXPECT_EQ(HDC_DYND,h->get_type());
+    EXPECT_EQ(1,h->get_ndim());
+    EXPECT_EQ(4,h->get_shape()[0]);
+    EXPECT_EQ("float64",h->get_type_str());
+    double* data2 = h->as<double*>();
+    for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    data[3] = 666.666;
+    h->set_data<double>(ndim,shape,data);
+    data2 = h->as<double*>();
+    EXPECT_EQ(666.666,data2[3]);
+}
+
+TEST(HDC,StringDataManipulation) {
+    HDC* h = new HDC();
+    std::string str("lalalalala  bleble");
+    h->set_data<std::string>(str);
+    std::string str2 = std::string(h->as_string());
+    EXPECT_STREQ(str.c_str(), str2.c_str());
+}
+
+TEST(HDC,SliceManipulation) {
+    HDC* h = new HDC();
+    HDC* sl = new HDC();
+    HDC* sl2 = new HDC();
+    h->append_slice(sl);
+    h->append_slice(sl2);
+    EXPECT_EQ(HDC_LIST, h->get_type());
+    EXPECT_EQ("hdc", h->get_type_str());
+    EXPECT_EQ(1,h->get_ndim());
+    EXPECT_EQ(2,h->get_shape()[0]);
+    EXPECT_EQ(sl,h->get_slice(0));
+    EXPECT_EQ(sl2,h->get_slice(1));
+    HDC* sl3 = new HDC();
+    h->insert_slice(1,sl3);
+    EXPECT_EQ(sl3,h->get_slice(1));
+    EXPECT_EQ(sl2,h->get_slice(2));
+    HDC* sl4 = new HDC();
+    h->set_slice(1,sl4);
+    EXPECT_EQ(sl4,h->get_slice(1));
+}
+
+
+TEST(HDC,JsonComplete) {
+    // Prepare tree
+    int8_t ndim = 1;
+    long shape[] = {4};
+    double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};
+    int32_t data_int[] = {777,20202020,3333,555555};
+    HDC* tree = new HDC();
+    tree->set_data<double>("aaa/bbb/double",ndim,shape,data_double);
+    tree->set_data<int>("aaa/bbb/int",ndim,shape,data_int);
+    tree->add_child("aaa/bbb/empty", new HDC());
+    HDC* list = new HDC();
+    for (int i=0;i<5;i++) list->append_slice(new HDC());
+    tree->add_child("aaa/list", list);
+    tree->set_data("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
     
-// // //     cout << "--- Testing get_type_str" << endl;
-// // //     HDC* t = new HDC();
-// // //     cout << "type: " << t->get_type_str() << endl;
-// // //     t->add_child("a",new HDC());
-// // //     cout << "type: " << t->get_type_str() << endl;
-// // //     HDC *tt = new HDC();
-// // //     tt->set_data<int8_t>(1,shape,(void*)array);
-// // //     cout << "type: " << tt->get_type_str() << endl;
-// // //     cout << "type: " << tt->get_datashape_str() << endl;
-// // //     
-// // //     getchar();
-// // //     cout << "Testing dynd compatibility with stl::vector" << endl;
-// // //     HDC* from_vector = new HDC();
-// // //     vector<double> v = {1.,2.,-333.3,};
-//     from_vector->set_data(v);
-//     vector<double> v = from_vector.as_vector<double>();
-    return 0;
+    // Save JSON
+    tree->to_json("tree.txt");
+    
+    // Load JSON
+    HDC* tree2 = from_json("tree.txt");
+    tree2->to_json("tree2.txt");
+    
+    // test tree
+    HDC* s = tree2->get("aaa/bbb/double");
+    
+    // Test double
+    EXPECT_EQ(1,s->get_ndim());
+    EXPECT_EQ(4,s->get_shape()[0]);
+    EXPECT_EQ(HDC_DYND,s->get_type());
+    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), tree2->get("aaa/bbb/double")->get_type_str().c_str());
+    double* data_double_in = s->as<double*>();
+    for (int i=0;i < shape[0];i++) EXPECT_EQ(data_double[i],data_double_in[i]);
+    
+    // Test int
+    s = tree2->get("aaa/bbb/int");
+    EXPECT_EQ(1,s->get_ndim());
+    EXPECT_EQ(4,s->get_shape()[0]);
+    EXPECT_EQ(HDC_DYND,s->get_type());
+    EXPECT_STREQ(tree->get("aaa/bbb/int")->get_type_str().c_str(), tree2->get("aaa/bbb/int")->get_type_str().c_str());
+    int32_t* data_int_in = s->as<int32_t*>();
+    for (int i=0;i < shape[0];i++) EXPECT_EQ(data_int[i],data_int_in[i]);
+    
+    // Test empty
+    EXPECT_EQ(HDC_EMPTY,tree2->get("aaa/bbb/empty")->get_type());
+    
+    // Test list
+    s = tree2->get("aaa/list");
+    EXPECT_EQ(1,s->get_ndim());
+    EXPECT_EQ(5,s->get_shape()[0]);
+    EXPECT_EQ(HDC_LIST,s->get_type());
+    EXPECT_STREQ(tree->get("aaa/list")->get_type_str().c_str(), tree2->get("aaa/list")->get_type_str().c_str());
+    for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice(i)->get_type());
+
+    // Test string
+    EXPECT_STREQ(tree->get("aaa/string")->as_string().c_str(), tree2->get("aaa/string")->as_string().c_str());
+    
 }

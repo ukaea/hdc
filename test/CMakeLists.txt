@@ -9,14 +9,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(inc)
 
-add_executable(test_hdc_cpp test_hdc_cpp.cpp)
-target_link_libraries(test_hdc_cpp hdc)
+file(GLOB SRCS *.cpp)
+add_executable(test_hdc_cpp ${SRCS})
+target_link_libraries(test_hdc_cpp hdc gtest gmock_main)
+add_test(NAME cpp_test COMMAND test_hdc_cpp)
 
-add_executable(test_hdc_c test_hdc_c.c)
-target_link_libraries(test_hdc_c chdc)
+install(TARGETS test_hdc_cpp DESTINATION bin)
 
-add_executable(test_hdc_fortran test_hdc_fortran.f90)
-target_link_libraries(test_hdc_fortran fhdc)
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
