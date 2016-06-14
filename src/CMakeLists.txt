@@ -12,7 +12,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 #include_directories(/sw/python2/anaconda/include/)
 #include_directories(/compass/home/fridrich/workspace/pybind11/include/)
 
-include_directories(inc)
+#include_directories(inc)
 link_directories(${hdc_SOURCE_DIR}/src)
 
 add_library(hdc SHARED hdc.cpp jsoncpp.cpp)

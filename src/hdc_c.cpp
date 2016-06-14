@@ -172,7 +172,7 @@ long int* hdc_get_shape_path(struct hdc_t* tree, char* path) {
     return t->get_shape((string)path);
 }
 
-uint8_t hdc_get_type(struct hdc_t* tree, char* path) {
+uint8_t hdc_get_type(struct hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     return t->get_type();
 }

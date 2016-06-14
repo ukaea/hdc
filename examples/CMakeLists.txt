@@ -7,7 +7,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories(inc)
 
 add_executable(example_cpp example_cpp.cpp)
 target_link_libraries(example_cpp hdc)
@@ -21,8 +20,8 @@ target_link_libraries(example_fortran fhdc)
 add_executable(cpo_hdc cpo_hdc.f90)
 target_link_libraries(cpo_hdc fhdc)
 
-add_executable(pokus calling_fortran_from_c.c)
-target_link_libraries(pokus fhdc)
+#add_executable(pokus calling_fortran_from_c.c)
+#target_link_libraries(pokus fhdc)
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)

@@ -75,7 +75,7 @@ module hdc_fortran
         subroutine hdc_set_slice(obj, pos, node) bind(c,name="hdc_set_slice")
             import
             type(hdc_t), value :: obj
-            integer, value     :: pos
+            integer(kind=c_int32_t), value     :: pos
             type(hdc_t), value :: node
         end subroutine hdc_set_slice
 
@@ -83,7 +83,7 @@ module hdc_fortran
         subroutine hdc_insert_slice(obj, pos, node) bind(c,name="hdc_insert_slice")
             import
             type(hdc_t), value :: obj
-            integer, value     :: pos
+            integer(kind=c_int32_t), value     :: pos
             type(hdc_t), value :: node
         end subroutine hdc_insert_slice
 
@@ -103,7 +103,7 @@ module hdc_fortran
             import
             type(hdc_t), value :: obj
             character(kind=c_char), intent(in) :: path(*)
-            integer, value :: mode
+            integer(kind=c_int32_t), value :: mode
         end subroutine c_hdc_to_json
 
         !> Returns HDC subtree by given path. This is interface to C.
@@ -201,27 +201,27 @@ module hdc_fortran
         subroutine c_hdc_set_double_scalar(obj, data) bind(c,name="hdc_set_double_scalar")
             import
             type(hdc_t), value:: obj
-            real(kind=dp), value :: data
+            real(kind=c_double), value :: data
         end subroutine c_hdc_set_double_scalar
         !> Sets scalar double to given path. This is interface to C.
         subroutine c_hdc_set_double_scalar_path(obj, path, data) bind(c,name="hdc_set_double_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            real(kind=dp), value :: data
+            real(kind=c_double), value :: data
         end subroutine c_hdc_set_double_scalar_path
         !> Sets scalar int32.This is interface to C.
         subroutine c_hdc_set_int32_scalar(obj, data) bind(c,name="hdc_set_int32_scalar")
             import
             type(hdc_t), value:: obj
-            integer, value :: data
+            integer(kind=c_int32_t), value :: data
         end subroutine c_hdc_set_int32_scalar
         !> Sets scalar int32 to given path. This is interface to C.
         subroutine c_hdc_set_int32_scalar_path(obj, path, data) bind(c,name="hdc_set_int32_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            integer, value :: data
+            integer(kind=c_int32_t), value :: data
         end subroutine c_hdc_set_int32_scalar_path
         !> Sets scalar int8. This is interface to C.
         subroutine c_hdc_set_int8_scalar(obj, data) bind(c,name="hdc_set_int8_scalar")
@@ -301,14 +301,14 @@ module hdc_fortran
         function c_hdc_as_double_scalar(obj) result(res) bind(c,name="hdc_as_double_scalar")
             import
             type(hdc_t), value:: obj
-            real(kind=dp) :: res
+            real(kind=c_double) :: res
         end function c_hdc_as_double_scalar
         !> Returns scalar double from given path. This is interface to C.
         function c_hdc_as_double_scalar_path(obj, path) result(res) bind(c,name="hdc_as_double_scalar_path")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            real(kind=dp) :: res
+            real(kind=c_double) :: res
         end function c_hdc_as_double_scalar_path
         !> Returns scalar int8. 
         function c_hdc_as_int8_scalar(obj) result(res) bind(c,name="hdc_as_int8_scalar")
@@ -451,6 +451,7 @@ module hdc_fortran
         module procedure hdc_get_shape_pos
     end interface hdc_get_shape
 
+
     interface hdc_get_ptr_f
         module procedure hdc_get_ptr_f
     end interface hdc_get_ptr_f
@@ -472,7 +473,6 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        type(hdc_t) :: node
         call c_hdc_delete_child(this, trim(path)//c_null_char)
     end subroutine hdc_delete_child
 
@@ -503,9 +503,8 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: ndim
-        integer(kind=c_long), dimension(:),pointer :: res
+        integer(kind=c_long), dimension(:), pointer :: res
         type(c_ptr) :: shape_ptr
-        integer :: i
         ndim = c_hdc_get_ndim(this)
         shape_ptr = c_hdc_get_shape(this)
         call c_f_pointer(shape_ptr, res, (/ ndim /))
@@ -526,7 +525,7 @@ contains
     function hdc_get_shape_pos(this, pos) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer :: pos
+        integer(kind=c_int32_t) :: pos
         integer(kind=c_int8_t) :: ndim
         integer(kind=c_long), dimension(:),pointer :: shape_
         integer(kind=c_long) :: res
@@ -583,7 +582,6 @@ contains
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: data
         character(len=*), intent(in) :: path
-        type(hdc_t) :: node
         call c_hdc_set_int8_scalar_path(this, trim(path)//c_null_char, data)
     end subroutine hdc_set_int8_scalar_path
 
@@ -772,7 +770,7 @@ contains
     function hdc_get_slice_(this, ii) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer :: ii
+        integer(kind=c_int32_t) :: ii
         type(hdc_t) :: res
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_
@@ -903,7 +901,6 @@ contains
     function hdc_as_double_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        type(c_ptr) :: data_ptr
         real(kind=dp) :: res
         res = c_hdc_as_double_scalar(this)
     end function hdc_as_double_
@@ -918,7 +915,6 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        type(c_ptr) :: data_ptr
         real(kind=dp) :: res
         res = c_hdc_as_double_scalar_path(this, trim(path)//c_null_char)
     end function hdc_as_double_path
@@ -927,14 +923,13 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         real(kind=dp) :: res
-        res = hdc_as_double_(this)
+        res = hdc_as_double_path(this,path)
     end subroutine hdc_as_double_path_sub
 
     function hdc_as_int8_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        type(c_ptr) :: data_ptr
         integer(kind=c_int8_t) :: res
         res = c_hdc_as_int8_scalar_path(this, trim(path)//c_null_char)
     end function hdc_as_int8_path
@@ -950,7 +945,6 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        type(c_ptr) :: data_ptr
         integer(kind=c_int32_t) :: res
         res = c_hdc_as_int32_scalar_path(this, trim(path)//c_null_char)
     end function hdc_as_int32_path
@@ -965,7 +959,6 @@ contains
     function hdc_as_int8_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        type(c_ptr) :: data_ptr
         integer(kind=c_int8_t) :: res
         res = c_hdc_as_int8_scalar(this)
     end function hdc_as_int8_
@@ -979,7 +972,6 @@ contains
     function hdc_as_int32_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        type(c_ptr) :: data_ptr
         integer(kind=c_int32_t) :: res
         res = c_hdc_as_int32_scalar(this)
     end function hdc_as_int32_
@@ -1221,7 +1213,7 @@ contains
     subroutine hdc_to_json(this,path,mode)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer :: mode
+        integer(kind=c_int32_t) :: mode
         call c_hdc_to_json(this,trim(path)//c_null_char, mode)
     end subroutine hdc_to_json
 

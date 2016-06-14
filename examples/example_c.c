@@ -2,7 +2,7 @@
 #include "types.h"
 #include "hdc_c.h"
 
-int main(int argc, char **argv) {
+int main() {
     
     // Create new HDC tree
     struct hdc_t* tree = hdc_new_empty();
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     int32_t ndim2 = hdc_get_ndim(node);
     long int* shape2 = hdc_get_shape(node);
     printf("Dimension: %d\nShape: ", ndim2);
-    for (int i=0; i<ndim2; i++) printf("%d ",shape2[i]);
+    for (int i=0; i<ndim2; i++) printf("%ld ",shape2[i]);
     printf("\n");
     printf("dtype: %s\n",hdc_get_type_str(node));
     

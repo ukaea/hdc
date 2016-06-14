@@ -159,8 +159,6 @@ public:
     void set_dynd(dynd::nd::array array); 
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list); 
-    /** Creates list with some data in nodes - just for testing some ideas. */
-    void create_list(size_t n=5); 
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
     void resize(HDC* h, int recursively = 0); 
     /** Returns copy of current object. */
@@ -276,7 +274,7 @@ template <typename T> HDC* hdc_empty_array(int8_t ndim, long* shape) {
     return new HDC(arr);
 }
 
-vector<string>& split(const string &s, char delim, vector<string>& elems);
+void split(const string &s, char delim, vector<string>& elems);
 vector<string> split(const string &s, char delim);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 
@@ -287,7 +285,6 @@ HDC* json_to_hdc(Json::Value* root);
 /** Loads tree from Json::Value object */
 HDC* json_to_hdc(const Json::Value& root);
 
-int64_t detect_array_type(Json::Value* root);
 bool is_all_numeric(Json::Value* root);
 bool is_double(Json::Value* root);
 bool is_jagged(Json::Value* root);
@@ -300,8 +297,6 @@ bool is_double(const Json::Value& root);
 bool is_jagged(const Json::Value& root);
 long* get_shape(const Json::Value& root);
 int8_t get_ndim(const Json::Value& root);
-
-
 
 void hello__();
 

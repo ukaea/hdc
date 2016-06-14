@@ -10,7 +10,7 @@ contains
         integer, dimension(1:4) :: array
         integer, dimension(:), pointer:: array2
         integer(kind=c_long), dimension(1:1) :: shape2
-        integer :: ndim2
+        integer(kind=8) :: ndim2
         allocate(tree)
         allocate(subtree)
         allocate(data)

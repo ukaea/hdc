@@ -52,7 +52,7 @@ HDC::~HDC()
         delete children;
         delete data;
         if (list_elements != nullptr) {
-            for (size_t i;i < list_elements->size();i++) delete &list_elements[i];
+            for (size_t i = 0;i < list_elements->size();i++) delete &list_elements[i];
             list_elements->clear();
             delete list_elements;
         }
@@ -68,7 +68,7 @@ bool HDC::has_child(vector<string> vs)
 {
     #ifdef DEBUG
     cout << "Searching for: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
     if(vs.empty()) return false; //TODO: re-do this!!!
@@ -89,7 +89,7 @@ bool HDC::has_child(vector<string> vs)
 void HDC::add_child(vector<string> vs, HDC* n) {
     #ifdef DEBUG
     cout << "Adding node: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
     if (!(this->type == HDC_EMPTY || this->type == HDC_STRUCT)) {
@@ -126,23 +126,6 @@ void HDC::set_list(deque<HDC*>* lst) {
     return;
 }
 
-void HDC::create_list(size_t n) {
-    if (this->type != HDC_EMPTY) {
-        cout << "Cannot add list to a non-list node." << endl;
-    }
-    this->type = HDC_LIST;
-    this->list_elements = new deque<HDC*>;
-    for (size_t i=0; i<n;i++) list_elements->push_back(new HDC());
-    //debuging
-    for (size_t i=0; i<n;i++) {
-        int8_t* arr = new int8_t[1];
-        arr[0] = i;
-        long shape[] = {1};
-        list_elements->at(i)->set_data<int8_t>(1,(long int*)shape,(void*)arr);    
-    }
-    return;
-}
-
 void HDC::add_child(string path, HDC* n)
 {
     #ifdef DEBUG
@@ -157,7 +140,7 @@ void HDC::delete_child(vector<string> vs) {
 
     #ifdef DEBUG
     cout << "Delete node: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
     if (!this->has_child(vs) || vs.empty())  {
@@ -183,7 +166,7 @@ void HDC::delete_child(string path) {
 HDC* HDC::get(vector<string> vs) {
     #ifdef DEBUG
     cout << "Getting node: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
     string first = vs[0];
@@ -201,7 +184,7 @@ HDC* HDC::get(vector<string> vs) {
 HDC* HDC::get_slice(vector<string> vs, size_t i) {
     #ifdef DEBUG
     cout << "Getting slice: " << i << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
     string first = vs[0];
@@ -240,7 +223,7 @@ HDC* HDC::get(string path) {
 void HDC::set_child(vector<string> vs, HDC* n) {
     #ifdef DEBUG
     cout << "Setting node: " << endl;
-    for (size_t i = 0; i < vs.size(); i++) cout << vs[i] << "/";
+    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
     cout << endl;
     #endif
     if (!this->has_child(vs)) { // Nothing to set
@@ -299,7 +282,7 @@ long int* HDC::get_shape()
 {
     if (this->type == HDC_DYND) {
         long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
-        for (size_t i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
+        for (long i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
         return shape;
     }
     else if (this->type == HDC_LIST) {
@@ -379,7 +362,7 @@ Json::Value HDC::to_json(int mode) {
         }
         else if (this->type == HDC_LIST) {
             Json::Value elements;
-            for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
+            for (size_t i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
         }
     }
     else if (mode == 1) {
@@ -428,7 +411,7 @@ Json::Value HDC::to_json(int mode) {
 //             for (long i=0;i<this->list_elements->size();i++) elements.append(this->list_elements->at(i)->to_json(mode));
 //             root["dtype"] = "hdc_list";
 //             root["data"] = elements;
-            for (long i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
+            for (size_t i=0;i<this->list_elements->size();i++) root.append(this->list_elements->at(i)->to_json(mode));
 
         }
 //         else if (this->type == HDC_EMPTY) {
@@ -790,7 +773,7 @@ HDC* json_to_hdc(Json::Value* root) {
             } else {
                 // call recursively -- save list
                 tree->set_type(HDC_LIST);
-                for (int i = 0;i<root->size();i++) {
+                for (unsigned int i = 0;i<root->size();i++) {
                     tree->append_slice(json_to_hdc(&(root->operator[](i))));
                 }
             }
@@ -803,7 +786,7 @@ HDC* json_to_hdc(Json::Value* root) {
                 #ifdef DEBUG
                 cout << it.key() << endl;
                 #endif
-                tree->add_child(it.key().asCString(),json_to_hdc(&it));
+                tree->add_child(it.key().asCString(),json_to_hdc(*it));
             }
             break;
     }
@@ -934,7 +917,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             } else {
                 // call recursively -- save list
                 tree->set_type(HDC_LIST);
-                for (int i = 0;i<root.size();i++) {
+                for (unsigned int i = 0;i<root.size();i++) {
                     tree->append_slice(json_to_hdc((root[i])));
                 }
             }
@@ -954,16 +937,10 @@ HDC* json_to_hdc(const Json::Value& root) {
     return tree;
 }
 
-
-int64_t detect_array_type(Json::Value* root)
-{
-    return 0;
-}
-
 bool is_all_numeric(Json::Value* root)
 {
     bool ok = true;
-    for (int i=0;i<root->size();i++) {
+    for (unsigned int i=0;i<root->size();i++) {
         if (!root->operator[](i).isNumeric() && !root->operator[](i).isArray()) {
             ok = false;
             break;
@@ -981,7 +958,7 @@ bool is_all_numeric(Json::Value* root)
 bool is_all_numeric(const Json::Value& root)
 {
     bool ok = true;
-    for (int i=0;i<root.size();i++) {
+    for (unsigned int i=0;i<root.size();i++) {
         if (!root[i].isNumeric() && !root[i].isArray()) {
             ok = false;
             break;
@@ -1002,10 +979,11 @@ bool is_double(Json::Value* root)
     if(!is_all_numeric(root)) return false;
     if (root->isDouble() && !(root->isInt64() || root->isInt())) return true;
     else if (root->isArray()) {
-        for (int i=0;i<root->size();i++) {
+        for (unsigned int i=0;i<root->size();i++) {
             if (is_double(&(root->operator[](i)))) return true;
         }
     } else return false;
+    return true; // Never go here
 }
 
 bool is_double(const Json::Value& root)
@@ -1013,20 +991,21 @@ bool is_double(const Json::Value& root)
     if(!is_all_numeric(root)) return false;
     if (root.isDouble() && !(root.isInt64() || root.isInt())) return true;
     else if (root.isArray()) {
-        for (int i=0;i<root.size();i++) {
+        for (unsigned int i=0;i<root.size();i++) {
             if (is_double(root[i])) return true;
         }
     } else return false;
+    return true; // Never go here
 }
 
 
 bool is_jagged(Json::Value* root)
 {
     if (!root->isArray()) return false;
-    int dim = 0;
+    unsigned int dim = 0;
     bool jagged = false;
     dim = root->operator[](0).size();
-    for (int i=1; i<root->size();i++) {
+    for (unsigned int i=0; i<root->size();i++) {
         if (root->operator[](i).size() != dim) {
             return true;
             break;
@@ -1038,10 +1017,10 @@ bool is_jagged(Json::Value* root)
 bool is_jagged(const Json::Value& root)
 {
     if (!root.isArray()) return false;
-    int dim = 0;
+    unsigned int dim = 0;
     bool jagged = false;
     dim = root[0].size();
-    for (int i=1; i<root.size();i++) {
+    for (unsigned int i=0; i<root.size();i++) {
         if (root[i].size() != dim) {
             return true;
             break;
@@ -1125,7 +1104,7 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-vector<string>& split(const string &s, char delim, vector<string>& elems) {
+void split(const string &s, char delim, vector<string>& elems) {
     stringstream ss(s);
     string item;
     while (getline(ss, item, delim)) {

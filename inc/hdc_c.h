@@ -40,7 +40,7 @@ int8_t hdc_get_ndim(struct hdc_t* tree);  /**  */
 long int* hdc_get_shape(struct hdc_t* tree);  /** Returns shape of array of node. */
 int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path);  /**  */
 long int* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape of array at given path. */
-uint8_t hdc_get_type(struct hdc_t* tree, char* path);  /**  */
+uint8_t hdc_get_type(struct hdc_t* tree);  /**  */
 int32_t* hdc_as_int32_1d(struct hdc_t* tree); /**  */
 int32_t** hdc_as_int32_2d(struct hdc_t* tree); /**  */
 int32_t* hdc_as_int32_1d_path(struct hdc_t* tree, char* path); /**  */

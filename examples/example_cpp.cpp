@@ -6,7 +6,7 @@
 using namespace std;
 
 
-int main(int argc, char **argv) {
+int main() {
 
     // Create new HDC tree
     HDC* tree = new HDC();
