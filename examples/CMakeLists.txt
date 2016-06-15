@@ -20,8 +20,8 @@ target_link_libraries(example_fortran fhdc)
 add_executable(cpo_hdc cpo_hdc.f90)
 target_link_libraries(cpo_hdc fhdc)
 
-#add_executable(pokus calling_fortran_from_c.c)
-#target_link_libraries(pokus fhdc)
+#add_executable(calling_fortran_from_c calling_fortran_from_c.c)
+#target_link_libraries(calling_fortran_from_c fhdc)
 
 set(CMAKE_INSTALL_RPATH "/usr/local/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
