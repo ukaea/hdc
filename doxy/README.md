@@ -38,21 +38,29 @@ make install
 
 Building HDC
 ------------
+There are several cmake options:
+- `-DBUILD_DOCUMENTATION=ON` Whether to build and install documentation.
+- `-DBUILD_EXAMPLES=ON` Whether to build and install examples.
+- `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
+- `-DDEBUG=ON` Whether to prin debugging messages.
+- `-DPYTHON_LIBRARY=/path/to/libpython.so` On abacus set this to `/sw/python2/anaconda3/lib/libpython3.4m.so`
+- `-DPYTHON_INCLUDE_DIR=/path/to/python/include`  On abacus set this to `-DPYTHON_INCLUDE_DIR=/sw/python2/anaconda3/include/python3.4m/`
+
+Some of them can be edited using `ccmake .` in`build` directory. The example of build follows:
+
+
 ```
 cd hdc_new
 mkdir build
 cd build
-# In order to build this with different version of Python, 
-# try to set -DPYTHON_LIBRARY and -DPYTHON_INCLUDE_DIR command line arguments.
-# For example on abacus run:
-# cmake -DPYTHON_LIBRARY=/sw/python2/anaconda3/lib/libpython3.4m.so -DPYTHON_INCLUDE_DIR=/sw/python2/anaconda3/include/python3.4m/ ..
 
-cmake ..
-# In order to build with debug output run the following line:
-# cmake -DDEBUG=ON
-make
+cmake -DDEBUG=OFF -DCMAKE_INSTALL_PREFIX=~/hdc_dist ..
+
+# Make
+make -j4
+
 # Optionally build documentation
-make doc
+make install
 ```
 
 Basic ideas
