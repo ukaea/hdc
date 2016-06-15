@@ -39,6 +39,7 @@ make install
 Building HDC
 ------------
 There are several cmake options:
+
   - `-DBUILD_DOCUMENTATION=ON` Whether to build and install documentation.
   - `-DBUILD_EXAMPLES=ON` Whether to build and install examples.
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
