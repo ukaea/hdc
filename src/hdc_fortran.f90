@@ -449,15 +449,26 @@ module hdc_fortran
     interface hdc_get_shape
         module procedure hdc_get_shape_
         module procedure hdc_get_shape_pos
+        module procedure hdc_get_shape_path
     end interface hdc_get_shape
 
+    interface hdc_set_int8_scalar
+        module procedure hdc_set_int8_scalar_path
+        module procedure hdc_set_int8_scalar
+    end interface hdc_set_int8_scalar
+    
     interface hdc_get_ptr_f
         module procedure hdc_get_ptr_f
     end interface hdc_get_ptr_f
 
+    interface hdc_get_ndim
+        module procedure hdc_get_ndim
+        module procedure hdc_get_ndim_path
+    end interface hdc_get_ndim
+    
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
-    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice
+    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -465,6 +476,7 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         type(hdc_t) :: node
+        print *,trim(path)//c_null_char
         call c_hdc_add_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_add_child
 
@@ -748,14 +760,14 @@ contains
         res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
     end function hdc_get_slice_path
 
-    function hdc_get_slice_l_path(this, path, ii) result(res)
-        use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
-        integer(kind=8) :: ii
-        type(hdc_t) :: res
-        res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
-    end function hdc_get_slice_l_path
+!     function hdc_get_slice_l_path(this, path, ii) result(res)
+!         use iso_c_binding
+!         type(hdc_t) :: this
+!         character(len=*), intent(in) :: path
+!         integer(kind=8) :: ii
+!         type(hdc_t) :: res
+!         res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
+!     end function hdc_get_slice_l_path
 
     subroutine hdc_get_slice_path_sub(this, path, ii, res)
         use iso_c_binding
@@ -1245,20 +1257,20 @@ contains
         res = c_loc(tree)
     end function hdc_get_ptr_f
 
-    function c_to_f_string(s) result(str)
-        use iso_c_binding
-        character(kind=c_char,len=1), intent(in) :: s(*)
-        character(len=:), allocatable :: str
-        integer i, nchars
-        i = 1
-        do
-            if (s(i) == c_null_char) exit
-            i = i + 1
-        end do
-        nchars = i - 1  ! Exclude null character from Fortran string
-        allocate(character(len=nchars) :: str)
-        str = transfer(s(1:nchars), str)
-    end function c_to_f_string
+!     function c_to_f_string(s) result(str)
+!         use iso_c_binding
+!         character(kind=c_char,len=1), intent(in) :: s(*)
+!         character(len=:), allocatable :: str
+!         integer i, nchars
+!         i = 1
+!         do
+!             if (s(i) == c_null_char) exit
+!             i = i + 1
+!         end do
+!         nchars = i - 1  ! Exclude null character from Fortran string
+!         allocate(character(len=nchars) :: str)
+!         str = transfer(s(1:nchars), str)
+!     end function c_to_f_string
 
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
