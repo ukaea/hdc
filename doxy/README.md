@@ -57,10 +57,9 @@ cd build
 
 cmake -DDEBUG=OFF -DCMAKE_INSTALL_PREFIX=~/hdc_dist ..
 
-# Make
 make -j4
 
-# Optionally build documentation
+# Optionally install
 make install
 ```
 
