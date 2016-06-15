@@ -68,7 +68,7 @@ Basic ideas
 
 Examples
 ========
-The basic examples can be found in src/examples folder. The executables are built in CMAKE_BUILD_DIR/bin directory.
+The basic examples can be found in examples folder. The executables are built in CMAKE_BUILD_DIR/bin directory.
 
 The Python examples can be run from any arbitraty folder, the only necessary thing is to set LD_LIBRARY_PATH properly:
 
