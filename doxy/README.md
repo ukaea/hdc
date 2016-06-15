@@ -40,7 +40,8 @@ Building HDC
 ------------
 ```
 cd hdc_new
-mkdir build cd build
+mkdir build
+cd build
 # In order to build this with different version of Python, 
 # try to set -DPYTHON_LIBRARY and -DPYTHON_INCLUDE_DIR command line arguments.
 # For example on abacus run:
