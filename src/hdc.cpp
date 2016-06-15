@@ -983,7 +983,7 @@ bool is_double(Json::Value* root)
             if (is_double(&(root->operator[](i)))) return true;
         }
     } else return false;
-    return true; // Never go here
+    return false;
 }
 
 bool is_double(const Json::Value& root)
@@ -995,7 +995,7 @@ bool is_double(const Json::Value& root)
             if (is_double(root[i])) return true;
         }
     } else return false;
-    return true; // Never go here
+    return false;
 }
 
 
