@@ -41,6 +41,11 @@ Building HDC
 ```
 cd hdc_new
 mkdir build cd build
+# In order to build this with different version of Python, 
+# try to set -DPYTHON_LIBRARY and -DPYTHON_INCLUDE_DIR command line arguments.
+# For example on abacus run:
+# cmake -DPYTHON_LIBRARY=/sw/python2/anaconda3/lib/libpython3.4m.so -DPYTHON_INCLUDE_DIR=/sw/python2/anaconda3/include/python3.4m/ ..
+
 cmake ..
 # In order to build with debug output run the following line:
 # cmake -DDEBUG=ON
@@ -69,4 +74,3 @@ The Python examples can be run from any arbitraty folder, the only necessary thi
 ```
 LD_LIBRARY_PATH="../build/lib/" ipython hdc_fortran_module.py
 ```
-
