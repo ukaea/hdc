@@ -3,7 +3,7 @@ HDC - Hierarchical Dynamic Containers                         {#mainpage}
 
 HDC is tiny library for exchanging hierarchical data (arrays of structures) in shared memory between multiple programming languages, currently supporting C, C++, Python and Fortran.
 
-As of May 2016 it is in a preview state - it works, but many work is still need to be done.
+As of June 2016 it is still in a preview state - it works, but many work is still need to be done.
 
 Building instructions
 =====================
