@@ -63,12 +63,12 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
+
+option(DEBUG "Turns some debug output on or off.")
 if(DEBUG)
     add_definitions(-DDEBUG)
 endif(DEBUG)
 
-
-# add_definitions(-DDEBUG)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
