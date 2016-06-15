@@ -377,5 +377,13 @@ void hdc_dump(hdc_t* tree) {
     return;
 }
 
+const char* hdc_dumps(hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    stringstream tmp;
+    tmp << t->to_json(0);
+    string dump_str = tmp.str();
+    return strdup(dump_str.c_str());
+}
+
 // end exter C
 }

@@ -44,6 +44,8 @@ _hdc_get_ndim = libchdc.hdc_get_ndim
 _hdc_get_ndim.restype = ctypes.c_int8
 _hdc_get_type_str = libchdc.hdc_get_type_str
 _hdc_get_type_str.restype = ctypes.c_char_p
+_hdc_dumps = libchdc.hdc_dumps
+_hdc_dumps.restype = ctypes.c_char_p
 
 
 class HDC(object):
@@ -168,6 +170,11 @@ class HDC(object):
         """Dump the continer
         """
         libchdc.hdc_dump(self.c_ptr)
+
+    def dumps(self):
+        """Dump the continer
+        """
+        return _hdc_dumps(self.c_ptr).decode()
 
 
 if __name__ == '__main__':

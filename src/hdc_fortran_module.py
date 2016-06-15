@@ -6,8 +6,8 @@ import numpy as np
 fmodule = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
 
 
-def test_cpos_f2c(equilibriumin):
-    """test_cpos_f2c Python wrapper
+def test_cpos(equilibriumin):
+    """test_cpos Python wrapper
 
     Args:
         equilibriumin(HDC): input
@@ -17,7 +17,7 @@ def test_cpos_f2c(equilibriumin):
     # in the Python / C wrapper, the output tree must be constructed
     tree = HDC()
     # the Fortran wrapper is called with output tree already allocated
-    fmodule.test_cpos_f2c(equilibriumin.c_ptr, tree.c_ptr)
+    fmodule.test_cpos(equilibriumin.c_ptr, tree.c_ptr)
 
     return tree
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # fmodule.c_test_cpos(equilibrium.c_ptr)
     # print('-- py call c_test_cpos end --')
 
-    tree = test_cpos_f2c(equilibrium)
+    tree = test_cpos(equilibrium)
 
     print("=== Python dump")
     tree.dump()
