@@ -29,3 +29,9 @@ target_link_libraries(hdc_fortran_module fhdc)
 
 add_library(hdc_python SHARED hdc_python.cpp)
 target_link_libraries(hdc_python hdc ${PYTHON_LIBRARIES})
+
+install(TARGETS hdc chdc fhdc hdc_fortran_module hdc_python
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib/static
+    )

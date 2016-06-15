@@ -7,23 +7,28 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+option(BUILD_EXAMPLES "Build and install examples")
+if (BUILD_EXAMPLES)
 
-add_executable(example_cpp example_cpp.cpp)
-target_link_libraries(example_cpp hdc)
+    add_executable(example_cpp example_cpp.cpp)
+    target_link_libraries(example_cpp hdc)
 
-add_executable(example_c example_c.c)
-target_link_libraries(example_c chdc)
+    add_executable(example_c example_c.c)
+    target_link_libraries(example_c chdc)
 
-add_executable(example_fortran example_fortran.f90)
-target_link_libraries(example_fortran fhdc)
+    add_executable(example_fortran example_fortran.f90)
+    target_link_libraries(example_fortran fhdc)
 
-add_executable(cpo_hdc cpo_hdc.f90)
-target_link_libraries(cpo_hdc fhdc)
+    add_executable(cpo_hdc cpo_hdc.f90)
+    target_link_libraries(cpo_hdc fhdc)
 
-#add_executable(calling_fortran_from_c calling_fortran_from_c.c)
-#target_link_libraries(calling_fortran_from_c fhdc)
+    #add_executable(calling_fortran_from_c calling_fortran_from_c.c)
+    #target_link_libraries(calling_fortran_from_c fhdc)
 
-set(CMAKE_INSTALL_RPATH "/usr/local/lib")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    #set(CMAKE_INSTALL_RPATH "/usr/local/lib")
+    #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# install(TARGETS test_hdc_cpp RUNTIME DESTINATION bin)
+    install(TARGETS example_cpp example_c example_fortran cpo_hdc  RUNTIME DESTINATION share/examples)
+    
+endif(BUILD_EXAMPLES)
+

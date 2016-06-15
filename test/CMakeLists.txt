@@ -17,7 +17,7 @@ add_test(NAME cpp_test COMMAND test_hdc_cpp)
 install(TARGETS test_hdc_cpp DESTINATION bin)
 
 
-set(CMAKE_INSTALL_RPATH "/usr/local/lib")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+#set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}"/lib")
+#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # install(TARGETS test_hdc_cpp RUNTIME DESTINATION bin)
