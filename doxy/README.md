@@ -33,6 +33,7 @@ cd build
 # make
 cmake ..
 make
+# Optionally install
 make install
 ```
 
