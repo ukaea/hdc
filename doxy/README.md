@@ -46,7 +46,7 @@ There are several cmake options:
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
   - `-DDEBUG=ON` Whether to prin debugging messages.
   - `-DPYTHON_LIBRARY=/path/to/libpython.so` On abacus set this to `/sw/python2/anaconda3/lib/libpython3.4m.so`
-  - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`  On abacus set this to `-DPYTHON_INCLUDE_DIR=/sw/python2/anaconda3/include/python3.4m/`
+  - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`  On abacus set this to `/sw/python2/anaconda3/include/python3.4m/`
 
 Some of them can be edited using `ccmake .` in`build` directory. The example of build follows:
 
