@@ -84,3 +84,12 @@ The Python examples can be run from any arbitraty folder, the only necessary thi
 ```
 LD_LIBRARY_PATH="../build/lib/" ipython hdc_fortran_module.py
 ```
+
+Next steps
+==========
+- Use shared memory, for example via [mdbm](https://github.com/yahoo/mdbm).
+- Read-only and/or copy-on-write potection of data.
+- Serialization to HDF5.
+- Support for metadata.
+- Support for scientific data: dimensions, units, etc.
+- More features: slicing, lazy evaluation, richer API, ...
