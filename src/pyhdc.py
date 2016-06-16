@@ -176,6 +176,11 @@ class HDC(object):
         """
         return _hdc_dumps(self.c_ptr).decode()
 
+    def json_dump(self, filename, mode=0):
+        """Save to json file
+        """
+        libchdc.hdc_to_json(self.c_ptr, filename.encode(), mode)
+
 
 if __name__ == '__main__':
 
