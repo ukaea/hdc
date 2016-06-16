@@ -89,7 +89,9 @@ Next steps
 ==========
 - Use shared memory, for example via [mdbm](https://github.com/yahoo/mdbm).
 - Read-only and/or copy-on-write potection of data.
-- Serialization to HDF5.
+- Serialization to HDF5 and other suitable formats.
+- File systems and database access (key-value, object stores) via the HDC API.
 - Support for metadata.
+- A plugin system for, e.g., data systems validation or conversion, object-oriented features (methods for particular data types), ...
 - Support for scientific data: dimensions, units, etc.
 - More features: slicing, lazy evaluation, richer API, ...
