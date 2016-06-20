@@ -60,7 +60,7 @@ int8_t hdc_as_int8_scalar(struct hdc_t* tree); /** Returns scalar int8. */
 int8_t hdc_as_int8_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int8.  */
 int32_t hdc_as_int32_scalar(struct hdc_t* tree); /** Returns scalar int32.  */
 int32_t hdc_as_int32_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int32.  */
-
+const char** hdc_keys(struct hdc_t* tree, size_t* size);
 struct hdc_t*  hdc_copy(struct hdc_t* src); /** Makes deep copy of HDC tree. */
 void hdc_to_json(struct hdc_t* tree, char* path, int mode); /** Performs serialization of tree to JSON*/
 void hdc_dump(struct hdc_t* tree);

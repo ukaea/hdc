@@ -11,7 +11,13 @@ int main() {
     hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty());
     hdc_add_child(tree,"aaa/bbb/eee",hdc_new_empty());
     hdc_add_child(tree,"bbb/eee/aaa",hdc_new_empty());
-    
+    // Test hdc_keys() here:
+    /*
+    size_t n;
+    char** keys = hdc_keys(tree,&n);
+    for (size_t i=0;i<n;i++) printf("%s ",keys[i]);
+    printf("\n");
+    */
     // Get subtree
     struct hdc_t* subtree = hdc_get(tree,"aaa/bbb");
     // Get node

@@ -118,6 +118,24 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     return;
 }
 
+vector<string> HDC::keys() {
+    vector<string> k;
+    if (this->type != HDC_STRUCT) {
+        cout << "Error: node has no keys." << endl;
+        return k;
+    }
+    k.reserve(this->children->size());
+    
+    for (unordered_map<string,HDC*>::iterator it = this->children->begin(); it != this->children->end(); ++it) {
+        #ifdef DEBUG
+        cout << it->first << " ";
+        #endif
+        k.push_back(it->first);
+    }
+    cout << endl;
+    return k;
+}
+
 void HDC::set_list(deque<HDC*>* lst) {
     if (this->type != HDC_EMPTY) {
         cout << "Cannot add list to a non-list node." << endl;

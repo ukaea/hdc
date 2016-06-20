@@ -377,6 +377,17 @@ void hdc_dump(hdc_t* tree) {
     return;
 }
 
+const char** hdc_keys(hdc_t* tree, size_t* size) {
+    HDC* t = (HDC*)tree->obj;
+    vector<string> keys = t->keys();
+    const char** arr;
+    *size = keys.size();
+    arr = (const char**)malloc(sizeof(char)*(*size));
+    for (size_t i=0;i<(*size);i++) arr[i] = keys[i].c_str();
+    return arr;
+}
+
+
 const char* hdc_dumps(hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     stringstream tmp;

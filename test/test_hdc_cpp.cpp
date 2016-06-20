@@ -126,6 +126,24 @@ TEST(HDC,SliceManipulation) {
     EXPECT_EQ(sl4,h->get_slice(1));
 }
 
+TEST(HDC,GetKeys) {
+    HDC* list = new HDC();
+    list->set_type(HDC_LIST);
+    EXPECT_EQ(true,list->keys().empty());
+    HDC* val = new HDC();
+    list->set_type(HDC_DYND);
+    EXPECT_EQ(true,val->keys().empty());
+    HDC* empty = new HDC();
+    EXPECT_EQ(true,empty->keys().empty());
+    HDC* tree = new HDC();
+    tree->add_child("aaa",new HDC());
+    tree->add_child("bbb",new HDC());
+    tree->add_child("ccc/sss",new HDC());
+    EXPECT_EQ(3u,tree->keys().size());
+    vector<string> keys = tree->keys();
+    for (size_t i=0;i<keys.size();i++) EXPECT_EQ(true,tree->has_child(keys[i]));
+}
+
 
 TEST(HDC,JsonComplete) {
     // Prepare tree
