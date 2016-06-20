@@ -348,8 +348,119 @@ Json::Value HDC::to_json(int mode) {
     Json::Value root;
     if (mode == 0) {
         if (this->type == HDC_DYND) {
-            root = dynd::format_json(this->data->at(0)).as<string>();
-            
+            //root = dynd::format_json(this->data->at(0)).as<string>();
+
+            string type_str = this->get_type_str();
+            int8_t type_id = JSON_UNDEF;
+            if (strncmp(type_str.c_str(),"float",5) == 0) {
+                type_id = JSON_DOUBLE;
+            }
+            else if (strncmp(type_str.c_str(),"int",3) == 0) {
+                type_id = JSON_INT;
+            }
+            else if (strncmp(type_str.c_str(),"string",6) == 0) {
+                type_id = JSON_STRING;
+            }
+            else {
+                cout << "Error in to_json(): Unknown data type." << endl;
+            }
+            switch(this->get_ndim()) {
+                case 0:
+                {
+                    if (type_id == JSON_DOUBLE) root = this->as<double*>()[0];
+                    else if (type_id == JSON_INT) root = this->as<int32_t*>()[0];
+                    else if (type_id == JSON_STRING) root = this->as_string();
+                }
+                    break;
+                case 1:
+                {
+                    long* s = this->get_shape();
+                    if (type_id == JSON_DOUBLE) {
+                        double* data = this->as<double*>();
+                        for (int i=0;i<s[0];i++) root[i] = data[i];
+                    }
+                    else if (type_id == JSON_INT) {
+                        int32_t* data = this->as<int32_t*>();
+                        for (int i=0;i<s[0];i++) root[i] = data[i];
+                    }
+                }
+                break;
+                case 2:
+                {
+                    long* s = this->get_shape();
+                    if (type_id == JSON_DOUBLE) {
+                        double** data = this->as<double**>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++) root[i][j] = data[i][j];
+                    }
+                    else if (type_id == JSON_INT) {
+                        int32_t** data = this->as<int32_t**>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++) root[i][j] = data[i][j];
+                    }
+                }
+                break;
+                case 3:
+                {
+                    long* s = this->get_shape();
+                    if (type_id == JSON_DOUBLE) {
+                        double*** data = this->as<double***>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++) 
+                                for (int k=0;k<s[2];k++) root[i][j][k] = data[i][j][k];
+                    }
+                    else if (type_id == JSON_INT) {
+                        int32_t*** data = this->as<int32_t***>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++) 
+                                for (int k=0;k<s[2];k++) root[i][j][k] = data[i][j][k];
+                    }
+                }
+                break;
+                case 4:
+                {
+                    long* s = this->get_shape();
+                    if (type_id == JSON_DOUBLE) {
+                        double**** data = this->as<double****>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++)
+                                for (int k=0;k<s[2];k++)
+                                    for (int l=0;l<s[3];l++) root[i][j][k][l] = data[i][j][k][l];
+                    }
+                    else if (type_id == JSON_INT) {
+                        int32_t**** data = this->as<int32_t****>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++) 
+                                for (int k=0;k<s[2];k++)
+                                    for (int l=0;l<s[3];l++) root[i][j][k][l] = data[i][j][k][l];
+                    }
+                }
+                break;
+                case 5:
+                {
+                    long* s = this->get_shape();
+                    if (type_id == JSON_DOUBLE) {
+                        double***** data = this->as<double*****>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++)
+                                for (int k=0;k<s[2];k++)
+                                    for (int l=0;l<s[3];l++)
+                                        for (int m=0;m<s[4];m++) root[i][j][k][l][m] = data[i][j][k][l][m];
+                    }
+                    else if (type_id == JSON_INT) {
+                        int32_t***** data = this->as<int32_t*****>();
+                        for (int i=0;i<s[0];i++) 
+                            for (int j=0;j<s[1];j++) 
+                                for (int k=0;k<s[2];k++)
+                                    for (int l=0;l<s[3];l++)
+                                        for (int m=0;m<s[4];m++) root[i][j][k][l][m] = data[i][j][k][l][m];
+                    }
+                }
+                break;
+                default:
+                    cout << "Error: unsupported number of dimensions in to_json()." << endl;
+                    break;
+            }
         }
         else if (this->type == HDC_STRUCT) {
             for (auto it = this->children->begin(); it != this->children->end(); it++) {
@@ -423,20 +534,7 @@ Json::Value HDC::to_json(int mode) {
 
 void HDC::dump() {
     
-    // get rid of quotes produced by writing dynd::nd::array.as<string>
-    stringstream tmp;
-    tmp << this->to_json(0);
-    string tmp_str = tmp.str();
-    string la("["); // left after
-    string lb("\"["); // left before
-    replace_all(tmp_str,lb,la);
-    string ra("]"); // right after
-    string rb("]\""); // right before
-    replace_all(tmp_str,rb,ra);
-    string sa(""); // slash after
-    string sb("\\\""); // slash before
-    replace_all(tmp_str,sb,sa);
-    cout << tmp_str;
+    cout << this->to_json(0);
     return;
 }
 
@@ -626,27 +724,8 @@ void HDC::to_json(string filename, int mode)
     #endif
     ofstream json_file;
     json_file.open(filename.c_str());
-    // json_file << this->to_json();
-    // get rid of quotes produced by writing dynd::nd::array.as<string>
-    stringstream tmp;
-    tmp << this->to_json(mode);
-    string tmp_str = tmp.str();
-    string la("["); // left after
-    string lb("\"["); // left before
-    replace_all(tmp_str,lb,la);
-    string ra("]"); // right after
-    string rb("]\""); // right before
-    replace_all(tmp_str,rb,ra);
-    string sa(""); // slash after
-    string sb("\\\""); // slash before
-    replace_all(tmp_str,sb,sa);
-    #ifdef DEBUG
-    cout << tmp_str;
-    #endif
-    json_file << tmp_str;
-    // end of quotes removal
+    json_file << this->to_json(mode);
     json_file.close();
-
     return;
 }
 

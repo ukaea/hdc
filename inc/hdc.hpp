@@ -29,6 +29,11 @@
 #define HDC_LIST 3
 #define HDC_ERROR 4
 
+#define JSON_UNDEF 0
+#define JSON_DOUBLE 1
+#define JSON_INT 2
+#define JSON_STRING 3
+
 //#define DEBUG
 
 using namespace std;
