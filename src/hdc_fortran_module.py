@@ -50,4 +50,7 @@ if __name__ == '__main__':
     print('tree["distsourceout/source/profiles_1d/psi"] %s' %
           tree["distsourceout/source/profiles_1d/psi"].as_array())
 
+    print("tree['distsourceout/source/profiles_1d'].keys() = %s" % tree.keys())
+    print("tree['distsourceout'].keys() = %s" % tree["distsourceout"].keys())
+    print("tree.keys() = %s" % tree.keys())
     # distsource = test_cpos(equilibrium)

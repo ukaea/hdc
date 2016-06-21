@@ -259,6 +259,7 @@ public:
     string get_datashape_str(string path);
     /** Returns vector of keys of a struct node and empty vector otherwise. */
     vector<string> keys();
+    size_t childs_count();
 private:
     int8_t type;
     vector<dynd::nd::array>* data; /*!< dynd::array storage*/

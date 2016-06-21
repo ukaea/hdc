@@ -118,6 +118,11 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     return;
 }
 
+size_t HDC::childs_count() {
+    if (this->type != HDC_STRUCT) return 0;
+    else return this->children->size();
+}
+
 vector<string> HDC::keys() {
     vector<string> k;
     if (this->type != HDC_STRUCT) {

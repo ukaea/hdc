@@ -377,15 +377,35 @@ void hdc_dump(hdc_t* tree) {
     return;
 }
 
-const char** hdc_keys(hdc_t* tree, size_t* size) {
+size_t hdc_childs_count(hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->childs_count();
+}
+
+
+char** hdc_keys(hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     vector<string> keys = t->keys();
-    const char** arr;
-    *size = keys.size();
-    arr = (const char**)malloc(sizeof(char)*(*size));
-    for (size_t i=0;i<(*size);i++) arr[i] = keys[i].c_str();
+    char** arr;
+    size_t size = keys.size();
+    arr = (char**)malloc(sizeof(char)*size);
+    for (size_t i=0;i<size;i++) {
+        size_t len = strlen(keys[i].c_str())+1;
+        arr[i] = (char*)malloc(sizeof(char)*len);
+        strcpy(arr[i],keys[i].c_str());
+    }
     return arr;
 }
+
+void hdc_keys_py(hdc_t* tree, char** arr) {
+    HDC* t = (HDC*)tree->obj;
+    vector<string> keys = t->keys();
+    size_t size = keys.size();
+    for (size_t i=0;i<size;i++) {
+        strcpy(arr[i],keys[i].c_str());
+    }
+}
+
 
 
 const char* hdc_dumps(hdc_t* tree) {

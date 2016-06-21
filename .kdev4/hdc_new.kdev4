@@ -12,7 +12,7 @@ Build Type=
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
 Extra Arguments=
-Install Directory=file:///usr/local
+Install Directory=file:///home/david/hdc_dist
 
 [Defines And Includes][Compiler]
 Name=GCC

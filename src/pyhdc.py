@@ -46,6 +46,10 @@ _hdc_get_type_str = libchdc.hdc_get_type_str
 _hdc_get_type_str.restype = ctypes.c_char_p
 _hdc_dumps = libchdc.hdc_dumps
 _hdc_dumps.restype = ctypes.c_char_p
+_hdc_childs_count = libchdc.hdc_childs_count
+_hdc_childs_count.restype = ctypes.c_ulong
+_hdc_keys_py = libchdc.hdc_keys_py
+_hdc_keys_py.argtypes = [_HDC_T_P, ctypes.POINTER(ctypes.c_char_p)]
 
 
 class HDC(object):
@@ -181,6 +185,17 @@ class HDC(object):
         """
         libchdc.hdc_to_json(self.c_ptr, filename.encode(), mode)
 
+    def keys(self):
+        """Get access keys of containers' children
+        """
+        n = _hdc_childs_count(self.c_ptr)
+        string_buffers = [ctypes.create_string_buffer(1000) for i in range(n)]
+        _keys = (ctypes.c_char_p*4)(*map(ctypes.addressof, string_buffers))
+        _hdc_keys_py(ctypes.cast(self.c_ptr,_HDC_T_P),_keys)
+        keys_lst = []
+        for i in range(n):
+            keys_lst.append(_keys[i].decode())
+        return keys_lst
 
 if __name__ == '__main__':
 
