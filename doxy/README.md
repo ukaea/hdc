@@ -95,3 +95,14 @@ Next steps
 - A plugin system for, e.g., data systems validation or conversion, object-oriented features (methods for particular data types), ...
 - Support for scientific data: dimensions, units, etc.
 - More features: slicing, lazy evaluation, richer API, ...
+
+Compared to ...
+===============
+HDF5
+----
+- HDC holds data buffers in memory, hence passing HDC containers means
+    - no data copy,
+    - no serialization / deserialization,
+    - better performace.
+- HDC is written in C++ with bindings to Fortran, C, Python and other languages in mind. 
+- HDC API can abstract out various back-end storage solutions: file systems, key-value stores, clouds, ...
