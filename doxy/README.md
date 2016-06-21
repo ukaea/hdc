@@ -100,9 +100,15 @@ Compared to ...
 ===============
 HDF5
 ----
-- HDC holds data buffers in memory, hence passing HDC containers means
+- HDC holds data buffers in (shared) memory, hence passing HDC containers means
     - no data copy,
     - no serialization / deserialization,
     - better performace.
 - HDC is written in C++ with bindings to Fortran, C, Python and other languages in mind. 
 - HDC API can abstract out various back-end storage solutions: file systems, key-value stores, clouds, ...
+
+Conduit
+-------
+Citing [Conduit](http://software.llnl.gov/conduit/): provides an intuitive model for describing hierarchical scientific data in C++, C, Fortran, and Python and is used for data coupling between packages in-core, serialization, and I/O tasks.
+
+*The goals are very close to ours, merging these two projects in near future is being considered.*
