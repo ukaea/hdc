@@ -23,10 +23,10 @@ Building libDyND
 For complete guide please follow instructions on [libDyND project page](https://github.com/libdynd/libdynd)
 ```
 git clone --recursive https://github.com/libdynd/libdynd.git
-# Checkout the last tested working commit
-git checkout 6e81192606875a9408f19a997854a46959f48cb4
 # Go to directory
 cd libdynd
+# Checkout the last tested working commit
+git checkout 6e81192606875a9408f19a997854a46959f48cb4
 # Create build directory
 mkdir build
 cd build
@@ -52,12 +52,16 @@ Some of them can be edited using `ccmake .` in`build` directory. The example of 
 
 
 ```
-cd hdc_new
+# clone the git repository
+git clone git@bitbucket.org:compass-tokamak/hdc.git
+# cd into hdc
+cd hdc
+
+# build in a separate build directory
 mkdir build
 cd build
 
-cmake -DDEBUG=OFF -DCMAKE_INSTALL_PREFIX=~/hdc_dist ..
-
+cmake -DDEBUG=OFF ..
 make -j4
 
 # Optionally install
