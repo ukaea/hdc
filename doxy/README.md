@@ -47,6 +47,7 @@ There are several cmake options:
   - `-DDEBUG=ON` Whether to prin debugging messages.
   - `-DPYTHON_LIBRARY=/path/to/libpython.so` On abacus set this to `/sw/python2/anaconda3/lib/libpython3.4m.so`
   - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`  On abacus set this to `/sw/python2/anaconda3/include/python3.4m/`
+  - `-DDYND_PREFIX=/lib/to/libdynd` Default is `/usr/local`, on abacus set this to `/sw/libdynd/`
 
 Some of them can be edited using `ccmake .` in`build` directory. The example of build follows:
 
