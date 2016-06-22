@@ -45,7 +45,7 @@ public:
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates HDC with data from DyND array object. */
-    HDC(dynd::nd::array arr);
+    HDC(dynd::nd::array&& arr);
     /** Desctructor */
     ~HDC();
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
@@ -150,7 +150,7 @@ public:
         return;
     };
     /** Sets DyND object to current node. */
-    void set_dynd(dynd::nd::array array); 
+    void set_dynd(dynd::nd::array&& array); 
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list); 
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */

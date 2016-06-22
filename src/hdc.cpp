@@ -23,7 +23,7 @@ HDC::HDC()
     list_elements = nullptr;
 }
 
-HDC::HDC(dynd::nd::array arr) {
+HDC::HDC(dynd::nd::array&& arr) {
     #ifdef DEBUG
     cout << "Creating DyND node..." << endl;
     #endif
@@ -579,7 +579,7 @@ void HDC::resize(HDC* h, int recursively)
     return;
 }
 
-void HDC::set_dynd(dynd::nd::array array) {
+void HDC::set_dynd(dynd::nd::array&& array) {
     if (this->type != HDC_EMPTY) return;
     this->data = std::move(array);
     return;
@@ -868,7 +868,7 @@ HDC* json_to_hdc(Json::Value* root) {
                         }
                         break;
                 }
-                tree->set_dynd(array);
+                tree->set_dynd(std::move(array));
                 tree->set_type(HDC_DYND);
             } else {
                 // call recursively -- save list
@@ -1012,7 +1012,7 @@ HDC* json_to_hdc(const Json::Value& root) {
                         }
                         break;
                 }
-                tree->set_dynd(array);
+                tree->set_dynd(std::move(array));
                 tree->set_type(HDC_DYND);
             } else {
                 // call recursively -- save list
