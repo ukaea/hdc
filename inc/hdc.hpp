@@ -69,16 +69,10 @@ public:
             cout << "The node has already children set..." << endl;
             return;
         }
-        //dynd::nd::array arr;
-        //dynd::ndt::type dtype = dynd::ndt::make_type<T>();
-        //arr->data = (char*) data;
-        dynd::nd::array arr = data;
         #ifdef DEBUG
         cout << arr << endl;
         #endif
-        if (this->data->size()) this->data->clear();
-        this->data->push_back(arr);
-        //this->data = arr;
+        this->data = data;
         this->type = HDC_DYND;
         return;
     };
@@ -105,16 +99,13 @@ public:
         dynd::ndt::type dtype = dynd::ndt::make_type<T>();
         size_t size = sizeof(T);
         for (int8_t i = 0;i<ndim;i++) size = size * shape[i];
-        char* data2 = (char*)malloc(size);
-        memcpy(data2,data,size);
-        arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
-        arr->data = (char*) data2;
-//         arr.assign(data); // New versions of DyND
+        char* data_ = (char*)malloc(size);
+        memcpy(data_,data,size);
+        this->data = dynd::nd::dtyped_empty(ndim,shape,dtype);
+        this->data->data = (char*) data_;
         #ifdef DEBUG
-        cout << arr << endl;
+        cout << this->data << endl;
         #endif
-        if (this->data->size()) this->data->clear();
-        this->data->push_back(arr);
         this->type = HDC_DYND;
         return;
     };
@@ -138,12 +129,10 @@ public:
             cout << "The node has already children set..." << endl;
             return;
         }
-        dynd::nd::array arr = data;
+        this->data = data;
         #ifdef DEBUG
-        cout << arr << endl;
+        cout << this->data << endl;
         #endif
-        if (this->data->size()) this->data->clear();
-        this->data->push_back(arr);
         this->type = HDC_DYND;
         return;
     };
@@ -193,11 +182,12 @@ public:
     {
         if (this->children->size()) {
             cout << "This node is not terminal" << endl;
+            return (T)0;
         }
         #ifdef DEBUG
-        cout << "From as:" << this->data->at(0) << endl;
+        cout << "From as:" << this->data << endl;
         #endif
-        return (T)(this->data->at(0)->data);
+        return (T)(this->data->data);
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
@@ -205,9 +195,9 @@ public:
             cout << "This node is not terminal" << endl;
         }
         #ifdef DEBUG
-        cout << "From as_string:" << this->data->at(0) << endl;
+        cout << "From as_string:" << this->data << endl;
         #endif
-        return this->data->at(0).as<std::string>();
+        return this->data.as<std::string>();
     }
     
     /** Returns string of node under given path. Needs to have separate function */
@@ -262,8 +252,7 @@ public:
     size_t childs_count();
 private:
     int8_t type;
-    vector<dynd::nd::array>* data; /*!< dynd::array storage*/
-    //     dynd::nd::array data;
+    dynd::nd::array data; /*!< dynd::array storage*/
     deque<HDC*>* list_elements; /*!< dynd::array storage - list type*/
     unordered_map<string, HDC*>* children; /*!< dynd::array storage - struct type*/
     
@@ -278,8 +267,7 @@ private:
 
 template <typename T> HDC* hdc_empty_array(int8_t ndim, long* shape) {
     dynd::ndt::type dtype = dynd::ndt::make_type<T>();
-    dynd::nd::array arr = dynd::nd::dtyped_empty(ndim,shape,dtype);
-    return new HDC(arr);
+    return new HDC(dynd::nd::dtyped_empty(ndim,shape,dtype));
 }
 
 void split(const string &s, char delim, vector<string>& elems);

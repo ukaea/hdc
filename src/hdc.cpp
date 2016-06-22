@@ -17,7 +17,7 @@ HDC::HDC()
     cout << "Creating empty node..." << endl;
     #endif
     type = HDC_EMPTY;
-    data = new vector<dynd::nd::array>;
+    data = dynd::nd::array();
     children = new unordered_map<string, HDC*>;
     //children = nullptr;
     list_elements = nullptr;
@@ -28,10 +28,9 @@ HDC::HDC(dynd::nd::array arr) {
     cout << "Creating DyND node..." << endl;
     #endif
     type = HDC_DYND;
-    data = new vector<dynd::nd::array>;
+    data = std::move(arr);
     children = new unordered_map<string, HDC*>;
     list_elements = nullptr;
-    data->push_back(arr);
 }
 
 HDC::~HDC()
@@ -50,7 +49,6 @@ HDC::~HDC()
         children->clear();
     } else {
         delete children;
-        delete data;
         if (list_elements != nullptr) {
             for (size_t i = 0;i < list_elements->size();i++) delete &list_elements[i];
             list_elements->clear();
@@ -287,8 +285,8 @@ void HDC::set_type(uint8_t i) {
 
 int8_t HDC::get_ndim()
 {
-    if (this->type == HDC_DYND) return this->data->at(0).get_ndim();
-    else if (this->type == HDC_LIST) return 1; // Currently, we support only single container list dimension
+    if (this->type == HDC_DYND) return this->data.get_ndim();
+    else if (this->type == HDC_LIST) return 1; // Currently we support only single container list dimension
     else return 1;
 }
 
@@ -304,8 +302,8 @@ void* HDC::as_void_ptr() {
 long int* HDC::get_shape()
 {
     if (this->type == HDC_DYND) {
-        long int* shape = (long int*)malloc(this->data->at(0).get_ndim() * sizeof(long int));
-        for (long i=0; i < this->data->at(0).get_ndim(); i++) shape[i] = this->data->at(0).get_shape()[i];
+        long int* shape = (long int*)malloc(this->data.get_ndim() * sizeof(long int));
+        for (long i=0; i < this->data.get_ndim(); i++) shape[i] = this->data.get_shape()[i];
         return shape;
     }
     else if (this->type == HDC_LIST) {
@@ -371,7 +369,7 @@ Json::Value HDC::to_json(int mode) {
     Json::Value root;
     if (mode == 0) {
         if (this->type == HDC_DYND) {
-            //root = dynd::format_json(this->data->at(0)).as<string>();
+            //root = dynd::format_json(this->data).as<string>();
 
             string type_str = this->get_type_str();
             int8_t type_id = JSON_UNDEF;
@@ -504,29 +502,29 @@ Json::Value HDC::to_json(int mode) {
             dynd::ndt::type dt;
             switch(this->get_ndim()) {
                 case 0:
-                    dt = this->data->at(0).get_type();
+                    dt = this->data.get_type();
                     break;
                 case 1:
-                    dt = this->data->at(0)(0).get_type();
+                    dt = this->data(0).get_type();
                     break;
                 case 2:
-                    dt = this->data->at(0)(0,0).get_type();
+                    dt = this->data(0,0).get_type();
                     break;
                 case 3:
-                    dt = this->data->at(0)(0,0,0).get_type();
+                    dt = this->data(0,0,0).get_type();
                     break;
                 case 4:
-                    dt = this->data->at(0)(0,0,0,0).get_type();
+                    dt = this->data(0,0,0,0).get_type();
                     break;
                 case 5:
-                    dt = this->data->at(0)(0,0,0,0,0).get_type();
+                    dt = this->data(0,0,0,0,0).get_type();
                     break;
                 default:
                     cout << "Error: unsupported number of dimensions." << endl;
                     break;
             }
             root["dtype"] = dt.str();
-            root["data"] = dynd::format_json(this->data->at(0)).as<string>();        
+            root["data"] = dynd::format_json(this->data).as<string>(); //TODO: remove this / move to another function??
         }
         else if (this->type == HDC_STRUCT) {
 //             Json::Value children;
@@ -583,7 +581,7 @@ void HDC::resize(HDC* h, int recursively)
 
 void HDC::set_dynd(dynd::nd::array array) {
     if (this->type != HDC_EMPTY) return;
-    this->data->push_back(array);
+    this->data = std::move(array);
     return;
 }
 
@@ -610,12 +608,12 @@ HDC* HDC::copy(int copy_arrays)
     }
     else if (this->type == HDC_DYND) {
         if (copy_arrays == 1) {
-            //dynd::nd::empty(<this->data->at(0).get_type()>);
-            //long size = this->data->at(0).size();
+            //dynd::nd::empty(<this->data.get_type()>);
+            //long size = this->data.size();
             //char *
-            copy->data->push_back(dynd::nd::array(this->data->at(0)));
+            copy->data = this->data;
             #ifdef DEBUG
-            cout << "copy: " << copy->data->at(0) << endl;
+            cout << "copy: " << copy->data << endl;
             #endif
         } else this->set_type(HDC_EMPTY);
     }
@@ -693,22 +691,22 @@ string HDC::get_type_str() {
         dynd::ndt::type dt;
         switch(this->get_ndim()) {
             case 0:
-                dt = this->data->at(0).get_type();
+                dt = this->data.get_type();
                 break;
             case 1:
-                dt = this->data->at(0)(0).get_type();
+                dt = this->data(0).get_type();
                 break;
             case 2:
-                dt = this->data->at(0)(0,0).get_type();
+                dt = this->data(0,0).get_type();
                 break;
             case 3:
-                dt = this->data->at(0)(0,0,0).get_type();
+                dt = this->data(0,0,0).get_type();
                 break;
             case 4:
-                dt = this->data->at(0)(0,0,0,0).get_type();
+                dt = this->data(0,0,0,0).get_type();
                 break;
             case 5:
-                dt = this->data->at(0)(0,0,0,0,0).get_type();
+                dt = this->data(0,0,0,0,0).get_type();
                 break;
             default:
                 cout << "Error: unsupported number of dimensions." << endl;
@@ -733,7 +731,7 @@ string HDC::get_datashape_str() {
     else if (this->type == HDC_LIST || this->type == HDC_STRUCT) type_str = "hdc";
     else {
         dynd::ndt::type dt;
-        dt = this->data->at(0).get_type();
+        dt = this->data.get_type();
         type_str = dt.str();
     }
     return type_str;
