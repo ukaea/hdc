@@ -18,6 +18,15 @@ module hdc_fortran
             type(hdc_t) :: obj
         end function hdc_new_empty
 
+        !> Construct empty arra of type given by string.
+        function c_hdc_new_dtype(ndim, shape_, type_str) result(obj) bind(c,name="hdc_new_dtype")
+            import
+            type(hdc_t) :: obj
+            integer(kind=c_int8_t),value :: ndim
+            type(c_ptr), value :: shape_
+            character(kind=c_char), intent(in) :: type_str(*)
+        end function c_hdc_new_dtype
+        
         function c_hdc_new_void_ptr() result(obj) bind(c, name="hdc_new_void_ptr")
             import
             type(c_ptr) :: obj
@@ -342,6 +351,12 @@ module hdc_fortran
             type(hdc_t), value:: obj
         end subroutine hdc_dump
 
+        function hdc_get_type(obj) bind(c,name="hdc_get_type") result(res)
+            import
+            type(hdc_t), value:: obj
+            integer(kind=c_int8_t) :: res
+        end function hdc_get_type
+        
     end interface
 
     !> Generic set interface.
@@ -468,7 +483,7 @@ module hdc_fortran
     
     public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
-    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path
+    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -993,6 +1008,14 @@ contains
         res = hdc_as_int32_(this)
     end subroutine hdc_as_int32_sub
 
+    function hdc_new_dtype(ndim, shape_, type_str) result(res)
+        integer(kind=c_int8_t) :: ndim
+        integer(kind=c_long), dimension(:), target :: shape_
+        character(len=*), intent(in) :: type_str
+        type(hdc_t) :: res
+        res = c_hdc_new_dtype(ndim, c_loc(shape_), trim(type_str)//c_null_char)
+    end function hdc_new_dtype
+    
     function hdc_as_double_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
