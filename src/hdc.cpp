@@ -44,7 +44,9 @@ HDC::~HDC()
         #endif
         for (auto it = children->begin(); it != children->end(); it++) {
             delete it->second;
+            #ifdef DEBUG
             cout << "Remove: " << it->first << endl;
+            #endif
         }
         children->clear();
     } else {
