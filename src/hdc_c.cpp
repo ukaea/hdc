@@ -196,6 +196,26 @@ int32_t** hdc_as_int32_2d(struct hdc_t* tree) {
     return t->as<int32_t**>();
 }
 
+int8_t* hdc_as_int8_1d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int8_t*>();
+}
+
+int8_t** hdc_as_int8_2d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int8_t**>();
+}
+
+double* hdc_as_double_1d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<double*>();
+}
+
+double** hdc_as_double_2d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<double**>();
+}
+
 int32_t* hdc_as_int32_1d_path(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
     return t->as<int32_t*>((string)path);
@@ -206,6 +226,16 @@ int32_t** hdc_as_int32_2d_path(struct hdc_t* tree, char* path) {
     return t->as<int32_t**>((string)path);
 }
 
+
+double* hdc_as_double_1d_path(struct hdc_t* tree, char* path) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<double*>((string)path);
+}
+
+double** hdc_as_double_2d_path(struct hdc_t* tree, char* path) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<double**>((string)path);
+}
 
 void hdc_set_int8_scalar(hdc_t* tree, int8_t data)
 {
@@ -275,14 +305,14 @@ struct hdc_t* hdc_copy(hdc_t* src)
 void hdc_set_string(hdc_t* tree, char* str)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((string)str);
+    t->set_data<std::string>((std::string)str);
     return;
 }
 
 void hdc_set_string_path(hdc_t* tree, char* path, char* str)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data(path,(string)str);
+    t->set_data<std::string>(path,(std::string)str);
     return;
 }
 
@@ -295,7 +325,8 @@ double hdc_as_double_scalar(hdc_t* tree)
 const char* hdc_as_string(hdc_t* tree)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->as_string().c_str();
+    std::string* str = new std::string(t->as_string()); //Unfortunatelly, we need to make copy here...
+    return str->c_str();
 }
 
 const char* hdc_as_string_path(hdc_t* tree, char* path)
@@ -404,6 +435,28 @@ void hdc_keys_py(hdc_t* tree, char** arr) {
     for (size_t i=0;i<size;i++) {
         strcpy(arr[i],keys[i].c_str());
     }
+}
+
+
+hdc_t* hdc_new_dtype(int8_t ndim, long int* shape, char* type_str)
+{
+    HDC* t;
+    if (strcmp("int8",type_str) == 0) {
+        t = hdc_empty_array<int8_t*>(ndim, shape);
+    }
+    else if (strcmp("int32",type_str) == 0) {
+        t = hdc_empty_array<int32_t*>(ndim, shape);
+    }
+    else if (strcmp("double",type_str) == 0) {
+        t = hdc_empty_array<double*>(ndim, shape);
+    }
+    else {
+        cout << "Error: unrecognized type: \"" << (string)type_str << "\"" << endl;
+        exit(-1);
+    }
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)t;
+    return h;
 }
 
 

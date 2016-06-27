@@ -7,7 +7,7 @@ TEST(HDC,EmptyNode) {
     EXPECT_EQ(0,h->get_shape()[0]);
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(HDC_EMPTY,h->get_type());
-    EXPECT_EQ("null",h->get_type_str());
+    EXPECT_STREQ("null",h->get_type_str().c_str());
     EXPECT_EQ(false,h->has_child("aaa"));
 }
 
@@ -17,7 +17,7 @@ TEST(HDC,NodeManipulation) {
     HDC* n2 = new HDC();
     tree->add_child("aaa/bbb",n1);
     EXPECT_EQ(HDC_STRUCT,tree->get_type());
-    EXPECT_EQ("hdc",tree->get_type_str());
+    EXPECT_STREQ("hdc",tree->get_type_str().c_str());
     EXPECT_EQ(true,tree->has_child("aaa/bbb"));
     EXPECT_EQ(true,tree->has_child("aaa"));
     EXPECT_EQ(n1,tree->get("aaa/bbb"));
@@ -51,7 +51,7 @@ TEST(HDC,Int8DataManipulation) {
     EXPECT_EQ(HDC_DYND,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_EQ("int8",h->get_type_str());
+    EXPECT_STREQ("int8",h->get_type_str().c_str());
     int8_t* data2 = h->as<int8_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 120;
@@ -69,7 +69,7 @@ TEST(HDC,Int32DataManipulation) {
     EXPECT_EQ(HDC_DYND,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_EQ("int32",h->get_type_str());
+    EXPECT_STREQ("int32",h->get_type_str().c_str());
     int32_t* data2 = h->as<int32_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 666;
@@ -88,7 +88,7 @@ TEST(HDC,DoubleDataManipulation) {
     EXPECT_EQ(HDC_DYND,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_EQ("float64",h->get_type_str());
+    EXPECT_STREQ("float64",h->get_type_str().c_str());
     double* data2 = h->as<double*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 666.666;
@@ -112,7 +112,7 @@ TEST(HDC,SliceManipulation) {
     h->append_slice(sl);
     h->append_slice(sl2);
     EXPECT_EQ(HDC_LIST, h->get_type());
-    EXPECT_EQ("hdc", h->get_type_str());
+    EXPECT_STREQ("hdc", h->get_type_str().c_str());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(2,h->get_shape()[0]);
     EXPECT_EQ(sl,h->get_slice(0));

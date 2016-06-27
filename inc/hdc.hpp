@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <json/json.h>
 #include <algorithm>
-
+#include <string>
 #include "types.h"
 
 

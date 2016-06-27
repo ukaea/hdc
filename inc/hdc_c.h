@@ -11,7 +11,7 @@ struct hdc_t* hdc_new_empty(); /** Default constructor. Creates empty HDC  */
 struct hdc_t* hdc_new_int8(int8_t ndim, long* shape); /** Creates new HDC with empty array of given shape and dimension.  */
 struct hdc_t* hdc_new_int32(int8_t ndim, long* shape); /** Creates new HDC with empty array of given shape and dimension.  */
 struct hdc_t* hdc_new_double(int8_t ndim, long* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-
+struct hdc_t* hdc_new_dtype(int8_t ndim, long* shape, char* type_str); /** Creates new HDC empty array of a given type string, shape and dimension. */
 void* hdc_new_void_ptr(); /** Alernative constuctor to be used in Fortran. */
 void hdc_delete(struct hdc_t* tree); /** Deletes HDC object (Destructor). */
 void hdc_delete_ptr(void* obj);
@@ -43,6 +43,10 @@ long int* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape
 uint8_t hdc_get_type(struct hdc_t* tree);  /**  */
 int32_t* hdc_as_int32_1d(struct hdc_t* tree); /**  */
 int32_t** hdc_as_int32_2d(struct hdc_t* tree); /**  */
+int8_t* hdc_as_int8_1d(struct hdc_t* tree); /**  */
+int8_t** hdc_as_int8_2d(struct hdc_t* tree); /**  */
+double* hdc_as_double_1d(struct hdc_t* tree); /**  */
+double** hdc_as_double_2d(struct hdc_t* tree); /**  */
 int32_t* hdc_as_int32_1d_path(struct hdc_t* tree, char* path); /**  */
 int32_t** hdc_as_int32_2d_path(struct hdc_t* tree, char* path); /**  */
 void* hdc_as_voidptr(struct hdc_t* tree);  /**  */
