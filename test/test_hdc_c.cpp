@@ -15,6 +15,36 @@ TEST(CHDC,EmptyNode) {
     EXPECT_EQ(false,hdc_has_child(h,"aaa"));
 }
 
+TEST(CHDC,EmptyArrayNode) {
+    int8_t ndim = 1;
+    long shape[] = {4};
+    
+    struct hdc_t* hi8 = hdc_new_dtype(ndim, shape, "int8");
+    EXPECT_EQ(1,hdc_get_ndim(hi8));
+    EXPECT_EQ(4,hdc_get_shape(hi8)[0]);
+    EXPECT_EQ(HDC_DYND,hdc_get_type(hi8));
+    EXPECT_STREQ("int8",hdc_get_type_str(hi8));
+    
+    struct hdc_t* hi32 = hdc_new_dtype(ndim, shape, "int32");
+    EXPECT_EQ(1,hdc_get_ndim(hi32));
+    EXPECT_EQ(4,hdc_get_shape(hi32)[0]);
+    EXPECT_EQ(HDC_DYND,hdc_get_type(hi32));
+    EXPECT_STREQ("int32",hdc_get_type_str(hi32));
+    
+    struct hdc_t* hd = hdc_new_dtype(ndim, shape, "float64");
+    EXPECT_EQ(1,hdc_get_ndim(hd));
+    EXPECT_EQ(4,hdc_get_shape(hd)[0]);
+    EXPECT_EQ(HDC_DYND,hdc_get_type(hd));
+    EXPECT_STREQ("float64",hdc_get_type_str(hd));
+    
+    hd = hdc_new_dtype(ndim, shape, "double");
+    EXPECT_EQ(1,hdc_get_ndim(hd));
+    EXPECT_EQ(4,hdc_get_shape(hd)[0]);
+    EXPECT_EQ(HDC_DYND,hdc_get_type(hd));
+    EXPECT_STREQ("float64",hdc_get_type_str(hd));
+}
+
+
 TEST(CHDC,NodeManipulation) {
     struct hdc_t* tree = hdc_new_empty();
     struct hdc_t* n1 = hdc_new_empty();

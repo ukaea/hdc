@@ -11,6 +11,29 @@ TEST(HDC,EmptyNode) {
     EXPECT_EQ(false,h->has_child("aaa"));
 }
 
+TEST(HDC,EmptyArrayNode) {
+    int8_t ndim = 1;
+    long shape[] = {4};
+    HDC* hi8 = hdc_empty_array<int8_t>(ndim, shape);
+    EXPECT_EQ(1,hi8->get_ndim());
+    EXPECT_EQ(4,hi8->get_shape()[0]);
+    EXPECT_EQ(HDC_DYND,hi8->get_type());
+    EXPECT_STREQ("int8",hi8->get_type_str().c_str());
+    
+    HDC* hi32 = hdc_empty_array<int32_t>(ndim, shape);
+    EXPECT_EQ(1,hi32->get_ndim());
+    EXPECT_EQ(4,hi32->get_shape()[0]);
+    EXPECT_EQ(HDC_DYND,hi32->get_type());
+    EXPECT_STREQ("int32",hi32->get_type_str().c_str());
+    
+    HDC* hd = hdc_empty_array<double>(ndim, shape);
+    EXPECT_EQ(1,hd->get_ndim());
+    EXPECT_EQ(4,hd->get_shape()[0]);
+    EXPECT_EQ(HDC_DYND,hd->get_type());
+    EXPECT_STREQ("float64",hd->get_type_str().c_str());
+
+}
+
 TEST(HDC,NodeManipulation) {
     HDC* tree = new HDC();
     HDC* n1 = new HDC();

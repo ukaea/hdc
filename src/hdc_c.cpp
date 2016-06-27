@@ -438,17 +438,20 @@ void hdc_keys_py(hdc_t* tree, char** arr) {
 }
 
 
-hdc_t* hdc_new_dtype(int8_t ndim, long int* shape, char* type_str)
+hdc_t* hdc_new_dtype(int8_t ndim, long int* shape, const char* type_str)
 {
     HDC* t;
     if (strcmp("int8",type_str) == 0) {
-        t = hdc_empty_array<int8_t*>(ndim, shape);
+        t = hdc_empty_array<int8_t>(ndim, shape);
     }
     else if (strcmp("int32",type_str) == 0) {
-        t = hdc_empty_array<int32_t*>(ndim, shape);
+        t = hdc_empty_array<int32_t>(ndim, shape);
     }
     else if (strcmp("double",type_str) == 0) {
-        t = hdc_empty_array<double*>(ndim, shape);
+        t = hdc_empty_array<double>(ndim, shape);
+    }
+    else if (strcmp("float64",type_str) == 0) {
+        t = hdc_empty_array<double>(ndim, shape);
     }
     else {
         cout << "Error: unrecognized type: \"" << (string)type_str << "\"" << endl;
