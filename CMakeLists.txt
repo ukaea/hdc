@@ -53,6 +53,34 @@ endif()
 
 ### gtest
 
+### gbenchmark
+
+if (CMAKE_VERSION VERSION_LESS 3.2)
+    set(UPDATE_DISCONNECTED_IF_AVAILABLE "")
+else()
+    set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
+endif()
+
+include(cmake/DownloadProject.cmake)
+download_project(PROJ                googlebenchmark
+                 GIT_REPOSITORY      https://github.com/google/benchmark.git
+                 GIT_TAG             master
+                 ${UPDATE_DISCONNECTED_IF_AVAILABLE}
+)
+
+add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
+
+# When using CMake 2.8.11 or later, header path dependencies
+# are automatically added to the gtest and gmock targets.
+# For earlier CMake versions, we have to explicitly add the
+# required directories to the header search path ourselves.
+# if (CMAKE_VERSION VERSION_LESS 2.8.11)
+#     include_directories("${googlebenchmark_SOURCE_DIR}/include")
+# endif()
+
+include_directories("${googlebenchmark_SOURCE_DIR}/include")
+### gbenchmark
+
 set(DYND_PREFIX "/usr/local" CACHE STRING "Specifies prefix of libDyND, default /usr/local")
 
 # site_name(HOSTNAME)
@@ -93,5 +121,5 @@ add_subdirectory(doxy)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
-
+add_subdirectory(benchmark)
 
