@@ -90,6 +90,10 @@ The Python examples can be run from any arbitraty folder, the only necessary thi
 LD_LIBRARY_PATH="../build/lib/" ipython hdc_fortran_module.py
 ```
 
+Some benchmarks
+===============
+See [this file](doxy/PERFORMANCE_TESTING.md)
+
 Next steps
 ==========
 - Use shared memory, for example via [mdbm](https://github.com/yahoo/mdbm).
