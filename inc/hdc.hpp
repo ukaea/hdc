@@ -89,7 +89,7 @@ public:
         return;
     };
     /** Sets array data to current node. */
-    template <typename T> void set_data(int8_t ndim, const long int* shape, void* data) 
+    template <typename T> void set_data(int8_t ndim, const long int* shape, void* data, bool copy=true) 
     {
         if (this->children->size()) {
             cout << "The node has already children set..." << endl;
@@ -99,10 +99,12 @@ public:
         dynd::ndt::type dtype = dynd::ndt::make_type<T>();
         size_t size = sizeof(T);
         for (int8_t i = 0;i<ndim;i++) size = size * shape[i];
-        char* data_ = (char*)malloc(size);
-        memcpy(data_,data,size);
         this->data = dynd::nd::dtyped_empty(ndim,shape,dtype);
-        this->data->data = (char*) data_;
+        if (copy) {
+            memcpy(this->data->data,data,size);
+        } else {
+            this->data->data = (char*) data;
+        }
         #ifdef DEBUG
         cout << this->data << endl;
         #endif
@@ -110,7 +112,7 @@ public:
         return;
     };
     /** Sets array data to node on given path. */
-    template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data) 
+    template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data, bool copy=true) 
     {
         if (!this->has_child(path)) {
             this->add_child(path, new HDC());
@@ -118,7 +120,7 @@ public:
             cout << "not found, adding..." << endl;
             #endif
         }
-        this->get(path)->set_data<T>(ndim,shape,data);
+        this->get(path)->set_data<T>(ndim,shape,data,copy=copy);
         return;
     };
     
