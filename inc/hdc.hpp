@@ -293,7 +293,7 @@ bool is_double(const Json::Value& root);
 bool is_jagged(const Json::Value& root);
 long* get_shape(const Json::Value& root);
 int8_t get_ndim(const Json::Value& root);
-
+static bool deleteAll(HDC* elem);
 void hello__();
 
 #endif // HDC_HPP

@@ -52,8 +52,7 @@ HDC::~HDC()
     } else {
         delete children;
         if (list_elements != nullptr) {
-            for (size_t i = 0;i < list_elements->size();i++) delete &list_elements[i];
-            list_elements->clear();
+            list_elements->erase(remove_if(list_elements->begin(),list_elements->end(),deleteAll));
             delete list_elements;
         }
     }
@@ -1231,4 +1230,10 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
 void hello__() {
     cout << "Hello from c++" << endl;
     return;
+}
+
+static bool deleteAll(HDC* elem)
+{
+    delete elem;
+    return true;
 }

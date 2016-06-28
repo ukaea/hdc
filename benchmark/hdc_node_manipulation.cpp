@@ -55,7 +55,7 @@ static void BM_HDCAppendSlice(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC* tree = new HDC();
         for (size_t i=0;i<state.range_x();i++) tree->append_slice(new HDC());
-        //delete tree; // TODO: opravit!
+        delete tree;
     }
 }
 BENCHMARK(BM_HDCAppendSlice)->Range(100,100<<3);
