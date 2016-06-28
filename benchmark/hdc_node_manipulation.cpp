@@ -3,29 +3,29 @@
 #include <string>
 
 using namespace std;
-
 // Empty child creation and deletion
-static void BM_HDCCreationAndDeletion(benchmark::State& state) {
+static void BM_HDC_CreationAndDeletion(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC* h = new HDC();
         delete h;
     }
+    state.SetItemsProcessed(state.iterations());
 }
-BENCHMARK(BM_HDCCreationAndDeletion);
+BENCHMARK(BM_HDC_CreationAndDeletion);
 
-static void BM_HDCAddChild(benchmark::State& state) {
-    state.SetItemsProcessed(state.range_x());
+// Adding childs
+static void BM_HDC_AddChild(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC* tree = new HDC();
         for (size_t i = 0;i < state.range_x();i++) tree->add_child(std::to_string(i),new HDC());
         delete tree;
     }
+    state.SetItemsProcessed(state.range_x() * state.iterations());
 }
-BENCHMARK(BM_HDCAddChild)->Range(1000,1000<<5);
+BENCHMARK(BM_HDC_AddChild)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-
-static void BM_HDCAddChildPathDepth(benchmark::State& state) {
-    state.SetItemsProcessed(state.range_x());
+// Adding child to long path
+static void BM_HDC_AddChildPathDepth(benchmark::State& state) {
     string path = "";
     for (size_t k=0;k<state.range_x();k++) path += "aaa/";
     int i = 0;
@@ -34,12 +34,12 @@ static void BM_HDCAddChildPathDepth(benchmark::State& state) {
         tree->add_child(path,new HDC());
         delete tree;
     }
+    state.SetItemsProcessed(state.range_x() * state.iterations());
 }
-BENCHMARK(BM_HDCAddChildPathDepth)->Range(1,16);
+BENCHMARK(BM_HDC_AddChildPathDepth)->Range(1,16);
 
-
-static void BM_HDCAddChildPathLength(benchmark::State& state) {
-    state.SetBytesProcessed(state.range_x());
+// Adding child to path with long string
+static void BM_HDC_AddChildPathLength(benchmark::State& state) {
     string path = "";
     for (size_t k=0;k<state.range_x();k++) path += "a";
     while (state.KeepRunning()) {
@@ -47,10 +47,12 @@ static void BM_HDCAddChildPathLength(benchmark::State& state) {
         tree->add_child(path,new HDC());
         delete tree;
     }
+    state.SetItemsProcessed(state.range_x() * state.iterations());
 }
-BENCHMARK(BM_HDCAddChildPathLength)->Range(100,100<<5);
+BENCHMARK(BM_HDC_AddChildPathLength)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-static void BM_HDCAppendSlice(benchmark::State& state) {
+// Appending slice
+static void BM_HDC_AppendSlice(benchmark::State& state) {
     state.SetItemsProcessed(state.range_x());
     while (state.KeepRunning()) {
         HDC* tree = new HDC();
@@ -58,38 +60,52 @@ static void BM_HDCAppendSlice(benchmark::State& state) {
         delete tree;
     }
 }
-BENCHMARK(BM_HDCAppendSlice)->Range(100,100<<3);
+BENCHMARK(BM_HDC_AppendSlice)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-
-//test createlarge
-static void BM_HDCCreateDeleteLarge(benchmark::State& state) {
-    HDC* g_tree = new HDC();
+// Test has_child()
+static void BM_HDC_HasChildMultipleItems(benchmark::State& state) {
     int n = state.range_x();
-    state.SetItemsProcessed(state.range_x());
-    while (state.KeepRunning()) {
-        HDC* g_tree = new HDC();
-        for(int i=0;i<n;i++) g_tree->add_child(to_string(i),new HDC());
-        delete g_tree;
-    }
-}
-BENCHMARK(BM_HDCCreateDeleteLarge)->Range(1000,1000<<5);
-
-// Test has() -- substract previous
-static void BM_HDCHasChildMultipleItems(benchmark::State& state) {
-    int n = state.range_x();
-    state.SetItemsProcessed(state.range_x());
-    HDC* g_tree = new HDC();
-    for(int i=0;i<n;i++) g_tree->add_child(to_string(i),new HDC());
+    HDC* tree = new HDC();
+    for(int i=0;i<n;i++) tree->add_child(to_string(i),new HDC());
     while (state.KeepRunning()) {
         // measure
-        for (int i=0;i<100;i++) {
-            bool has_child = g_tree->has_child(std::to_string(i*99));
+        for (int i=0;i<n/100;i++) {
+            bool has_child = tree->has_child(std::to_string(i*99));
         }
     }
-    delete g_tree;
+    state.SetItemsProcessed(state.range_x() * state.iterations());
+    delete tree;
 }
-BENCHMARK(BM_HDCHasChildMultipleItems)->Range(1000,1000<<5);
+BENCHMARK(BM_HDC_HasChildMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
 
+// Test get()
+static void BM_HDC_GetChildMultipleItems(benchmark::State& state) {
+    int n = state.range_x();
+    HDC* tree = new HDC();
+    for(int i=0;i<n;i++) tree->add_child(to_string(i),new HDC());
+    while (state.KeepRunning()) {
+        // measure
+        for (int i=0;i<n/100;i++) {
+            HDC* child = tree->get(std::to_string(i*99));
+        }
+    }
+    state.SetItemsProcessed(state.range_x() * state.iterations());
+    delete tree;
+}
+BENCHMARK(BM_HDC_GetChildMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-
-
+// Test get_slice()
+static void BM_HDC_GetSliceMultipleItems(benchmark::State& state) {
+    int n = state.range_x();
+    HDC* tree = new HDC();
+    for(int i=0;i<n;i++) tree->append_slice(new HDC());
+    while (state.KeepRunning()) {
+        // measure
+        for (int i=0;i<n/100;i++) {
+            HDC* slice = tree->get_slice(i*99);
+        }
+    }
+    state.SetItemsProcessed(state.range_x() * state.iterations());
+    delete tree;
+}
+BENCHMARK(BM_HDC_GetSliceMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
