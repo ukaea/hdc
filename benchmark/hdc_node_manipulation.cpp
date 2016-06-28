@@ -24,19 +24,33 @@ static void BM_HDC_AddChild(benchmark::State& state) {
 }
 BENCHMARK(BM_HDC_AddChild)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-// Adding child to long path
+// Adding child to deep path
 static void BM_HDC_AddChildPathDepth(benchmark::State& state) {
     string path = "";
     for (size_t k=0;k<state.range_x();k++) path += "aaa/";
-    int i = 0;
     while (state.KeepRunning()) {
         HDC* tree = new HDC();
         tree->add_child(path,new HDC());
         delete tree;
     }
-    state.SetItemsProcessed(state.range_x() * state.iterations());
+    state.SetItemsProcessed(state.iterations());
 }
-BENCHMARK(BM_HDC_AddChildPathDepth)->Range(1,16);
+BENCHMARK(BM_HDC_AddChildPathDepth)->RangeMultiplier(2)->Range(1,16);
+
+// Geting child from deep path
+static void BM_HDC_GetChildPathDepth(benchmark::State& state) {
+    string path = "";
+    for (size_t k=0;k<state.range_x();k++) path += "aaa/";
+    HDC* tree = new HDC();
+    tree->add_child(path,new HDC());
+    while (state.KeepRunning()) {
+        HDC* node = tree->get(path);
+    }
+    state.SetItemsProcessed(state.iterations());
+    delete tree;
+}
+BENCHMARK(BM_HDC_GetChildPathDepth)->RangeMultiplier(2)->Range(1,16);
+
 
 // Adding child to path with long string
 static void BM_HDC_AddChildPathLength(benchmark::State& state) {
@@ -47,11 +61,26 @@ static void BM_HDC_AddChildPathLength(benchmark::State& state) {
         tree->add_child(path,new HDC());
         delete tree;
     }
-    state.SetItemsProcessed(state.range_x() * state.iterations());
+    state.SetItemsProcessed(state.iterations());
 }
 BENCHMARK(BM_HDC_AddChildPathLength)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-// Appending slice
+// Getting child to path with long string
+static void BM_HDC_GetChildPathLength(benchmark::State& state) {
+    string path = "";
+    for (size_t k=0;k<state.range_x();k++) path += "a";
+    HDC* tree = new HDC();
+    tree->add_child(path,new HDC());
+    while (state.KeepRunning()) {
+        HDC* node = tree->get(path);
+    }
+    state.SetItemsProcessed(state.iterations());
+    delete tree;
+}
+BENCHMARK(BM_HDC_GetChildPathLength)->RangeMultiplier(2)->Range(1024,1024<<5);
+
+
+// Appending slice to long (but no deep)
 static void BM_HDC_AppendSlice(benchmark::State& state) {
     state.SetItemsProcessed(state.range_x());
     while (state.KeepRunning()) {
@@ -59,6 +88,7 @@ static void BM_HDC_AppendSlice(benchmark::State& state) {
         for (size_t i=0;i<state.range_x();i++) tree->append_slice(new HDC());
         delete tree;
     }
+    state.SetItemsProcessed(state.range_x() * state.iterations());
 }
 BENCHMARK(BM_HDC_AppendSlice)->RangeMultiplier(2)->Range(1024,1024<<5);
 
@@ -69,11 +99,11 @@ static void BM_HDC_HasChildMultipleItems(benchmark::State& state) {
     for(int i=0;i<n;i++) tree->add_child(to_string(i),new HDC());
     while (state.KeepRunning()) {
         // measure
-        for (int i=0;i<n/100;i++) {
-            bool has_child = tree->has_child(std::to_string(i*99));
+        for (int i=0;i<100;i++) {
+            bool has_child = tree->has_child(std::to_string(i*n/100));
         }
     }
-    state.SetItemsProcessed(state.range_x() * state.iterations());
+    state.SetItemsProcessed(100 * state.iterations());
     delete tree;
 }
 BENCHMARK(BM_HDC_HasChildMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
@@ -85,11 +115,11 @@ static void BM_HDC_GetChildMultipleItems(benchmark::State& state) {
     for(int i=0;i<n;i++) tree->add_child(to_string(i),new HDC());
     while (state.KeepRunning()) {
         // measure
-        for (int i=0;i<n/100;i++) {
-            HDC* child = tree->get(std::to_string(i*99));
+        for (int i=0;i<100;i++) {
+            HDC* child = tree->get(std::to_string(i*n/100));
         }
     }
-    state.SetItemsProcessed(state.range_x() * state.iterations());
+    state.SetItemsProcessed(100 * state.iterations());
     delete tree;
 }
 BENCHMARK(BM_HDC_GetChildMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
@@ -101,11 +131,11 @@ static void BM_HDC_GetSliceMultipleItems(benchmark::State& state) {
     for(int i=0;i<n;i++) tree->append_slice(new HDC());
     while (state.KeepRunning()) {
         // measure
-        for (int i=0;i<n/100;i++) {
-            HDC* slice = tree->get_slice(i*99);
+        for (int i=0;i<100;i++) {
+            HDC* slice = tree->get_slice(i*n/100);
         }
     }
-    state.SetItemsProcessed(state.range_x() * state.iterations());
+    state.SetItemsProcessed(100 * state.iterations());
     delete tree;
 }
 BENCHMARK(BM_HDC_GetSliceMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
