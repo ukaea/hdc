@@ -10,6 +10,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_EXAMPLES "Build and install examples" ON)
 if (BUILD_EXAMPLES)
 
+    add_library(hdc_fortran_module SHARED hdc_fortran_module.f90)
+    target_link_libraries(hdc_fortran_module fhdc)
+
     add_executable(example_cpp example_cpp.cpp)
     target_link_libraries(example_cpp hdc)
 
@@ -28,7 +31,9 @@ if (BUILD_EXAMPLES)
     #set(CMAKE_INSTALL_RPATH "/usr/local/lib")
     #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-    install(TARGETS example_cpp example_c example_fortran cpo_hdc  RUNTIME DESTINATION share/examples)
+    install(TARGETS hdc_fortran_module  example_cpp example_c example_fortran cpo_hdc  
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION share/examples)
     
 endif(BUILD_EXAMPLES)
 

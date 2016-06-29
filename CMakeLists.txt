@@ -14,11 +14,6 @@ set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace 
 
 #find_package(LibDyND REQUIRED)
 
-find_package(PythonLibs REQUIRED)
-message(${PYTHON_INCLUDE_DIRS})
-message(${PYTHON_LIBRARIES})
-include_directories(${PYTHON_INCLUDE_DIRS})
-
 ### gtest
 
 include(CTest)
