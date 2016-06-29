@@ -80,7 +80,7 @@ static void BM_HDC_GetChildPathLength(benchmark::State& state) {
 BENCHMARK(BM_HDC_GetChildPathLength)->RangeMultiplier(2)->Range(1024,1024<<5);
 
 
-// Appending slice to long (but no deep)
+// Appending slice to long (but not deep) path
 static void BM_HDC_AppendSlice(benchmark::State& state) {
     state.SetItemsProcessed(state.range_x());
     while (state.KeepRunning()) {
