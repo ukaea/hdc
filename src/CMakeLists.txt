@@ -6,11 +6,24 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(PythonLibs REQUIRED)
-#include_directories(${hdc_new_BINARY_DIR}/src)
-include_directories(${PYTHON_INCLUDE_DIRS})
-#include_directories(/sw/python2/anaconda/include/)
-#include_directories(/compass/home/fridrich/workspace/pybind11/include/)
+option(BUILD_PYBIND "Build and install Python pybind lib" OFF)
+
+if (BUILD_PYBIND)
+	find_package(PythonLibs REQUIRED)
+	#include_directories(${hdc_new_BINARY_DIR}/src)
+	include_directories(${PYTHON_INCLUDE_DIRS})
+	#include_directories(/sw/python2/anaconda/include/)
+	#include_directories(/compass/home/fridrich/workspace/pybind11/include/)
+
+	add_library(hdc_python SHARED hdc_python.cpp)
+	target_link_libraries(hdc_python hdc ${PYTHON_LIBRARIES})
+
+	install(TARGETS hdc_python
+	    RUNTIME DESTINATION bin
+	    LIBRARY DESTINATION lib
+	    ARCHIVE DESTINATION lib/static
+	    )
+endif (BUILD_PYBIND)
 
 #include_directories(inc)
 link_directories(${hdc_SOURCE_DIR}/src)
@@ -27,10 +40,8 @@ target_link_libraries(fhdc chdc)
 add_library(hdc_fortran_module SHARED hdc_fortran_module.f90)
 target_link_libraries(hdc_fortran_module fhdc)
 
-add_library(hdc_python SHARED hdc_python.cpp)
-target_link_libraries(hdc_python hdc ${PYTHON_LIBRARIES})
 
-install(TARGETS hdc chdc fhdc hdc_fortran_module hdc_python
+install(TARGETS hdc chdc fhdc hdc_fortran_module 
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static

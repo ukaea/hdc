@@ -45,6 +45,7 @@ There are several cmake options:
   - `-DBUILD_EXAMPLES=ON` Whether to build and install examples.
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
   - `-DDEBUG=ON` Whether to prin debugging messages.
+  - `-DBUILD_PYBIND=ON` switch on pybind11 Python module generation (not necessary at the moment for pyhdc, which uses pure C-API via ctypes)
   - `-DPYTHON_LIBRARY=/path/to/libpython.so` On abacus set this to `/sw/python2/anaconda3/lib/libpython3.4m.so`
   - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`  On abacus set this to `/sw/python2/anaconda3/include/python3.4m/`
   - `-DDYND_PREFIX=/lib/to/libdynd` Default is `/usr/local`, on abacus set this to `/sw/libdynd/`
