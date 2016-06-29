@@ -7,7 +7,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-option(BUILD_EXAMPLES "Build and install examples")
+option(BUILD_EXAMPLES "Build and install examples" ON)
 if (BUILD_EXAMPLES)
 
     add_executable(example_cpp example_cpp.cpp)
