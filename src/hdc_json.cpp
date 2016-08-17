@@ -112,7 +112,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             //#ifdef DEBUG
             cout << "root is double, value = " << root.asDouble() << endl;
             //#endif
-            tree->set_data_scalar<double>(root.asDouble());
+            tree->set_data_scalar(root.asDouble());
             break;
         }
         case(Json::stringValue):
@@ -149,9 +149,9 @@ HDC* json_to_hdc(const Json::Value& root) {
                 if (is_double(root)) dt = DOUBLE_ID;
                 else dt = INT32_ID;
                 delete tree;
-                tree = new HDC(ndim,shape,dt,HDCDefault);
+                tree = new HDC(ndim,shape,dt);
                 cout << tree->get_type_str() << endl;
-                char* data_ptr = tree->as<char*>();
+                void* data_ptr = tree->as<void*>();
                 if (dt == DOUBLE_ID) {
                     switch(ndim) {
                         case 1:
@@ -239,7 +239,7 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
     switch(ndim) {
         case(0):
         {
-            root = (T*)buffer[0];
+            root = ((T*)buffer)[0];
             break;
         }
         case (1):

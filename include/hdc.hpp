@@ -112,6 +112,7 @@ public:
             exit(-2);
         }
         size_t elem_size = 1;
+        memset(shape,0,sizeof(shape[0])*HDC_MAX_DIMS);
         for (int i = 0; i < ndim; i++) {
             shape[i] = _shape[i];
             elem_size *= _shape[i];
@@ -121,6 +122,7 @@ public:
         ndim = _ndim;
         char* buffer = buff_allocate(elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
         buff_set_header(buffer, type, flags, ndim, shape);
+        buff_info(buffer);
         storage = global_storage;
         storage->set(uuid,buffer,elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
     }
@@ -185,13 +187,10 @@ public:
         shape[0] = 0;
         ndim = 0;
         for (int i = 1; i<HDC_MAX_DIMS; i++) shape[i] = 0;
-        for (int i = 0; i<HDC_MAX_DIMS; i++) cout << shape[i] << " ";
-        cout << endl;
         char* buffer = buff_allocate(size + HDC_DATA_POS);
         buff_set_header(buffer,type,HDCDefault,1,shape);
         memcpy(buffer+HDC_DATA_POS,&data,sizeof(T));
-        buff_info(buffer);
-        getchar();
+        storage->set(uuid,buffer,size + HDC_DATA_POS);
     }
 
     void set_data(string str) {
