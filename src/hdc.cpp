@@ -252,14 +252,6 @@ vector<string> HDC::keys() {
     cout << endl;
     return k;
 }
-// 
-// void HDC::set_list(deque<HDC*>* lst) {
-//     if (type != HDC_EMPTY) {
-//         cout << "Cannot add list to a non-list node." << endl;
-//     }
-//     children = lst;
-//     return;
-// }
 
 void HDC::add_child(string path, HDC* n)
 {
@@ -407,82 +399,13 @@ void* HDC::as_void_ptr() {
     return (void*)this;
 }
 
-
-// long int* HDC::get_shape()
-// {
-//     if (type == HDC_DYND) {
-//         long int* shape = (long int*)malloc(data.get_ndim() * sizeof(long int));
-//         for (long i=0; i < data.get_ndim(); i++) shape[i] = data.get_shape()[i];
-//         return shape;
-//     }
-//     else if (type == HDC_LIST) {
-//         long int* shape = (long int*)malloc(1 * sizeof(long int)); // Currently, we support only single container list dimension
-//         shape[0] = children->size();
-//         return shape;
-//     }
-//     else if (type == HDC_EMPTY) {
-//         long int* shape = (long int*)malloc(1 * sizeof(long int));
-//         // empty shape = (0, )
-//         shape[0] = 0;
-//         return shape;
-//     }
-//     else if (type == HDC_STRUCT) {
-//         long int* shape = (long int*)malloc(1 * sizeof(long int)); 
-//         // container type has (1, ) shape
-//         shape[0] = 1;
-//         return shape;
-//     }
-//     else {
-//         // error, should not get here
-//         cout << "Unknown type" << endl;
-//         long int* shape = (long int*)malloc(1 * sizeof(long int)); 
-//         shape[0] = -1;
-//         return shape;
-//     }
-// }
-// 
-// long int* HDC::get_shape(string path) {
-//     if (!has_child(path)) {
-//         cerr << "Not found (get_shape): " << path << endl;
-//         exit(-1);
-//     }
-//     return get(path)->get_shape();
-// }
-// 
-// bool HDC::is_empty()
-// {
-//     return (type == HDC_EMPTY);
-// }
-
-//------------------ Serialization -----------------------------
-
-// HDC* from_json(const string& filename)
-// {
-//     HDC* tree;
-//     ifstream file;
-//     file.exceptions(ifstream::failbit | ifstream::badbit);
-//     try {
-//         file.open(filename);
-//         Json::Value root;
-//         file >> root;
-//         tree = json_to_hdc(root);
-//     }
-//     catch (ifstream::failure e) {
-//         cout << "Error reading / opening file." << endl;
-//     }
-//     file.close();
-//     return tree;
-// }
-// 
-
-
 void HDC::dump() {
-    
     //cout << to_json(0);
     buff_dump_header(storage->get(uuid));
     buff_info(storage->get(uuid));
     return;
 }
+
 // 
 // 
 // void HDC::resize(HDC* h, int recursively)
