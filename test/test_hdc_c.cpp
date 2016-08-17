@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
-#include "hdc.hpp"
-#include "hdc_c.h"
-#include "types.h"
-struct hdc_t {
-    void* obj;
-};
-
+// #include "hdc.hpp"
+// #include "hdc_c.h"
+// #include "types.h"
+// struct hdc_t {
+//     void* obj;
+// };
+/*
 TEST(CHDC,EmptyNode) {
     struct hdc_t* h = hdc_new_empty();
     EXPECT_EQ(0,hdc_get_shape(h)[0]);
@@ -158,7 +158,9 @@ TEST(CHDC,SliceManipulation) {
     hdc_set_slice(h,1,sl4);
     EXPECT_EQ(sl4->obj,hdc_get_slice(h,1)->obj);
 }
+*/
 
+//-----------------------------------------------------------------------------------------
 /*
 TEST(CHDC,GetKeys) {
     HDC* list = new HDC();

@@ -9,10 +9,13 @@ set(hdc_new_SOURCE_DIR "${hdc_new_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fPIC")
 set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
 
-#find_package(LibDyND REQUIRED)
+find_package(Boost REQUIRED)
+include_directories( ${Boost_INCLUDE_DIRS})
+
+
 
 ### gtest
 
@@ -108,13 +111,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 message("Binary dir is: ${hdc_BINARY_DIR}")
 message("Source dir is: ${hdc_SOURCE_DIR}")
 
-# file(COPY inc DESTINATION ${CMAKE_BINARY_DIR}/inc)
+########################## Pluma ###############################
+file(GLOB Pluma_HEADERS ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/include/Pluma/*)
+file(GLOB Pluma_SOURCES ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/src/Pluma/*)
+include_directories(${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/include ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/src/)
+add_library(Pluma STATIC ${Pluma_SOURCES})
 
-include_directories(inc)
+
+# file(COPY include DESTINATION ${CMAKE_BINARY_DIR}/include)
+
+include_directories(include)
 # add_subdirectory(docs)
 add_subdirectory(doxy)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
 add_subdirectory(benchmark)
-
+add_subdirectory(plugins)

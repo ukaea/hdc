@@ -1,7 +1,7 @@
 #include "hdc.hpp"
 #include "benchmark/benchmark.h"
 #include <string>
-
+/*
 using namespace std;
 // Empty child creation and deletion
 static void BM_HDC_CreationAndDeletion(benchmark::State& state) {
@@ -139,3 +139,4 @@ static void BM_HDC_GetSliceMultipleItems(benchmark::State& state) {
     delete tree;
 }
 BENCHMARK(BM_HDC_GetSliceMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
+*/

@@ -28,18 +28,18 @@ endif (BUILD_PYBIND)
 #include_directories(inc)
 link_directories(${hdc_SOURCE_DIR}/src)
 
-add_library(hdc SHARED hdc.cpp jsoncpp.cpp)
-target_link_libraries(hdc dynd dyndt)
+add_library(hdc SHARED hdc.cpp jsoncpp.cpp storage_interface.cpp utils.cpp hdc_json.cpp)
+target_link_libraries(hdc ${Boost_LIBRARIES} Pluma dl)
 
-add_library(chdc SHARED hdc_c.cpp)
-target_link_libraries(chdc hdc stdc++)
+# add_library(chdc SHARED hdc_c.cpp)
+# target_link_libraries(chdc hdc stdc++)
+# 
+# add_library(fhdc SHARED hdc_fortran.f90)
+# target_link_libraries(fhdc chdc)
 
-add_library(fhdc SHARED hdc_fortran.f90)
-target_link_libraries(fhdc chdc)
 
-
-install(TARGETS hdc chdc fhdc 
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    )
+# install(TARGETS hdc chdc fhdc 
+#     RUNTIME DESTINATION bin
+#     LIBRARY DESTINATION lib
+#     ARCHIVE DESTINATION lib/static
+#     )

@@ -3,7 +3,7 @@
 #include <string>
 
 using namespace std;
-
+/*
 // Plain memcpy test to show over overhead of HDC
 static void BM_memcpy(benchmark::State& state) {
     size_t n = state.range_x();
@@ -66,3 +66,4 @@ static void BM_HDC_GetData(benchmark::State& state) {
     delete[] data;
 }
 BENCHMARK(BM_HDC_GetData)->RangeMultiplier(2)->Range(1024,1024<<5);
+*/

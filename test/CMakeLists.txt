@@ -7,11 +7,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories(inc)
+include_directories(include)
 
 file(GLOB SRCS *.cpp)
 add_executable(test_hdc ${SRCS})
-target_link_libraries(test_hdc hdc chdc gtest gmock_main)
+#target_link_libraries(test_hdc hdc chdc gtest gmock_main)
+target_link_libraries(test_hdc hdc gtest gmock_main)
 add_test(NAME cpp_test COMMAND test_hdc)
 
 install(TARGETS test_hdc DESTINATION bin)
