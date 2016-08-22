@@ -14,13 +14,13 @@ HDCStorage* global_storage = nullptr;
 void HDC_init() {
     global_storage = new HDCStorage("libUMapPlugin.so","");
     //global_storage = new HDCStorage("libMDBMPlugin.so","{\"filename\": \"/tmp/db1.mdbm\"}");
-    printf("HDC storage initialized.");
+    printf("HDC_init(): HDC storage initialized.\n");
 }
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy() {
     delete global_storage;
-    printf("HDC storage destroyed.");
+    printf("HDC_destroy(): HDC storage destroyed.\n");
 }
 
 /** --------------------- Buffer helper functions ---------------------*/

@@ -2,7 +2,8 @@
 #define KVSTDMAP
 #include <unordered_map>
 #include <string>
-#include <iostream>
+#include <cstdio>
+
 #include "storage_interface.hpp"
 
 
@@ -19,10 +20,10 @@ private:
     unordered_map<string,datum> _map;
 public:
     UnorderedMapStorage() {
-        cout << "UnorderedMapStorage()" << endl;
+        printf("UnorderedMapStorage()\n");
     };
     ~UnorderedMapStorage() {
-        cout << "~UnorderedMapStorage()" << endl;
+        printf("~UnorderedMapStorage()\n");
     };
 
     string getDescription() {
@@ -38,14 +39,14 @@ public:
     };
     char* get(string key) {
         if (_map.find(key) == _map.end()) {
-            cout << "get(): not found" << endl;
+            fprintf(stderr,"UnorderedMapStorage::get(%s): not found\n",key.c_str());
             exit(-3);
         }
         return (char*)_map[key].dptr;
     };
     size_t get_size(string key) {
         if (_map.find(key) == _map.end()) {
-            cout << "get_size(): not found" << endl;
+            fprintf(stderr,"UnorderedMapStorage::get_size(%s): not found\n",key.c_str());
             exit(-3);
         }
         return _map[key].dsize;
@@ -54,7 +55,7 @@ public:
         return (_map.find(key) != _map.end());
     };
     void cleanup () {
-        cout << "UnorderedMapStorage::cleanup()" << endl;
+        printf("UnorderedMapStorage::cleanup()\n");
         return;
     };
     void remove(string key) {
@@ -63,7 +64,7 @@ public:
     };
     void init(string settings) {
         // Nothing to set here ...
-        cout << "Initialized." << endl;
+        printf("UnorderedMapStorage::init()\n");
     };
 };
 

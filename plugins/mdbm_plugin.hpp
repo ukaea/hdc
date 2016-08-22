@@ -4,6 +4,7 @@
 #include "storage_interface.hpp"
 #include <mdbm.h>
 #include <iostream>
+#include <cstdio>
 #include <json/json.h>
 #include <sstream>
 
@@ -15,10 +16,10 @@ private:
     bool initialized = false;
 public:
     MDBMStorage() {
-        cout << "MDBMStorage()" << endl;
+        printf("MDBMStorage()\n");
     };
     ~MDBMStorage() {
-        cout << "~MDBMStorage()" << endl;
+        printf("~MDBMStorage()\n");
         cleanup();
     };
     string getDescription() {
@@ -43,7 +44,7 @@ public:
         return found.dsize;
     };
     void cleanup () {
-        cout << "MDBMStorage::cleanup()" << endl;
+        printf("MDBMStorage::cleanup()\n")
         mdbm_close(this->db);
         return;
     };
