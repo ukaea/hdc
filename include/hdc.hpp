@@ -25,6 +25,7 @@
 
 // our stuff
 #include "types.h"
+#include "hdc_map.h"
 #include "utils.h"
 #include "hdc_storage.h"
 
@@ -179,6 +180,28 @@ public:
        get(path)->set_data(_ndim, _shape, _data, _flags);
     }
     
+    void set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type) {
+        if (storage->has(uuid)) storage->remove(uuid);
+        type = _type;
+        size = hdc_sizeof(type);
+        ndim = _ndim;
+        memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
+        for (int i = 0; i < _ndim; i++) {
+            size *= _shape[i];
+            shape[i] = _shape[i];
+        }
+        size_t buffer_size = size + HDC_DATA_POS;
+        char* buffer = buff_allocate(buffer_size);
+        buff_set_header(buffer,_type,HDCDefault,_ndim,_shape);
+        memcpy(buffer+HDC_DATA_POS,_data,size);
+        storage->set(uuid,buffer,buffer_size);
+        return;
+    }
+    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type) {
+        if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
+        get(path)->set_data_c(_ndim, _shape, _data, _type);
+    }
+
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data_scalar(T data) {
@@ -192,7 +215,12 @@ public:
         memcpy(buffer+HDC_DATA_POS,&data,sizeof(T));
         storage->set(uuid,buffer,size + HDC_DATA_POS);
     }
-
+    template <typename T>
+    void set_data_scalar(string path, T data) {
+        if(!has_child(path)) add_child(path, new HDC());
+        get(path)->set_data_scalar(data);
+    }
+    
     void set_data(string str) {
         size = str.length()+1;
         type = STRING_ID;
@@ -207,19 +235,15 @@ public:
     };
     
     void set_data(string path, string str) {
-        if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
+        if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
         get(path)->set_data(str);
     }
     
     /** Returns number of dimensions of current node. */
-    int get_ndim() {
-        //return buff_get_ndim(storage->get(uuid));
-        return ndim;
-    }
+    int get_ndim();
     /** Returns shape of current node. */
-    size_t* get_shape() {
-        return shape;
-    }
+    size_t* get_shape();
+    
     bool is_external() {
         return (flags & HDCExternal) != 0;
     }
@@ -313,11 +337,11 @@ public:
     /** Sets HDC type of current node. */
     void set_type(TypeID _type);
     /** Returns true if node is empty. */
-    bool is_empty(); 
+    bool is_empty();
     /** Returns number of dimensions of node under path. */
-    int8_t get_ndim(string path); 
+    int get_ndim(string path);
     /** Returns shape of node under path. */
-    long int* get_shape(string path); 
+    size_t* get_shape(string path);
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {

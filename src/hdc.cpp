@@ -401,64 +401,54 @@ void HDC::dump() {
     return;
 }
 
-// 
-// 
-// void HDC::resize(HDC* h, int recursively)
-// {
-//     if (type == HDC_DYND) {
-//         if (!recursively) cout << "Operation is yet not supported on the DYND node." << endl;
-//         return;
-//     }
-//     else if (type == HDC_LIST) {
-//         if (!recursively) cout << "Operation is yet not supported on the list node." << endl;
-//         return;
-//     }
-//     else if (type == HDC_STRUCT) {
-//         for (auto it = h->children->begin(); it != h->children->end(); ++it) {
-//             if (!has_child(it->first)) add_child(it->first,it->second->copy(0));
-//         }
-//         return;
-//     }
-//     return;
-// }
-// 
-// HDC* HDC::copy(int copy_arrays)
-// {
-//     #ifdef DEBUG
-//     cout << "Called copy()" << endl;
-//     #endif
-//     HDC* copy = new HDC();
-//     copy->set_type(get_type());
-//     #ifdef DEBUG
-//     cout << (int)(get_type()) << endl;
-//     #endif
-//     if (type == HDC_STRUCT) {
-//         for (auto it = children->begin(); it != children->end(); it++) {
-//             copy->add_child(it->first,it->second->copy(copy_arrays));
-//             #ifdef DEBUG
-//             cout << it->first << " copied" << endl;
-//             #endif
-//         }
-//     } else if (type == HDC_LIST) {
-//         for (size_t i = 0; i < children->size(); i++)
-//             copy->insert_slice(i,children->at(i)->copy(copy_arrays));
-//     }
-//     else if (type == HDC_DYND) {
-//         if (copy_arrays == 1) {
-//             //dynd::nd::empty(<data.get_type()>);
-//             //long size = data.size();
-//             //char *
-//             copy->data = data;
-//             #ifdef DEBUG
-//             cout << "copy: " << copy->data << endl;
-//             #endif
-//         } else set_type(HDC_EMPTY);
-//     }
-//     #ifdef DEBUG
-//     cout << "copy() Done" << endl;
-//     #endif
-//     return copy;
-// }
+void HDC::resize(HDC* h, int recursively)
+{
+    // TODO: discuss this with Jakub and redo this.
+    fprintf(stderr,"resize(): not implemented yet...\n");
+    exit(-3);
+    return;
+}
+
+HDC* HDC::copy(int copy_arrays)
+{
+    /*
+    #ifdef DEBUG
+    cout << "Called copy()" << endl;
+    #endif
+    HDC* copy = new HDC();
+    copy->set_type(get_type());
+    #ifdef DEBUG
+    cout << (int)(get_type()) << endl;
+    #endif
+    if (type == HDC_STRUCT) {
+        for (auto it = children->begin(); it != children->end(); it++) {
+            copy->add_child(it->first,it->second->copy(copy_arrays));
+            #ifdef DEBUG
+            cout << it->first << " copied" << endl;
+            #endif
+        }
+    } else if (type == HDC_LIST) {
+        for (size_t i = 0; i < children->size(); i++)
+            copy->insert_slice(i,children->at(i)->copy(copy_arrays));
+    }
+    else if (type == HDC_DYND) {
+        if (copy_arrays == 1) {
+            //dynd::nd::empty(<data.get_type()>);
+            //long size = data.size();
+            //char *
+            copy->data = data;
+            #ifdef DEBUG
+            cout << "copy: " << copy->data << endl;
+            #endif
+        } else set_type(HDC_EMPTY);
+    }
+    #ifdef DEBUG
+    cout << "copy() Done" << endl;
+    #endif
+    return copy;*/
+    fprintf(stderr,"copy(): not implemented yet...\n");
+    exit(-3);
+}
 
 void HDC::insert_slice(size_t i, HDC* h)
 {
@@ -500,7 +490,6 @@ void HDC::set_slice(size_t i, HDC* h)
     return;
 }
 
-
 void HDC::append_slice(HDC* h) {
     if (type == EMPTY_ID) {
         set_type(LIST_ID);
@@ -524,21 +513,32 @@ string HDC::get_type_str() {
     return hdc_get_type_str(type);
 }
 
-// string HDC::get_type_str(string path) {
-//     return get(path)->get_type_str();
-// }
-// 
-// string HDC::get_datashape_str(string path) {
-//     return get(path)->get_datashape_str();
-// }
-// string HDC::get_datashape_str() {
-//     string type_str;
-//     if (type == HDC_EMPTY) type_str = "null";
-//     else if (type == HDC_LIST || type == HDC_STRUCT) type_str = "hdc";
-//     else {
-//         dynd::ndt::type dt;
-//         dt = data.get_type();
-//         type_str = dt.str();
-//     }
-//     return type_str;
-// }
+string HDC::get_type_str(string path) {
+    return get(path)->get_type_str();
+}
+
+string HDC::get_datashape_str(string path) {
+    return get(path)->get_datashape_str();
+}
+
+string HDC::get_datashape_str() {
+    // TODO: redo this
+    return "get_datashape_str() is not implemented yet.";
+}
+
+int HDC::get_ndim() {
+    return ndim;
+}
+
+size_t* HDC::get_shape() {
+    return shape;
+}
+
+int HDC::get_ndim(string path) {
+    //TODO: make more error-proof - add has check -> make it as function???
+    return get(path)->get_ndim();
+}
+
+size_t* HDC::get_shape(string path) {
+    return get(path)->get_shape();
+}

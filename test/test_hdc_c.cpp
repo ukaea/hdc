@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
-// #include "hdc.hpp"
-// #include "hdc_c.h"
-// #include "types.h"
-// struct hdc_t {
-//     void* obj;
-// };
-/*
+#include "hdc.hpp"
+#include "hdc_c.h"
+//#include "types.h"
+struct hdc_t {
+    void* obj;
+};
+
 TEST(CHDC,EmptyNode) {
     struct hdc_t* h = hdc_new_empty();
     EXPECT_EQ(0,hdc_get_shape(h)[0]);
@@ -16,31 +16,31 @@ TEST(CHDC,EmptyNode) {
 }
 
 TEST(CHDC,EmptyArrayNode) {
-    int8_t ndim = 1;
-    long shape[] = {4};
+    int ndim = 1;
+    size_t shape[] = {4};
     
-    struct hdc_t* hi8 = hdc_new_dtype(ndim, shape, "int8");
+    struct hdc_t* hi8 = hdc_new_dtype(ndim, shape, INT8_ID);
     EXPECT_EQ(1,hdc_get_ndim(hi8));
     EXPECT_EQ(4,hdc_get_shape(hi8)[0]);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(hi8));
+    EXPECT_EQ(INT8_ID,hdc_get_type(hi8));
     EXPECT_STREQ("int8",hdc_get_type_str(hi8));
     
-    struct hdc_t* hi32 = hdc_new_dtype(ndim, shape, "int32");
+    struct hdc_t* hi32 = hdc_new_dtype(ndim, shape, INT32_ID);
     EXPECT_EQ(1,hdc_get_ndim(hi32));
     EXPECT_EQ(4,hdc_get_shape(hi32)[0]);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(hi32));
+    EXPECT_EQ(INT32_ID,hdc_get_type(hi32));
     EXPECT_STREQ("int32",hdc_get_type_str(hi32));
     
-    struct hdc_t* hd = hdc_new_dtype(ndim, shape, "float64");
+    struct hdc_t* hd = hdc_new_dtype(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hdc_get_ndim(hd));
     EXPECT_EQ(4,hdc_get_shape(hd)[0]);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(hd));
+    EXPECT_EQ(DOUBLE_ID,hdc_get_type(hd));
     EXPECT_STREQ("float64",hdc_get_type_str(hd));
     
-    hd = hdc_new_dtype(ndim, shape, "double");
+    hd = hdc_new_dtype(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hdc_get_ndim(hd));
     EXPECT_EQ(4,hdc_get_shape(hd)[0]);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(hd));
+    EXPECT_EQ(DOUBLE_ID,hdc_get_type(hd));
     EXPECT_STREQ("float64",hdc_get_type_str(hd));
 }
 
@@ -77,12 +77,12 @@ TEST(CHDC,NodeManipulation) {
 }
 
 TEST(CHDC,Int8DataManipulation) {
-    int8_t ndim = 1;
-    long shape[] = {4};
+    int ndim = 1;
+    size_t shape[] = {4};
     int8_t data[] = {7,20,3,5};
     struct hdc_t* h = hdc_new_empty();
     hdc_set_int8(h,ndim,shape,(void*)data);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(h));
+    EXPECT_EQ(INT8_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
     EXPECT_STREQ("int8",hdc_get_type_str(h));
@@ -95,12 +95,12 @@ TEST(CHDC,Int8DataManipulation) {
 }
 
 TEST(CHDC,Int32DataManipulation) {
-    int8_t ndim = 1;
-    long shape[] = {4};
+    int ndim = 1;
+    size_t shape[] = {4};
     int32_t data[] = {777,20202020,3333,555555};
     struct hdc_t* h = hdc_new_empty();
     hdc_set_int32(h,ndim,shape,(void*)data);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(h));
+    EXPECT_EQ(INT32_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
     EXPECT_STREQ("int32",hdc_get_type_str(h));
@@ -113,12 +113,12 @@ TEST(CHDC,Int32DataManipulation) {
 }
 
 TEST(CHDC,DoubleDataManipulation) {
-    int8_t ndim = 1;
-    long shape[] = {4};
+    int ndim = 1;
+    size_t shape[] = {4};
     double data[] = {0.0,1000.0,1.0e-200,1.0e200};
     struct hdc_t* h = hdc_new_empty();
     hdc_set_double(h,ndim,shape,data);
-    EXPECT_EQ(HDC_DYND,hdc_get_type(h));
+    EXPECT_EQ(DOUBLE_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
     EXPECT_STREQ("float64",hdc_get_type_str(h));
@@ -145,7 +145,7 @@ TEST(CHDC,SliceManipulation) {
     hdc_append_slice(h,sl);
     hdc_append_slice(h,sl2);
     EXPECT_EQ(HDC_LIST, hdc_get_type(h));
-    EXPECT_STREQ("hdc", hdc_get_type_str(h));
+    EXPECT_STREQ("list", hdc_get_type_str(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(2,hdc_get_shape(h)[0]);
     EXPECT_EQ(sl->obj,hdc_get_slice(h,0)->obj);
@@ -158,7 +158,6 @@ TEST(CHDC,SliceManipulation) {
     hdc_set_slice(h,1,sl4);
     EXPECT_EQ(sl4->obj,hdc_get_slice(h,1)->obj);
 }
-*/
 
 //-----------------------------------------------------------------------------------------
 /*
@@ -183,8 +182,8 @@ TEST(CHDC,GetKeys) {
 
 TEST(HDC,JsonComplete) {
     // Prepare tree
-    int8_t ndim = 1;
-    long shape[] = {4};
+    int ndim = 1;
+    size_t shape[] = {4};
     double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};
     int32_t data_int[] = {777,20202020,3333,555555};
     HDC* tree = new HDC();

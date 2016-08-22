@@ -8,9 +8,9 @@ enable_language (Fortran)
 set(hdc_new_SOURCE_DIR "${hdc_new_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fPIC")
-set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fmax-errors=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fPIC -fmax-errors=1")
+set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008 -fmax-errors=1")
 
 find_package(Boost REQUIRED)
 include_directories( ${Boost_INCLUDE_DIRS})
@@ -78,25 +78,6 @@ add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
 
 include_directories("${googlebenchmark_SOURCE_DIR}/include")
 ### gbenchmark
-
-set(DYND_PREFIX "/usr/local" CACHE STRING "Specifies prefix of libDyND, default /usr/local")
-
-# site_name(HOSTNAME)
-# message("Hostname is: " ${HOSTNAME})
-# if (${HOSTNAME} STREQUAL "abacus")
-#     message("Setting libdynd path to /sw/libdynd...")
-#     link_directories(/sw/libdynd/lib)
-#     include_directories(/sw/libdynd/include .)
-# else()
-#     link_directories(/usr/local/lib)
-# endif()
-
-link_directories("${DYND_PREFIX}/lib")
-include_directories("${DYND_PREFIX}/include" .)
-message("Setting libdynd path to ${DYND_PREFIX}/lib")
-
-
-
 
 option(DEBUG "Turns some debug output on or off." OFF)
 if(DEBUG)

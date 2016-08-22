@@ -71,7 +71,7 @@ size_t* get_shape(const Json::Value& root) {
 
 
 
-int8_t get_ndim(const Json::Value& root) {
+int get_ndim(const Json::Value& root) {
     if (!root.isArray()) return 0;
     int dim = 0;
     Json::Value curr = root;

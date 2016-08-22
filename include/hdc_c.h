@@ -8,10 +8,10 @@ extern "C" {
 
 struct hdc_t* hdc_new_empty(); /** Default constructor. Creates empty HDC  */
 
-struct hdc_t* hdc_new_int8(int8_t ndim, long* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-struct hdc_t* hdc_new_int32(int8_t ndim, long* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-struct hdc_t* hdc_new_double(int8_t ndim, long* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-struct hdc_t* hdc_new_dtype(int8_t ndim, long* shape, const char* type_str); /** Creates new HDC empty array of a given type string, shape and dimension. */
+struct hdc_t* hdc_new_int8(int ndim, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
+struct hdc_t* hdc_new_int32(int ndim, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
+struct hdc_t* hdc_new_double(int ndim, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
+struct hdc_t* hdc_new_dtype(int ndim, size_t* shape, TypeID type); /** Creates new HDC empty array of a given type string, shape and dimension. */
 void* hdc_new_void_ptr(); /** Alernative constuctor to be used in Fortran. */
 void hdc_delete(struct hdc_t* tree); /** Deletes HDC object (Destructor). */
 void hdc_delete_ptr(void* obj);
@@ -26,20 +26,20 @@ void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n); /**  */
 void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n); /**  */
 void hdc_insert_slice(struct hdc_t* tree, size_t i, struct hdc_t* n); /**  */
 bool hdc_has_child(struct hdc_t* tree, char* path);  /**  */
-void hdc_set_int8(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);  /**  */
-void hdc_set_int8_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data); /**  */
+void hdc_set_int8     (struct hdc_t* tree,             int ndim, size_t* shape, void* data);  /**  */
+void hdc_set_int8_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data); /**  */
 
-void hdc_set_double(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);  /**  */
-void hdc_set_int32(struct hdc_t* tree, int8_t ndim, const long int* shape, void* data);  /**  */
+void hdc_set_double(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
+void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
 void hdc_set_string_path(struct hdc_t* tree, char* path, char* str);  /**  */
 void hdc_set_string(struct hdc_t* tree, char* str);  /**  */
 const char* hdc_as_string_path(struct hdc_t* tree, char* path);
 const char* hdc_as_string(struct hdc_t* tree);
 
 int8_t hdc_get_ndim(struct hdc_t* tree);  /**  */
-long int* hdc_get_shape(struct hdc_t* tree);  /** Returns shape of array of node. */
+size_t* hdc_get_shape(struct hdc_t* tree);  /** Returns shape of array of node. */
 int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path);  /**  */
-long int* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape of array at given path. */
+size_t* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape of array at given path. */
 uint8_t hdc_get_type(struct hdc_t* tree);  /**  */
 int32_t* hdc_as_int32_1d(struct hdc_t* tree); /**  */
 int32_t** hdc_as_int32_2d(struct hdc_t* tree); /**  */
@@ -54,8 +54,8 @@ void* hdc_as_voidptr_path(struct hdc_t* tree, char* path); /**  */
 void hdc_set_int8_scalar_path(struct hdc_t* tree, char* path, int8_t data); /**  */
 void hdc_set_int32_scalar_path(struct hdc_t* tree, char* path, int32_t data); /**  */
 void hdc_set_int32_scalar(struct hdc_t* tree, int32_t data); /**  */
-void hdc_set_int32_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data);
-void hdc_set_double_path(struct hdc_t* tree, char* path, int8_t ndim, const long int* shape, void* data); /**  */
+void hdc_set_int32_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data);
+void hdc_set_double_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data); /**  */
 void hdc_set_double_scalar_path(struct hdc_t* tree, char* path, double data); /**  */
 void hdc_set_double_scalar(struct hdc_t* tree, double data); /**  */
 double hdc_as_double_scalar(struct hdc_t* tree); /** Returns scalar double. */
@@ -64,7 +64,6 @@ int8_t hdc_as_int8_scalar(struct hdc_t* tree); /** Returns scalar int8. */
 int8_t hdc_as_int8_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int8.  */
 int32_t hdc_as_int32_scalar(struct hdc_t* tree); /** Returns scalar int32.  */
 int32_t hdc_as_int32_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int32.  */
-size_t hdc_childs_count(struct hdc_t* tree);
 char** hdc_keys(struct hdc_t* tree);
 void hdc_keys_py(struct hdc_t* tree, char** keys);
 struct hdc_t*  hdc_copy(struct hdc_t* src); /** Makes deep copy of HDC tree. */
