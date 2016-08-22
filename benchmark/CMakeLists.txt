@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(inc)
 
-# file(GLOB SRCS *.cpp)
-# add_executable(benchmark_hdc ${SRCS})
-# target_link_libraries(benchmark_hdc benchmark hdc chdc )
-# install(TARGETS benchmark_hdc DESTINATION bin)
+file(GLOB SRCS *.cpp)
+add_executable(benchmark_hdc ${SRCS})
+target_link_libraries(benchmark_hdc benchmark hdc chdc )
+install(TARGETS benchmark_hdc DESTINATION bin)
