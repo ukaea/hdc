@@ -326,7 +326,7 @@ public:
             return reinterpret_cast<T>(0);
         }
         #ifdef DEBUG
-        cout << "From as:" << data << endl;
+        cout << "From as:" << data[0] << endl;
         #endif
         if (!storage->has(uuid)) {
             printf("Not found: %s\n",uuid.c_str());
@@ -336,21 +336,17 @@ public:
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
-//         if (type == LIST_ID || type == STRUCT_ID) {
-//             cout << "as_string is not implemented yet for this type: " << type << endl;
-//         }
-        #ifdef DEBUG
-        cout << "From as_string: \n" << buff_dump_header(storage->get(uuid));<< endl;
-        #endif
-        string str(buff_get_data_ptr(storage->get(uuid)));
-        return str;
+        if (type == STRING_ID) {
+            string str(buff_get_data_ptr(storage->get(uuid)));
+            return str;
+        } else return "as_string(): Not implemented yet for give type.";
     }
     
     /** Returns string of node under given path. Needs to have separate function */
     std::string as_string(string path)
     {
         #ifdef DEBUG
-        cout << "as<T>(" << path << ")" << endl;
+        printf("as_string(%s)\n",path.c_str());
         #endif
         return get(path)->as_string();
     }
@@ -359,7 +355,7 @@ public:
     template<typename T> T as(string path)
     {
         #ifdef DEBUG
-        cout << "as<T>(" << path << ")" << endl;
+        printf("as<T>(%s)\n",path.c_str());
         #endif
         return get(path)->as<T>();
     }

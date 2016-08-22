@@ -183,9 +183,10 @@ bool HDC::has_child(string path)
 bool HDC::has_child(vector<string> vs)
 {
     #ifdef DEBUG
-    cout << "Searching for: " << endl;
-    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
-    cout << endl;
+    printf("has_child(");
+    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+    printf("%s",vs[vs.size()-1].c_str());
+    printf(")\n");
     #endif
     if(vs.empty()) return false; //TODO: re-do this!!!
     string first = vs[0];
@@ -203,9 +204,10 @@ bool HDC::has_child(vector<string> vs)
 
 void HDC::add_child(vector<string> vs, HDC* n) {
     #ifdef DEBUG
-    cout << "Adding node: " << endl;
-    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
-    cout << endl;
+    printf("set_child(");
+    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+    printf("%s",vs[vs.size()-1].c_str());
+    printf(")\n");
     #endif
     if (!(type == EMPTY_ID || type == STRUCT_ID)) {
         cout << "Cannot add child to this node. Data assigned???" << endl;
@@ -225,40 +227,26 @@ void HDC::add_child(vector<string> vs, HDC* n) {
         }
         static_cast<record>(*(children->find(first))).node->add_child(vs,n);
     }
-    #ifdef DEBUG
-    cout << "done" << endl;
-    #endif
     return;
 }
-// 
-// size_t HDC::childs_count() {
-//     if (type != HDC_STRUCT) return 0;
-//     else return children->size();
-// }
-// 
+
 vector<string> HDC::keys() {
     vector<string> k;
     if (children == nullptr) {
         return k;
     }
     k.reserve(children->size());
-    
     for (map_t::iterator it = children->begin(); it != children->end(); ++it) {
-        #ifdef DEBUG
-        cout << it->key << " ";
-        #endif
         k.push_back(it->key);
     }
-    cout << endl;
     return k;
 }
 
 void HDC::add_child(string path, HDC* n)
 {
     #ifdef DEBUG
-    cout << "Adding node: " << path << endl;
+    printf("add_child(%s)\n",path.c_str());
     #endif
-    
     add_child(split(path,'/'),n);
     return;
 }
@@ -266,9 +254,10 @@ void HDC::add_child(string path, HDC* n)
 void HDC::delete_child(vector<string> vs) {
 
     #ifdef DEBUG
-    cout << "Delete node: " << endl;
-    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
-    cout << endl;
+    printf("delete_child(");
+    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+    printf("%s",vs[vs.size()-1].c_str());
+    printf(")\n");
     #endif
     if (!has_child(vs) || vs.empty())  {
         return;
@@ -292,9 +281,10 @@ void HDC::delete_child(string path) {
 
 HDC* HDC::get(vector<string> vs) {
     #ifdef DEBUG
-    cout << "Getting node: " << endl;
-    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
-    cout << endl;
+    printf("get(");
+    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+    printf("%s",vs[vs.size()-1].c_str());
+    printf(")\n");
     #endif
     string first = vs[0];
     vs.erase(vs.begin());
@@ -310,9 +300,10 @@ HDC* HDC::get(vector<string> vs) {
 
 HDC* HDC::get_slice(vector<string> vs, size_t i) {
     #ifdef DEBUG
-    cout << "Getting slice: " << i << endl;
-    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
-    cout << endl;
+    printf("get_slice(");
+    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+    printf("%s",vs[vs.size()-1].c_str());
+    printf(",%d)\n",i);
     #endif
     string first = vs[0];
     vs.erase(vs.begin());
@@ -327,13 +318,19 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
         }
         else return static_cast<record>(*(children->find(first))).node->get_slice(vs,i);
     } else {
-        cout << "Not found" << endl;
+        printf("Not found: get_slice(");
+        for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+        printf("%s",vs[vs.size()-1].c_str());
+        printf(",%d)\n",i);
         return new HDC();
     }
 }
 
 
 HDC* HDC::get_slice(size_t i) {
+    #ifdef DEBUG
+    printf("get_slice(%d)\n",i);
+    #endif
     if (children == nullptr) return this;
     if (type == LIST_ID) return children->get<by_index>()[i].node;
     else return this; // return this if not list
@@ -349,9 +346,10 @@ HDC* HDC::get(string path) {
 
 void HDC::set_child(vector<string> vs, HDC* n) {
     #ifdef DEBUG
-    cout << "Setting node: " << endl;
-    for (long i = 0; i < vs.size(); i++) cout << vs[i] << "/";
-    cout << endl;
+    printf("set_child(");
+    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
+    printf("%s",vs[vs.size()-1].c_str());
+    printf(")\n");
     #endif
     if (!has_child(vs)) { // Nothing to set
         cout << "Nothing to set, maybe you want to add..." << endl;
@@ -465,7 +463,7 @@ void HDC::dump() {
 void HDC::insert_slice(size_t i, HDC* h)
 {
     #ifdef DEBUG
-    cout << "Setting slice " << i << endl;
+    printf("insert_slice(%d)\n",i);
     #endif
     map_t::nth_index<1>::type& ri=children->get<1>();
     switch (type) {
@@ -484,7 +482,7 @@ void HDC::insert_slice(size_t i, HDC* h)
 void HDC::set_slice(size_t i, HDC* h)
 {
     #ifdef DEBUG
-    cout << "Setting slice " << i << endl;
+    printf("set_slice(%d)\n",i);
     #endif
     switch (type) {
         case LIST_ID:
