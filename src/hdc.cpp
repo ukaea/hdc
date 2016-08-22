@@ -245,7 +245,7 @@ vector<string> HDC::keys() {
     
     for (map_t::iterator it = children->begin(); it != children->end(); ++it) {
         #ifdef DEBUG
-        cout << it.key << " ";
+        cout << it->key << " ";
         #endif
         k.push_back(it->key);
     }
