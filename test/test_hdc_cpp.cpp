@@ -10,29 +10,28 @@ TEST(HDC,EmptyNode) {
     EXPECT_STREQ("null",h->get_type_str().c_str());
     EXPECT_EQ(false,h->has_child("aaa"));
 }
-/*
+
 TEST(HDC,EmptyArrayNode) {
     int8_t ndim = 1;
-    long shape[] = {4};
-    HDC* hi8 = hdc_empty_array<int8_t>(ndim, shape);
+    size_t shape[] = {4};
+    HDC* hi8 = new HDC(ndim, shape, INT8_ID);
     EXPECT_EQ(1,hi8->get_ndim());
     EXPECT_EQ(4,hi8->get_shape()[0]);
-    EXPECT_EQ(HDC_DYND,hi8->get_type());
+    EXPECT_EQ(INT8_ID,hi8->get_type());
     EXPECT_STREQ("int8",hi8->get_type_str().c_str());
     
-    HDC* hi32 = hdc_empty_array<int32_t>(ndim, shape);
+    HDC* hi32 = new HDC(ndim, shape, INT32_ID);
     EXPECT_EQ(1,hi32->get_ndim());
     EXPECT_EQ(4,hi32->get_shape()[0]);
-    EXPECT_EQ(HDC_DYND,hi32->get_type());
+    EXPECT_EQ(INT32_ID,hi32->get_type());
     EXPECT_STREQ("int32",hi32->get_type_str().c_str());
     
-    HDC* hd = hdc_empty_array<double>(ndim, shape);
+    HDC* hd = new HDC(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hd->get_ndim());
     EXPECT_EQ(4,hd->get_shape()[0]);
-    EXPECT_EQ(HDC_DYND,hd->get_type());
+    EXPECT_EQ(DOUBLE_ID,hd->get_type());
     EXPECT_STREQ("float64",hd->get_type_str().c_str());
-
-}*/
+}
 
 TEST(HDC,NodeManipulation) {
     HDC* tree = new HDC();
@@ -137,7 +136,7 @@ TEST(HDC,DoubleDataManipulation) {
     EXPECT_EQ(DOUBLE_ID,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_STREQ("double",h->get_type_str().c_str());
+    EXPECT_STREQ("float64",h->get_type_str().c_str());
     double* data2 = h->as<double*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
 }

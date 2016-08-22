@@ -149,9 +149,9 @@ string hdc_get_type_str(TypeID type) {
         case INT64_ID:
             return "int64";
         case FLOAT_ID:
-            return "float";
+            return "float32";
         case DOUBLE_ID:
-            return "double";
+            return "float64";
         case BOOL_ID:
             return "bool";
         default:

@@ -398,10 +398,4 @@ public:
 };
 HDC* from_json(const string& filename);
 
-// template <typename T> HDC* hdc_empty_array(int8_t ndim, long* shape) {
-//     return new HDC()
-// }
-
-
-
 #endif // HDC_HPP
