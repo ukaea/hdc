@@ -44,7 +44,7 @@ public:
         return found.dsize;
     };
     void cleanup () {
-        printf("MDBMStorage::cleanup()\n")
+        printf("MDBMStorage::cleanup()\n");
         mdbm_close(this->db);
         return;
     };
