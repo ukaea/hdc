@@ -51,10 +51,10 @@ bool is_jagged(const Json::Value& root)
 size_t* get_shape(const Json::Value& root) {
     if (!root.isArray()) return 0;
     int dim = 0;
-    std::vector<size_t> shape;
+    size_t shape[HDC_MAX_DIMS];
     Json::Value curr = root;
     while (curr.isArray()) {
-        shape.push_back(curr.size());
+        shape[dim] = curr.size();
         curr = curr[0];
         dim++;
     }
@@ -68,6 +68,8 @@ size_t* get_shape(const Json::Value& root) {
     for (int i=0;i<dim;i++) res[i] = shape[i];
     return res;
 }
+
+
 
 int8_t get_ndim(const Json::Value& root) {
     if (!root.isArray()) return 0;
@@ -85,57 +87,57 @@ HDC* json_to_hdc(const Json::Value& root) {
     switch(root.type()) {
         {
         case(Json::nullValue):
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is null" << endl;
-            //#endif
+            #endif
             tree->set_type(EMPTY_ID);
             break;
         }
         case(Json::intValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is int, value = " << root.asInt() << endl;
-            //#endif
+            #endif
             tree->set_data_scalar<int32_t>(root.asInt());
             break;
         }
         case(Json::uintValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is uint, value = " << root.asUInt() << endl;
-            //#endif
+            #endif
             tree->set_data_scalar<uint32_t>(root.asUInt());
             break;
         }
         case(Json::realValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is double, value = " << root.asDouble() << endl;
-            //#endif
+            #endif
             tree->set_data_scalar(root.asDouble());
             break;
         }
         case(Json::stringValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is string, value = " << root.asCString() << endl;
-            //#endif
+            #endif
             tree->set_data(root.asCString());
             break;
         }
         case(Json::booleanValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is bool, value = " << root.asBool() << endl;
-            //#endif
+            #endif
             tree->set_data_scalar<bool>(root.asBool());
             break;
         }
         case(Json::arrayValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is array, size = " << root.size() << endl;
-            //#endif
+            #endif
             if (is_all_numeric(root)) {
                 int8_t ndim = get_ndim(root);
                 if (ndim > HDC_MAX_DIMS) {
@@ -143,14 +145,11 @@ HDC* json_to_hdc(const Json::Value& root) {
                     exit(-5);
                 }
                 size_t* shape = get_shape(root);
-                stringstream ss;
-                ss << root;
                 TypeID dt;
                 if (is_double(root)) dt = DOUBLE_ID;
                 else dt = INT32_ID;
                 delete tree;
                 tree = new HDC(ndim,shape,dt);
-                cout << tree->get_type_str() << endl;
                 void* data_ptr = tree->as<void*>();
                 if (dt == DOUBLE_ID) {
                     switch(ndim) {
@@ -159,10 +158,6 @@ HDC* json_to_hdc(const Json::Value& root) {
                             andres::View<double> view(shape, shape+1, (double*)data_ptr);
                             for (int i = 0; i < shape[0]; i++) {
                                 view(i) = root[i].asDouble();
-                                cout << "DOUBLE: " << view(i) << " " << root[i].asDouble() << endl;
-                            }
-                            for (int i = 0; i < shape[0]; i++) {
-                                cout << "SET: " << tree->as<double*>()[i] << endl;
                             }
                             break;
                         }
@@ -204,6 +199,7 @@ HDC* json_to_hdc(const Json::Value& root) {
                         }
                     }
                 }
+                delete[] shape;
             } else {
                 // call recursively -- save list
                 tree->set_type(LIST_ID);
@@ -215,13 +211,13 @@ HDC* json_to_hdc(const Json::Value& root) {
         }
         case(Json::objectValue):
         {
-            //#ifdef DEBUG
+            #ifdef DEBUG
             cout << "root is object, children:" << endl;
-            //#endif
+            #endif
             for (Json::ValueConstIterator it = root.begin(); it != root.end(); it++) {
-                //#ifdef DEBUG
-                cout << it.key() << endl;
-                //#endif
+                #ifdef DEBUG
+                cout << "KEY: " << it.key() << endl;
+                #endif
                 tree->add_child(it.key().asCString(),json_to_hdc(*it));
             }
             break;

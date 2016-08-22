@@ -334,10 +334,7 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
 
 
 HDC* HDC::get_slice(size_t i) {
-    cout << "Get slice:\n" << endl;
     if (children == nullptr) return this;
-    cout << children->size();
-    children->get<by_index>()[i].node->dump();
     if (type == LIST_ID) return children->get<by_index>()[i].node;
     else return this; // return this if not list
 }

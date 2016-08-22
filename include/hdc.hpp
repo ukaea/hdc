@@ -122,7 +122,7 @@ public:
         ndim = _ndim;
         char* buffer = buff_allocate(elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
         buff_set_header(buffer, type, flags, ndim, shape);
-        buff_info(buffer);
+        uuid = generate_uuid_str();
         storage = global_storage;
         storage->set(uuid,buffer,elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
     }

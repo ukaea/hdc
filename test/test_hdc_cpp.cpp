@@ -168,7 +168,6 @@ TEST(HDC,SliceManipulation) {
     sl3->set_data("3");
     h->insert_slice(1,sl3);
     vector<string> keys = h->keys();
-    for (int i = 0; i < keys.size(); i++) cout << "BBB: " << keys[i] << endl;
     EXPECT_STREQ("3",h->get_slice(1)->as_string().c_str());
     EXPECT_STREQ("2",h->get_slice(2)->as_string().c_str());
     HDC* sl4 = new HDC();
@@ -205,9 +204,9 @@ TEST(HDC,JsonComplete) {
     HDC* tree = new HDC();
     HDC* scalar = new HDC();
     scalar->set_data_scalar(333.333);
-    cout << "TYPE: " << scalar->get_type_str() << endl;
     tree->add_child("aaa/bbb/_scalar", scalar);
     tree->set_data<double>("aaa/bbb/double",ndim,shape,data_double);
+    //tree->set_data<double>("aaa/bbb/double2",ndim,shape,data_double);
     tree->set_data<int>("aaa/bbb/int",ndim,shape,data_int);
     tree->add_child("aaa/bbb/empty", new HDC());
     HDC* list = new HDC();
@@ -220,7 +219,6 @@ TEST(HDC,JsonComplete) {
     // Load JSON
     HDC* tree2 = from_json("tree.txt");
     tree2->to_json("tree2.txt");
-
     // test tree
     HDC* s = tree2->get("aaa/bbb/double");
 
@@ -228,10 +226,11 @@ TEST(HDC,JsonComplete) {
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,s->get_type());
-    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), tree2->get("aaa/bbb/double")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), s->get_type_str().c_str());
+
     double* data_double_in = s->as<double*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_double[i],data_double_in[i]);
-    /*
+
     // Test int
     s = tree2->get("aaa/bbb/int");
     EXPECT_EQ(1,s->get_ndim());
@@ -254,5 +253,4 @@ TEST(HDC,JsonComplete) {
     
     // Test string
     //EXPECT_STREQ(tree->get("aaa/string")->as_string().c_str(), tree2->get("aaa/string")->as_string().c_str());
-    */
 }
