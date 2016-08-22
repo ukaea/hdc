@@ -29,19 +29,19 @@ int main() {
 
     // Prepare some data
     int32_t array[4] = {7,2,3,4};
-    long int shape[1];
+    size_t shape[1];
     shape[0] = 4;
 
     // Add data to a single node
     HDC* data = new HDC();
-    data->set_data<int32_t>(1,shape,(void*)array);
+    data->set_data(1,shape,array);
 
     // Add data to a subtree
-    tree->set_data<int32_t>("aaa/bbb/ccc",1,shape,(void*)array);
+    tree->set_data("aaa/bbb/ccc",1,shape,array);
 
     // Ask for some data details, use subtree to shorten the path
     int32_t ndim2 = node->get_ndim();
-    long int* shape2 = node->get_shape();
+    size_t* shape2 = node->get_shape();
     cout << "Dimension: " << (int)ndim2 << endl << "Shape: ";
     for (int i=0; i<ndim2; i++) cout << (int)shape2[i] << " ";
     cout << endl;

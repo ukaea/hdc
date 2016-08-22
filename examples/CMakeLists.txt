@@ -13,15 +13,15 @@ if (BUILD_EXAMPLES)
 #     add_library(hdc_fortran_module SHARED hdc_fortran_module.f90)
 #     target_link_libraries(hdc_fortran_module fhdc)
 # 
-#     add_executable(example_cpp example_cpp.cpp)
-#     target_link_libraries(example_cpp hdc)
-# 
-#     add_executable(example_c example_c.c)
-#     target_link_libraries(example_c chdc)
-# 
-#     add_executable(example_fortran example_fortran.f90)
-#     target_link_libraries(example_fortran fhdc)
-# 
+    add_executable(example_cpp example_cpp.cpp)
+    target_link_libraries(example_cpp hdc)
+
+    add_executable(example_c example_c.c)
+    target_link_libraries(example_c chdc)
+
+    add_executable(example_fortran example_fortran.f90)
+    target_link_libraries(example_fortran fhdc)
+
 #     add_executable(cpo_hdc cpo_hdc.f90)
 #     target_link_libraries(cpo_hdc fhdc)
 # 

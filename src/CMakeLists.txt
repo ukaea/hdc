@@ -33,9 +33,9 @@ target_link_libraries(hdc ${Boost_LIBRARIES} Pluma dl)
 
 add_library(chdc SHARED hdc_c.cpp)
 target_link_libraries(chdc hdc stdc++)
-# 
-# add_library(fhdc SHARED hdc_fortran.f90)
-# target_link_libraries(fhdc chdc)
+
+add_library(fhdc SHARED hdc_fortran.f90)
+target_link_libraries(fhdc chdc)
 
 
 # install(TARGETS hdc chdc fhdc 

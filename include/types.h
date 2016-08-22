@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <limits.h>
 
 #define    HDC_MAX_DIMS  10
 #define    HDC_LIST_INIT_CAPACITY 10
@@ -26,7 +27,7 @@
 #define    HDC_BOOL      15
 #define    HDC_ERROR     16
 
-typedef enum : unsigned long { // padding by C++11
+typedef enum {
     EMPTY_ID    = HDC_EMPTY,
     STRUCT_ID   = HDC_STRUCT,
     LIST_ID     = HDC_LIST,
@@ -42,7 +43,8 @@ typedef enum : unsigned long { // padding by C++11
     DOUBLE_ID   = HDC_DOUBLE,
     STRING_ID   = HDC_STRING,
     BOOL_ID     = HDC_BOOL,
-    ERROR_ID    = HDC_ERROR
+    ERROR_ID    = HDC_ERROR,
+    Internal_ForceMyEnumIntSize = ULONG_MAX // enum : unsigned int is not compatible with C, so we will do thi and hope that it will be ok.
 } TypeID;
 
 #define HDCDefault        0lu
