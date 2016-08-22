@@ -86,78 +86,23 @@ private:
 
 public:
     /** Creates empty HDC with specified buffer size */
-    HDC(size_t byte_size) {
-        if (global_storage == nullptr) {
-            HDC_init();
-            atexit(HDC_destroy);
-        }
-        size_t buffer_size = HDC_DATA_POS + byte_size;
-        char* data = buff_allocate(buffer_size);
-        uuid = generate_uuid_str();
-        storage = global_storage;
-        storage->set(uuid,data,buffer_size);
-        shape[0] = byte_size;
-        for(int i=1;i<HDC_MAX_DIMS;i++) shape[i] = 0;
-        type = EMPTY_ID;
-        flags = HDCDefault;
-        size = buffer_size;
-    }
-
+    HDC(size_t byte_size);
     /** Default constructor. Creates empty HDC */
-    HDC(): HDC(0) {};
-
+    HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags = HDCDefault) {
-        if (ndim >= HDC_MAX_DIMS) {
-            cerr << "Unsupported number of dimensions: " << ndim << endl;
-            exit(-2);
-        }
-        size_t elem_size = 1;
-        memset(shape,0,sizeof(shape[0])*HDC_MAX_DIMS);
-        for (int i = 0; i < ndim; i++) {
-            shape[i] = _shape[i];
-            elem_size *= _shape[i];
-        }
-        type = _type;
-        flags = _flags;
-        ndim = _ndim;
-        char* buffer = buff_allocate(elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
-        buff_set_header(buffer, type, flags, ndim, shape);
-        uuid = generate_uuid_str();
-        storage = global_storage;
-        storage->set(uuid,buffer,elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
-    }
+    HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags = HDCDefault);
 
     // TODO: More constructors
-    
+
     /** Destructor */
-    ~HDC() {
-        storage->remove(uuid);
-    }
-    size_t get_datasize() {
-        //return buff_get_data_size(storage->get(uuid));
-        return size + HDC_DATA_POS;
-    }
-    size_t get_size() {
-        //return buff_get_size(storage->get(uuid));
-        //return buff_get_size(storage->get_size(uuid));
-        return size;
-    }
+    ~HDC();
+    size_t get_datasize();
+    size_t get_size();
     /** Returns type of current node. */
-    TypeID get_type() {
-        //return buff_get_type(storage->get(uuid));
-        return type;
-    }
-    Flags get_flags() {
-        //return buff_get_flags(storage->get(uuid));
-        return flags;
-    }
-    template<typename T>
-    T* get_data() {
-        return reinterpret_cast<T*>(buff_get_data_ptr(storage->get(uuid)));
-    }
-    template<typename T>
-    void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+    TypeID get_type();
+    Flags get_flags();
+    template<typename T> T* get_data();
+    template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         if (storage->has(uuid)) storage->remove(uuid);
         type = to_typeid(_data[0]);
         size = hdc_sizeof(type);
@@ -174,34 +119,28 @@ public:
         storage->set(uuid,buffer,buffer_size);
         return;
     }
-    template<typename T>
-    void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-       if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
-       get(path)->set_data(_ndim, _shape, _data, _flags);
+    template<typename T> void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+        if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
+        get(path)->set_data(_ndim, _shape, _data, _flags);
     }
-    
-    void set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type) {
-        if (storage->has(uuid)) storage->remove(uuid);
-        type = _type;
-        size = hdc_sizeof(type);
-        ndim = _ndim;
+    void set_data(string str) {
+        size = str.length()+1;
+        type = STRING_ID;
+        ndim = 1;
         memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-        for (int i = 0; i < _ndim; i++) {
-            size *= _shape[i];
-            shape[i] = _shape[i];
-        }
+        shape[0] = size;
         size_t buffer_size = size + HDC_DATA_POS;
         char* buffer = buff_allocate(buffer_size);
-        buff_set_header(buffer,_type,HDCDefault,_ndim,_shape);
-        memcpy(buffer+HDC_DATA_POS,_data,size);
+        buff_set_header(buffer,type,flags,ndim,shape);
+        memcpy(buffer+HDC_DATA_POS,str.c_str(),size);
         storage->set(uuid,buffer,buffer_size);
-        return;
+    };
+    void set_data(string path, string str) {
+        if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
+        get(path)->set_data(str);
     }
-    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type) {
-        if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
-        get(path)->set_data_c(_ndim, _shape, _data, _type);
-    }
-
+    void set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type);
+    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data_scalar(T data) {
@@ -220,51 +159,14 @@ public:
         if(!has_child(path)) add_child(path, new HDC());
         get(path)->set_data_scalar(data);
     }
-    
-    void set_data(string str) {
-        size = str.length()+1;
-        type = STRING_ID;
-        ndim = 1;
-        memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-        shape[0] = size;
-        size_t buffer_size = size + HDC_DATA_POS;
-        char* buffer = buff_allocate(buffer_size);
-        buff_set_header(buffer,type,flags,ndim,shape);
-        memcpy(buffer+HDC_DATA_POS,str.c_str(),size);
-        storage->set(uuid,buffer,buffer_size);
-    };
-    
-    void set_data(string path, string str) {
-        if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
-        get(path)->set_data(str);
-    }
-    
     /** Returns number of dimensions of current node. */
     int get_ndim();
     /** Returns shape of current node. */
     size_t* get_shape();
-    
-    bool is_external() {
-        return (flags & HDCExternal) != 0;
-    }
-    bool is_readonly() {
-        return (flags & HDCReadOnly) != 0;
-    }
-    bool is_fortranorder() {
-        return (flags & HDCFortranOrder) != 0;
-    }
-    void info() {
-        printf("Size:\t\t%d\n",size);
-        printf("NDim:\t\t%d\n",get_ndim());
-        printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%d,",get_shape()[i]);
-        printf("\n");
-        printf("Data Size:\t\t%d\n",get_datasize());
-        printf("External:\t\t%d\n",is_external());
-        printf("ReadOnly:\t\t%d\n",is_readonly());
-        printf("FortranOrder:\t%d\n",is_fortranorder());
-        return;
-    }
-
+    bool is_external();
+    bool is_readonly();
+    bool is_fortranorder();
+    void info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
     void add_child(string path, HDC* n);

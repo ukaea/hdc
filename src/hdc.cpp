@@ -127,54 +127,104 @@ void buff_info(char* buffer) {
 
 
 
+//---------------------------- HDC class -----------------------------------
+
+/** Creates empty HDC with specified buffer size */
+HDC::HDC(size_t byte_size) {
+    if (global_storage == nullptr) {
+        HDC_init();
+        atexit(HDC_destroy);
+    }
+    size_t buffer_size = HDC_DATA_POS + byte_size;
+    char* data = buff_allocate(buffer_size);
+    uuid = generate_uuid_str();
+    storage = global_storage;
+    storage->set(uuid,data,buffer_size);
+    shape[0] = byte_size;
+    for(int i=1;i<HDC_MAX_DIMS;i++) shape[i] = 0;
+    type = EMPTY_ID;
+    flags = HDCDefault;
+    size = buffer_size;
+}
+
+/** Default constructor. Creates empty HDC */
+HDC::HDC(): HDC(0) {};
+
+/** Creates empty HDC with specified type and shape */
+HDC::HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags) {
+    if (ndim >= HDC_MAX_DIMS) {
+        cerr << "Unsupported number of dimensions: " << ndim << endl;
+        exit(-2);
+    }
+    size_t elem_size = 1;
+    memset(shape,0,sizeof(shape[0])*HDC_MAX_DIMS);
+    for (int i = 0; i < ndim; i++) {
+        shape[i] = _shape[i];
+        elem_size *= _shape[i];
+    }
+    type = _type;
+    flags = _flags;
+    ndim = _ndim;
+    char* buffer = buff_allocate(elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
+    buff_set_header(buffer, type, flags, ndim, shape);
+    uuid = generate_uuid_str();
+    storage = global_storage;
+    storage->set(uuid,buffer,elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
+}
+
+/** Destructor */
+HDC::~HDC() {
+    storage->remove(uuid);
+}
+
+//---------------------------- Header information ----------------------------------
+size_t HDC::get_datasize() {
+    //return buff_get_data_size(storage->get(uuid));
+    return size + HDC_DATA_POS;
+}
+size_t HDC::get_size() {
+    //return buff_get_size(storage->get(uuid));
+    //return buff_get_size(storage->get_size(uuid));
+    return size;
+}
+/** Returns type of current node. */
+TypeID HDC::get_type() {
+    //return buff_get_type(storage->get(uuid));
+    return type;
+}
+Flags HDC::get_flags() {
+    //return buff_get_flags(storage->get(uuid));
+    return flags;
+}
+template<typename T>
+T* HDC::get_data() {
+    return reinterpret_cast<T*>(buff_get_data_ptr(storage->get(uuid)));
+}
+
+bool HDC::is_external() {
+    return (flags & HDCExternal) != 0;
+}
+bool HDC::is_readonly() {
+    return (flags & HDCReadOnly) != 0;
+}
+bool HDC::is_fortranorder() {
+    return (flags & HDCFortranOrder) != 0;
+}
+void HDC::info() {
+    printf("Size:\t\t%d\n",size);
+    printf("NDim:\t\t%d\n",get_ndim());
+    printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%d,",get_shape()[i]);
+    printf("\n");
+    printf("Data Size:\t\t%d\n",get_datasize());
+    printf("External:\t\t%d\n",is_external());
+    printf("ReadOnly:\t\t%d\n",is_readonly());
+    printf("FortranOrder:\t%d\n",is_fortranorder());
+    return;
+}
+
 //---------------------------- Tree manipulation -----------------------------------
-// HDC::HDC()
-// {
-//     #ifdef DEBUG
-//     cout << "Creating empty node..." << endl;
-//     #endif
-//     type = HDC_EMPTY;
-//     data = dynd::nd::array();
-//     children = new unordered_map<string, HDC*>;
-//     //children = nullptr;
-//     children = nullptr;
-// }
-// 
-// HDC::HDC(dynd::nd::array&& arr) {
-//     #ifdef DEBUG
-//     cout << "Creating DyND node..." << endl;
-//     #endif
-//     type = HDC_DYND;
-//     data = std::move(arr);
-//     children = new unordered_map<string, HDC*>;
-//     children = nullptr;
-// }
-// 
-// HDC::~HDC()
-// {
-//     #ifdef DEBUG
-//     cout << "Destructor called..." << endl;
-//     #endif
-//     if (!children->empty()) {
-//         #ifdef DEBUG
-//         cout << "Deleting children..." << endl;
-//         #endif
-//         for (auto it = children->begin(); it != children->end(); it++) {
-//             delete it->second;
-//             #ifdef DEBUG
-//             cout << "Remove: " << it->first << endl;
-//             #endif
-//         }
-//         children->clear();
-//     } else {
-//         delete children;
-//         if (children != nullptr) {
-//             children->erase(remove_if(children->begin(),children->end(),deleteAll));
-//             delete children;
-//         }
-//     }
-// }
-// 
+
+
 bool HDC::has_child(string path)
 {
     return has_child(split(path,'/'));
@@ -451,6 +501,28 @@ HDC* HDC::copy(int copy_arrays)
     return copy;*/
     fprintf(stderr,"copy(): not implemented yet...\n");
     exit(-3);
+}
+
+void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type) {
+    if (storage->has(uuid)) storage->remove(uuid);
+    type = _type;
+    size = hdc_sizeof(type);
+    ndim = _ndim;
+    memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
+    for (int i = 0; i < _ndim; i++) {
+        size *= _shape[i];
+        shape[i] = _shape[i];
+    }
+    size_t buffer_size = size + HDC_DATA_POS;
+    char* buffer = buff_allocate(buffer_size);
+    buff_set_header(buffer,_type,HDCDefault,_ndim,_shape);
+    memcpy(buffer+HDC_DATA_POS,_data,size);
+    storage->set(uuid,buffer,buffer_size);
+    return;
+}
+void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type) {
+    if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
+    get(path)->set_data_c(_ndim, _shape, _data, _type);
 }
 
 void HDC::insert_slice(size_t i, HDC* h)
