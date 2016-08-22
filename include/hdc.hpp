@@ -282,46 +282,7 @@ public:
     bool has_child(string path);
     
     HDC* json_to_hdc(Json::Value* root);
-    
-    
-//     /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
-//     template <typename T> void set_data(string path, vector<T> data) 
-//     {
-//         if (!has_child(path)) {
-//             add_child(path, new HDC());
-//             #ifdef DEBUG
-//             cout << "\"" << path << "\" not found, adding..." << endl;
-//             #endif
-//         }
-//         get(path)->set_data<T>(data);
-//         return;
-//     };
-// 
-//     /** Sets array data to node on given path. */
-//     template <typename T> void set_data(string path, int8_t ndim, const long int* shape, void* data, bool copy=true) 
-//     {
-//         if (!has_child(path)) {
-//             add_child(path, new HDC());
-//             #ifdef DEBUG
-//             cout << "not found, adding..." << endl;
-//             #endif
-//         }
-//         get(path)->set_data<T>(ndim,shape,data,copy=copy);
-//         return;
-//     };
-// 
-//     /** Sets scalar data to node on given path. */
-//     template <typename T> void set_data(string path, T data) 
-//     {
-//         if (!has_child(path)) {
-//             add_child(path, new HDC());
-//             #ifdef DEBUG
-//             cout << "not found, adding..." << endl;
-//             #endif
-//         }
-//         get(path)->set_data(data);
-//         return;
-//     };
+
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list); 
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -402,6 +363,8 @@ public:
     Json::Value to_json(int mode = 0);
     /** Dumps JSON to cout */
     void dump();
+    /** Dumps header */
+    void get_header_info();
     /** Returns void pointer to data. */
     void* as_void_ptr();
     /** Returns string representing data/node type. */

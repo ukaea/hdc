@@ -394,11 +394,14 @@ void* HDC::as_void_ptr() {
     return (void*)this;
 }
 
-void HDC::dump() {
-    //cout << to_json(0);
+void HDC::get_header_info() {
     buff_dump_header(storage->get(uuid));
     buff_info(storage->get(uuid));
     return;
+}
+
+void HDC::dump() {
+    cout << to_json(0);
 }
 
 void HDC::resize(HDC* h, int recursively)
