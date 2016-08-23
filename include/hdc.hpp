@@ -29,7 +29,7 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -105,7 +105,9 @@ public:
     template<typename T> T* get_data();
     
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-        if (storage->has(uuid)) storage->remove(uuid);
+        if (storage->has(uuid)) {
+            storage->remove(uuid);
+        }
         type = to_typeid(_data[0]);
         size = hdc_sizeof(type);
         ndim = _ndim;

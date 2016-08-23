@@ -59,7 +59,10 @@ public:
         return;
     };
     void remove(string key) {
-        _map.erase(key);
+        if (has(key)) {
+            delete[] _map[key].dptr;
+            _map.erase(key);
+        }
         return;
     };
     void init(string settings) {
