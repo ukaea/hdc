@@ -308,14 +308,14 @@ struct hdc_t* hdc_copy(hdc_t* src)
 void hdc_set_string(hdc_t* tree, char* str)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((std::string)str);
+    t->set_string((std::string)str);
     return;
 }
 
 void hdc_set_string_path(hdc_t* tree, char* path, char* str)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data(path,(std::string)str);
+    t->set_string(path,(std::string)str);
     return;
 }
 

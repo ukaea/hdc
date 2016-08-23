@@ -124,7 +124,7 @@ public:
         if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
         get(path)->set_data(_ndim, _shape, _data, _flags);
     }
-    void set_data(string str) {
+    void set_string(string str) {
         size = str.length()+1;
         type = STRING_ID;
         ndim = 1;
@@ -136,9 +136,9 @@ public:
         memcpy(buffer+HDC_DATA_POS,str.c_str(),size);
         storage->set(uuid,buffer,buffer_size);
     };
-    void set_data(string path, string str) {
+    void set_string(string path, string str) {
         if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
-        get(path)->set_data(str);
+        get(path)->set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type);
     void set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type);

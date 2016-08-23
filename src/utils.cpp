@@ -173,6 +173,7 @@ TypeID to_typeid(uint16_t a) {return UINT16_ID;};
 TypeID to_typeid(uint8_t a) {return UINT8_ID;};
 TypeID to_typeid(string a) {return STRING_ID;};
 TypeID to_typeid(char* a) {return STRING_ID;};
+TypeID to_typeid(char const* a) {return STRING_ID;};
 TypeID to_typeid(bool a) {return BOOL_ID;};
 
 

@@ -122,7 +122,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             #ifdef DEBUG
             cout << "root is string, value = " << root.asCString() << endl;
             #endif
-            tree->set_data(root.asCString());
+            tree->set_string(root.asCString());
             break;
         }
         case(Json::booleanValue):

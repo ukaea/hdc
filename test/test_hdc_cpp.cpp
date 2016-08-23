@@ -144,7 +144,7 @@ TEST(HDC,DoubleDataManipulation) {
 TEST(HDC,StringDataManipulation) {
     HDC* h = new HDC();
     std::string str("lalalalala  bleble");
-    h->set_data(str);
+    h->set_string(str);
     std::string str2 = std::string(h->as_string());
     EXPECT_STREQ(str.c_str(), str2.c_str());
 }
@@ -152,9 +152,9 @@ TEST(HDC,StringDataManipulation) {
 TEST(HDC,SliceManipulation) {
     HDC* h = new HDC();
     HDC* sl = new HDC();
-    sl->set_data("1");
+    sl->set_string("1");
     HDC* sl2 = new HDC();
-    sl2->set_data("2");
+    sl2->set_string("2");
     h->append_slice(sl);
     h->append_slice(sl2);
     EXPECT_EQ(HDC_LIST, h->get_type());
@@ -164,13 +164,13 @@ TEST(HDC,SliceManipulation) {
     EXPECT_STREQ("1",h->get_slice(0)->as_string().c_str());
     EXPECT_STREQ("2",h->get_slice(1)->as_string().c_str());
     HDC* sl3 = new HDC();
-    sl3->set_data("3");
+    sl3->set_string("3");
     h->insert_slice(1,sl3);
     vector<string> keys = h->keys();
     EXPECT_STREQ("3",h->get_slice(1)->as_string().c_str());
     EXPECT_STREQ("2",h->get_slice(2)->as_string().c_str());
     HDC* sl4 = new HDC();
-    sl4->set_data("4");
+    sl4->set_string("4");
     h->set_slice(1,sl4);
     EXPECT_STREQ("4",h->get_slice(1)->as_string().c_str());
 }
@@ -211,7 +211,7 @@ TEST(HDC,JsonComplete) {
     HDC* list = new HDC();
     for (int i=0;i<5;i++) list->append_slice(new HDC());
     tree->add_child("aaa/list", list);
-    tree->set_data("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
+    tree->set_string("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
     // Save JSON
     tree->to_json("tree.txt");
 
