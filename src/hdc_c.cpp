@@ -243,28 +243,28 @@ double** hdc_as_double_2d_path(struct hdc_t* tree, char* path) {
 void hdc_set_int8_scalar(hdc_t* tree, int8_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_scalar(data);
+    t->set_data(data);
     return;
 }
 
 void hdc_set_int8_scalar_path(hdc_t* tree, char* path, int8_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_scalar((string)path, data);
+    t->set_data((string)path, data);
     return;
 }
 
 void hdc_set_int32_scalar(hdc_t* tree, int32_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_scalar(data);
+    t->set_data(data);
     return;
 }
 
 void hdc_set_int32_scalar_path(hdc_t* tree, char* path, int32_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_scalar((string)path, data);
+    t->set_data((string)path, data);
     return;
 }
 
@@ -286,14 +286,14 @@ void hdc_set_double_sc_path(struct hdc_t* tree, char* path, int ndim, size_t* sh
 void hdc_set_double_scalar_path(hdc_t* tree, char* path, double data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_scalar((string)path, data);
+    t->set_data((string)path, data);
     return;
 }
 
 void hdc_set_double_scalar(hdc_t* tree, double data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_scalar(data);
+    t->set_data(data);
     return;
 }
 

@@ -98,7 +98,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             #ifdef DEBUG
             cout << "root is int, value = " << root.asInt() << endl;
             #endif
-            tree->set_data_scalar<int32_t>(root.asInt());
+            tree->set_data<int32_t>(root.asInt());
             break;
         }
         case(Json::uintValue):
@@ -106,7 +106,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             #ifdef DEBUG
             cout << "root is uint, value = " << root.asUInt() << endl;
             #endif
-            tree->set_data_scalar<uint32_t>(root.asUInt());
+            tree->set_data<uint32_t>(root.asUInt());
             break;
         }
         case(Json::realValue):
@@ -114,7 +114,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             #ifdef DEBUG
             cout << "root is double, value = " << root.asDouble() << endl;
             #endif
-            tree->set_data_scalar(root.asDouble());
+            tree->set_data(root.asDouble());
             break;
         }
         case(Json::stringValue):
@@ -130,7 +130,7 @@ HDC* json_to_hdc(const Json::Value& root) {
             #ifdef DEBUG
             cout << "root is bool, value = " << root.asBool() << endl;
             #endif
-            tree->set_data_scalar<bool>(root.asBool());
+            tree->set_data<bool>(root.asBool());
             break;
         }
         case(Json::arrayValue):

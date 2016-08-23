@@ -144,7 +144,7 @@ public:
     void set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type);
     /** Sets scalar data to given node. */
     template <typename T>
-    void set_data_scalar(T data) {
+    void set_data(T data) {
         type = to_typeid(data);
         size = sizeof(T);
         shape[0] = 0;
@@ -156,9 +156,9 @@ public:
         storage->set(uuid,buffer,size + HDC_DATA_POS);
     }
     template <typename T>
-    void set_data_scalar(string path, T data) {
+    void set_data(string path, T data) {
         if(!has_child(path)) add_child(path, new HDC());
-        get(path)->set_data_scalar(data);
+        get(path)->set_data(data);
     }
     /** sets whole buffer */
     void set_buffer(char* buffer);

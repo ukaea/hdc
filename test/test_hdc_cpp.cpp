@@ -202,7 +202,7 @@ TEST(HDC,JsonComplete) {
     int32_t data_int[] = {777,20202020,3333,555555};
     HDC* tree = new HDC();
     HDC* scalar = new HDC();
-    scalar->set_data_scalar(333.333);
+    scalar->set_data(333.333);
     tree->add_child("aaa/bbb/_scalar", scalar);
     tree->set_data<double>("aaa/bbb/double",ndim,shape,data_double);
     //tree->set_data<double>("aaa/bbb/double2",ndim,shape,data_double);
