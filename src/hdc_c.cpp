@@ -453,5 +453,5 @@ const char* hdc_dumps(hdc_t* tree) {
     return strdup(dump_str.c_str());
 }
 
-// end exter C
+// end extern C
 }
