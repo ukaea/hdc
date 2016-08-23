@@ -64,6 +64,7 @@ bool buff_is_external(char* buffer);
 bool buff_is_readonly(char* buffer);
 bool buff_is_fortranorder(char* buffer);
 void buff_info(char* buffer);
+char* buff_copy(char* buffer);
 
 class HDC
 {
@@ -159,6 +160,8 @@ public:
         if(!has_child(path)) add_child(path, new HDC());
         get(path)->set_data_scalar(data);
     }
+    /** sets whole buffer */
+    void set_buffer(char* buffer);
     /** Returns number of dimensions of current node. */
     int get_ndim();
     /** Returns shape of current node. */
@@ -213,7 +216,7 @@ public:
             return reinterpret_cast<T>(0);
         }
         #ifdef DEBUG
-        cout << "From as:" << data[0] << endl;
+//         cout << "From as:" << data[0] << endl;
         #endif
         if (!storage->has(uuid)) {
             printf("Not found: %s\n",uuid.c_str());

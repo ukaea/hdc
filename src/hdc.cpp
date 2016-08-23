@@ -124,6 +124,11 @@ void buff_info(char* buffer) {
     printf("FortranOrder:\t%d\n",buff_is_fortranorder(buffer));
     return;
 }
+char* buff_copy(char* buffer) {
+    size_t dsize = buff_get_data_size(buffer);
+    char* _new = new char[dsize];
+    memcpy(_new,buffer,dsize);
+};
 
 
 
@@ -462,43 +467,51 @@ void HDC::resize(HDC* h, int recursively)
     return;
 }
 
-HDC* HDC::copy(int copy_arrays)
-{
-    /*
+HDC* HDC::copy(int copy_arrays) {
     #ifdef DEBUG
     cout << "Called copy()" << endl;
     #endif
-    HDC* copy = new HDC();
-    copy->set_type(get_type());
+    HDC* _copy = new HDC();
+    _copy->set_type(get_type());
     #ifdef DEBUG
     cout << (int)(get_type()) << endl;
     #endif
-    if (type == HDC_STRUCT) {
-        for (auto it = children->begin(); it != children->end(); it++) {
-            copy->add_child(it->first,it->second->copy(copy_arrays));
-            #ifdef DEBUG
-            cout << it->first << " copied" << endl;
-            #endif
-        }
-    } else if (type == HDC_LIST) {
-        for (size_t i = 0; i < children->size(); i++)
-            copy->insert_slice(i,children->at(i)->copy(copy_arrays));
-    }
-    else if (type == HDC_DYND) {
+    if (hdc_is_primitive_type(type)) {
         if (copy_arrays == 1) {
-            //dynd::nd::empty(<data.get_type()>);
-            //long size = data.size();
-            //char *
-            copy->data = data;
-            #ifdef DEBUG
-            cout << "copy: " << copy->data << endl;
-            #endif
-        } else set_type(HDC_EMPTY);
+            _copy->set_buffer(buff_copy(storage->get(uuid)));
+        } else return _copy;
+    }
+    else {
+        switch (type) {
+            case (HDC_STRUCT):
+            {
+                for (size_t i=0;i<children->size();i++) {
+                    string key = children->get<by_index>()[i].key;
+                    HDC* node = children->get<by_index>()[i].node;
+                    _copy->add_child(key,node->copy(copy_arrays));
+                    #ifdef DEBUG
+                    cout << key << " copied" << endl;
+                    #endif
+                }
+                break;
+            }
+            case (HDC_LIST):
+            {
+                for (size_t i = 0; i < children->size(); i++)
+                    _copy->insert_slice(i,children->get<by_index>()[i].node->copy(copy_arrays));
+                break;
+            }
+            default:
+            {
+                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str());
+                exit(-3);
+            }
+        }
     }
     #ifdef DEBUG
     cout << "copy() Done" << endl;
     #endif
-    return copy;*/
+    return _copy;
     fprintf(stderr,"copy(): not implemented yet...\n");
     exit(-3);
 }
@@ -616,4 +629,26 @@ int HDC::get_ndim(string path) {
 
 size_t* HDC::get_shape(string path) {
     return get(path)->get_shape();
+}
+
+void HDC::set_buffer(char* _buffer) {
+    if (storage->has(uuid)) {
+        delete storage->get(uuid);
+        storage->remove(uuid);
+        type = EMPTY_ID;
+    }
+    if (type == EMPTY_ID) {
+        uuid = generate_uuid_str();
+        type = buff_get_type(_buffer);
+        flags= buff_get_flags(_buffer);
+        size = buff_get_size(_buffer);
+        ndim = buff_get_ndim(_buffer);
+        memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
+        memcpy(shape,buff_get_shape(_buffer),sizeof(size_t)*ndim);
+        storage->set(uuid,_buffer,size);
+        return;
+    }
+    // Shout otherwise
+    fprintf(stderr,"set_buffer(): Node of type %s cannot have buffer set\n", get_type_str().c_str());
+    exit(-1);
 }
