@@ -29,7 +29,7 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
-//#define DEBUG
+#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -103,6 +103,7 @@ public:
     TypeID get_type();
     Flags get_flags();
     template<typename T> T* get_data();
+    
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         if (storage->has(uuid)) storage->remove(uuid);
         type = to_typeid(_data[0]);
@@ -120,10 +121,63 @@ public:
         storage->set(uuid,buffer,buffer_size);
         return;
     }
+    
+    template<typename T> void set_data(int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
+        set_data(_ndim,_shape,_data,_flags);
+    };
+    
     template<typename T> void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
         get(path)->set_data(_ndim, _shape, _data, _flags);
     }
+    
+    template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault) {
+        #ifdef DEBUG
+        printf("template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault), %f\n",_data[0]);
+        #endif
+        vector<T> vec = _data;
+        set_data(1,{vec.size()},&vec[0],_flags);
+    };
+    
+    template<typename T> void set_data(string path, initializer_list<T> _data, Flags _flags = HDCDefault) {
+        if(!has_child(path)) add_child(path, new HDC());
+        get(path)->set_data(_data, _flags);
+    }
+    
+    
+    template<typename T> void set_data(string path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
+        if(!has_child(path)) add_child(path, new HDC());
+        get(path)->set_data(_ndim, _shape, _data, _flags);
+    }
+    
+    /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
+    template <typename T> void set_data(vector<T> data) 
+    {
+        #ifdef DEBUG
+        printf("template <typename T> void set_data(vector<T> data), %f\n",data[0]);
+        #endif
+        if (this->children != nullptr) {
+            cout << "The node has already children set..." << endl;
+            return;
+        }
+        size_t _shape[1] = {data.size()};
+        set_data<T>(1,_shape,&data[0]);
+        return;
+    };
+
+    /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
+    template <typename T> void set_data(string path, vector<T> data) 
+    {
+        if (!this->has_child(path)) {
+            this->add_child(path, new HDC());
+            #ifdef DEBUG
+            cout << "\"" << path << "\" not found, adding..." << endl;
+            #endif
+        }
+        this->get(path)->set_data<T>(data);
+        return;
+    };
+
     void set_string(string str) {
         size = str.length()+1;
         type = STRING_ID;

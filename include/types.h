@@ -44,7 +44,7 @@ typedef enum {
     STRING_ID   = HDC_STRING,
     BOOL_ID     = HDC_BOOL,
     ERROR_ID    = HDC_ERROR,
-    Internal_ForceMyEnumIntSize = ULONG_MAX // enum : unsigned int is not compatible with C, so we will do thi and hope that it will be ok.
+    Internal_ForceMyEnumIntSize = ULONG_MAX // enum : unsigned int is not compatible with C, so we will do this and hope that it will be ok.
 } TypeID;
 
 #define HDCDefault        0lu
@@ -58,6 +58,10 @@ typedef unsigned long Flags;
 #define HDC_FLAGS_POS    sizeof(TypeID)
 #define HDC_SHAPE_POS    HDC_FLAGS_POS + sizeof(Flags)
 #define HDC_DATA_POS     HDC_SHAPE_POS + HDC_MAX_DIMS * sizeof(size_t)
+
+//TODO Specify offsets in header, possibly make header of dynamic length.
+//TODO support external data
+//TODO HDF5 1) as serialization, 2) as backend
 
 struct hdc_t;
 

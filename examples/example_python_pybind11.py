@@ -2,7 +2,7 @@ import libhdc_python as hdc
 import ctypes
 
 # Get pointer from PyCapsuleObject:
-hh = hdc.hdc()
+hh = hdc.HDC()
 capsule = hh.as_void_ptr()
 
 from ctypes import pythonapi

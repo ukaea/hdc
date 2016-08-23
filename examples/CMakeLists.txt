@@ -31,9 +31,9 @@ if (BUILD_EXAMPLES)
 #     #set(CMAKE_INSTALL_RPATH "/usr/local/lib")
 #     #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # 
-#     install(TARGETS hdc_fortran_module  example_cpp example_c example_fortran cpo_hdc  
-#         LIBRARY DESTINATION lib
-#         RUNTIME DESTINATION share/examples)
+    install(TARGETS hdc_fortran_module  example_cpp example_c example_fortran cpo_hdc  
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION share/examples)
     
 endif(BUILD_EXAMPLES)
 

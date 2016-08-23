@@ -25,7 +25,6 @@ if (BUILD_PYBIND)
 	    )
 endif (BUILD_PYBIND)
 
-#include_directories(inc)
 link_directories(${hdc_SOURCE_DIR}/src)
 
 add_library(hdc SHARED hdc.cpp jsoncpp.cpp storage_interface.cpp utils.cpp hdc_json.cpp)
