@@ -76,7 +76,7 @@ int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path); /**  */
 const char* hdc_get_type_str(struct hdc_t* tree); /**  */
 void hdc_print_type_str(struct hdc_t* tree);
 const char* hdc_get_type_str_path(struct hdc_t* tree, char* path); /**  */
-
+size_t hdc_childs_count(struct hdc_t* tree); /** */
 void test_str(char* str);
 
 #ifdef __cplusplus

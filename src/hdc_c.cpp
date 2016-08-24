@@ -453,5 +453,10 @@ const char* hdc_dumps(hdc_t* tree) {
     return strdup(dump_str.c_str());
 }
 
+size_t hdc_childs_count(hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->childs_count();
+}
+
 // end extern C
 }

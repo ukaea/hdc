@@ -55,7 +55,7 @@ void buff_set_header(char* buffer, TypeID type, Flags flags, int ndim, size_t* s
 TypeID buff_get_type(char* buffer);
 Flags buff_get_flags(char* buffer);
 size_t* buff_get_shape(char* buffer);
-size_t buff_get_size(char* buffer);
+size_t buff_get_elem_size(char* buffer);
 int buff_get_ndim(char* buffer);
 size_t buff_get_data_size(char* buffer);
 char* buff_get_data_ptr(char* buffer);
@@ -92,7 +92,8 @@ public:
     HDC();
     /** Creates empty HDC with specified type and shape */
     HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags = HDCDefault);
-
+    /** Copy contructor */
+    HDC(HDC* h);
     // TODO: More constructors
 
     /** Destructor */
@@ -105,6 +106,9 @@ public:
     template<typename T> T* get_data();
     
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+        #ifdef DEBUG
+        printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
+        #endif
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
@@ -249,7 +253,7 @@ public:
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
     void resize(HDC* h, int recursively = 0); 
     /** Returns copy of current object. */
-    HDC* copy(int copy_arrays = 0); 
+    HDC* copy(int copy_arrays = 1); 
     /** Inserts node to i-th slice of current node. */
     void insert_slice(size_t i, HDC* h);
     /** Sets node to i-th slice of current node. */
@@ -339,6 +343,7 @@ public:
     /** Returns vector of keys of a struct node and empty vector otherwise. */
     vector<string> keys();
     size_t childs_count();
+    char* get_buffer();
 };
 HDC* from_json(const string& filename);
 

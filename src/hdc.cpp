@@ -41,11 +41,8 @@ void buff_set_flags(char* buffer, Flags flags) {
     memcpy(buffer+HDC_FLAGS_POS,&flags,sizeof(Flags));
 }
 void buff_set_shape(char* buffer, int ndim, size_t* shape) {
-    for (int i=0;i<ndim;i++)
-        buffer[HDC_SHAPE_POS+i*sizeof(size_t)] = shape[i];
-    if (ndim < HDC_MAX_DIMS)
-        for (int i=ndim+1;i<HDC_MAX_DIMS;i++)
-            buffer[HDC_SHAPE_POS+i*sizeof(size_t)] = 0;
+    memcpy(buffer+HDC_SHAPE_POS,shape,ndim*sizeof(size_t));
+    memset(buffer+HDC_SHAPE_POS+sizeof(size_t)*ndim,0,HDC_MAX_DIMS*sizeof(size_t));
 }
 void buff_set_shape(char* buffer, size_t shape[HDC_MAX_DIMS]) {
     for (int i=0;i<HDC_MAX_DIMS;i++)
@@ -65,7 +62,7 @@ Flags buff_get_flags(char* buffer) {
 size_t* buff_get_shape(char* buffer) {
     return reinterpret_cast<size_t*>(buffer+HDC_SHAPE_POS);
 }
-size_t buff_get_size(char* buffer) {
+size_t buff_get_elem_size(char* buffer) {
     size_t size = hdc_sizeof(buff_get_type(buffer));
     if (size > 0) {
         for (int i = 0;i<HDC_MAX_DIMS;i++) {
@@ -91,7 +88,7 @@ int buff_get_ndim(char* buffer) {
     return ndim;
 }
 size_t buff_get_data_size(char* buffer) {
-    return buff_get_size(buffer) + HDC_DATA_POS;
+    return buff_get_elem_size(buffer) + HDC_DATA_POS;
 }
 char* buff_get_data_ptr(char* buffer) {
     return buffer + HDC_DATA_POS;
@@ -114,7 +111,7 @@ bool buff_is_fortranorder(char* buffer) {
 }
 void buff_info(char* buffer) {
     printf("Type:\t\t%d\n",buff_get_type(buffer));
-    printf("Size:\t\t%d\n",buff_get_size(buffer));
+    printf("Size:\t\t%d\n",buff_get_elem_size(buffer));
     printf("NDim:\t\t%d\n",buff_get_ndim(buffer));
     printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%d,",buff_get_shape(buffer)[i]);
     printf("\n");
@@ -153,7 +150,7 @@ HDC::HDC(size_t byte_size) {
 }
 
 /** Default constructor. Creates empty HDC */
-HDC::HDC(): HDC(0) {};
+HDC::HDC(): HDC((size_t)0) {};
 
 /** Creates empty HDC with specified type and shape */
 HDC::HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags) {
@@ -176,6 +173,58 @@ HDC::HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags) {
     storage = global_storage;
     storage->set(uuid,buffer,elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
 }
+
+/** Copy contructor */
+HDC::HDC(HDC* h) {
+    storage = h->storage;
+    type = h->type;
+    ndim = h->ndim;
+    flags = h->flags;
+    size = h->size;
+    uuid = generate_uuid_str();
+    storage->set(uuid,h->get_buffer(),size);
+    if (h->children != nullptr) {
+        switch (type) {
+            case (HDC_STRUCT):
+            {
+                for (size_t i=0;i<h->children->size();i++) {
+                    string key = h->children->get<by_index>()[i].key;
+                    HDC* node = h->children->get<by_index>()[i].node;
+                    add_child(key,new HDC(node));
+                    #ifdef DEBUG
+                    cout << key << " copied" << endl;
+                    #endif
+                }
+                break;
+            }
+            case (HDC_LIST):
+            {
+                for (size_t i = 0; i < h->children->size(); i++) {
+                    HDC* node = h->children->get<by_index>()[i].node;
+                    insert_slice(i,new HDC(node));
+                }
+                break;
+            }
+            default:
+            {
+                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str());
+                exit(-3);
+            }
+        }
+    }
+}
+
+/** Copy contructor from pointer */
+/*HDC::HDC(HDC* h) {
+    storage = h->storage;
+    type = h->type;
+    ndim = h->ndim;
+    flags = h->flags;
+    size = h->size;
+    uuid = generate_uuid_str();
+    storage->set(uuid,h->get_buffer(),size);
+}
+*/
 
 /** Destructor */
 HDC::~HDC() {
@@ -456,7 +505,7 @@ void HDC::get_header_info() {
 }
 
 void HDC::dump() {
-    cout << to_json(0);
+    cout << to_json(0) << endl;
 }
 
 void HDC::resize(HDC* h, int recursively)
@@ -473,9 +522,6 @@ HDC* HDC::copy(int copy_arrays) {
     #endif
     HDC* _copy = new HDC();
     _copy->set_type(get_type());
-    #ifdef DEBUG
-    cout << (int)(get_type()) << endl;
-    #endif
     if (hdc_is_primitive_type(type)) {
         if (copy_arrays == 1) {
             _copy->set_buffer(buff_copy(storage->get(uuid)));
@@ -483,10 +529,16 @@ HDC* HDC::copy(int copy_arrays) {
     }
     else {
         switch (type) {
-            case (HDC_STRUCT):
+            case (EMPTY_ID):
+                // Nothing to be done
+                break;
+            case (STRUCT_ID):
             {
                 for (size_t i=0;i<children->size();i++) {
                     string key = children->get<by_index>()[i].key;
+                    #ifdef DEBUG
+                    cout << "copy: " << key << endl;
+                    #endif
                     HDC* node = children->get<by_index>()[i].node;
                     _copy->add_child(key,node->copy(copy_arrays));
                     #ifdef DEBUG
@@ -495,10 +547,15 @@ HDC* HDC::copy(int copy_arrays) {
                 }
                 break;
             }
-            case (HDC_LIST):
+            case (LIST_ID):
             {
                 for (size_t i = 0; i < children->size(); i++)
                     _copy->insert_slice(i,children->get<by_index>()[i].node->copy(copy_arrays));
+                break;
+            }
+            case (ERROR_ID):
+            {
+                _copy->set_buffer(get_buffer());
                 break;
             }
             default:
@@ -512,11 +569,11 @@ HDC* HDC::copy(int copy_arrays) {
     cout << "copy() Done" << endl;
     #endif
     return _copy;
-    fprintf(stderr,"copy(): not implemented yet...\n");
-    exit(-3);
 }
-
 void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type) {
+    #ifdef DEBUG
+    printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_get_type_str(_type).c_str());
+    #endif
     if (storage->has(uuid)) storage->remove(uuid);
     type = _type;
     size = hdc_sizeof(type);
@@ -526,11 +583,10 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type) {
         size *= _shape[i];
         shape[i] = _shape[i];
     }
-    size_t buffer_size = size + HDC_DATA_POS;
-    char* buffer = buff_allocate(buffer_size);
-    buff_set_header(buffer,_type,HDCDefault,_ndim,_shape);
+    char* buffer = buff_allocate(size+HDC_DATA_POS);
+    buff_set_header(buffer,type,flags,ndim,shape);
     memcpy(buffer+HDC_DATA_POS,_data,size);
-    storage->set(uuid,buffer,buffer_size);
+    storage->set(uuid,buffer,size+HDC_DATA_POS);
     return;
 }
 void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type) {
@@ -633,22 +689,24 @@ size_t* HDC::get_shape(string path) {
 
 void HDC::set_buffer(char* _buffer) {
     if (storage->has(uuid)) {
-        delete storage->get(uuid);
         storage->remove(uuid);
-        type = EMPTY_ID;
     }
-    if (type == EMPTY_ID) {
-        uuid = generate_uuid_str();
-        type = buff_get_type(_buffer);
-        flags= buff_get_flags(_buffer);
-        size = buff_get_size(_buffer);
-        ndim = buff_get_ndim(_buffer);
-        memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-        memcpy(shape,buff_get_shape(_buffer),sizeof(size_t)*ndim);
-        storage->set(uuid,_buffer,size);
-        return;
-    }
-    // Shout otherwise
-    fprintf(stderr,"set_buffer(): Node of type %s cannot have buffer set\n", get_type_str().c_str());
-    exit(-1);
+    uuid = generate_uuid_str();
+    type = buff_get_type(_buffer);
+    flags= buff_get_flags(_buffer);
+    size = buff_get_data_size(_buffer);
+    ndim = buff_get_ndim(_buffer);
+    memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
+    memcpy(shape,buff_get_shape(_buffer),sizeof(size_t)*ndim);
+    storage->set(uuid,_buffer,size);
+    return;
+}
+
+size_t HDC::childs_count()
+{
+    return children->size();
+}
+
+char* HDC::get_buffer() {
+    return storage->get(uuid);
 }

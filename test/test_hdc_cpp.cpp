@@ -251,5 +251,13 @@ TEST(HDC,JsonComplete) {
     for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice(i)->get_type());
     
     // Test string
-    //EXPECT_STREQ(tree->get("aaa/string")->as_string().c_str(), tree2->get("aaa/string")->as_string().c_str());
+    EXPECT_STREQ(tree->get("aaa/string")->as_string().c_str(), tree2->get("aaa/string")->as_string().c_str());
+    
+    //test copy c-tor
+    /*
+    HDC* copy = new HDC(tree2);
+    copy->to_json("tree_copy.txt");
+    */
+    //HDC* copy = tree->copy();
+    //copy->to_json("tree_copy.txt");
 }
