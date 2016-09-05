@@ -15,11 +15,7 @@ private:
 public:
     HDCStorage(std::string name, std::string settings) {
         _pluma.acceptProviderType<StorageProvider>();
-        /*if (!_pluma.load("plugins",name)) {
-            cout << "Could not load plugin \"" << name << "\"" << endl;
-            return;
-        }*/
-        if (!_pluma.load("/home/david/projects/hdc_new/build/bin/plugins","libUMapPlugin.so")) {
+        if (!_pluma.load("plugins",name)) {
             cout << "Could not load plugin \"" << name << "\"" << endl;
             return;
         }
