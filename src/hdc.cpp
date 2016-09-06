@@ -207,7 +207,7 @@ HDC::HDC(HDC* h) {
             }
             default:
             {
-                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str());
+                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str().c_str());
                 exit(-3);
             }
         }
@@ -414,7 +414,7 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
     if (children->count(first)) {
         if (vs.empty()) {
             if (type != HDC_LIST) return this;
-            if (i < 0 || i > children->size()) {
+            if (i > children->size()) {
                 cout << "Error: index out of range!" << endl;
                 return new HDC();
             }
@@ -425,7 +425,7 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
         printf("Not found: get_slice(");
         for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
         printf("%s",vs[vs.size()-1].c_str());
-        printf(",%d)\n",i);
+        printf(",%zu)\n",i);
         return new HDC();
     }
 }
@@ -488,8 +488,8 @@ void HDC::set_type(TypeID _type) {
     // More to be added here later
     type = _type;
     if ((_type == LIST_ID || _type == STRUCT_ID) && children == nullptr) {
-        children = new map_t;
-        children->reserve(HDC_LIST_INIT_CAPACITY);
+        children = new map_t();
+        //children->reserve(HDC_LIST_INIT_CAPACITY);
     }
     return;
 }
@@ -560,7 +560,7 @@ HDC* HDC::copy(int copy_arrays) {
             }
             default:
             {
-                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str());
+                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str().c_str());
                 exit(-3);
             }
         }

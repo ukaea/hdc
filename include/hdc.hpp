@@ -3,12 +3,6 @@
 
 #include <iostream>
 
-// multi_index container for children
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/multi_index/member.hpp>
-
 // marray - array views
 #include "andres/marray.hxx"
 

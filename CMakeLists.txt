@@ -9,11 +9,13 @@ set(hdc_new_SOURCE_DIR "${hdc_new_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fmax-errors=1")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fPIC -fmax-errors=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++14 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -lrt -fPIC -fmax-errors=1")
 set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008 -fmax-errors=1")
 
-find_package(Boost REQUIRED)
-include_directories( ${Boost_INCLUDE_DIRS})
+set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
+set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
+find_package(Boost 1.48.0 REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 
 
