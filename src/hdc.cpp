@@ -690,7 +690,7 @@ void HDC::set_buffer(char* _buffer) {
     if (storage->has(uuid)) {
         storage->remove(uuid);
     }
-    uuid = generate_uuid_str();
+    //uuid = generate_uuid_str();
     type = buff_get_type(_buffer);
     flags= buff_get_flags(_buffer);
     size = buff_get_data_size(_buffer);
