@@ -338,7 +338,10 @@ public:
     vector<string> keys();
     size_t childs_count();
     char* get_buffer();
+    string get_uuid();
+
 };
-HDC* from_json(const string& filename);
+HDC* from_json(const string& filename); //todo: make constructor from this
+    string map_to_json(map_t& children);
 
 #endif // HDC_HPP

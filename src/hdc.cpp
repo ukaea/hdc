@@ -110,12 +110,12 @@ bool buff_is_fortranorder(char* buffer) {
     return (static_cast<unsigned long>(buffer[HDC_FLAGS_POS]) & HDCFortranOrder) != 0;
 }
 void buff_info(char* buffer) {
-    printf("Type:\t\t%d\n",buff_get_type(buffer));
-    printf("Size:\t\t%d\n",buff_get_elem_size(buffer));
+    printf("Type:\t\t%lu\n",buff_get_type(buffer));
+    printf("Size:\t\t%zu\n",buff_get_elem_size(buffer));
     printf("NDim:\t\t%d\n",buff_get_ndim(buffer));
-    printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%d,",buff_get_shape(buffer)[i]);
+    printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%zu,",buff_get_shape(buffer)[i]);
     printf("\n");
-    printf("Data Size:\t\t%d\n",buff_get_data_size(buffer));
+    printf("Data Size:\t\t%zu\n",buff_get_data_size(buffer));
     printf("External:\t\t%d\n",buff_is_external(buffer));
     printf("ReadOnly:\t\t%d\n",buff_is_readonly(buffer));
     printf("FortranOrder:\t%d\n",buff_is_fortranorder(buffer));
@@ -125,9 +125,8 @@ char* buff_copy(char* buffer) {
     size_t dsize = buff_get_data_size(buffer);
     char* _new = new char[dsize];
     memcpy(_new,buffer,dsize);
+    return _new;
 };
-
-
 
 //---------------------------- HDC class -----------------------------------
 
@@ -265,11 +264,11 @@ bool HDC::is_fortranorder() {
     return (flags & HDCFortranOrder) != 0;
 }
 void HDC::info() {
-    printf("Size:\t\t%d\n",size);
+    printf("Size:\t\t%zu\n",size);
     printf("NDim:\t\t%d\n",get_ndim());
-    printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%d,",get_shape()[i]);
+    printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%zu,",get_shape()[i]);
     printf("\n");
-    printf("Data Size:\t\t%d\n",get_datasize());
+    printf("Data Size:\t\t%zu\n",get_datasize());
     printf("External:\t\t%d\n",is_external());
     printf("ReadOnly:\t\t%d\n",is_readonly());
     printf("FortranOrder:\t%d\n",is_fortranorder());
@@ -709,4 +708,8 @@ size_t HDC::childs_count()
 
 char* HDC::get_buffer() {
     return storage->get(uuid);
+}
+
+string HDC::get_uuid() {
+    return uuid;
 }

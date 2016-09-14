@@ -435,6 +435,19 @@ void HDC::to_json(string filename, int mode)
     return;
 }
 
+/* Saves children to JSON strin in order to store tree hierarchy in KV stores*/
+string map_to_json(map_t& children) {
+        Json::Value root;
+    //root["size"] = Json::UInt64(children.size());
+    for (size_t i=0;i<children.size();i++) {
+                    string key = children.get<by_index>()[i].key;
+                    HDC* node = children.get<by_index>()[i].node;
+                    root[key] = node->get_uuid();
+                }
+    stringstream ss;
+    ss << root;
+    return ss.str();
+}
 
 HDC* from_json(const string& filename)
 {
