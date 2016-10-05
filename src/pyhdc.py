@@ -20,6 +20,7 @@ class _HDC_T(ctypes.Structure):
     """
     pass
 
+
 _HDC_T_P = ctypes.POINTER(_HDC_T)
 
 
@@ -190,22 +191,9 @@ class HDC(object):
         """
         n = _hdc_childs_count(self.c_ptr)
         string_buffers = [ctypes.create_string_buffer(1000) for i in range(n)]
-        _keys = (ctypes.c_char_p*4)(*map(ctypes.addressof, string_buffers))
-        _hdc_keys_py(ctypes.cast(self.c_ptr,_HDC_T_P),_keys)
+        _keys = (ctypes.c_char_p * 4)(*map(ctypes.addressof, string_buffers))
+        _hdc_keys_py(ctypes.cast(self.c_ptr, _HDC_T_P), _keys)
         keys_lst = []
         for i in range(n):
             keys_lst.append(_keys[i].decode())
         return keys_lst
-
-if __name__ == '__main__':
-
-    for dtype in (np.float_, np.int32, ):
-        tree = HDC()
-        pydata = np.arange(1, 8, 2, dtype=dtype)
-        tree["data"] = pydata
-        del pydata
-        data = tree["data"].as_array()
-        print(data)
-        pydata = np.arange(1, 8, 2, dtype=dtype)
-        assert np.all(pydata == data)
-        assert pydata.dtype == data.dtype
