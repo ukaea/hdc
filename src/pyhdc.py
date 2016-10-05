@@ -111,6 +111,12 @@ class HDC(object):
             res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
             return res
 
+    def __contains__(self, key):
+        return self.has_child(key)
+
+    def has_child(self, key):
+        return bool(_hdc_has_child(self.c_ptr, key.encode()))
+
     def append(self, data):
         libchdc.hdc_append_slice(self.c_ptr, data.c_ptr)
 
@@ -152,11 +158,11 @@ class HDC(object):
         if type_str == 'hdc':
             res = [_hdc_get_slice(self._c_ptr, i) for i in range(self.shape[0])]
         else:
-            res = self.as_array().tolist()
+            res = self.asarray().tolist()
 
         return res
 
-    def as_array(self):
+    def asarray(self):
         """Convert to a numpy array, sharing numerical data
         """
         type_str = self.get_type_str()
@@ -170,6 +176,9 @@ class HDC(object):
         res = np.ctypeslib.as_array(cdata, self.get_shape())
 
         return res
+
+    def __array__(self):
+        return self.asarray()
 
     def dump(self):
         """Dump the continer
