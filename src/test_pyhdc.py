@@ -19,6 +19,15 @@ def random_key(nchars=5):
     return key
 
 
+def test_set_base_types():
+    # string
+    for size in (0, 1, 10, 101, 999, 100038):
+        tree = HDC()
+        data = random_key(size)
+        tree.set_data(data)
+        assert tree.get_data() == data
+
+
 def test_put_ndarray():
     # loop over number of dimensions
     for ndim in (1, ):
@@ -73,7 +82,7 @@ def test_nested():
     for key1 in keys1:
         print(key1)
         tree_dict[key1] = {}
-        tree[key1] = tree_dict[key1]
+        tree[key1] = HDC()
         for key2 in keys2:
             print(key2)
             data = random_array()
