@@ -43,6 +43,8 @@ size_t* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape o
 uint8_t hdc_get_type(struct hdc_t* tree);  /**  */
 int32_t* hdc_as_int32_1d(struct hdc_t* tree); /**  */
 int32_t** hdc_as_int32_2d(struct hdc_t* tree); /**  */
+int32_t*** hdc_as_int32_3d(struct hdc_t* tree); /**  */
+int32_t**** hdc_as_int32_4d(struct hdc_t* tree); /**  */
 int8_t* hdc_as_int8_1d(struct hdc_t* tree); /**  */
 int8_t** hdc_as_int8_2d(struct hdc_t* tree); /**  */
 double* hdc_as_double_1d(struct hdc_t* tree); /**  */

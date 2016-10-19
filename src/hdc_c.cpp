@@ -199,6 +199,16 @@ int32_t** hdc_as_int32_2d(struct hdc_t* tree) {
     return t->as<int32_t**>();
 }
 
+int32_t*** hdc_as_int32_3d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int32_t***>();
+}
+
+int32_t**** hdc_as_int32_4d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int32_t****>();
+}
+
 int8_t* hdc_as_int8_1d(struct hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     return t->as<int8_t*>();
@@ -434,7 +444,6 @@ void hdc_keys_py(hdc_t* tree, char** arr) {
     }
 }
 
-
 hdc_t* hdc_new_dtype(int ndim, size_t* shape, TypeID type)
 {
     HDC* t = new HDC(ndim,shape,type);
@@ -442,8 +451,6 @@ hdc_t* hdc_new_dtype(int ndim, size_t* shape, TypeID type)
     h->obj = (void*)t;
     return h;
 }
-
-
 
 const char* hdc_dumps(hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;

@@ -365,6 +365,9 @@ module hdc_fortran
         module procedure hdc_set_int8_1d_path
         module procedure hdc_set_int8_scalar
         module procedure hdc_set_int32_1d
+!         module procedure hdc_set_int32_2d
+!         module procedure hdc_set_int32_3d
+!         module procedure hdc_set_int32_4d
         module procedure hdc_set_int32_1d_path
         module procedure hdc_set_int32_scalar
         module procedure hdc_set_double_1d
