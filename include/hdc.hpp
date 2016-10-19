@@ -6,6 +6,10 @@
 // marray - array views
 #include "andres/marray.hxx"
 
+// Boost
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+
 // some other stuff -- to be reduced later
 #include <cstdint>
 #include <vector>
@@ -32,7 +36,7 @@ template<typename T> struct identity { typedef T type; };
 extern HDCStorage* global_storage;
 
 /** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init();
+void HDC_init(string pluginFileName="", string pluginSettingsFileName="");
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();

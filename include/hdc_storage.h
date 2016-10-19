@@ -3,6 +3,7 @@
 
 #include <Pluma/Pluma.hpp>
 #include "storage_interface.hpp"
+#include "../plugins/umap_plugin.hpp" // Add this as fallback
 #include <iostream>
 #include <cstdio>
 
@@ -15,9 +16,15 @@ private:
 public:
     HDCStorage(std::string name, std::string settings) {
         _pluma.acceptProviderType<StorageProvider>();
-        if (!_pluma.load("plugins",name)) {
-            cout << "Could not load plugin \"" << name << "\"" << endl;
-            return;
+        //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
+        if (name.size() != 0) {
+            if (!_pluma.load(name)) {
+                cerr << "Could not load plugin \"" << name << "\"" << endl;
+                cerr << "Using std::unordered_map as fallback" << endl;
+                _pluma.addProvider( new UnorderedMapStorageProvider() );
+            }
+        } else {
+            _pluma.addProvider( new UnorderedMapStorageProvider() );
         }
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);

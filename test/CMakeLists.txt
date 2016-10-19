@@ -11,7 +11,7 @@ include_directories(include)
 
 file(GLOB SRCS *.cpp)
 add_executable(test_hdc ${SRCS})
-target_link_libraries(test_hdc hdc chdc gtest gmock_main)
+target_link_libraries(test_hdc hdc chdc gtest gmock_main ${Boost_LIBRARIES})
 add_test(NAME cpp_test COMMAND test_hdc)
 
 install(TARGETS test_hdc DESTINATION bin)

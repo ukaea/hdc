@@ -11,9 +11,49 @@ using namespace std;
 HDCStorage* global_storage = nullptr;
 
 /** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init() {
-    global_storage = new HDCStorage("libUMapPlugin.so","");
-    //global_storage = new HDCStorage("libMDBMPlugin.so","{\"filename\": \"/tmp/db1.mdbm\"}");
+void HDC_init(string pluginFileName, string pluginSettingsFileName) {
+
+    // First , try to load the file under filename, if not exists try some paths
+    string pluginPath = "";
+    
+    if (boost::filesystem::exists(pluginFileName)) {
+        // OK, load this
+        pluginPath = boost::filesystem::absolute(pluginFileName).string();
+    } else {
+        // Never mind, try some default paths -- Now I don't know how do this better...
+        boost::filesystem::path p(pluginFileName);
+        string strippedName = p.filename().string();
+        vector<string> pluginSearchPath;
+        pluginSearchPath.push_back("./");
+        pluginSearchPath.push_back("./plugins");
+        pluginSearchPath.push_back(".config/hdc/plugins");
+        pluginSearchPath.push_back("/usr/local/lib");
+        pluginSearchPath.push_back("/usr/lib");
+        pluginSearchPath.push_back("/usr/local/lib64");
+        pluginSearchPath.push_back("/usr/lib64");
+        pluginSearchPath.push_back("/usr/local/lib/hdc");
+        pluginSearchPath.push_back("/usr/lib/hdc");
+        pluginSearchPath.push_back("/usr/local/lib64/hdc");
+        pluginSearchPath.push_back("/usr/lib64/hdc");
+        // Search all paths and stop if found
+        for (auto path : pluginSearchPath) {
+            string tmp = path+'/'+strippedName;
+            if (boost::filesystem::exists(tmp)) {
+                cout << "Plugin found: " << tmp << endl;
+                pluginPath = tmp;
+                break;
+            }
+        }
+    }
+    // If selected, check whether file settings file exists
+    if (pluginSettingsFileName.size() != 0) {
+        if (!boost::filesystem::exists(pluginSettingsFileName)) {
+            cerr << "Settings file set, but does not exist: " << pluginSettingsFileName << endl;
+            exit(-1);
+        }
+    }
+
+    global_storage = new HDCStorage(pluginPath,pluginSettingsFileName);
     printf("HDC_init(): HDC storage initialized.\n");
 }
 
