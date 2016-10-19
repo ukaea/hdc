@@ -1,7 +1,7 @@
 What should be done before merging the testing branch:
 
 - "serialize" whole tree into KV store, not just terminal nodes. See https://docs.mongodb.com/manual/applications/data-models-tree-structures/ -- we should want the easiest possible solution for this. Possibilities are:
-    - Store children in dom object, possibly json, serialization into KV will be quite efficient. Question is, how big arrays of structs we will have to deal with.
+    - Store children in dom object, possibly json, serialization into KV will be quite efficient. Question is, how big arrays of structs will we have to deal with.
         - Pros: get rid of Boost, easy
         - Cons: slow
     - Keep Boost::multi_index and searialize on demand -- will need external synchronization I want to avoid for now.
