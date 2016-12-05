@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(multi_index_in_magaged_heap)
+project(multi_index_in_external_buffer)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
