@@ -81,7 +81,7 @@ public:
     template<typename T> T* get_data();
     
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-        print("fixme\n");exit(7);
+        printf("fixme\n");exit(7);
 // //         #ifdef DEBUG
 // //         printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
 // //         #endif
@@ -161,7 +161,7 @@ public:
     };
 
     void set_string(string str) {
-        print("fixme\n");exit(7);
+        printf("fixme\n");exit(7);
 // //         size = str.length()+1;
 // //         type = STRING_ID;
 // //         ndim = 1;
@@ -182,7 +182,7 @@ public:
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
-        print("fixme\n");exit(7);
+        printf("fixme\n");exit(7);
 // //         type = to_typeid(data);
 // //         size = sizeof(T);
 // //         shape[0] = 0;
@@ -260,14 +260,14 @@ public:
             printf("Not found: %s\n",uuid.c_str());
             exit(-3);
         }
-        print("fixme\n");exit(7);
+        printf("fixme\n");exit(7);
 // //         return reinterpret_cast<T>(buff_get_data_ptr(storage->get(uuid)));
         return reinterpret_cast<T>(0);
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
         if (header.type == STRING_ID) {
-print("fixme\n");exit(7);
+printf("fixme\n");exit(7);
 // //             string str(buff_get_data_ptr(storage->get(uuid)));
             string str("fixme");
             return str;
