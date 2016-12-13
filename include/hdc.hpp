@@ -1,6 +1,9 @@
 #ifndef HDC_HPP
 #define HDC_HPP
 
+#define HDC_MEMSIZE_DEFAULT 5120
+#define HDC_MEMSIZE_INCREMENT 5120
+
 #include <iostream>
 
 // marray - array views
@@ -27,7 +30,7 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
-//#define DEBUG
+#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -41,40 +44,13 @@ void HDC_init(string pluginFileName="", string pluginSettingsFileName="");
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();
 
-/** --------------------- Buffer helper functions ---------------------*/
-
-char* buff_allocate(size_t size);
-char* buff_resize(char* buffer, size_t old_size, size_t new_size);
-void buff_set_type(char* buffer, TypeID type);
-void buff_set_flags(char* buffer, Flags flags);
-void buff_set_shape(char* buffer, int ndim, size_t* shape);
-void buff_set_shape(char* buffer, size_t shape[HDC_MAX_DIMS]);
-void buff_set_header(char* buffer, TypeID type, Flags flags, int ndim, size_t* shape);
-TypeID buff_get_type(char* buffer);
-Flags buff_get_flags(char* buffer);
-size_t* buff_get_shape(char* buffer);
-size_t buff_get_elem_size(char* buffer);
-int buff_get_ndim(char* buffer);
-size_t buff_get_data_size(char* buffer);
-char* buff_get_data_ptr(char* buffer);
-void buff_dump_header(char* buffer);
-bool buff_is_external(char* buffer);
-bool buff_is_readonly(char* buffer);
-bool buff_is_fortranorder(char* buffer);
-void buff_info(char* buffer);
-char* buff_copy(char* buffer);
-
 class HDC
 {
 private:
-    map_t* children = nullptr;
     string uuid;
     HDCStorage* storage;
-    size_t size = 0;
-    size_t shape[HDC_MAX_DIMS];
-    TypeID type = EMPTY_ID;
-    Flags flags = HDCDefault;
-    int ndim = 1;
+    header_t header;
+
 /* ------------------------------- methods ----------------------------------------- */
     void add_child(vector<string> vs, HDC* n);
     void set_child(vector<string> vs, HDC* n);
@@ -89,40 +65,42 @@ public:
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(int _ndim, size_t* _shape, TypeID _type,Flags _flags = HDCDefault);
+    HDC(int _ndim, size_t* _shape, size_t _type,Flags _flags = HDCDefault);
     /** Copy contructor */
     HDC(HDC* h);
-    // TODO: More constructors
+    // Deserializing constructor
+    HDC(HDCStorage* _storage, string _uuid);
 
     /** Destructor */
     ~HDC();
     size_t get_datasize();
     size_t get_size();
     /** Returns type of current node. */
-    TypeID get_type();
-    Flags get_flags();
+    size_t get_type();
+    size_t get_flags();
     template<typename T> T* get_data();
     
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-        #ifdef DEBUG
-        printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
-        #endif
-        if (storage->has(uuid)) {
-            storage->remove(uuid);
-        }
-        type = to_typeid(_data[0]);
-        size = hdc_sizeof(type);
-        ndim = _ndim;
-        memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-        for (int i = 0; i < _ndim; i++) {
-            size *= _shape[i];
-            shape[i] = _shape[i];
-        }
-        size_t buffer_size = size + HDC_DATA_POS;
-        char* buffer = buff_allocate(buffer_size);
-        buff_set_header(buffer,to_typeid(_data[0]),_flags,_ndim,_shape);
-        memcpy(buffer+HDC_DATA_POS,_data,size);
-        storage->set(uuid,buffer,buffer_size);
+        print("fixme\n");exit(7);
+// //         #ifdef DEBUG
+// //         printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
+// //         #endif
+// //         if (storage->has(uuid)) {
+// //             storage->remove(uuid);
+// //         }
+// //         type = to_typeid(_data[0]);
+// //         size = hdc_sizeof(type);
+// //         ndim = _ndim;
+// //         memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
+// //         for (int i = 0; i < _ndim; i++) {
+// //             size *= _shape[i];
+// //             shape[i] = _shape[i];
+// //         }
+// //         size_t buffer_size = size + HDC_DATA_POS;
+// //         char* buffer = buff_allocate(buffer_size);
+// //         buff_set_header(buffer,to_typeid(_data[0]),_flags,_ndim,_shape);
+// //         memcpy(buffer+HDC_DATA_POS,_data,size);
+// //         storage->set(uuid,buffer,buffer_size);
         return;
     }
     
@@ -160,7 +138,7 @@ public:
         #ifdef DEBUG
         printf("template <typename T> void set_data(vector<T> data), %f\n",data[0]);
         #endif
-        if (this->children != nullptr) {
+        if (get_children_ptr() != nullptr) {
             cout << "The node has already children set..." << endl;
             return;
         }
@@ -183,35 +161,37 @@ public:
     };
 
     void set_string(string str) {
-        size = str.length()+1;
-        type = STRING_ID;
-        ndim = 1;
-        memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-        shape[0] = size;
-        size_t buffer_size = size + HDC_DATA_POS;
-        char* buffer = buff_allocate(buffer_size);
-        buff_set_header(buffer,type,flags,ndim,shape);
-        memcpy(buffer+HDC_DATA_POS,str.c_str(),size);
-        storage->set(uuid,buffer,buffer_size);
+        print("fixme\n");exit(7);
+// //         size = str.length()+1;
+// //         type = STRING_ID;
+// //         ndim = 1;
+// //         memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
+// //         shape[0] = size;
+// //         size_t buffer_size = size + HDC_DATA_POS;
+// //         char* buffer = buff_allocate(buffer_size);
+// //         buff_set_header(buffer,type,flags,ndim,shape);
+// //         memcpy(buffer+HDC_DATA_POS,str.c_str(),size);
+// //         storage->set(uuid,buffer,buffer_size);
     };
     void set_string(string path, string str) {
         if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
         get(path)->set_string(str);
     }
-    void set_data_c(int _ndim, size_t* _shape, void* _data, TypeID _type);
-    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, TypeID _type);
+    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
+    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
-        type = to_typeid(data);
-        size = sizeof(T);
-        shape[0] = 0;
-        ndim = 0;
-        for (int i = 1; i<HDC_MAX_DIMS; i++) shape[i] = 0;
-        char* buffer = buff_allocate(size + HDC_DATA_POS);
-        buff_set_header(buffer,type,HDCDefault,1,shape);
-        memcpy(buffer+HDC_DATA_POS,&data,sizeof(T));
-        storage->set(uuid,buffer,size + HDC_DATA_POS);
+        print("fixme\n");exit(7);
+// //         type = to_typeid(data);
+// //         size = sizeof(T);
+// //         shape[0] = 0;
+// //         ndim = 0;
+// //         for (int i = 1; i<HDC_MAX_DIMS; i++) shape[i] = 0;
+// //         char* buffer = buff_allocate(size + HDC_DATA_POS);
+// //         buff_set_header(buffer,type,HDCDefault,1,shape);
+// //         memcpy(buffer+HDC_DATA_POS,&data,sizeof(T));
+// //         storage->set(uuid,buffer,size + HDC_DATA_POS);
     }
     template <typename T>
     void set_data(string path, T data) {
@@ -259,7 +239,7 @@ public:
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
     void append_slice(HDC* h); 
     /** Sets HDC type of current node. */
-    void set_type(TypeID _type);
+    void set_type(size_t _type);
     /** Returns true if node is empty. */
     bool is_empty();
     /** Returns number of dimensions of node under path. */
@@ -269,7 +249,7 @@ public:
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
-        if (children != nullptr) {
+        if (get_children_ptr() != nullptr) {
             cout << "This node is not terminal" << endl;
             return reinterpret_cast<T>(0);
         }
@@ -280,12 +260,16 @@ public:
             printf("Not found: %s\n",uuid.c_str());
             exit(-3);
         }
-        return reinterpret_cast<T>(buff_get_data_ptr(storage->get(uuid)));
+        print("fixme\n");exit(7);
+// //         return reinterpret_cast<T>(buff_get_data_ptr(storage->get(uuid)));
+        return reinterpret_cast<T>(0);
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
-        if (type == STRING_ID) {
-            string str(buff_get_data_ptr(storage->get(uuid)));
+        if (header.type == STRING_ID) {
+print("fixme\n");exit(7);
+// //             string str(buff_get_data_ptr(storage->get(uuid)));
+            string str("fixme");
             return str;
         } else return "as_string(): Not implemented yet for give type.";
     }
@@ -326,8 +310,6 @@ public:
     Json::Value to_json(int mode = 0);
     /** Dumps JSON to cout */
     void dump();
-    /** Dumps header */
-    void get_header_info();
     /** Returns void pointer to data. */
     void* as_void_ptr();
     /** Returns string representing data/node type. */
@@ -344,8 +326,16 @@ public:
     char* get_buffer();
     string get_uuid();
 
+    // allocator stuff
+    bip::managed_external_buffer get_segment();
+    map_t* get_children_ptr();
+
+    // flags set/get
+//     bool get_flag(uint pos);
+//     void set_flag(uint pos, bool val);
 };
+
 HDC* from_json(const string& filename); //todo: make constructor from this
-    string map_to_json(map_t& children);
+string map_to_json(map_t& children);
 
 #endif // HDC_HPP

@@ -51,13 +51,24 @@ typedef enum {
 #define HDCFortranOrder   1lu
 #define HDCReadOnly       2lu
 #define HDCExternal       4lu
+#define HDCChildrenInitialized 8lu
 
 typedef unsigned long Flags;
 
-#define HDC_TYPE_POS     0
-#define HDC_FLAGS_POS    sizeof(TypeID)
-#define HDC_SHAPE_POS    HDC_FLAGS_POS + sizeof(Flags)
-#define HDC_DATA_POS     HDC_SHAPE_POS + HDC_MAX_DIMS * sizeof(size_t)
+struct header_t {
+    size_t buffer_size;
+    size_t data_size;
+    size_t type;
+    size_t flags;
+    size_t shape[10];
+    size_t ndim;
+    size_t pad; // Padding
+};
+//} __attribute__((packed));
+
+#define HDC_NODE_SIZE_DEFAULT 4096 // we can try less here 3072 works, 2048 does not
+#define HDC_NODE_SIZE_INCREMENT 1024
+
 
 //TODO Specify offsets in header, possibly make header of dynamic length.
 //TODO support external data

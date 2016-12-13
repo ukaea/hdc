@@ -7,10 +7,9 @@ using namespace std;
 
 
 int main() {
-
     // Create new HDC tree
     HDC* tree = new HDC();
-
+//    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
@@ -18,15 +17,14 @@ int main() {
 
     // Get subtree
     HDC* subtree = tree->get("aaa/bbb");
+
     // Get node
     HDC* node = subtree->get("ccc");
 
     // Ask whether child exists
     cout << "has_child: " << tree->has_child("aaa/bbb/ccc") << endl;
-
     // Delete subtree
     tree->delete_child("aaa/eee");
-
     // Prepare some data
     int32_t array[4] = {7,2,3,4};
     size_t shape[1];
@@ -35,6 +33,7 @@ int main() {
     // Add data to a single node
     HDC* data = new HDC();
     data->set_data(1,shape,array);
+exit(0);
 
     // Add data to a subtree
     tree->set_data("aaa/bbb/ccc",1,shape,array);

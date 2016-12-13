@@ -58,12 +58,13 @@ public:
         return;
     };
     void init(string settings) {
-         Json::Value root;
-        stringstream ss(settings);
-        ss >> root;
+        Json::Value root;
+//         stringstream ss(settings);
+//         ss >> root;
         string filename = root.get("filename","/tmp/db.mdbm").asString();
         printf("Filename: %s\n", filename.c_str());
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
+//         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
         return;
     }
