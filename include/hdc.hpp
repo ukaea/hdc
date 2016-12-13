@@ -325,7 +325,7 @@ printf("fixme\n");exit(7);
     size_t childs_count();
     char* get_buffer();
     string get_uuid();
-
+    void grow(size_t extra_size);
     // allocator stuff
     bip::managed_external_buffer get_segment();
     map_t* get_children_ptr();

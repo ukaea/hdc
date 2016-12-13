@@ -93,7 +93,7 @@ HDC::HDC(size_t _data_size) {
 }
 
 /** Default constructor. Creates empty HDC */
-HDC::HDC(): HDC((size_t)4096+256) {};
+HDC::HDC(): HDC((size_t)4096) {};
 
 /** Creates empty HDC with specified type and shape */
 HDC::HDC(int _ndim, size_t* _shape, size_t _type,Flags _flags) {
@@ -750,6 +750,26 @@ map_t* HDC::get_children_ptr() {
     auto segment = bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t)*1, header.buffer_size-sizeof(header_t)*1);
     printf("size of segment: %d\n",segment.get_size());
     return segment.find<map_t>("d").first;
+}
+/* Grows underlying storage to given size, it does nothing if new_size <= old_size.*/
+void HDC::grow(size_t extra_size) {
+    if (extra_size <= 0) return;
+    auto new_size = header.data_size + extra_size;
+    printf("Growing %db->%db\n",header.data_size,new_size);
+    auto new_buffer = new char[new_size];
+    auto buffer = storage->get(uuid);
+    memset(new_buffer,0,new_size);
+    memcpy(new_buffer,buffer,header.data_size+sizeof(header_t));
+    header.data_size = new_size;
+    header.buffer_size = new_size+sizeof(header_t);
+    memcpy(new_buffer,&header,sizeof(header_t));
+    // if there was children, resize the segment
+    if (header.type == HDC_LIST || header.type == HDC_STRUCT) {
+        auto segment = bip::managed_external_buffer(bip::open_only,new_buffer+sizeof(header_t),0);
+        auto old_size = segment.get_size();
+        if (new_size >= old_size) segment.grow(new_size-old_size);
+    }
+    storage->set(uuid,new_buffer,header.buffer_size);
 }
 
 

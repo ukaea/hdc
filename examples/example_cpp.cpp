@@ -9,11 +9,20 @@ using namespace std;
 int main() {
     // Create new HDC tree
     HDC* tree = new HDC();
+//     tree->info();
+//     tree->grow(4096+256);
+//     tree->info();
+
 //    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
     tree->add_child("bbb/eee/aaa",new HDC());
+    
+    tree->info();
+    tree->grow(4096);
+    tree->info();
+
 
     // Get subtree
     HDC* subtree = tree->get("aaa/bbb");
@@ -25,6 +34,7 @@ int main() {
     cout << "has_child: " << tree->has_child("aaa/bbb/ccc") << endl;
     // Delete subtree
     tree->delete_child("aaa/eee");
+exit(0);
     // Prepare some data
     int32_t array[4] = {7,2,3,4};
     size_t shape[1];
