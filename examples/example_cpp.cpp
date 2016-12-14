@@ -9,12 +9,12 @@ using namespace std;
 int main() {
     // Create new HDC tree
     HDC* tree = new HDC();
-//     tree->info();
-//     tree->grow(4096+256);
-//     tree->info();
-
 //    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
+    HDC* nnn = new HDC();
+    tree->add_child("aaaaaaaaaaaaaaaaaaa",new HDC());
+//     tree->add_child("aaa",new HDC());
+exit(0);
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
     tree->add_child("bbb/eee/aaa",new HDC());
