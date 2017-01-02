@@ -338,4 +338,14 @@ printf("fixme\n");exit(7);
 HDC* from_json(const string& filename); //todo: make constructor from this
 string map_to_json(map_t& children);
 
+// HDC exception // TODO: convert to hdc::bad_alloc
+class hdc_bad_alloc: public exception
+{
+  virtual const char* what() const throw()
+  {
+    return "";
+  }
+};
+
+
 #endif // HDC_HPP

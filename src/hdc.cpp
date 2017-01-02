@@ -298,13 +298,15 @@ void HDC::add_child(vector<string> vs, HDC* n) {
             for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
                 if (redo == 0) break;
                 try {
-                    printf("Trying...\n");
-                    printf("segment size: %lu\n",segment->get_size());
-                    children->insert(record(first.c_str(),n->get_uuid().c_str(),segment->get_segment_manager()));
-                    exit(111);
+                    // Storing record larger than 114 bytes can mess up the heap on small buffers (1300b, key with longer than 24 characters), so we need to increase the buffer size here
+                    size_t old_seg_free_mem = segment->get_free_memory();
+                    record rec(first.c_str(),n->get_uuid().c_str(),segment->get_segment_manager());
+                    size_t rec_size = old_seg_free_mem - segment->get_free_memory();
+                    printf("sizeof(record) = %lu\n",rec_size);
+                    if (segment->get_free_memory() < 512) throw (hdc_bad_alloc()); //This is experimentaly set, probably use some multiple of rec_size here???
+                    children->insert(rec);
                     printf("done...\n");
                     redo = 0;
-//                 } catch (bip::bad_alloc e) {
                 } catch (std::exception e) {
                     cout << "add_child(): Caught " << e.what() << "\n";
                     // delete old segment
@@ -327,11 +329,45 @@ void HDC::add_child(vector<string> vs, HDC* n) {
         else cout << "Error: child already exists!" << endl;
     } else {
         // Create new intermediate node
+        // TODO: redo this similarly to the previous branch (probably utilize it?)
         if (children->count(first.c_str()) == 0) {
             printf("\n\n--- Creating new\n\n");
             HDC* nn = new HDC();
-            children->insert(record(first.c_str(),nn->get_uuid().c_str(),segment->get_segment_manager()));
+            //children->insert(record(first.c_str(),nn->get_uuid().c_str(),segment->get_segment_manager()));
+            // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
+            int redo = 1;
+            for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
+                if (redo == 0) break;
+                try {
+                    // Storing record larger than 114 bytes can mess up the heap on small buffers (1300b, key with longer than 24 characters), so we need to increase the buffer size here
+                    size_t old_seg_free_mem = segment->get_free_memory();
+                    record rec(first.c_str(),nn->get_uuid().c_str(),segment->get_segment_manager());
+                    size_t rec_size = old_seg_free_mem - segment->get_free_memory();
+                    printf("sizeof(record) = %lu\n",rec_size);
+                    if (segment->get_free_memory() < 512) throw (hdc_bad_alloc()); //This is experimentaly set, probably use some multiple of rec_size here???
+                    children->insert(rec);
+                    printf("done...\n");
+                    redo = 0;
+                } catch (std::exception e) {
+                    cout << "add_child(): Caught " << e.what() << "\n";
+                    // delete old segment
+                    delete segment;
+                    grow(HDC_NODE_SIZE_INCREMENT);
+                    // reinitialize buffer and stuff
+                    buffer = storage->get(uuid);
+                    // update header
+                    memcpy(&header,buffer,sizeof(header_t));
+                    segment = new bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t)*1,0);
+                    children = segment->find<map_t>("d").first;
+                    redo = 1;
+                }
+                if (redo == 1 && i == HDC_MAX_RESIZE_ATTEMPTS-1) {
+                    fprintf(stderr,"add_child(): Could not allocate enough memory.\n");
+                    exit(8);
+                }
+            }
             nn->add_child(vs,n);
+            
         } else get(first)->add_child(vs,n);
     }
     storage->set(uuid,buffer,header.buffer_size);
@@ -409,7 +445,6 @@ HDC* HDC::get(vector<string> vs) {
     map_t* children = segment.find<map_t>("d").first;
 
     if (children->count(first.c_str())) {
-        printf("a\n");
         string child_uuid = children->find(first.c_str())->address.c_str();
         if (vs.empty()) {
             return new HDC(storage,child_uuid);
@@ -799,15 +834,19 @@ void HDC::grow(size_t extra_size) {
             if (old_children != nullptr) {
                 auto new_segment = bip::managed_external_buffer(bip::create_only,new_buffer+sizeof(header_t),new_size);
                 printf("Segment size: %d\n",new_segment.get_size());
-                map_t* new_children = new_segment.construct<map_t>("d")(map_t::ctor_args_list(),new_segment.get_allocator<record>());;
+                map_t* new_children = new_segment.construct<map_t>("d")(map_t::ctor_args_list(),new_segment.get_allocator<record>());
                 for (map_t::iterator it = old_children->begin(); it != old_children->end(); ++it) {
+                    cout << "AAA " << it->key.c_str() << "\n";
                     new_children->insert(*it);
+                    cout << "AAA " << it->key.c_str() << "\n";
                 }
             }
         }
+        cout << "here\n";
         header.data_size = new_size;
         header.buffer_size = new_size+sizeof(header_t);
         memcpy(new_buffer,&header,sizeof(header_t));
+        cout << "here\n";
         storage->set(uuid,new_buffer,header.buffer_size);
     } catch (std::exception& e) {
         std::cerr << "Caught exception in grow(): " << e.what() << std::endl;

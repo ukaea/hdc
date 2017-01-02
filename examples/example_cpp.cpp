@@ -12,29 +12,26 @@ int main() {
 //    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
     HDC* nnn = new HDC();
-    tree->add_child("aaaaaaaaaaaaaaaaaaa",new HDC());
-//     tree->add_child("aaa",new HDC());
-exit(0);
+    tree->add_child("aaaaaaaaaaaaaaaaaaaaaaaa",new HDC());
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
     tree->add_child("bbb/eee/aaa",new HDC());
     
-    tree->info();
-    tree->grow(4096);
-    tree->info();
-
+//     tree->info();
+//     tree->grow(4096);
+//     tree->info();
 
     // Get subtree
     HDC* subtree = tree->get("aaa/bbb");
 
     // Get node
     HDC* node = subtree->get("ccc");
-
+exit(0);
     // Ask whether child exists
     cout << "has_child: " << tree->has_child("aaa/bbb/ccc") << endl;
     // Delete subtree
     tree->delete_child("aaa/eee");
-exit(0);
+
     // Prepare some data
     int32_t array[4] = {7,2,3,4};
     size_t shape[1];
@@ -43,7 +40,6 @@ exit(0);
     // Add data to a single node
     HDC* data = new HDC();
     data->set_data(1,shape,array);
-exit(0);
 
     // Add data to a subtree
     tree->set_data("aaa/bbb/ccc",1,shape,array);
