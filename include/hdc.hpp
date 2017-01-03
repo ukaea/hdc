@@ -30,7 +30,7 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -81,26 +81,26 @@ public:
     template<typename T> T* get_data();
     
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-        printf("fixme\n");exit(7);
-// //         #ifdef DEBUG
-// //         printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
-// //         #endif
-// //         if (storage->has(uuid)) {
-// //             storage->remove(uuid);
-// //         }
-// //         type = to_typeid(_data[0]);
-// //         size = hdc_sizeof(type);
-// //         ndim = _ndim;
-// //         memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-// //         for (int i = 0; i < _ndim; i++) {
-// //             size *= _shape[i];
-// //             shape[i] = _shape[i];
-// //         }
-// //         size_t buffer_size = size + HDC_DATA_POS;
-// //         char* buffer = buff_allocate(buffer_size);
-// //         buff_set_header(buffer,to_typeid(_data[0]),_flags,_ndim,_shape);
-// //         memcpy(buffer+HDC_DATA_POS,_data,size);
-// //         storage->set(uuid,buffer,buffer_size);
+        #ifdef DEBUG
+        printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
+        #endif
+        if (storage->has(uuid)) {
+            storage->remove(uuid);
+        }
+        // Start with determining of the buffer size
+        size_t data_size = 1;
+        for (int i=0;i<_ndim;i++) data_size *= _shape[i];
+        size_t buffer_size = data_size + sizeof(header_t);
+        header.buffer_size = buffer_size;
+        header.data_size = data_size;
+        memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+        for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
+        header.flags = _flags;
+        set_type(to_typeid(_data[0]));
+        char buffer[header.buffer_size];
+        memcpy(&buffer,&header,sizeof(header_t));
+        memcpy(&buffer+sizeof(header_t),_data,header.data_size);
+        storage->set(uuid,buffer,buffer_size);
         return;
     }
     
@@ -161,7 +161,7 @@ public:
     };
 
     void set_string(string str) {
-        printf("fixme\n");exit(7);
+        printf("fixmeh2\n");exit(7);
 // //         size = str.length()+1;
 // //         type = STRING_ID;
 // //         ndim = 1;
@@ -182,7 +182,7 @@ public:
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
-        printf("fixme\n");exit(7);
+        printf("fixmeh3\n");exit(7);
 // //         type = to_typeid(data);
 // //         size = sizeof(T);
 // //         shape[0] = 0;
@@ -260,16 +260,16 @@ public:
             printf("Not found: %s\n",uuid.c_str());
             exit(-3);
         }
-        printf("fixme\n");exit(7);
+        printf("fixmeh4\n");exit(7);
 // //         return reinterpret_cast<T>(buff_get_data_ptr(storage->get(uuid)));
         return reinterpret_cast<T>(0);
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
         if (header.type == STRING_ID) {
-printf("fixme\n");exit(7);
+printf("fixmeh5\n");exit(7);
 // //             string str(buff_get_data_ptr(storage->get(uuid)));
-            string str("fixme");
+            string str("fixmeh6");
             return str;
         } else return "as_string(): Not implemented yet for give type.";
     }

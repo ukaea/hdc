@@ -31,7 +31,6 @@ public:
     };
     void set(string key, char* data, size_t size) {
         if (_map.find(key) != _map.end() && _map[key].dptr != data) {
-            printf("erasing\n");
             delete[] _map[key].dptr;
             _map.erase(key);
         }

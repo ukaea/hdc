@@ -82,8 +82,6 @@ struct record
     record(std::string& _key, const char* _address, const char_allocator &a): key(_key.c_str(),a), address(_address,a) {};
     record(const char * _key, std::string& _address, const char_allocator &a): key(_key,a), address(_address.c_str(),a) {};
 
-    ~record() {printf("~record() called\n");};
-    
     shared_string key;
     shared_string address;
 
