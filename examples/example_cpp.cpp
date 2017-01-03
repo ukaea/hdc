@@ -11,25 +11,18 @@ int main() {
     HDC* tree = new HDC();
 //    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
-    HDC* nnn = new HDC();
-    tree->add_child("aaaaaaaaaaaaaaaaaaaaaaaa",new HDC());
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
-    tree->add_child("bbb/eee/aaa",new HDC());
-//     tree->info();
-//     tree->grow(4096);
-//     tree->info();
+    tree->add_child("aaa/eee/bbb",new HDC());
 
     // Get subtree
     HDC* subtree = tree->get("aaa/bbb");
-    cout << "here1\n";
     // Get node
     HDC* node = subtree->get("ccc");
-    cout << "here2\n";
+
     // Ask whether child exists
     cout << "has_child: " << tree->has_child("aaa/bbb/ccc") << endl;
-    cout << "here\n";
-    exit(0);
+
     // Delete subtree
     tree->delete_child("aaa/eee");
 
@@ -52,13 +45,11 @@ int main() {
     for (int i=0; i<ndim2; i++) cout << (int)shape2[i] << " ";
     cout << endl;
     cout << "dtype: " << node->get_type_str() << endl;
-
     // Get data back from tree
     int32_t* array2 = node->as<int32_t*>();
     cout << "Data: ";
     for (int i=0; i<shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;
-
     //Serialize data to JSON
     tree->to_json("tree.txt",0);
     // On screen

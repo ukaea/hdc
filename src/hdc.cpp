@@ -177,8 +177,7 @@ HDC::HDC(HDC* h) {
 HDC::HDC(HDCStorage* _storage, string _uuid) {
     uuid = _uuid;
     storage = _storage;
-    char* buffer = storage->get(uuid);
-    memcpy(&header,buffer,sizeof(header_t));
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
 }
 
 /** Destructor */
@@ -256,11 +255,11 @@ bool HDC::has_child(vector<string> vs)
     } else {
         try {
             auto it = children->find(first.c_str());
-            if (it != nullptr) {
-                HDC ch(storage,it->address.c_str());
-                return ch.has_child(vs);
+            if (it != children->end()) {
+                HDC* ch = new HDC(storage,it->address.c_str());
+                return ch->has_child(vs);
             }
-            else return false; // TODO Create error HDC obj here.
+            else return false; // TODO Create error HDC obj here???
         } catch (std::exception& e) {
             std::cerr << "has_child(): Caught exception: " << e.what() << "\n";
             return false;
@@ -321,6 +320,7 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                     exit(8);
                 }
             }
+            storage->set(uuid,buffer,header.buffer_size);
         }
         else cerr << "Error: child already exists!" << endl;
     } else {
@@ -404,13 +404,15 @@ void HDC::delete_child(vector<string> vs) {
     map_t* children = get_children_ptr();
     if (vs.empty()) {
         auto it = children->find(first.c_str());
-        if(it==children->end())
-        children->erase(it);
+        if (it!=children->end()) {
+            storage->remove(it->address.c_str());
+            children->erase(it);
+        }
     } else {
         get(first.c_str())->delete_child(vs);
     }
     // set type back to empty if the only child was deleted.
-    if (children->empty()) set_type(EMPTY_ID);
+    //if (children->empty()) set_type(EMPTY_ID); Not sure if to do this
     return;
 }
 
@@ -441,6 +443,7 @@ HDC* HDC::get(vector<string> vs) {
     }
     if (children->count(first.c_str())) {
         auto rec = children->find(first.c_str());
+        //cout << rec->key << " " << rec->address << "\n";
         string child_uuid = rec->address.c_str();
         if (vs.empty()) {
             return new HDC(storage,child_uuid);
@@ -550,8 +553,10 @@ void HDC::set_type(size_t _type) {
     printf("set_type(%d -> %d)\n",header.type,_type);
     #endif
     header.type = _type;
-    // first, check the data size and enlarge buffer if needed:
-    if (header.data_size <= HDC_NODE_SIZE_DEFAULT) grow(HDC_NODE_SIZE_DEFAULT-header.data_size);
+    if (header.type == STRUCT_ID || header.type == LIST_ID) {
+        // first, check the data size and enlarge buffer if needed:
+        if (header.data_size <= HDC_NODE_SIZE_DEFAULT) grow(HDC_NODE_SIZE_DEFAULT-header.data_size);
+    }
     char* buffer = storage->get(uuid);
     if ((_type == LIST_ID || _type == STRUCT_ID)) {
         // TODO: increase buffer size first
@@ -653,7 +658,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
 // //     return;
 }
 void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type) {
-    if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
+    if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
     get(path)->set_data_c(_ndim, _shape, _data, _type);
 }
 
@@ -713,8 +718,43 @@ hdc_t* HDC::as_hdc_ptr() {
 }
 
 string HDC::get_type_str() {
-    //return hdc_get_type_str(header.type);
-    return "fixme3";
+    switch(header.type) {
+        case EMPTY_ID:
+            return "empty";
+        case STRUCT_ID:
+            return "struct";
+        case LIST_ID:
+            return "list";
+        case INT8_ID:
+            return "int8";
+        case INT16_ID:
+            return "int16";
+        case INT32_ID:
+            return "int32";
+        case INT64_ID:
+            return "int64";
+        case UINT8_ID:
+            return "int8";
+        case UINT16_ID:
+            return "int16";
+        case UINT32_ID:
+            return "int32";
+        case UINT64_ID:
+            return "int64";
+        case FLOAT_ID:
+            return "float32";
+        case DOUBLE_ID:
+            return "float64";
+        case STRING_ID:
+            return "string";
+        case BOOL_ID:
+            return "bool";
+        case ERROR_ID:
+            return "error";
+        default:
+            return "unknown";
+    };
+    return "unknown";
 }
 
 string HDC::get_type_str(string path) {
@@ -731,19 +771,23 @@ string HDC::get_datashape_str() {
 }
 
 int HDC::get_ndim() {
+    memcpy(&header,storage->get(uuid),sizeof(header_t)); // TODO: do this in more sophisticately
     return header.ndim;
 }
 
 size_t* HDC::get_shape() {
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
     return header.shape;
 }
 
 int HDC::get_ndim(string path) {
     //TODO: make more error-proof - add has check -> make it as function???
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
     return get(path)->get_ndim();
 }
 
 size_t* HDC::get_shape(string path) {
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
     return get(path)->get_shape();
 }
 
@@ -801,7 +845,6 @@ map_t* HDC::get_children_ptr() {
     }
     char* buffer = storage->get(uuid);
     auto segment = bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t)*1, header.buffer_size-sizeof(header_t)*1);
-    printf("size of segment: %d\n",segment.get_size());
     return segment.find<map_t>("d").first;
 }
 /* Grows underlying storage to given size, it does nothing if new_size <= old_size.*/
@@ -837,6 +880,12 @@ void HDC::grow(size_t extra_size) {
         std::cerr << "Caught exception in grow(): " << e.what() << std::endl;
         exit(8);
     }
+}
+
+
+char* HDC::get_data_ptr() {
+    if (header.data_size == 0) return nullptr;
+    return (char*)(storage->get(uuid)+sizeof(header_t));
 }
 
 

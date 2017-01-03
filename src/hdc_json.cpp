@@ -328,93 +328,98 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
 Json::Value HDC::to_json(int mode) {
     Json::Value root;
     if (mode == 0) {
-// //         switch(*type) {
-// //             case(INT8_ID):
-// //             {
-// //                 root = buffer_to_json<int8_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             case(INT16_ID):
-// //             {
-// //                 root =  buffer_to_json<int16_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             case(INT32_ID):
-// //             {
-// //                 root =  buffer_to_json<int32_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             /*case(INT64_ID):
-// //             {
-// //             root =  buffer_to_json<int64_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }*/
-// //             case(UINT8_ID):
-// //             {
-// //                 root = buffer_to_json<uint8_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             case(UINT16_ID):
-// //             {
-// //                 root =  buffer_to_json<uint16_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             case(UINT32_ID):
-// //             {
-// //                 root =  buffer_to_json<uint32_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             /*case(UINT64_ID):
-// //              {  *
-// //              root =  buffer_to_json<uint64_t>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //              break;
-// //             }*/
-// //             case(FLOAT_ID):
-// //             {
-// //                 root =  buffer_to_json<float>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             case(DOUBLE_ID):
-// //             {
-// //                 root =  buffer_to_json<double>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             case(STRUCT_ID):
-// //             {
-// //                 for (auto it : *children) {
-// //                     HDC* node = (HDC*)(storage->get(it.address.c_str()));
-// //                     root[it.key.c_str()] = node->to_json(mode);
-// //                 }
-// //                 break;
-// //             }
-// //             case(LIST_ID):
-// //             {
-// //                 Json::Value elements;
-// //                 for (size_t i=0;i<children->size();i++)
-// //                     root.append(((HDC*)(storage->get(children->get<by_index>()[i].address.c_str())))->to_json(mode));
-// //                 break;
-// //             }
-// //             case(EMPTY_ID):
-// //             {
-// //                 root = Json::nullValue;
-// //                 break;
-// //             }
-// //             case(STRING_ID):
-// //             {
-// //                 root = as_string();
-// //                 break;
-// //             }
-// //             case(BOOL_ID):
-// //             {
-// //                 root = buffer_to_json<bool>(buff_get_data_ptr(storage->get(uuid)),get_ndim(),get_shape());
-// //                 break;
-// //             }
-// //             default:
-// //             {
-// //                 cerr << "to_json(): Type " << get_type_str() << " not supported yet.";
-// //                 exit(-1);
-// //             }
-// //         }
+        switch(header.type) {
+            case(INT8_ID):
+            {
+                root = buffer_to_json<int8_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            case(INT16_ID):
+            {
+                root =  buffer_to_json<int16_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            case(INT32_ID):
+            {
+                root =  buffer_to_json<int32_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            /*case(INT64_ID):
+            {
+            root =  buffer_to_json<int64_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }*/
+            case(UINT8_ID):
+            {
+                root = buffer_to_json<uint8_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            case(UINT16_ID):
+            {
+                root =  buffer_to_json<uint16_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            case(UINT32_ID):
+            {
+                root =  buffer_to_json<uint32_t>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            /*case(UINT64_ID):
+             {  *
+             root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape());
+             break;
+            }*/
+            case(FLOAT_ID):
+            {
+                root =  buffer_to_json<float>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            case(DOUBLE_ID):
+            {
+                root =  buffer_to_json<double>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            case(STRUCT_ID):
+            {
+                auto children = get_children_ptr();
+                for (auto it = children->begin(); it != children->end(); ++it) {
+                    HDC* node = new HDC(storage,it->address.c_str());
+                    root[it->key.c_str()] = node->to_json(mode);
+                }
+                break;
+            }
+            case(LIST_ID):
+            {
+                Json::Value elements;
+                auto children = get_children_ptr();
+                int i=0;
+                for (auto it = children->begin(); it != children->end(); ++it) {
+                    HDC* node = new HDC(storage,it->address.c_str());
+                    root[i++] = node->to_json(mode);
+                }
+                break;
+            }
+            case(EMPTY_ID):
+            {
+                root = Json::nullValue;
+                break;
+            }
+            case(STRING_ID):
+            {
+                root = as_string();
+                break;
+            }
+            case(BOOL_ID):
+            {
+                root = buffer_to_json<bool>(get_data_ptr(),get_ndim(),get_shape());
+                break;
+            }
+            default:
+            {
+                cerr << "to_json(): Type " << get_type_str() << " not supported yet.";
+                exit(-1);
+            }
+        }
     }
     else {
         cerr << "to_json(): Mode " << mode << " not supported yet.";

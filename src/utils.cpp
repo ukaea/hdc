@@ -120,8 +120,8 @@ bool hdc_is_primitive_type(TypeID type) {
     }
 }
 
-string hdc_get_type_str(TypeID type) {
-    switch(type) {
+string hdc_get_type_str(TypeID _type) {
+    switch(_type) {
         case EMPTY_ID:
             return "null";
         case LIST_ID:

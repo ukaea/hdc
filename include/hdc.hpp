@@ -88,7 +88,7 @@ public:
             storage->remove(uuid);
         }
         // Start with determining of the buffer size
-        size_t data_size = 1;
+        size_t data_size = sizeof(T);
         for (int i=0;i<_ndim;i++) data_size *= _shape[i];
         size_t buffer_size = data_size + sizeof(header_t);
         header.buffer_size = buffer_size;
@@ -96,11 +96,12 @@ public:
         memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
         for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
         header.flags = _flags;
-        set_type(to_typeid(_data[0]));
-        char buffer[header.buffer_size];
-        memcpy(&buffer,&header,sizeof(header_t));
-        memcpy(&buffer+sizeof(header_t),_data,header.data_size);
-        storage->set(uuid,buffer,buffer_size);
+        header.type = to_typeid(_data[0]);
+        header.ndim = _ndim;
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),_data,header.data_size);
+        storage->set(uuid,buffer,header.buffer_size);
         return;
     }
     
@@ -249,20 +250,18 @@ public:
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
-        if (get_children_ptr() != nullptr) {
+        if (header.type == STRUCT_ID || header.type == LIST_ID) {
             cout << "This node is not terminal" << endl;
             return reinterpret_cast<T>(0);
         }
         #ifdef DEBUG
-//         cout << "From as:" << data[0] << endl;
+        printf("as<%s>()",get_type_str().c_str());
         #endif
         if (!storage->has(uuid)) {
             printf("Not found: %s\n",uuid.c_str());
             exit(-3);
         }
-        printf("fixmeh4\n");exit(7);
-// //         return reinterpret_cast<T>(buff_get_data_ptr(storage->get(uuid)));
-        return reinterpret_cast<T>(0);
+        return reinterpret_cast<T>(storage->get(uuid)+sizeof(header_t));
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
@@ -320,6 +319,8 @@ printf("fixmeh5\n");exit(7);
     string get_type_str(string path);
     /** Returns datashape desctiption string. */
     string get_datashape_str(string path);
+    /** Returns void pointer to data */
+    char* get_data_ptr();
     /** Returns vector of keys of a struct node and empty vector otherwise. */
     vector<string> keys();
     size_t childs_count();
