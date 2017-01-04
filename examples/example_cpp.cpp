@@ -11,10 +11,16 @@ int main() {
     HDC* tree = new HDC();
 //    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
+//     tree->add_child("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",new HDC());
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
     tree->add_child("aaa/eee/bbb",new HDC());
-
+    tree->add_child("eee",new HDC());
+    tree->add_child("bbb",new HDC());
+    tree->add_child("ccc",new HDC());
+    
+    tree->grow(1111);
+    for (auto it : tree->keys()) cout << "key: " << it << endl;
     // Get subtree
     HDC* subtree = tree->get("aaa/bbb");
     // Get node

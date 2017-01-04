@@ -1,9 +1,6 @@
 #ifndef HDC_HPP
 #define HDC_HPP
 
-#define HDC_MEMSIZE_DEFAULT 5120
-#define HDC_MEMSIZE_INCREMENT 5120
-
 #include <iostream>
 
 // marray - array views
@@ -30,7 +27,7 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
-//#define DEBUG
+#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -53,9 +50,11 @@ private:
 
 /* ------------------------------- methods ----------------------------------------- */
     void add_child(vector<string> vs, HDC* n);
+    void add_child(vector<string> vs, HDC& n);
     void set_child(vector<string> vs, HDC* n);
     void delete_child(vector<string> vs);
     HDC* get(vector<string> vs);
+    HDC get2(vector<string> vs);
     HDC* get_slice(vector<string> vs, size_t i);
     bool has_child(vector<string> vs);
 
@@ -199,8 +198,7 @@ public:
         if(!has_child(path)) add_child(path, new HDC());
         get(path)->set_data(data);
     }
-    /** sets whole buffer */
-    void set_buffer(char* buffer);
+
     /** Returns number of dimensions of current node. */
     int get_ndim();
     /** Returns shape of current node. */
@@ -212,12 +210,14 @@ public:
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
     void add_child(string path, HDC* n);
+    void add_child(string path, HDC& n);
     /** Sets HDC subtree to given path. */
     void set_child(string path, HDC* n);
     /** Deletes HDC subtree. */
     void delete_child(string path);
     /** Returns subtree by path. */
     HDC* get(string path);
+    HDC get2(string path);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice(string path, size_t i); 
     /** Returns i-th subnode if HDC_LIST is the type. */
@@ -292,7 +292,7 @@ printf("fixmeh5\n");exit(7);
     }
     
     /** Returns double. */
-    double as_double() 
+    double as_double()
     {
         return as<double*>()[0];
     }
@@ -338,7 +338,7 @@ printf("fixmeh5\n");exit(7);
 
 HDC* from_json(const string& filename); //todo: make constructor from this
 string map_to_json(map_t& children);
-
+char* buffer_grow(char* old_buffer, size_t extra_size);
 // HDC exception // TODO: convert to hdc::bad_alloc
 class hdc_bad_alloc: public exception
 {

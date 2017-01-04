@@ -71,7 +71,7 @@ struct header_t {
 #define HDC_MAX_RESIZE_ATTEMPTS 3 // how many times to try increasing buffer
 
 #define HDC_NODE_SIZE_DEFAULT 2048 // we can try less here 3072 works, 2048 does not
-#define HDC_NODE_SIZE_INCREMENT 512 // by how many bytes increase node buffer
+#define HDC_NODE_SIZE_INCREMENT 2048 // by how many bytes increase node buffer
 
 //TODO Specify offsets in header, possibly make header of dynamic length.
 //TODO support external data
