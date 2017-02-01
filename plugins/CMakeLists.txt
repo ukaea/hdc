@@ -6,14 +6,11 @@ find_path(MDBM_INCLUDE_DIR
   HINTS "/usr/include" "/usr/local/include" "/sw/mdbm/include"
 )
 
-message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
-include_directories(${MDBM_INCLUDE_DIR})
 
 find_library(MDBM_LIBRARY
     NAMES libmdbm mdbm
     HINTS "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/sw/mdbm/lib64"
 )
-message("Found MDBM library: ${MDBM_LIBRARY}")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
@@ -21,6 +18,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
 
 # Create MDBM plugin
 if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+    message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
+    include_directories(${MDBM_INCLUDE_DIR})
+
+    message("Found MDBM library: ${MDBM_LIBRARY}")
+
     add_library(MDBMPlugin SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
     target_link_libraries(MDBMPlugin ${MDBM_LIBRARY} Pluma dl)
 else ()
