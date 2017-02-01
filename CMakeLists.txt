@@ -31,7 +31,7 @@ endif()
 include(cmake/DownloadProject.cmake)
 download_project(PROJ                googletest
                  GIT_REPOSITORY      https://github.com/google/googletest.git
-                 GIT_TAG             master
+                 GIT_TAG             release-1.8.0
                  ${UPDATE_DISCONNECTED_IF_AVAILABLE}
 )
 
@@ -63,7 +63,7 @@ endif()
 include(cmake/DownloadProject.cmake)
 download_project(PROJ                googlebenchmark
                  GIT_REPOSITORY      https://github.com/google/benchmark.git
-                 GIT_TAG             master
+                 GIT_TAG             v1.1.0
                  ${UPDATE_DISCONNECTED_IF_AVAILABLE}
 )
 
