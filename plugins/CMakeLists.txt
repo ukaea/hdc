@@ -5,6 +5,7 @@ find_path(MDBM_INCLUDE_DIR
   NAMES mdbm.h
   HINTS "/usr/include" "/usr/local/include" "/sw/mdbm/include"
 )
+
 message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
 include_directories(${MDBM_INCLUDE_DIR})
 
@@ -19,8 +20,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
 
 
 # Create MDBM plugin
-add_library(MDBMPlugin SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
-target_link_libraries(MDBMPlugin ${MDBM_LIBRARY} Pluma dl)
+if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+    add_library(MDBMPlugin SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
+    target_link_libraries(MDBMPlugin ${MDBM_LIBRARY} Pluma dl)
+else ()
+    message("MDBM Not found, Building of MDBM Plugin will be skipped...")
+endif()
 
 # Create Unordered map storage
 add_library(UMapPlugin SHARED umap_plugin.cpp ../src/storage_interface.cpp)
