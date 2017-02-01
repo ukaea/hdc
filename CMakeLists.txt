@@ -2,6 +2,21 @@ cmake_minimum_required(VERSION 2.8)
 project(hdc_new)
 enable_language (Fortran)
 
+### Set minimal compiler requirements
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9)
+    message(FATAL_ERROR "
+    I require at least gcc-4.9. Please, obtain higher version of gcc toolset and run me again after exporting path to newer compiler.
+
+    For example:
+
+    export FC=/usr/bin/gfortran-4.9
+    export CC=/usr/bin/gcc-4.9
+    export CXX=/usr/bin/g++-4.9
+    ")
+endif()### 
+
+
+
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 
@@ -10,7 +25,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fmax-errors=1 -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -lrt -fPIC -fmax-errors=1 -fPIC")
-set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008 -fmax-errors=1 -fPIC")
+set(CMAKE_Fortran_FLAGS "-g -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008 -fmax-errors=1000 -fPIC")
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
