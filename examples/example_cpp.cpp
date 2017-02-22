@@ -18,8 +18,7 @@ int main() {
     tree->add_child("eee",new HDC());
     tree->add_child("bbb",new HDC());
     tree->add_child("ccc",new HDC());
-    
-    tree->grow(1111);
+
     for (auto it : tree->keys()) cout << "key: " << it << endl;
     // Get subtree
     HDC* subtree = tree->get("aaa/bbb");
