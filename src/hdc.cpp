@@ -72,6 +72,7 @@ HDC::HDC(size_t _data_size) {
     memset(&header,0,sizeof(header_t));
     header.buffer_size = _data_size + sizeof(header_t);
     header.data_size = _data_size;
+    header.ndim = 1;
     
     if (global_storage == nullptr) {
 //        HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
@@ -97,28 +98,61 @@ HDC::HDC(size_t _data_size) {
 HDC::HDC(): HDC(0lu) {};
 
 /** Creates empty HDC with specified type and shape */
-HDC::HDC(int _ndim, size_t* _shape, size_t _type,Flags _flags) {
-    std::cout << "Fixme1\n";
-    exit(7);
-// //     if (ndim >= HDC_MAX_DIMS) {
-// //         cerr << "Unsupported number of dimensions: " << ndim << endl;
-// //         exit(-2);
-// //     }
-// //     size_t elem_size = 1;
-// //     memset(shape,0,sizeof(shape[0])*HDC_MAX_DIMS);
-// //     for (int i = 0; i < ndim; i++) {
-// //         shape[i] = _shape[i];
-// //         elem_size *= _shape[i];
-// //     }
-// //     type = _type;
-// //     flags = _flags;
-// //     ndim = _ndim;
-// //     char* buffer = buff_allocate(elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
-// //     buff_set_header(buffer, type, flags, ndim, shape);
-// //     uuid = generate_uuid_str();
-// //     storage = global_storage;
-// //     storage->set(uuid,buffer,elem_size * hdc_sizeof(_type) + HDC_DATA_POS);
+HDC::HDC(int _ndim, size_t* _shape, TypeID _type,long _flags) {
+    if (_ndim >= HDC_MAX_DIMS) {
+        cerr << "Unsupported number of dimensions: " << _ndim << endl;
+        exit(-2);
+    }
+    size_t elem_size = 1;
+    memset(&header,0,sizeof(header_t));
+    for (int i = 0; i < _ndim; i++) {
+        header.shape[i] = _shape[i];
+        elem_size *= _shape[i];
+    }
+    header.type = _type;
+    header.flags = _flags;
+    header.ndim = _ndim;
+    header.data_size = elem_size * hdc_sizeof(_type);
+    header.buffer_size = header.data_size + sizeof(header_t);
+    char* buffer = new char[header.buffer_size];
+    memcpy(buffer,&header,sizeof(header_t));
+    uuid = generate_uuid_str();
+    storage = global_storage;
+    storage->set(uuid,buffer,header.buffer_size);
 }
+
+/** Creates empty HDC with specified buffer size */
+HDC::HDC(string str) {
+    // fill some data
+    memset(&header,0,sizeof(header_t));
+    size_t _data_size = str.length()+1;
+    header.buffer_size = _data_size + sizeof(header_t);
+    header.data_size = _data_size;
+    header.ndim = 1;
+    header.type = STRING_ID;
+    
+    if (global_storage == nullptr) {
+//        HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+        HDC_init();
+        atexit(HDC_destroy);
+    }
+    
+    // Start by creating segment
+    char* buffer = new char[header.buffer_size];
+
+    // copy header there -- we need that, hopefully it will be optimized out
+    memcpy(buffer,&header,sizeof(header_t));
+    // Copy char* data
+    memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
+    //Store to some storage
+    uuid = generate_uuid_str();
+    storage = global_storage;
+    storage->set(uuid,buffer,header.buffer_size);
+    // Now it is safe to
+    // delete buffer; // TODO: uncomment this? It should be ok for MDBM
+}
+
+
 
 /** Copy contructor */
 HDC::HDC(HDC* h) {
@@ -246,6 +280,7 @@ bool HDC::has_child(vector<string> vs)
     printf(")\n");
     #endif
     if(vs.empty()) return false; //TODO: re-do this!!!
+    if (header.type != HDC_STRUCT && header.type != HDC_LIST) return false;
     string first = vs[0];
     vs.erase(vs.begin());
     map_t* children = get_children_ptr();
@@ -262,8 +297,8 @@ bool HDC::has_child(vector<string> vs)
                 return ch.has_child(vs);
             }
             else return false; // TODO Create error HDC obj here???
-        } catch (std::exception& e) {
-            std::cerr << "has_child(): Caught exception: " << e.what() << "\n";
+        } catch (...) {
+            std::cerr << "has_child(): Caught exception" << "\n";
             return false;
         }
     }
@@ -276,6 +311,7 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
+    printf("%s\n",get_uuid().c_str());
     #endif
     if (!(header.type == EMPTY_ID || header.type == STRUCT_ID)) {
         cout << "Cannot add child to this node. Data assigned???" << endl;
@@ -301,11 +337,10 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                     size_t old_seg_free_mem = segment.get_free_memory();
                     if (segment.get_free_memory() < 4*first.size()) throw (hdc_bad_alloc()); // There can be problem to store large strings
                     record rec(first.c_str(),n->get_uuid().c_str(),segment.get_segment_manager());
-                    size_t rec_size = old_seg_free_mem - segment.get_free_memory();
                     if (segment.get_free_memory() < HDC_NODE_SIZE_INCREMENT) throw (hdc_bad_alloc()); //This is experimentaly set, probably use some multiple of rec_size here???
                     children->insert(rec);
                     redo = 0;
-                } catch (std::exception e) {
+                } catch (hdc_bad_alloc e) {
                     cout << "add_child(): Caught " << e.what() << "\n";
                     // delete old segment
                     //delete segment;
@@ -330,7 +365,6 @@ void HDC::add_child(vector<string> vs, HDC* n) {
         // TODO: redo this similarly to the previous branch (probably utilize it?)
         if (children->count(first.c_str()) == 0) {
             HDC* nn = new HDC();
-
             // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
             int redo = 1;
             for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
@@ -340,11 +374,10 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                     size_t old_seg_free_mem = segment.get_free_memory();
                     if (segment.get_free_memory() < 4*first.size()) throw (hdc_bad_alloc()); // There can be problem to store large strings
                     record rec(first.c_str(),nn->get_uuid().c_str(),segment.get_segment_manager());
-                    size_t rec_size = old_seg_free_mem - segment.get_free_memory();
                     if (segment.get_free_memory() < HDC_NODE_SIZE_INCREMENT) throw (hdc_bad_alloc()); //This is experimentaly set, probably use some multiple of rec_size here???
                     children->insert(rec);
                     redo = 0;
-                } catch (std::exception e) {
+                } catch (hdc_bad_alloc e) {
                     cout << "add_child(): Caught " << e.what() << "\n";
                     // delete old segment
                     //delete segment;
@@ -363,6 +396,10 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                 }
             }
             nn->add_child(vs,n);
+            /*
+            add_child(first,new HDC());
+            get(first)->add_child(vs,n);
+            */
         } else get(first)->add_child(vs,n);
     }
     storage->set(uuid,buffer,header.buffer_size);
@@ -471,8 +508,10 @@ void HDC::add_child(vector<string> vs, HDC& n) {
 
 vector<string> HDC::keys() {
     vector<string> k;
-    map_t* children = get_children_ptr();
-    if (children == nullptr) {
+    map_t* children;
+    try {
+        children = get_children_ptr();
+    } catch(...) {
         return k;
     }
     k.reserve(children->size());
@@ -684,7 +723,7 @@ void HDC::set_child(vector<string> vs, HDC* n) {
         if (children == nullptr) children = get_children_ptr();
         // check whether given path exists
         if (children->count(first.c_str())) {
-            shared_string str(get_uuid().c_str(),ca); // TODO wrap this up to try catch block
+            shared_string str(n->get_uuid().c_str(),ca); // TODO wrap this up to try catch block
             children->modify(children->find(first.c_str()), change_node(str));
         } else {
             // TODO: get_allocator -- viz vyse...
@@ -833,19 +872,19 @@ void HDC::insert_slice(size_t i, HDC* h)
     #ifdef DEBUG
     printf("insert_slice(%d)\n",i);
     #endif
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
+    
+    if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
+        cout << "Error in insert_slice(): Wrong type to call insert_slice." << endl;
+    }
+    if (header.type == HDC_EMPTY) set_type(LIST_ID);
+    
     auto children = get_children_ptr();
     map_t::nth_index<1>::type& ri=children->get<1>();
-    switch (header.type) {
-        case EMPTY_ID:
-            set_type(LIST_ID);
-        case LIST_ID:
-//            ri.insert(ri.begin()+i,{"_",h});
-            ri.insert(ri.begin()+i,record("_",h->get_uuid().c_str(),get_segment().get_allocator<char>()));
-            break;
-        default:
-            cout << "Error in insert_slice(): Wrong type to call insert_slice." << endl;
-            break;
-    }
+    ri.insert(ri.begin()+i,record("_",h->get_uuid().c_str(),get_segment().get_allocator<char>()));
+    
+    header.shape[0] = children->size();
+    memcpy(storage->get(uuid),&header,sizeof(header_t));
     return;
 }
 
@@ -854,26 +893,24 @@ void HDC::set_slice(size_t i, HDC* h)
     #ifdef DEBUG
     printf("set_slice(%d)\n",i);
     #endif
+    if (header.type != LIST_ID) {
+        cout << "set_slice() called on non list type node\n";
+        throw exception();
+    };
     auto children = get_children_ptr();
-    shared_string str(get_uuid().c_str(),get_segment().get_allocator<char>()); // TODO try-catch this (or make factory object/function???)
-    switch (header.type) {
-        case LIST_ID:
-            if (i >= children->size()) {
-                cout << "Error in set_slice: Index " << i << " >= list size." << endl;
-                return;
-            }
-            children->modify(children->iterator_to(children->get<by_index>()[i]), change_node(str));
-            break;
-            //TODO: Add support for HDC_STRUCT here? How?
-        default:
-            cout << "Error in insert_slice(): Wrong type to call insert_slice." << endl;
-            break;
+    bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
+    shared_string str(h->get_uuid().c_str(),ca); // TODO try-catch this (or make factory object/function???)
+    if (i >= children->size()) {
+        cout << "Error in set_slice: Index " << i << " >= list size." << endl;
+        throw exception();
     }
+    children->modify(children->iterator_to(children->get<by_index>()[i]), change_node(str));
     return;
 }
 
 void HDC::append_slice(HDC* h) {
-        insert_slice(header.shape[0]++,h);
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
+    insert_slice(header.shape[0],h);
     return;
 }
 
@@ -886,7 +923,7 @@ hdc_t* HDC::as_hdc_ptr() {
 string HDC::get_type_str() {
     switch(header.type) {
         case EMPTY_ID:
-            return "empty";
+            return "null";
         case STRUCT_ID:
             return "struct";
         case LIST_ID:
@@ -990,8 +1027,8 @@ bip::managed_external_buffer HDC::get_segment() {
 
 map_t* HDC::get_children_ptr() {
     if (header.type != HDC_STRUCT && header.type != HDC_LIST) {
-        std::cerr << ("get_children_ptr(): the type is not list or struct\n");
-        exit(1);
+        cerr << ("get_children_ptr(): the type is not list or struct\n"); // TODO make more excetptions
+        throw new HDCException();
     }
     char* buffer = storage->get(uuid);
     auto segment = bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t), header.buffer_size-sizeof(header_t));
@@ -1065,8 +1102,6 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
     memcpy(new_buffer,&header,sizeof(header_t));
     return new_buffer;
 }
-
-
 
 /*
 bool HDC::get_flag(uint pos) {

@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <json/json.h>
+#include <exception>
 
 // our stuff
 #include "types.h"
@@ -40,6 +41,16 @@ void HDC_init(string pluginFileName="", string pluginSettingsFileName="");
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();
+
+class HDCException: public std::exception
+{
+public:
+    const char* what() const throw() {
+        return "HDCException happened.\n";
+    };
+};
+
+
 
 class HDC
 {
@@ -64,7 +75,9 @@ public:
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(int _ndim, size_t* _shape, size_t _type,Flags _flags = HDCDefault);
+    HDC(int _ndim, size_t* _shape, TypeID _type,long _flags = HDCDefault);
+    /** Constructor from string */
+    HDC(string str);
     /** Copy contructor */
     HDC(HDC* h);
     // Deserializing constructor
@@ -161,37 +174,38 @@ public:
     };
 
     void set_string(string str) {
-        printf("fixmeh2\n");exit(7);
-// //         size = str.length()+1;
-// //         type = STRING_ID;
-// //         ndim = 1;
-// //         memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-// //         shape[0] = size;
-// //         size_t buffer_size = size + HDC_DATA_POS;
-// //         char* buffer = buff_allocate(buffer_size);
-// //         buff_set_header(buffer,type,flags,ndim,shape);
-// //         memcpy(buffer+HDC_DATA_POS,str.c_str(),size);
-// //         storage->set(uuid,buffer,buffer_size);
+        if (storage->has(uuid)) {
+            storage->remove(uuid);
+        }
+        memset(&header,0,sizeof(header_t));
+        header.data_size = str.length()+1;
+        header.type = STRING_ID;
+        header.ndim = 1;
+        header.shape[0] = header.data_size;
+        header.buffer_size = header.data_size + sizeof(header_t);
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
+        storage->set(uuid,buffer,header.buffer_size);
     };
+    
     void set_string(string path, string str) {
-        if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
-        get(path)->set_string(str);
+        if(!has_child(path)) add_child(path, new HDC(str)); // TODO: add constructor for this!!
+        //get(path)->set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
     void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
-        printf("fixmeh3\n");exit(7);
-// //         type = to_typeid(data);
-// //         size = sizeof(T);
-// //         shape[0] = 0;
-// //         ndim = 0;
-// //         for (int i = 1; i<HDC_MAX_DIMS; i++) shape[i] = 0;
-// //         char* buffer = buff_allocate(size + HDC_DATA_POS);
-// //         buff_set_header(buffer,type,HDCDefault,1,shape);
-// //         memcpy(buffer+HDC_DATA_POS,&data,sizeof(T));
-// //         storage->set(uuid,buffer,size + HDC_DATA_POS);
+        memset(&header,0,sizeof(header_t));
+        header.type = to_typeid(data);
+        header.data_size = sizeof(T);
+        header.buffer_size = header.data_size + sizeof(header_t);
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),&data,sizeof(T));
+        storage->set(uuid,buffer,header.buffer_size);
     }
     template <typename T>
     void set_data(string path, T data) {
@@ -266,11 +280,15 @@ public:
     /** Returns string. Needs to have separate function */
     std::string as_string() {
         if (header.type == STRING_ID) {
-printf("fixmeh5\n");exit(7);
-// //             string str(buff_get_data_ptr(storage->get(uuid)));
-            string str("fixmeh6");
+            string str(storage->get(uuid)+sizeof(header_t));
+            cout << get_type_str() << "\n";
             return str;
-        } else return "as_string(): Not implemented yet for give type.";
+        } else {
+            cout << header.type << endl;
+            std::ostringstream oss;
+            oss << to_json(0) << "\n";
+            return oss.str();
+        }
     }
     
     /** Returns string of node under given path. Needs to have separate function */
@@ -342,9 +360,10 @@ char* buffer_grow(char* old_buffer, size_t extra_size);
 // HDC exception // TODO: convert to hdc::bad_alloc
 class hdc_bad_alloc: public exception
 {
+public:
   virtual const char* what() const throw()
   {
-    return "";
+    return "HDC Bad Alloc";
   }
 };
 
