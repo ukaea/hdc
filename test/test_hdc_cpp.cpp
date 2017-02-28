@@ -260,8 +260,17 @@ TEST(HDC,JsonComplete) {
     // test copy c-tor
     
     HDC* copy = new HDC(tree2);
-    copy->to_json("tree_copy.txt");
+    HDC* d = copy->get("aaa/bbb/double");
+
+    EXPECT_EQ(1,d->get_ndim());
+    EXPECT_EQ(4,d->get_shape()[0]);
+    EXPECT_EQ(DOUBLE_ID,d->get_type());
+    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
     HDC* copy_ = tree->copy();
-    copy_->to_json("tree_copy.txt");
-    
+    // test copy() method
+    d = copy_->get("aaa/bbb/double");
+    EXPECT_EQ(1,d->get_ndim());
+    EXPECT_EQ(4,d->get_shape()[0]);
+    EXPECT_EQ(DOUBLE_ID,d->get_type());
+    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
 }

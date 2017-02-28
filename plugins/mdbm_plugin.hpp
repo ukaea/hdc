@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <json/json.h>
 #include <sstream>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -59,8 +60,10 @@ public:
     };
     void init(string settings) {
         Json::Value root;
-//         stringstream ss(settings);
-//         ss >> root;
+        if (boost::filesystem::exists(settings)) {
+            stringstream ss(settings);
+            ss >> root;
+        }
         string filename = root.get("filename","/tmp/db.mdbm").asString();
         printf("Filename: %s\n", filename.c_str());
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
