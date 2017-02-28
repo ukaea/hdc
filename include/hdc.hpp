@@ -28,7 +28,7 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -281,7 +281,6 @@ public:
     std::string as_string() {
         if (header.type == STRING_ID) {
             string str(storage->get(uuid)+sizeof(header_t));
-            cout << get_type_str() << "\n";
             return str;
         } else {
             cout << header.type << endl;

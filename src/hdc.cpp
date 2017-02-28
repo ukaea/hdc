@@ -978,7 +978,6 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
     char* new_buffer = new char[new_size];
     //memset(new_buffer,0,new_size);
     // if there were children, resize the segment
-    cout << "data_size: " << header.data_size << "\nheader.type: " << header.type << endl;
     if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
         try {
             // try to open old children

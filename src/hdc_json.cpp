@@ -83,7 +83,6 @@ int get_ndim(const Json::Value& root) {
 }
 
 HDC* json_to_hdc(const Json::Value& root) {
-    cout << "json_to_hdc():\n" << root << "\n";
     HDC* tree = new HDC();
     switch(root.type()) {
         {
@@ -205,7 +204,6 @@ HDC* json_to_hdc(const Json::Value& root) {
                 // call recursively -- save list
                 tree->set_type(LIST_ID);
                 for (unsigned int i = 0;i<root.size();i++) {
-                    cout << i << ",";
                     tree->append_slice(json_to_hdc(root[i]));
                 }
             }
@@ -330,8 +328,6 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
 Json::Value HDC::to_json(int mode) {
     Json::Value root;
     if (mode == 0) {
-        cout << "Type " <<header.type << endl;
-//         getchar();
         switch(header.type) {
             case(INT8_ID):
             {
