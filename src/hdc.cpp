@@ -50,7 +50,7 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
     if (pluginSettingsFileName.size() != 0) {
         if (!boost::filesystem::exists(pluginSettingsFileName)) {
             cerr << "Settings file set, but does not exist: " << pluginSettingsFileName << endl;
-            exit(-1);
+            cerr << "Using default configuration...\n";
         }
     }
 
@@ -75,8 +75,8 @@ HDC::HDC(size_t _data_size) {
     header.ndim = 1;
     
     if (global_storage == nullptr) {
-//        HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-        HDC_init();
+       HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+//         HDC_init();
         atexit(HDC_destroy);
     }
     
