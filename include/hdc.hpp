@@ -82,7 +82,7 @@ public:
     HDC(HDC* h);
     // Deserializing constructor
     HDC(HDCStorage* _storage, string _uuid);
-
+    HDC(char* src_buffer);
     /** Destructor */
     ~HDC();
     size_t get_datasize();

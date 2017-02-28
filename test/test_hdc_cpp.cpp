@@ -37,22 +37,28 @@ TEST(HDC,NodeManipulation) {
     HDC* tree = new HDC();
     HDC* n1 = new HDC();
     HDC* n2 = new HDC();
+    // Try different
+    EXPECT_STRNE(n1->get_uuid().c_str(),tree->get_uuid().c_str());
+    EXPECT_STRNE(n2->get_uuid().c_str(),tree->get_uuid().c_str());
+    EXPECT_STRNE(n1->get_uuid().c_str(),n2->get_uuid().c_str());
+    
+    // Try add
     tree->add_child("aaa/bbb",n1);
     EXPECT_EQ(HDC_STRUCT,tree->get_type());
-    EXPECT_STREQ("hdc",tree->get_type_str().c_str());
+    EXPECT_STREQ("struct",tree->get_type_str().c_str());
     EXPECT_EQ(true,tree->has_child("aaa/bbb"));
     EXPECT_EQ(true,tree->has_child("aaa"));
-    EXPECT_EQ(n1,tree->get("aaa/bbb"));
-    EXPECT_NE(n2,tree->get("aaa/bbb"));
+    EXPECT_STREQ(n1->get_uuid().c_str(),tree->get("aaa/bbb")->get_uuid().c_str());
+    EXPECT_STRNE(n2->get_uuid().c_str(),tree->get("aaa/bbb")->get_uuid().c_str());
     // Try subtree
     HDC* sub = tree->get("aaa");
     EXPECT_EQ(true,sub->has_child("bbb"));
-    EXPECT_EQ(n1,sub->get("bbb"));
+    EXPECT_STREQ(n1->get_uuid().c_str(),sub->get("bbb")->get_uuid().c_str());
     // Test set
     tree->set_child("aaa/bbb",n2);
     EXPECT_EQ(true,sub->has_child("bbb"));
-    EXPECT_EQ(n2,sub->get("bbb"));
-    EXPECT_NE(n1,tree->get("aaa/bbb"));
+    EXPECT_STREQ(n2->get_uuid().c_str(),sub->get("bbb")->get_uuid().c_str());
+    EXPECT_STRNE(n1->get_uuid().c_str(),tree->get("aaa/bbb")->get_uuid().c_str());
     // Test delete
     tree->delete_child("aaa/bbb");
     EXPECT_EQ(false,tree->has_child("aaa/bbb"));
@@ -60,7 +66,6 @@ TEST(HDC,NodeManipulation) {
     tree->add_child("aaa/bbb",n1);
     tree->delete_child("aaa");
     EXPECT_EQ(false,tree->has_child("aaa"));
-    EXPECT_EQ(HDC_EMPTY,tree->get_type());
 }
 
 
@@ -76,12 +81,12 @@ TEST(HDC,Int8DataManipulation) {
     EXPECT_STREQ("int8",h->get_type_str().c_str());
     int8_t* data2 = h->as<int8_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
-//     // This is no longer possible as for some storages data have to be copied (all for now, maybe we can enable specifically for umap storage in future)
-//     // All further occurencies will be removed.
-//     data[3] = 120;
-//     h->set_data(ndim,(size_t*)shape,data);
-//     data2 = h->as<int8_t*>();
-//     EXPECT_EQ(120,data2[3]);
+    // This is no longer possible as for some storages data have to be copied (all for now, maybe we can enable specifically for umap storage in future)
+    // All further occurencies will be removed.
+    data[3] = 120;
+    h->set_data(ndim,(size_t*)shape,data);
+    data2 = h->as<int8_t*>();
+    EXPECT_EQ(120,data2[3]);
 }
 
 TEST(HDC,Int16DataManipulation) {
@@ -155,6 +160,7 @@ TEST(HDC,SliceManipulation) {
     sl->set_string("1");
     HDC* sl2 = new HDC();
     sl2->set_string("2");
+    h->set_type(HDC_LIST);
     h->append_slice(sl);
     h->append_slice(sl2);
     EXPECT_EQ(HDC_LIST, h->get_type());
@@ -180,7 +186,6 @@ TEST(HDC,GetKeys) {
     list->set_type(LIST_ID);
     EXPECT_EQ(true,list->keys().empty());
     HDC* val = new HDC();
-    list->set_type(STRING_ID);
     EXPECT_EQ(true,val->keys().empty());
     HDC* empty = new HDC();
     EXPECT_EQ(true,empty->keys().empty());
@@ -193,7 +198,6 @@ TEST(HDC,GetKeys) {
     for (size_t i=0;i<keys.size();i++) EXPECT_EQ(true,tree->has_child(keys[i]));
 }
 
-
 TEST(HDC,JsonComplete) {
     // Prepare tree
     int ndim = 1;
@@ -205,7 +209,7 @@ TEST(HDC,JsonComplete) {
     scalar->set_data(333.333);
     tree->add_child("aaa/bbb/_scalar", scalar);
     tree->set_data<double>("aaa/bbb/double",ndim,shape,data_double);
-    //tree->set_data<double>("aaa/bbb/double2",ndim,shape,data_double);
+    tree->set_data<double>("aaa/bbb/double2",ndim,shape,data_double);
     tree->set_data<int>("aaa/bbb/int",ndim,shape,data_int);
     tree->add_child("aaa/bbb/empty", new HDC());
     HDC* list = new HDC();
@@ -253,11 +257,11 @@ TEST(HDC,JsonComplete) {
     // Test string
     EXPECT_STREQ(tree->get("aaa/string")->as_string().c_str(), tree2->get("aaa/string")->as_string().c_str());
     
-    //test copy c-tor
-    /*
+    // test copy c-tor
+    
     HDC* copy = new HDC(tree2);
     copy->to_json("tree_copy.txt");
-    */
-    //HDC* copy = tree->copy();
-    //copy->to_json("tree_copy.txt");
+    HDC* copy_ = tree->copy();
+    copy_->to_json("tree_copy.txt");
+    
 }

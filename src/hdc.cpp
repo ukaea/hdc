@@ -152,50 +152,44 @@ HDC::HDC(string str) {
     // delete buffer; // TODO: uncomment this? It should be ok for MDBM
 }
 
+HDC::HDC(char* src_buffer) {
+    storage = global_storage;
+    uuid = generate_uuid_str();
+    memcpy(&header,src_buffer,sizeof(header_t));
+    auto buffer = new char[header.buffer_size];
 
+    if (header.type == STRUCT_ID || header.type == LIST_ID) {
+        try {
+            bip::managed_external_buffer src_segment(bip::open_only,src_buffer+sizeof(header_t),header.buffer_size-sizeof(header_t));
+            map_t* src_children = src_segment.find<map_t>("d").first;
+            if (src_children == nullptr) {
+                cout << "This node has no children." << endl;
+                exit(50);
+            }
+            bip::managed_external_buffer segment(bip::create_only,buffer+sizeof(header_t),header.buffer_size-sizeof(header_t));
+            auto children = segment.construct<map_t>("d")(map_t::ctor_args_list(),map_t::allocator_type(segment.get_segment_manager()));
+            for (map_t::iterator it = src_children->begin(); it != src_children->end(); ++it) {
+                auto buff = storage->get(it->address.c_str());
+                HDC* n = new HDC(buff);
+                record rec(it->key.c_str(),n->get_uuid().c_str(),segment.get_segment_manager());
+                children->insert(rec);
+            }
+            memcpy(buffer,&header,sizeof(header_t));
+        }
+        catch(...)
+        {
+            cout << "Exception in HDC(HDC*)" << endl;
+            exit(1);
+        }
+    } else {
+        memcpy(buffer,src_buffer,header.buffer_size);
+    }
+
+    storage->set(uuid,buffer,header.buffer_size);
+}
 
 /** Copy contructor */
-HDC::HDC(HDC* h) {
-    printf("fixme2\n");
-    exit(7);
-    storage = h->storage;
-    memcpy(&header,h->get_buffer(),sizeof(header_t));
-    uuid = generate_uuid_str();
-    map_t* h_children = h->get_children_ptr();
-    /*
-    auto h_type = h->get_type();
-    if (h_children != nullptr) {
-        set_type(h_type);
-        switch (h_type) {
-            case (HDC_STRUCT):
-            {
-                for (map_t::iterator it : h_children) {
-                    string key = it->key;
-                    HDC* node = storage->get();
-                    add_child(key,new HDC(node));
-                    #ifdef DEBUG
-                    cout << key << " copied" << endl;
-                    #endif
-                }
-                break;
-            }
-            case (HDC_LIST):
-            {
-                for (size_t i = 0; i < h_children->size(); i++) {
-                    HDC* node = (h_children->get<by_index>()[i].address.c_str());
-                    insert_slice(i,new HDC(node));
-                }
-                break;
-            }
-            default:
-            {
-                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str().c_str());
-                exit(-3);
-            }
-        }
-    }*/
-    memcpy(&header,h->get_buffer(),sizeof(header_t));
-}
+HDC::HDC(HDC* h) : HDC(h->get_buffer()) {};
 
 /** Copy contructor from pointer */
 /*HDC::HDC(HDC* h) {
@@ -753,59 +747,9 @@ void HDC::resize(HDC* h, int recursively)
 }
 
 HDC* HDC::copy(int copy_arrays) {
-    #ifdef DEBUG
-    cout << "Called copy()" << endl;
-    #endif
-    HDC* _copy = new HDC();
-    _copy->set_type(get_type());
-    if (hdc_is_primitive_type(type)) {
-        if (copy_arrays == 1) {
-            _copy->set_buffer(buff_copy(storage->get(uuid)));
-        } else return _copy;
-    }
-    else {
-        switch (type) {
-            case (EMPTY_ID):
-                // Nothing to be done
-                break;
-            case (STRUCT_ID):
-            {
-                for (size_t i=0;i<children->size();i++) {
-                    string key = children->get<by_index>()[i].key.c_str();
-                    #ifdef DEBUG
-                    cout << "copy: " << key << endl;
-                    #endif
-                    HDC* node = get(storage->get(it->address.c_str()));
-                    _copy->add_child(key,node->copy(copy_arrays));
-                    #ifdef DEBUG
-                    cout << key << " copied" << endl;
-                    #endif
-                }
-                break;
-            }
-            case (LIST_ID):
-            {
-                for (size_t i = 0; i < children->size(); i++)
-                    _copy->insert_slice(i,get(storage->get(it->address.c_str()))->copy(copy_arrays));
-                break;
-            }
-            case (ERROR_ID):
-            {
-                _copy->set_buffer(get_buffer());
-                break;
-            }
-            default:
-            {
-                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str().c_str());
-                exit(-3);
-            }
-        }
-    }
-    #ifdef DEBUG
-    cout << "copy() Done" << endl;
-    #endif
-    return _copy;
+    return new HDC(this);
 }
+
 void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
 // //     #ifdef DEBUG
 // //     printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_get_type_str(_type).c_str());
@@ -825,6 +769,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
 // //     storage->set(uuid,buffer,size+HDC_DATA_POS);
 // //     return;
 }
+
 void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type) {
     if(!has_child(path)) add_child(path, new HDC()); // TODO: add constructor for this!!
     get(path)->set_data_c(_ndim, _shape, _data, _type);
