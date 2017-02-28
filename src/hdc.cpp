@@ -753,58 +753,58 @@ void HDC::resize(HDC* h, int recursively)
 }
 
 HDC* HDC::copy(int copy_arrays) {
-// //     #ifdef DEBUG
-// //     cout << "Called copy()" << endl;
-// //     #endif
-// //     HDC* _copy = new HDC();
-// //     _copy->set_type(get_type());
-// //     if (hdc_is_primitive_type(type)) {
-// //         if (copy_arrays == 1) {
-// //             _copy->set_buffer(buff_copy(storage->get(uuid)));
-// //         } else return _copy;
-// //     }
-// //     else {
-// //         switch (type) {
-// //             case (EMPTY_ID):
-// //                 // Nothing to be done
-// //                 break;
-// //             case (STRUCT_ID):
-// //             {
-// //                 for (size_t i=0;i<children->size();i++) {
-// //                     string key = children->get<by_index>()[i].key.c_str();
-// //                     #ifdef DEBUG
-// //                     cout << "copy: " << key << endl;
-// //                     #endif
-// //                     HDC* node = get(storage->get(it->address.c_str()));
-// //                     _copy->add_child(key,node->copy(copy_arrays));
-// //                     #ifdef DEBUG
-// //                     cout << key << " copied" << endl;
-// //                     #endif
-// //                 }
-// //                 break;
-// //             }
-// //             case (LIST_ID):
-// //             {
-// //                 for (size_t i = 0; i < children->size(); i++)
-// //                     _copy->insert_slice(i,get(storage->get(it->address.c_str()))->copy(copy_arrays));
-// //                 break;
-// //             }
-// //             case (ERROR_ID):
-// //             {
-// //                 _copy->set_buffer(get_buffer());
-// //                 break;
-// //             }
-// //             default:
-// //             {
-// //                 fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str().c_str());
-// //                 exit(-3);
-// //             }
-// //         }
-// //     }
-// //     #ifdef DEBUG
-// //     cout << "copy() Done" << endl;
-// //     #endif
-// //     return _copy;
+    #ifdef DEBUG
+    cout << "Called copy()" << endl;
+    #endif
+    HDC* _copy = new HDC();
+    _copy->set_type(get_type());
+    if (hdc_is_primitive_type(type)) {
+        if (copy_arrays == 1) {
+            _copy->set_buffer(buff_copy(storage->get(uuid)));
+        } else return _copy;
+    }
+    else {
+        switch (type) {
+            case (EMPTY_ID):
+                // Nothing to be done
+                break;
+            case (STRUCT_ID):
+            {
+                for (size_t i=0;i<children->size();i++) {
+                    string key = children->get<by_index>()[i].key.c_str();
+                    #ifdef DEBUG
+                    cout << "copy: " << key << endl;
+                    #endif
+                    HDC* node = get(storage->get(it->address.c_str()));
+                    _copy->add_child(key,node->copy(copy_arrays));
+                    #ifdef DEBUG
+                    cout << key << " copied" << endl;
+                    #endif
+                }
+                break;
+            }
+            case (LIST_ID):
+            {
+                for (size_t i = 0; i < children->size(); i++)
+                    _copy->insert_slice(i,get(storage->get(it->address.c_str()))->copy(copy_arrays));
+                break;
+            }
+            case (ERROR_ID):
+            {
+                _copy->set_buffer(get_buffer());
+                break;
+            }
+            default:
+            {
+                fprintf(stderr,"copy(): Unsupported type of node: %s\n",get_type_str().c_str());
+                exit(-3);
+            }
+        }
+    }
+    #ifdef DEBUG
+    cout << "copy() Done" << endl;
+    #endif
+    return _copy;
 }
 void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
 // //     #ifdef DEBUG
