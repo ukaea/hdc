@@ -346,6 +346,9 @@ public:
 
 };
 HDC* from_json(const string& filename); //todo: make constructor from this
-    string map_to_json(map_t& children);
+string map_to_json(map_t& children);
+
+// "static contructor" from c pointer
+HDC* new_HDC_from_void_ptr(void* c_ptr);
 
 #endif // HDC_HPP

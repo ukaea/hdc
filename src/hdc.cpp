@@ -753,3 +753,11 @@ char* HDC::get_buffer() {
 string HDC::get_uuid() {
     return uuid;
 }
+
+HDC* new_HDC_from_void_ptr(void* c_ptr) {
+    HDC* tree;
+    tree = (HDC*) c_ptr;
+    return tree;
+    // HDC* t = (HDC*)c_ptr->obj;
+    // return t;
+}
