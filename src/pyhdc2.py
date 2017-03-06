@@ -37,17 +37,33 @@ class HDC(object):
             self.set_data(data)
 
     @classmethod
-    def from_void_ptr(cls, c_ptr):
+    def from_cpp_ptr(cls, cpp_ptr):
         """Construct HDC Python class instance from (void) pointer to a HDC C++ instance
         (i.e. not struct hdc_t*)
         """
         self = super(HDC, cls).__new__(cls)
-        self._hdc_obj = libhdc_._from_void_ptr(c_ptr)
+        self._hdc_obj = libhdc_.from_cpp_ptr(cpp_ptr)
         return self
+
+    @classmethod
+    def from_c_ptr(cls, c_ptr):
+        """Construct HDC Python class instance from (void) pointer to a HDC C++ instance
+        (i.e. not struct hdc_t*)
+        """
+        self = super(HDC, cls).__new__(cls)
+        self._hdc_obj = libhdc_.from_c_ptr(c_ptr)
+        return self
+
+    @property
+    def cpp_ptr(self):
+        """Return the (void) pointer to the HDC C++ instance
+        (i.e. not struct hdc_t*)
+        """
+        return self._hdc_obj.as_cpp_ptr()
 
     @property
     def c_ptr(self):
         """Return the (void) pointer to the HDC C++ instance
         (i.e. not struct hdc_t*)
         """
-        return self._hdc_obj.as_void_ptr()
+        return self._hdc_obj.as_c_ptr()

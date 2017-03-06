@@ -755,8 +755,16 @@ string HDC::get_uuid() {
 }
 
 // "static contructor" from void* HDC
-HDC* new_HDC_from_void_ptr(intptr_t c_ptr) {
+HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr) {
     HDC* tree;
-    tree = (HDC*) c_ptr;
+    tree = (HDC*) cpp_ptr;
+    return tree;
+}
+
+// "static contructor" from hdc_t*
+HDC* new_HDC_from_c_ptr(intptr_t c_ptr) {
+    HDC* tree;
+    hdc_t* c_wrap = (hdc_t*) c_ptr;
+    tree = (HDC*) c_wrap->obj;
     return tree;
 }
