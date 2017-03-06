@@ -81,6 +81,14 @@ struct hdc_t* hdc_get(struct hdc_t* tree, char* path) {
     return h;
 }
 
+const char* hdc_get_uuid(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    char* a = new char[t->get_uuid().size()];
+    strcpy(a,t->get_uuid().c_str());
+    return a;
+}
+
+
 struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
     HDC* t = (HDC*)tree->obj;
     HDC* node = t->get_slice(i);

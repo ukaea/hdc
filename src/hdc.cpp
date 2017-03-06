@@ -751,23 +751,23 @@ HDC* HDC::copy(int copy_arrays) {
 }
 
 void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
-// //     #ifdef DEBUG
-// //     printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_get_type_str(_type).c_str());
-// //     #endif
-// //     if (storage->has(uuid)) storage->remove(uuid);
-// //     type = _type;
-// //     size = hdc_sizeof(type);
-// //     ndim = _ndim;
-// //     memset(shape,0,HDC_MAX_DIMS*sizeof(size_t));
-// //     for (int i = 0; i < _ndim; i++) {
-// //         size *= _shape[i];
-// //         shape[i] = _shape[i];
-// //     }
-// //     char* buffer = buff_allocate(size+HDC_DATA_POS);
-// //     buff_set_header(buffer,type,flags,ndim,shape);
-// //     memcpy(buffer+HDC_DATA_POS,_data,size);
-// //     storage->set(uuid,buffer,size+HDC_DATA_POS);
-// //     return;
+    #ifdef DEBUG
+    printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_get_type_str(_type).c_str());
+    #endif
+    if (storage->has(uuid)) storage->remove(uuid);
+    header.type = _type;
+    header.ndim = _ndim;
+    header.data_size = hdc_sizeof(to_typeid(_type));
+    for (int i = 0; i < _ndim; i++) {
+        header.data_size *= _shape[i];
+        header.shape[i] = _shape[i];
+    }
+    header.buffer_size = header.data_size + sizeof(header_t);
+    char* buffer = new char[header.buffer_size];
+    memcpy(buffer,&header,sizeof(header_t));
+    memcpy(buffer+sizeof(header_t),_data,header.data_size);
+    storage->set(uuid,buffer,header.buffer_size);
+    return;
 }
 
 void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type) {

@@ -37,6 +37,7 @@ const char* hdc_as_string_path(struct hdc_t* tree, char* path);
 const char* hdc_as_string(struct hdc_t* tree);
 
 int8_t hdc_get_ndim(struct hdc_t* tree);  /**  */
+const char* hdc_get_uuid(struct hdc_t* tree);  /**  */
 size_t* hdc_get_shape(struct hdc_t* tree);  /** Returns shape of array of node. */
 int8_t hdc_get_ndim_path(struct hdc_t* tree, char* path);  /**  */
 size_t* hdc_get_shape_path(struct hdc_t* tree, char* path);  /** Returns shape of array at given path. */
