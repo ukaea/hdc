@@ -24,7 +24,7 @@ _HDC_T_P = ctypes.POINTER(_HDC_T)
 
 
 # TODO perhaps we do not need it
-libchdc_ = ctypes.cdll.LoadLibrary('libchdc.so')
+# libchdc_ = ctypes.cdll.LoadLibrary('libchdc.so')
 
 
 class HDC(object):
@@ -38,23 +38,16 @@ class HDC(object):
 
     @classmethod
     def from_void_ptr(cls, c_ptr):
+        """Construct HDC Python class instance from (void) pointer to a HDC C++ instance
+        (i.e. not struct hdc_t*)
+        """
         self = super(HDC, cls).__new__(cls)
-        ctypes.pythonapi.PyCapsule_New.restype = ctypes.py_object
-        ctypes.pythonapi.PyCapsule_New.argtypes = [ctypes.c_void_p, ctypes.c_char_p,
-                                                   ctypes.py_object]
-        # TODO this crashes Python badly for an unknown reason
-        # although it works well interactively :-Z
-        # even in %debug !!!
-        capsule = ctypes.pythonapi.PyCapsule_New(c_ptr, None, None)
-        self._hdc_obj = libhdc_._from_void_ptr(capsule)
-        # self._hdc_obj = libhdc_.HDC()
+        self._hdc_obj = libhdc_._from_void_ptr(c_ptr)
         return self
 
     @property
     def c_ptr(self):
-        capsule = self._hdc_obj.as_void_ptr()
-        ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
-        ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-        c_ptr = ctypes.pythonapi.PyCapsule_GetPointer(capsule, None)
-
-        return c_ptr
+        """Return the (void) pointer to the HDC C++ instance
+        (i.e. not struct hdc_t*)
+        """
+        return self._hdc_obj.as_void_ptr()

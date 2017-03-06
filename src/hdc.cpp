@@ -533,8 +533,8 @@ void HDC::set_type(TypeID _type) {
     return;
 }
 
-void* HDC::as_void_ptr() {
-    return (void*)this;
+intptr_t HDC::as_void_ptr() {
+    return (intptr_t)(void*)this;
 }
 
 void HDC::get_header_info() {
@@ -754,10 +754,9 @@ string HDC::get_uuid() {
     return uuid;
 }
 
-HDC* new_HDC_from_void_ptr(void* c_ptr) {
+// "static contructor" from void* HDC
+HDC* new_HDC_from_void_ptr(intptr_t c_ptr) {
     HDC* tree;
     tree = (HDC*) c_ptr;
     return tree;
-    // HDC* t = (HDC*)c_ptr->obj;
-    // return t;
 }

@@ -329,7 +329,7 @@ public:
     /** Dumps header */
     void get_header_info();
     /** Returns void pointer to data. */
-    void* as_void_ptr();
+    intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
     string get_type_str();
     /** Returns datashape desctiption string. */
@@ -348,7 +348,7 @@ public:
 HDC* from_json(const string& filename); //todo: make constructor from this
 string map_to_json(map_t& children);
 
-// "static contructor" from c pointer
-HDC* new_HDC_from_void_ptr(void* c_ptr);
+// "static contructor" from void* HDC
+HDC* new_HDC_from_void_ptr(intptr_t c_ptr);
 
 #endif // HDC_HPP
