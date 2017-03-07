@@ -344,9 +344,8 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                     //cout << "add_child(): Caught " << e.what() << "\n";
                     // delete old segment
                     //delete segment;
-                    grow(header.buffer_size);
                     // reinitialize buffer and stuff
-                    buffer = storage->get(uuid);
+                    buffer = buffer_grow(buffer,header.buffer_size);
                     // update header
                     memcpy(&header,buffer,sizeof(header_t));
                     segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
@@ -703,28 +702,24 @@ void HDC::insert_slice(size_t i, HDC* h)
 
     bip::managed_external_buffer segment(bip::open_only,buffer+sizeof(header_t),0);
     auto children = segment.find<map_t>("d").first;
-//     cout << segment.get_size() << endl;
+
+    int k = 0;
     int redo = 1;
-    for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
+    for (k=0;k<HDC_MAX_RESIZE_ATTEMPTS-1;k++) {
         if (redo == 0) break;
         try {
             map_t::nth_index<1>::type& ri=children->get<1>();
-            ri.insert(ri.begin()+i,record("_",h->get_uuid().c_str(),segment.get_allocator<record>()));
+            ri.insert(ri.begin()+i,record("_",h->get_uuid().c_str(),segment.get_segment_manager()));
             redo = 0;
         } catch (exception e) {
-            //cout << "insert_slice(): Caught " << e.what() << "\n";
-            // delete old segment
-            //delete segment;
             buffer = buffer_grow(buffer, header.buffer_size);
-            // update header
             memcpy(&header,buffer,sizeof(header_t));
             segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
-//             cout << "a"<<segment.get_size() << endl;
             children = segment.find<map_t>("d").first;
             redo = 1;
         }
     }
-    if (redo == 1 && i >= HDC_MAX_RESIZE_ATTEMPTS-1) {
+    if (redo == 1 && k >= HDC_MAX_RESIZE_ATTEMPTS-1) {
         fprintf(stderr,"add_child(): Could not allocate enough memory.\n");
         exit(8);
     }
@@ -925,8 +920,10 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
             // if there are some, copy them
             if (old_children != nullptr) {
                 auto new_segment = bip::managed_external_buffer(bip::create_only,new_buffer+sizeof(header_t),new_size);
+                cout << old_segment.get_size() << " " <<  new_segment.get_size()  <<endl;
                 map_t* new_children = new_segment.construct<map_t>("d")(map_t::ctor_args_list(),new_segment.get_segment_manager());
-                for (map_t::iterator it = old_children->begin(); it != old_children->end(); ++it) {
+                map_t::nth_index<1>::type& ri=old_children->get<1>();
+                for (auto it = ri.begin(); it != ri.end(); ++it) {
                     record rec(it->key.c_str(),it->address.c_str(),new_segment.get_segment_manager());
                     new_children->insert(rec);
                 }
