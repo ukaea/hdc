@@ -9,9 +9,13 @@ using namespace std;
 int main() {
     // Create new HDC tree
     HDC* tree = new HDC();
-//    tree->set_type((TypeID)HDC_STRUCT);
     // Add some children
-//     tree->add_child("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",new HDC());
+    string path = "";
+    for (int i=0;i<10;i++) path += "aaa/";
+    tree->add_child(path,new HDC());
+    delete tree;
+
+/*
     tree->add_child("aaa/bbb/ccc",new HDC());
     tree->add_child("aaa/bbb/eee",new HDC());
     tree->add_child("aaa/eee/bbb",new HDC());
@@ -60,4 +64,5 @@ int main() {
     // On screen
     tree->dump();
     return 0;
+    */
 }

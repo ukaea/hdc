@@ -32,6 +32,7 @@ public:
         mdbm_lock_smart (this->db, &key, 0);
         mdbm_store(this->db,key,value,MDBM_REPLACE);
         mdbm_unlock_smart (this->db, &key, 0);
+//         delete[] data;
         return;
     };
     char* get(string path) {

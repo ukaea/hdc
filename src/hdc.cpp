@@ -91,7 +91,7 @@ HDC::HDC(size_t _data_size) {
     storage = global_storage;
     storage->set(uuid,buffer,header.buffer_size);
     // Now it is safe to
-    // delete buffer; // TODO: uncomment this? It should be ok for MDBM
+    //delete buffer; // TODO: uncomment this? It should be ok for MDBM
 }
 
 /** Default constructor. Creates empty HDC */
@@ -316,6 +316,10 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     if (header.type == EMPTY_ID) set_type(STRUCT_ID);
 
     string first = vs[0];
+    if (first.size() > 1024) {
+        cout << "add_child(): string too long.\n";
+        exit(111);
+    }
     vs.erase(vs.begin());
 
     // load new buffer
@@ -340,13 +344,8 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                     record rec(first.c_str(),n->get_uuid().c_str(),segment.get_segment_manager());
                     children->insert(rec);
                     redo = 0;
-                } catch (exception e) {
-                    //cout << "add_child(): Caught " << e.what() << "\n";
-                    // delete old segment
-                    //delete segment;
-                    // reinitialize buffer and stuff
-                    buffer = buffer_grow(buffer,header.buffer_size);
-                    // update header
+                } catch (hdc_bad_alloc e) {
+                    buffer = buffer_grow(buffer,max(header.buffer_size,4*first.size()));
                     memcpy(&header,buffer,sizeof(header_t));
                     segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
                     children = segment.find<map_t>("d").first;
@@ -708,8 +707,9 @@ void HDC::insert_slice(size_t i, HDC* h)
     for (k=0;k<HDC_MAX_RESIZE_ATTEMPTS-1;k++) {
         if (redo == 0) break;
         try {
+//             if (segment.get_free_memory() < 256) throw hdc_bad_alloc();
             map_t::nth_index<1>::type& ri=children->get<1>();
-            ri.insert(ri.begin()+i,record("_",h->get_uuid().c_str(),segment.get_segment_manager()));
+            ri.insert(ri.begin()+i,record(to_string(i).c_str(),h->get_uuid().c_str(),segment.get_segment_manager()));
             redo = 0;
         } catch (exception e) {
             buffer = buffer_grow(buffer, header.buffer_size);
@@ -725,6 +725,7 @@ void HDC::insert_slice(size_t i, HDC* h)
     }
     header.shape[0] = children->size();
     memcpy(buffer,&header,sizeof(header_t));
+//     cout << header.buffer_size << endl;
     storage->set(uuid,buffer,header.buffer_size);
     return;
 }
@@ -916,11 +917,9 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
             // try to open old children
             auto old_segment = bip::managed_external_buffer(bip::open_only,old_buffer+sizeof(header_t),0);
             map_t* old_children = old_segment.find<map_t>("d").first;
-
             // if there are some, copy them
             if (old_children != nullptr) {
                 auto new_segment = bip::managed_external_buffer(bip::create_only,new_buffer+sizeof(header_t),new_size);
-                cout << old_segment.get_size() << " " <<  new_segment.get_size()  <<endl;
                 map_t* new_children = new_segment.construct<map_t>("d")(map_t::ctor_args_list(),new_segment.get_segment_manager());
                 map_t::nth_index<1>::type& ri=old_children->get<1>();
                 for (auto it = ri.begin(); it != ri.end(); ++it) {
