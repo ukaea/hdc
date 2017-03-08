@@ -33,6 +33,9 @@ find_package(Boost 1.48.0 REQUIRED filesystem system program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
+option(BUILD_TESTS "Build and install Google tests and benchmarks" OFF)
+
+if (BUILD_TESTS)
 ### gtest
 
 include(CTest)
@@ -95,6 +98,12 @@ add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
 include_directories("${googlebenchmark_SOURCE_DIR}/include")
 ### gbenchmark
 
+add_subdirectory(test)
+add_subdirectory(benchmark)
+
+### BUILD_TESTS
+endif()
+
 option(DEBUG "Turns some debug output on or off." OFF)
 if(DEBUG)
     add_definitions(-DDEBUG)
@@ -121,7 +130,5 @@ include_directories(include)
 # add_subdirectory(docs)
 add_subdirectory(doxy)
 add_subdirectory(src)
-add_subdirectory(test)
 add_subdirectory(examples)
-add_subdirectory(benchmark)
 add_subdirectory(plugins)
