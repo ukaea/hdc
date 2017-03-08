@@ -25,7 +25,9 @@ public:
     ~UnorderedMapStorage() {
         printf("~UnorderedMapStorage()\n");
     };
-
+    bool usesBuffersDirectly() {
+        return true;
+    };
     string getDescription() {
         return "This is unordered_map based storage.";
     };

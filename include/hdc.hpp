@@ -114,6 +114,7 @@ public:
         memcpy(buffer,&header,sizeof(header_t));
         memcpy(buffer+sizeof(header_t),_data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
         return;
     }
     

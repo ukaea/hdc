@@ -149,7 +149,7 @@ HDC::HDC(string str) {
     storage = global_storage;
     storage->set(uuid,buffer,header.buffer_size);
     // Now it is safe to
-    // delete buffer; // TODO: uncomment this? It should be ok for MDBM
+    if (!storage->usesBuffersDirectly()) delete buffer; // TODO: uncomment this? It should be ok for MDBM
 }
 
 HDC::HDC(char* src_buffer) {

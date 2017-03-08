@@ -23,6 +23,9 @@ public:
         printf("~MDBMStorage()\n");
         cleanup();
     };
+    bool usesBuffersDirectly() {
+        return false;
+    };
     string getDescription() {
         return "This is MDBM based storage.";
     };

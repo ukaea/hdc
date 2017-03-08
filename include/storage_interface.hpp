@@ -7,6 +7,7 @@ using namespace std;
 
 class Storage{
 public:
+    virtual bool usesBuffersDirectly() = 0;
     virtual string getDescription() = 0;
     virtual void set(string path, char* data, size_t size) = 0;
     virtual char* get(string path) = 0;
