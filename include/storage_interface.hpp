@@ -7,6 +7,10 @@ using namespace std;
 
 class Storage{
 public:
+    // virtual void lock() = 0;
+    // virtual void unlock() = 0;
+    // virtual void locked() = 0;
+    // virtual void sync() = 0;
     virtual bool usesBuffersDirectly() = 0;
     virtual string getDescription() = 0;
     virtual void set(string path, char* data, size_t size) = 0;

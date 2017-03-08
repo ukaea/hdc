@@ -308,7 +308,7 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     // sync buffer
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
-
+    int old_size = header.buffer_size;
     if (!(header.type == EMPTY_ID || header.type == STRUCT_ID)) {
         cout << "Cannot add child to this node. Data assigned???" << endl;
         return;
@@ -358,7 +358,7 @@ void HDC::add_child(vector<string> vs, HDC* n) {
             }
         }
         else cerr << "Error: child already exists!" << endl;
-        storage->set(uuid,buffer,header.buffer_size);
+        if (header.buffer_size != old_size) storage->set(uuid,buffer,header.buffer_size);
     }
     return;
 }
@@ -689,7 +689,7 @@ void HDC::insert_slice(size_t i, HDC* h)
     printf("insert_slice(%d)\n",i);
     #endif
     memcpy(&header,storage->get(uuid),sizeof(header_t));
-    
+    size_t old_size = header.buffer_size;
     if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
         cout << "Error in insert_slice(): Wrong type to call insert_slice." << endl;
         exit(7);
@@ -726,7 +726,7 @@ void HDC::insert_slice(size_t i, HDC* h)
     header.shape[0] = children->size();
     memcpy(buffer,&header,sizeof(header_t));
 //     cout << header.buffer_size << endl;
-    storage->set(uuid,buffer,header.buffer_size);
+    if (header.buffer_size != old_size) storage->set(uuid,buffer,header.buffer_size);
     return;
 }
 
