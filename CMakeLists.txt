@@ -19,7 +19,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 ### gtest
-
+option(BUILD_TESTS "Whether to build tests - uses google tests." ON)
+if (BUILD_TESTS)
 include(CTest)
 
 if (CMAKE_VERSION VERSION_LESS 3.2)
@@ -49,11 +50,12 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include"
                         "${gmock_SOURCE_DIR}/include")
 endif()
-
+endif()
 ### gtest
 
 ### gbenchmark
-
+option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." ON)
+if (BUILD_BENCHMARKS)
 if (CMAKE_VERSION VERSION_LESS 3.2)
     set(UPDATE_DISCONNECTED_IF_AVAILABLE "")
 else()
@@ -78,6 +80,7 @@ add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
 # endif()
 
 include_directories("${googlebenchmark_SOURCE_DIR}/include")
+endif()
 ### gbenchmark
 
 option(DEBUG "Turns some debug output on or off." OFF)
@@ -106,7 +109,11 @@ include_directories(include)
 # add_subdirectory(docs)
 add_subdirectory(doxy)
 add_subdirectory(src)
+if (BUILD_TESTS)
 add_subdirectory(test)
+endif()
 add_subdirectory(examples)
+if (BUILD_BENCHMARKS)
 add_subdirectory(benchmark)
+endif()
 add_subdirectory(plugins)
