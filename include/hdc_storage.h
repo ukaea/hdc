@@ -62,6 +62,18 @@ public:
     void remove(string path) {
         _store->remove(path);
     }
+    void lock(string path) {
+        _store->lock(path);
+    };
+    void unlock(string path) {
+        _store->unlock(path);
+    };
+    bool locked() {
+        return _store->locked();
+    };
+    void sync() {
+        _store-> sync();
+    };
 };
 
 #endif

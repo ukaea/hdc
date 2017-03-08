@@ -26,6 +26,18 @@ public:
     bool usesBuffersDirectly() {
         return false;
     };
+    void lock(string path) {
+        datum key = {&path[0u], static_cast<int>(path.length())};
+        mdbm_lock_smart (this->db, &key, 0);
+    };
+    void unlock(string path) {
+        datum key = {&path[0u], static_cast<int>(path.length())};
+        mdbm_unlock_smart (this->db, &key, 0);
+    };
+    bool locked() {
+        return mdbm_islocked(this->db);
+    };
+    void sync() {};
     string getDescription() {
         return "This is MDBM based storage.";
     };

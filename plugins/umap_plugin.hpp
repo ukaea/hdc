@@ -28,6 +28,13 @@ public:
     bool usesBuffersDirectly() {
         return true;
     };
+    void lock(string path) {};
+    void unlock(string path) {};
+    bool locked() {
+        return false;
+    };
+    void sync() {};
+    
     string getDescription() {
         return "This is unordered_map based storage.";
     };
