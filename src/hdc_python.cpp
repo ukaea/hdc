@@ -43,6 +43,7 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("set_data_int8", (void (HDC::*)(int8_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_int32", (void (HDC::*)(int32_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(double data)) &HDC::set_data, "Sets data to node")
+        .def("set_string", (void (HDC::*)(std::string str)) &HDC::set_string, "Sets data to node")
         .def("set_data_int8", (void (HDC::*)(std::string path, int8_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_int32", (void (HDC::*)(std::string path, int32_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(std::string path, double data)) &HDC::set_data, "Sets data to node")

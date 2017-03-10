@@ -80,12 +80,14 @@ class HDC(object):
     def set_data(self, data):
         """Store data into the container
         """
-        if isinstance(data, np.ndarray):
+        if isinstance(data, (np.ndarray, np.generic)):
             # cdata = np.ctypeslib.as_ctypes(data)
             data = np.require(data, requirements=('C', 'O'))
             data.setflags(write=False)
 
             self._hdc_obj.set_numpy(data)
+        elif isinstance(data, six.string_types):
+            self._hdc_obj.set_string(data)
         else:
             raise NotImplementedError("{typ} not supported in HDC.set_data".format(typ=type(data)))
 
