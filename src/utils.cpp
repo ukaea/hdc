@@ -175,6 +175,30 @@ TypeID to_typeid(string a) {return STRING_ID;};
 TypeID to_typeid(char* a) {return STRING_ID;};
 TypeID to_typeid(char const* a) {return STRING_ID;};
 TypeID to_typeid(bool a) {return BOOL_ID;};
+TypeID to_typeid(string format, size_t itemsize) {
+    if (format == "i") {
+        switch(itemsize){
+            case 1:
+                return INT8_ID;
+            case 2:
+                return INT16_ID;
+            case 4:
+                return INT32_ID;
+        }
+    } else if (format == "d") {
+        switch(itemsize){
+            case 8:
+                return DOUBLE_ID;
+        }
+    } else if (format == "f") {
+        switch(itemsize){
+            case 4:
+                return FLOAT_ID;
+        }
+    }
+    // return error by default
+    return ERROR_ID;
+};
 
 
 /* -------------------------  Other stuff ----------------------------- */

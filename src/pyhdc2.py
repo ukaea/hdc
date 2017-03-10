@@ -67,3 +67,51 @@ class HDC(object):
         (i.e. not struct hdc_t*)
         """
         return self._hdc_obj.as_c_ptr()
+
+    @property
+    def stype(self):
+        """Return string type
+        """
+        return self._hdc_obj.get_type_str()
+
+    def dump(self):
+        print(self._hdc_obj.to_json_string())
+
+    def set_data(self, data):
+        """Store data into the container
+        """
+        if isinstance(data, np.ndarray):
+            # cdata = np.ctypeslib.as_ctypes(data)
+            data = np.require(data, requirements=('C', 'O'))
+            data.setflags(write=False)
+
+            self._hdc_obj.set_numpy(data)
+        else:
+            raise NotImplementedError("{typ} not supported in HDC.set_data".format(typ=type(data)))
+
+    # def __setitem__(self, key, value):
+    #     if isinstance(key, six.string_types):
+    #         ckey = key.encode()
+    #         if not _hdc_has_child(self._c_ptr, ckey):
+    #             new_hdc = self.__class__(value)
+    #             # TODO this is the problem - new_hdc gets lost from Python
+    #             # we have to explain numpy not to deallocate the buffer
+    #             libchdc.hdc_add_child(self._c_ptr, ckey, new_hdc._c_ptr)
+    #         else:
+    #             self[key].set_data(value)
+
+    #     else:
+    #         # key is numeric
+    #         libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
+
+    # def __getitem__(self, key):
+    #     if isinstance(key, six.string_types):
+    #         ckey = key.encode()
+    #         if not _hdc_has_child(self._c_ptr, ckey):
+    #             raise KeyError('key not found')
+    #         res = self.from_c_ptr(_hdc_get(self._c_ptr, ckey))
+    #         return res
+    #     else:
+    #         ckey = ctypes.c_size_t(key)
+    #         res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
+    #         return res

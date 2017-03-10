@@ -324,6 +324,8 @@ public:
     void to_json(string filename, int mode = 0);
     /** Serialization to Json::Value object. */
     Json::Value to_json(int mode = 0);
+    /** Serialization to string object. */
+    string to_json_string(int mode = 0);
     /** Dumps JSON to cout */
     void dump();
     /** Dumps header */
