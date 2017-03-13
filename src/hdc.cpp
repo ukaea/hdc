@@ -897,8 +897,26 @@ char* HDC::get_data_ptr() {
     return (char*)(storage->get(uuid)+sizeof(header_t));
 }
 
-
-
+void HDC::delete_data() {
+    auto buffer = storage->get(uuid);
+    memcpy(&header,buffer,sizeof(header_t));
+    if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
+        try {
+            auto segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
+            map_t* children = segment.find<map_t>("d").first;
+            map_t::nth_index<1>::type& ri=children->get<1>();
+            for (auto it = ri.begin(); it != ri.end(); ++it) {
+                HDC h(storage,it->address.c_str());
+                h.delete_data();
+            }
+        } catch (std::exception& e) {
+            std::cerr << "Caught exception in delete_data(): " << e.what() << std::endl;
+            exit(8);
+        }
+    }
+    storage->remove(uuid);
+    uuid = "";
+}
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 char* buffer_grow(char* old_buffer, size_t extra_size) {
     #ifdef DEBUG

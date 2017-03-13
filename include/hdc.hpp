@@ -348,7 +348,7 @@ public:
     // allocator stuff
     bip::managed_external_buffer get_segment();
     map_t* get_children_ptr();
-
+    void delete_data();
     // flags set/get
 //     bool get_flag(uint pos);
 //     void set_flag(uint pos, bool val);
