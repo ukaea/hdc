@@ -8,32 +8,32 @@ using namespace std;
 
 int main() {
     // Create new HDC tree
-    HDC* tree = new HDC();
+    HDC tree;
     // Add some children
-    string path = "";
-    for (int i=0;i<10;i++) path += "aaa/";
-    tree->add_child(path,new HDC());
-    delete tree;
+    HDC dummy1;
+    tree.add_child("aaa/bbb/ccc",dummy1);
+    HDC dummy2;
+    tree.add_child("aaa/bbb/eee",dummy2);
+    HDC dummy3;
+    tree.add_child("aaa/eee/bbb",dummy3);
+    HDC dummy4;
+    tree.add_child("eee",dummy4);
+    HDC dummy5;
+    tree.add_child("bbb",dummy5);
+    HDC dummy6;
+    tree.add_child("ccc",dummy6);
 
-/*
-    tree->add_child("aaa/bbb/ccc",new HDC());
-    tree->add_child("aaa/bbb/eee",new HDC());
-    tree->add_child("aaa/eee/bbb",new HDC());
-    tree->add_child("eee",new HDC());
-    tree->add_child("bbb",new HDC());
-    tree->add_child("ccc",new HDC());
-
-    for (auto it : tree->keys()) cout << "key: " << it << endl;
+    for (auto it : tree.keys()) cout << "key: " << it << endl;
     // Get subtree
-    HDC* subtree = tree->get("aaa/bbb");
+    HDC subtree = tree.get2("aaa/bbb");
     // Get node
-    HDC* node = subtree->get("ccc");
+    HDC node = subtree.get2("ccc");
 
     // Ask whether child exists
-    cout << "has_child: " << tree->has_child("aaa/bbb/ccc") << endl;
+    cout << "has_child: " << tree.has_child("aaa/bbb/ccc") << endl;
 
     // Delete subtree
-    tree->delete_child("aaa/eee");
+    tree.delete_child("aaa/eee");
 
     // Prepare some data
     int32_t array[4] = {7,2,3,4};
@@ -41,28 +41,27 @@ int main() {
     shape[0] = 4;
 
     // Add data to a single node
-    HDC* data = new HDC();
-    data->set_data(1,shape,array);
+    HDC data;
+    data.set_data(1,shape,array);
 
     // Add data to a subtree
-    tree->set_data("aaa/bbb/ccc",1,shape,array);
+    tree.set_data("aaa/bbb/ccc",1,shape,array);
 
     // Ask for some data details, use subtree to shorten the path
-    int32_t ndim2 = node->get_ndim();
-    size_t* shape2 = node->get_shape();
+    int32_t ndim2 = node.get_ndim();
+    size_t* shape2 = node.get_shape();
     cout << "Dimension: " << (int)ndim2 << endl << "Shape: ";
     for (int i=0; i<ndim2; i++) cout << (int)shape2[i] << " ";
     cout << endl;
-    cout << "dtype: " << node->get_type_str() << endl;
+    cout << "dtype: " << node.get_type_str() << endl;
     // Get data back from tree
-    int32_t* array2 = node->as<int32_t*>();
+    int32_t* array2 = node.as<int32_t*>();
     cout << "Data: ";
     for (int i=0; i<shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;
     //Serialize data to JSON
-    tree->to_json("tree.txt",0);
+    tree.to_json("tree.txt",0);
     // On screen
-    tree->dump();
+    tree.dump();
     return 0;
-    */
 }

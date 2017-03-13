@@ -35,7 +35,7 @@ public:
     }
     ~HDCStorage() {
         _store->cleanup();
-        //delete _store;
+        delete _store;
         _pluma.unloadAll();
     }
     bool usesBuffersDirectly() {

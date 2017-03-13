@@ -383,8 +383,8 @@ Json::Value HDC::to_json(int mode) {
             {
                 auto children = get_children_ptr();
                 for (auto it = children->begin(); it != children->end(); ++it) {
-                    HDC* node = new HDC(storage,it->address.c_str());
-                    root[it->key.c_str()] = node->to_json(mode);
+                    HDC node(storage,it->address.c_str());
+                    root[it->key.c_str()] = node.to_json(mode);
                 }
                 break;
             }
@@ -394,8 +394,8 @@ Json::Value HDC::to_json(int mode) {
                 auto children = get_children_ptr();
                 int i=0;
                 for (auto it = children->begin(); it != children->end(); ++it) {
-                    HDC* node = new HDC(storage,it->address.c_str());
-                    root[i++] = node->to_json(mode);
+                    HDC node(storage,it->address.c_str());
+                    root[i++] = node.to_json(mode);
                 }
                 break;
             }

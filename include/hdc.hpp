@@ -123,8 +123,11 @@ public:
     };
     
     template<typename T> void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-        if(!has_child(path)) add_child(path, new HDC()); // TODO: add contructor for this!!
-        get(path)->set_data(_ndim, _shape, _data, _flags);
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h); // TODO: add contructor for this!!
+        }
+        get2(path).set_data(_ndim, _shape, _data, _flags);
     }
     
     template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault) {
@@ -136,14 +139,20 @@ public:
     };
     
     template<typename T> void set_data(string path, initializer_list<T> _data, Flags _flags = HDCDefault) {
-        if(!has_child(path)) add_child(path, new HDC());
-        get(path)->set_data(_data, _flags);
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h);
+        }
+        get2(path).set_data(_data, _flags);
     }
     
     
     template<typename T> void set_data(string path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
-        if(!has_child(path)) add_child(path, new HDC());
-        get(path)->set_data(_ndim, _shape, _data, _flags);
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h);
+        }
+        get2(path).set_data(_ndim, _shape, _data, _flags);
     }
     
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
@@ -165,12 +174,13 @@ public:
     template <typename T> void set_data(string path, vector<T> data) 
     {
         if (!this->has_child(path)) {
-            this->add_child(path, new HDC());
+            HDC h;
+            this->add_child(path, h);
             #ifdef DEBUG
             cout << "\"" << path << "\" not found, adding..." << endl;
             #endif
         }
-        this->get(path)->set_data<T>(data);
+        get2(path).set_data<T>(data);
         return;
     };
 
@@ -188,11 +198,15 @@ public:
         memcpy(buffer,&header,sizeof(header_t));
         memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
     
     void set_string(string path, string str) {
-        if(!has_child(path)) add_child(path, new HDC(str)); // TODO: add constructor for this!!
-        //get(path)->set_string(str);
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h); // TODO: add constructor for this!!
+        }
+        get2(path).set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
     void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
@@ -207,11 +221,15 @@ public:
         memcpy(buffer,&header,sizeof(header_t));
         memcpy(buffer+sizeof(header_t),&data,sizeof(T));
         storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     template <typename T>
     void set_data(string path, T data) {
-        if(!has_child(path)) add_child(path, new HDC());
-        get(path)->set_data(data);
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h);
+        }
+        get2(path).set_data(data);
     }
 
     /** Returns number of dimensions of current node. */
@@ -297,7 +315,7 @@ public:
         #ifdef DEBUG
         printf("as_string(%s)\n",path.c_str());
         #endif
-        return get(path)->as_string();
+        return get2(path).as_string();
     }
     
     /** Returns pointer to data of node under given path. */
@@ -306,7 +324,7 @@ public:
         #ifdef DEBUG
         printf("as<T>(%s)\n",path.c_str());
         #endif
-        return get(path)->as<T>();
+        return get2(path).as<T>();
     }
     
     /** Returns double. */
