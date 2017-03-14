@@ -437,11 +437,8 @@ void HDC::add_child(vector<string> vs, HDC& n) {
 vector<string> HDC::keys() {
     vector<string> k;
     map_t* children;
-    try {
-        children = get_children_ptr();
-    } catch(...) {
-        return k;
-    }
+    children = get_children_ptr();
+    if (children == nullptr) return k;
     k.reserve(children->size());
 
     for (map_t::iterator it = children->begin(); it != children->end(); ++it) {
@@ -938,10 +935,7 @@ bip::managed_external_buffer HDC::get_segment() {
 }
 
 map_t* HDC::get_children_ptr() {
-    if (header.type != HDC_STRUCT && header.type != HDC_LIST) {
-        cerr << ("get_children_ptr(): the type is not list or struct\n"); // TODO make more excetptions
-        throw new HDCException();
-    }
+    if (header.type != HDC_STRUCT && header.type != HDC_LIST) return nullptr;
     char* buffer = storage->get(uuid);
     auto segment = bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t), header.buffer_size-sizeof(header_t));
     return segment.find<map_t>("d").first;
