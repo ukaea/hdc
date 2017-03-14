@@ -9,6 +9,7 @@ TEST(HDC,EmptyNode) {
     EXPECT_EQ(HDC_EMPTY,h->get_type());
     EXPECT_STREQ("null",h->get_type_str().c_str());
     EXPECT_EQ(false,h->has_child("aaa"));
+    delete h;
 }
 
 TEST(HDC,EmptyArrayNode) {
@@ -19,18 +20,21 @@ TEST(HDC,EmptyArrayNode) {
     EXPECT_EQ(4,hi8->get_shape()[0]);
     EXPECT_EQ(INT8_ID,hi8->get_type());
     EXPECT_STREQ("int8",hi8->get_type_str().c_str());
+    delete hi8;
     
     HDC* hi32 = new HDC(ndim, shape, INT32_ID);
     EXPECT_EQ(1,hi32->get_ndim());
     EXPECT_EQ(4,hi32->get_shape()[0]);
     EXPECT_EQ(INT32_ID,hi32->get_type());
     EXPECT_STREQ("int32",hi32->get_type_str().c_str());
+    delete hi32;
     
     HDC* hd = new HDC(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hd->get_ndim());
     EXPECT_EQ(4,hd->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,hd->get_type());
     EXPECT_STREQ("float64",hd->get_type_str().c_str());
+    delete hd;
 }
 
 TEST(HDC,NodeManipulation) {
@@ -66,6 +70,10 @@ TEST(HDC,NodeManipulation) {
     tree->add_child("aaa/bbb",n1);
     tree->delete_child("aaa");
     EXPECT_EQ(false,tree->has_child("aaa"));
+    delete tree;
+    delete n1;
+    delete n2;
+    delete sub;
 }
 
 
@@ -87,6 +95,7 @@ TEST(HDC,Int8DataManipulation) {
     h->set_data(ndim,(size_t*)shape,data);
     data2 = h->as<int8_t*>();
     EXPECT_EQ(120,data2[3]);
+    delete h;
 }
 
 TEST(HDC,Int16DataManipulation) {
@@ -101,6 +110,7 @@ TEST(HDC,Int16DataManipulation) {
     EXPECT_STREQ("int16",h->get_type_str().c_str());
     int16_t* data2 = h->as<int16_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    delete h;
 }
 
 TEST(HDC,Int32DataManipulation) {
@@ -115,6 +125,7 @@ TEST(HDC,Int32DataManipulation) {
     EXPECT_STREQ("int32",h->get_type_str().c_str());
     int32_t* data2 = h->as<int32_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    delete h;
 }
 
 TEST(HDC,Int64DataManipulation) {
@@ -129,6 +140,7 @@ TEST(HDC,Int64DataManipulation) {
     EXPECT_STREQ("int64",h->get_type_str().c_str());
     int64_t* data2 = h->as<int64_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    delete h;
 }
 
 
@@ -144,6 +156,7 @@ TEST(HDC,DoubleDataManipulation) {
     EXPECT_STREQ("float64",h->get_type_str().c_str());
     double* data2 = h->as<double*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    delete h;
 }
 
 TEST(HDC,StringDataManipulation) {
@@ -152,6 +165,7 @@ TEST(HDC,StringDataManipulation) {
     h->set_string(str);
     std::string str2 = std::string(h->as_string());
     EXPECT_STREQ(str.c_str(), str2.c_str());
+    delete h;
 }
 
 TEST(HDC,SliceManipulation) {
@@ -179,6 +193,11 @@ TEST(HDC,SliceManipulation) {
     sl4->set_string("4");
     h->set_slice(1,sl4);
     EXPECT_STREQ("4",h->get_slice(1)->as_string().c_str());
+    delete h;
+    delete sl;
+    delete sl2;
+    delete sl3;
+    delete sl4;
 }
 
 TEST(HDC,GetKeys) {
@@ -196,6 +215,10 @@ TEST(HDC,GetKeys) {
     EXPECT_EQ(3u,tree->keys().size());
     vector<string> keys = tree->keys();
     for (size_t i=0;i<keys.size();i++) EXPECT_EQ(true,tree->has_child(keys[i]));
+    delete list;
+    delete val;
+    delete empty;
+    delete tree;
 }
 
 TEST(HDC,JsonComplete) {
@@ -273,4 +296,13 @@ TEST(HDC,JsonComplete) {
     EXPECT_EQ(4,d->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,d->get_type());
     EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
+    delete tree;
+    delete copy;
+    delete s;
+    delete d;
+    delete copy_;
+    delete tree2;
+    delete scalar;
+    delete list;
 }
+
