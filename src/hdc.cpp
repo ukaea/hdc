@@ -361,7 +361,6 @@ void HDC::add_child(vector<string> vs, HDC* n) {
                 }
             }
         }
-        else cerr << "Error: child already exists!" << endl;
         if (header.buffer_size != old_size) storage->set(uuid,buffer,header.buffer_size);
     }
     return;
@@ -430,7 +429,6 @@ void HDC::add_child(vector<string> vs, HDC& n) {
                 }
             }
         }
-        else cerr << "Error: child already exists!" << endl;
         if (header.buffer_size != old_size) storage->set(uuid,buffer,header.buffer_size);
     }
     return;
