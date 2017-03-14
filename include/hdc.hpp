@@ -96,26 +96,32 @@ public:
         #ifdef DEBUG
         printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
         #endif
-        if (storage->has(uuid)) {
-            storage->remove(uuid);
-        }
+        auto buffer = storage->get(uuid);
+        memcpy(&header,buffer,sizeof(header_t));
         // Start with determining of the buffer size
         size_t data_size = sizeof(T);
         for (int i=0;i<_ndim;i++) data_size *= _shape[i];
         size_t buffer_size = data_size + sizeof(header_t);
-        header.buffer_size = buffer_size;
-        header.data_size = data_size;
-        memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-        for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
-        header.flags = _flags;
-        header.type = to_typeid(_data[0]);
-        header.ndim = _ndim;
-        char* buffer = new char[header.buffer_size];
-        memcpy(buffer,&header,sizeof(header_t));
-        memcpy(buffer+sizeof(header_t),_data,header.data_size);
-        storage->set(uuid,buffer,header.buffer_size);
-        if (!storage->usesBuffersDirectly()) delete[] buffer;
-        return;
+        if (header.buffer_size == buffer_size) {
+            storage->lock(uuid);
+            memcpy(buffer+sizeof(header_t),_data,data_size);
+            storage->unlock(uuid);
+            return;
+        } else {
+            header.buffer_size = buffer_size;
+            header.data_size = data_size;
+            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
+            header.flags = _flags;
+            header.type = to_typeid(_data[0]);
+            header.ndim = _ndim;
+            char* buffer = new char[header.buffer_size];
+            memcpy(buffer,&header,sizeof(header_t));
+            memcpy(buffer+sizeof(header_t),_data,header.data_size);
+            storage->set(uuid,buffer,header.buffer_size);
+            if (!storage->usesBuffersDirectly()) delete[] buffer;
+            return;
+        }
     }
     
     template<typename T> void set_data(int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
