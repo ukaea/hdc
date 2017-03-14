@@ -28,6 +28,9 @@
 #include "utils.h"
 #include "hdc_storage.h"
 
+#ifdef _USE_HDF5
+#include <H5Cpp.h>
+#endif
 //#define DEBUG
 
 using namespace std;
@@ -373,9 +376,10 @@ public:
     bip::managed_external_buffer get_segment();
     map_t* get_children_ptr();
     void delete_data();
-    // flags set/get
-//     bool get_flag(uint pos);
-//     void set_flag(uint pos, bool val);
+#ifdef _USE_HDF5
+    void to_hdf5(std::string filename, std::string dataset_name = "data");
+    void write_node(H5::H5File* file, std::string path);
+#endif
 };
 
 HDC* from_json(const string& filename); //todo: make constructor from this
@@ -391,5 +395,10 @@ public:
   }
 };
 
+
+#ifdef _USE_HDF5
+    HDC from_hdf5(std::string filename, std::string dataset_name = "data");
+    HDC from_hdf5(H5::H5File* file, std::string path);
+#endif
 
 #endif // HDC_HPP

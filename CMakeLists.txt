@@ -83,6 +83,51 @@ include_directories("${googlebenchmark_SOURCE_DIR}/include")
 endif()
 ### gbenchmark
 
+### HDF5 begin
+
+# the option is here so that we can plug it into other
+# codes where HDF5 may be optional
+option(ENABLE_HDF5 "Enable HDF5 support" ON)
+if(ENABLE_HDF5)
+    find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
+    if(HDF5_FOUND)
+        include_directories(${HDF5_INCLUDE_DIR})
+        set(_hdf5_libs hdf5 hdf5_cpp)
+        message("HDF5 library found: ${HDF5_INCLUDE_DIR}")
+    else()
+        message("HDF5 library not found, trying to build it...")
+        # we did not find it so we fetch it from the web, configure, compile, and link
+        include(ExternalProject)
+        set(ExternalProjectCMakeArgs
+            -DHDF5_BUILD_CPP_LIB=ON
+            )
+        set(_hdf5_version "1.10.0-patch1")
+        file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
+        ExternalProject_Add(hdf5_local
+            DOWNLOAD_COMMAND curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_hdf5_version}.tar.gz | tar xvz -C ${PROJECT_BINARY_DIR}/hdf5_local/src
+            CMAKE_ARGS ${ExternalProjectCMakeArgs}
+            SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_hdf5_version}
+            BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
+            STAMP_DIR  ${PROJECT_BINARY_DIR}/hdf5_local/stamp
+            TMP_DIR    ${PROJECT_BINARY_DIR}/hdf5_local/tmp
+            INSTALL_COMMAND ""
+            )
+        include_directories(
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_hdf5_version}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_hdf5_version}/c++/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build
+            )
+        set(_hdf5_libs
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_cpp.a
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
+            -ldl
+            )
+    endif()
+    add_definitions(-D_USE_HDF5=1)
+endif()
+
+### HDF5 end
+
 option(DEBUG "Turns some debug output on or off." OFF)
 if(DEBUG)
     add_definitions(-DDEBUG)
