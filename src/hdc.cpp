@@ -333,7 +333,7 @@ void HDC::add_child(vector<string> vs, HDC* n) {
     if (!vs.empty()) { // Create intermediate nodes here
         HDC h;
         add_child(first,h);
-        get2(first).add_child(vs,n);
+        get(first).add_child(vs,n);
     } else {
         if (children->count(first.c_str()) == 0) {
             // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
@@ -401,7 +401,7 @@ void HDC::add_child(vector<string> vs, HDC& n) {
     if (!vs.empty()) { // Create intermediate nodes here
         HDC h;
         add_child(first,h);
-        get2(first).add_child(vs,n);
+        get(first).add_child(vs,n);
     } else {
         if (children->count(first.c_str()) == 0) {
             // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
@@ -485,7 +485,7 @@ void HDC::delete_child(vector<string> vs) {
             children->erase(it);
         }
     } else {
-        get2(first.c_str()).delete_child(vs);
+        get(first.c_str()).delete_child(vs);
     }
     // set type back to empty if the only child was deleted.
     //if (children->empty()) set_type(EMPTY_ID); Not sure if to do this
@@ -594,7 +594,7 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
             }
             return new HDC(storage,children->get<by_index>()[i].address.c_str());
         }
-        else return get2(first).get_slice(vs,i);
+        else return get(first).get_slice(vs,i);
     } else {
         printf("Not found: get_slice(");
         for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
@@ -618,11 +618,11 @@ HDC* HDC::get_slice(string path, size_t i) {
     return get_slice(split(path,'/'),i);
 }
 
-HDC* HDC::get(string path) {
+HDC* HDC::get_ptr(string path) {
     return get(split(path,'/'));
 }
 
-HDC HDC::get2(string path) {
+HDC HDC::get(string path) {
     return get2(split(path,'/'));
 }
 
@@ -652,7 +652,7 @@ void HDC::set_child(vector<string> vs, HDC* n) {
             // TODO: get_allocator -- viz vyse...
             children->insert(record(first.c_str(),n->get_uuid().c_str(),ca));
         }
-    } else get2(first).set_child(vs, n);
+    } else get(first).set_child(vs, n);
     return;
 }
 
@@ -745,7 +745,7 @@ void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get2(path).set_data_c(_ndim, _shape, _data, _type);
+    get(path).set_data_c(_ndim, _shape, _data, _type);
 }
 
 void HDC::insert_slice(size_t i, HDC* h)
@@ -870,11 +870,11 @@ string HDC::get_type_str() {
 }
 
 string HDC::get_type_str(string path) {
-    return get2(path).get_type_str();
+    return get(path).get_type_str();
 }
 
 string HDC::get_datashape_str(string path) {
-    return get2(path).get_datashape_str();
+    return get(path).get_datashape_str();
 }
 
 string HDC::get_datashape_str() {
@@ -895,12 +895,12 @@ size_t* HDC::get_shape() {
 int HDC::get_ndim(string path) {
     //TODO: make more error-proof - add has check -> make it as function???
     memcpy(&header,storage->get(uuid),sizeof(header_t));
-    return get2(path).get_ndim();
+    return get(path).get_ndim();
 }
 
 size_t* HDC::get_shape(string path) {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
-    return get2(path).get_shape();
+    return get(path).get_shape();
 }
 
 
@@ -912,7 +912,6 @@ size_t HDC::childs_count()
 char* HDC::get_buffer() {
     return storage->get(uuid);
 }
-
 string HDC::get_uuid() {
     return uuid;
 }

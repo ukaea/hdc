@@ -75,7 +75,7 @@ void hdc_delete_child(struct hdc_t* tree, char* path) {
 
 struct hdc_t* hdc_get(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get((string)path);
+    HDC* node = t->get_ptr((string)path);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;

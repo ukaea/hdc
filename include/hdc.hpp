@@ -136,7 +136,7 @@ public:
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
         }
-        get2(path).set_data(_ndim, _shape, _data, _flags);
+        get(path).set_data(_ndim, _shape, _data, _flags);
     }
     
     template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault) {
@@ -152,7 +152,7 @@ public:
             HDC h;
             add_child(path, h);
         }
-        get2(path).set_data(_data, _flags);
+        get(path).set_data(_data, _flags);
     }
     
     
@@ -161,7 +161,7 @@ public:
             HDC h;
             add_child(path, h);
         }
-        get2(path).set_data(_ndim, _shape, _data, _flags);
+        get(path).set_data(_ndim, _shape, _data, _flags);
     }
     
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
@@ -189,7 +189,7 @@ public:
             cout << "\"" << path << "\" not found, adding..." << endl;
             #endif
         }
-        get2(path).set_data<T>(data);
+        get(path).set_data<T>(data);
         return;
     };
 
@@ -215,7 +215,7 @@ public:
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
         }
-        get2(path).set_string(str);
+        get(path).set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
     void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
@@ -238,7 +238,7 @@ public:
             HDC h;
             add_child(path, h);
         }
-        get2(path).set_data(data);
+        get(path).set_data(data);
     }
 
     /** Returns number of dimensions of current node. */
@@ -258,8 +258,8 @@ public:
     /** Deletes HDC subtree. */
     void delete_child(string path);
     /** Returns subtree by path. */
-    HDC* get(string path);
-    HDC get2(string path);
+    HDC* get_ptr(string path);
+    HDC get(string path);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice(string path, size_t i); 
     /** Returns i-th subnode if HDC_LIST is the type. */
@@ -324,7 +324,7 @@ public:
         #ifdef DEBUG
         printf("as_string(%s)\n",path.c_str());
         #endif
-        return get2(path).as_string();
+        return get(path).as_string();
     }
     
     /** Returns pointer to data of node under given path. */
@@ -333,7 +333,7 @@ public:
         #ifdef DEBUG
         printf("as<T>(%s)\n",path.c_str());
         #endif
-        return get2(path).as<T>();
+        return get(path).as<T>();
     }
     
     /** Returns double. */

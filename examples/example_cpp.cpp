@@ -2,7 +2,7 @@
 #include "hdc.hpp"
 
 #include <vector>
-
+#include <string>
 using namespace std;
 
 
@@ -25,9 +25,9 @@ int main() {
 
     for (auto it : tree.keys()) cout << "key: " << it << endl;
     // Get subtree
-    HDC subtree = tree.get2("aaa/bbb");
+    HDC subtree = tree.get("aaa/bbb");
     // Get node
-    HDC node = subtree.get2("ccc");
+    HDC node = subtree.get("ccc");
 
     // Ask whether child exists
     cout << "has_child: " << tree.has_child("aaa/bbb/ccc") << endl;
@@ -43,7 +43,6 @@ int main() {
     // Add data to a single node
     HDC data;
     data.set_data(1,shape,array);
-
     // Add data to a subtree
     tree.set_data("aaa/bbb/ccc",1,shape,array);
 
@@ -61,6 +60,10 @@ int main() {
     cout << endl;
     //Serialize data to JSON
     tree.to_json("tree.txt",0);
+    tree.to_hdf5("tree.h5");
+    cout << "written\n";
+    HDC hhh = from_hdf5("tree.h5","data");
+    hhh.dump();
     // On screen
     tree.dump();
     return 0;

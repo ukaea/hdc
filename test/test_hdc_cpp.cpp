@@ -52,17 +52,17 @@ TEST(HDC,NodeManipulation) {
     EXPECT_STREQ("struct",tree->get_type_str().c_str());
     EXPECT_EQ(true,tree->has_child("aaa/bbb"));
     EXPECT_EQ(true,tree->has_child("aaa"));
-    EXPECT_STREQ(n1->get_uuid().c_str(),tree->get("aaa/bbb")->get_uuid().c_str());
-    EXPECT_STRNE(n2->get_uuid().c_str(),tree->get("aaa/bbb")->get_uuid().c_str());
+    EXPECT_STREQ(n1->get_uuid().c_str(),tree->get_ptr("aaa/bbb")->get_uuid().c_str());
+    EXPECT_STRNE(n2->get_uuid().c_str(),tree->get_ptr("aaa/bbb")->get_uuid().c_str());
     // Try subtree
-    HDC* sub = tree->get("aaa");
+    HDC* sub = tree->get_ptr("aaa");
     EXPECT_EQ(true,sub->has_child("bbb"));
-    EXPECT_STREQ(n1->get_uuid().c_str(),sub->get("bbb")->get_uuid().c_str());
+    EXPECT_STREQ(n1->get_uuid().c_str(),sub->get_ptr("bbb")->get_uuid().c_str());
     // Test set
     tree->set_child("aaa/bbb",n2);
     EXPECT_EQ(true,sub->has_child("bbb"));
-    EXPECT_STREQ(n2->get_uuid().c_str(),sub->get("bbb")->get_uuid().c_str());
-    EXPECT_STRNE(n1->get_uuid().c_str(),tree->get("aaa/bbb")->get_uuid().c_str());
+    EXPECT_STREQ(n2->get_uuid().c_str(),sub->get_ptr("bbb")->get_uuid().c_str());
+    EXPECT_STRNE(n1->get_uuid().c_str(),tree->get_ptr("aaa/bbb")->get_uuid().c_str());
     // Test delete
     tree->delete_child("aaa/bbb");
     EXPECT_EQ(false,tree->has_child("aaa/bbb"));
@@ -246,56 +246,56 @@ TEST(HDC,JsonComplete) {
     HDC* tree2 = from_json("tree.txt");
     tree2->to_json("tree2.txt");
     // test tree
-    HDC* s = tree2->get("aaa/bbb/double");
+    HDC* s = tree2->get_ptr("aaa/bbb/double");
 
     // Test double
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,s->get_type());
-    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), s->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), s->get_type_str().c_str());
 
     double* data_double_in = s->as<double*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_double[i],data_double_in[i]);
 
     // Test int
-    s = tree2->get("aaa/bbb/int");
+    s = tree2->get_ptr("aaa/bbb/int");
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(INT32_ID,s->get_type());
-    EXPECT_STREQ(tree->get("aaa/bbb/int")->get_type_str().c_str(), tree2->get("aaa/bbb/int")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/int")->get_type_str().c_str(), tree2->get_ptr("aaa/bbb/int")->get_type_str().c_str());
     int32_t* data_int_in = s->as<int32_t*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_int[i],data_int_in[i]);
     
     // Test empty
-    EXPECT_EQ(HDC_EMPTY,tree2->get("aaa/bbb/empty")->get_type());
+    EXPECT_EQ(HDC_EMPTY,tree2->get_ptr("aaa/bbb/empty")->get_type());
     
     // Test list
-    s = tree2->get("aaa/list");
+    s = tree2->get_ptr("aaa/list");
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(5,s->get_shape()[0]);
     EXPECT_EQ(HDC_LIST,s->get_type());
-    EXPECT_STREQ(tree->get("aaa/list")->get_type_str().c_str(), tree2->get("aaa/list")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/list")->get_type_str().c_str(), tree2->get_ptr("aaa/list")->get_type_str().c_str());
     for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice(i)->get_type());
     
     // Test string
-    EXPECT_STREQ(tree->get("aaa/string")->as_string().c_str(), tree2->get("aaa/string")->as_string().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2->get_ptr("aaa/string")->as_string().c_str());
     
     // test copy c-tor
     
     HDC* copy = new HDC(tree2);
-    HDC* d = copy->get("aaa/bbb/double");
+    HDC* d = copy->get_ptr("aaa/bbb/double");
 
     EXPECT_EQ(1,d->get_ndim());
     EXPECT_EQ(4,d->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,d->get_type());
-    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
     HDC* copy_ = tree->copy();
     // test copy() method
-    d = copy_->get("aaa/bbb/double");
+    d = copy_->get_ptr("aaa/bbb/double");
     EXPECT_EQ(1,d->get_ndim());
     EXPECT_EQ(4,d->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,d->get_type());
-    EXPECT_STREQ(tree->get("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
     delete tree;
     delete copy;
     delete s;

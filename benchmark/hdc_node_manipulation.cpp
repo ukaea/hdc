@@ -45,7 +45,7 @@ static void BM_HDC_GetChildPathDepth(benchmark::State& state) {
     HDC* tree = new HDC();
     tree->add_child(path,new HDC());
     while (state.KeepRunning()) {
-        HDC* node = tree->get(path);
+        HDC* node = tree->get_ptr(path);
     }
     state.SetItemsProcessed(state.iterations());
     delete tree;
@@ -73,7 +73,7 @@ static void BM_HDC_GetChildPathLength(benchmark::State& state) {
     HDC* tree = new HDC();
     tree->add_child(path,new HDC());
     while (state.KeepRunning()) {
-        HDC* node = tree->get(path);
+        HDC* node = tree->get_ptr(path);
     }
     state.SetItemsProcessed(state.iterations());
     delete tree;
@@ -117,7 +117,7 @@ static void BM_HDC_GetChildMultipleItems(benchmark::State& state) {
     while (state.KeepRunning()) {
         // measure
         for (int i=0;i<100;i++) {
-            HDC* child = tree->get(std::to_string(i*n/100));
+            HDC* child = tree->get_ptr(std::to_string(i*n/100));
         }
     }
     state.SetItemsProcessed(100 * state.iterations());
