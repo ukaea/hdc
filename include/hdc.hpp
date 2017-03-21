@@ -67,8 +67,8 @@ private:
     void add_child(vector<string> vs, HDC& n);
     void set_child(vector<string> vs, HDC* n);
     void delete_child(vector<string> vs);
-    HDC* get(vector<string> vs);
-    HDC get2(vector<string> vs);
+    HDC* get_ptr(vector<string> vs);
+    HDC get(vector<string> vs);
     HDC* get_slice(vector<string> vs, size_t i);
     bool has_child(vector<string> vs);
 

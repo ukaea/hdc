@@ -497,7 +497,7 @@ void HDC::delete_child(string path) {
     return;
 }
 
-HDC* HDC::get(vector<string> vs) {
+HDC* HDC::get_ptr(vector<string> vs) {
     #ifdef DEBUG
     printf("get(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
@@ -526,7 +526,7 @@ HDC* HDC::get(vector<string> vs) {
         }
         else {
             HDC child(storage,child_uuid);
-            return child.get(vs);
+            return child.get_ptr(vs);
         }
     } else {
         cout << "Not found" << endl;
@@ -535,7 +535,7 @@ HDC* HDC::get(vector<string> vs) {
     }
 }
 
-HDC HDC::get2(vector<string> vs) {
+HDC HDC::get(vector<string> vs) {
     #ifdef DEBUG
     printf("get(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
@@ -565,7 +565,7 @@ HDC HDC::get2(vector<string> vs) {
         }
         else {
             HDC child(storage,child_uuid);
-            return child.get2(vs);
+            return child.get(vs);
         }
     } else {
         cout << "Not found" << endl;
@@ -619,11 +619,11 @@ HDC* HDC::get_slice(string path, size_t i) {
 }
 
 HDC* HDC::get_ptr(string path) {
-    return get(split(path,'/'));
+    return get_ptr(split(path,'/'));
 }
 
 HDC HDC::get(string path) {
-    return get2(split(path,'/'));
+    return get(split(path,'/'));
 }
 
 void HDC::set_child(vector<string> vs, HDC* n) {
