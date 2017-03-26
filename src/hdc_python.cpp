@@ -17,6 +17,7 @@ PYBIND11_PLUGIN(libhdc_python) {
     m.def("from_cpp_ptr", &new_HDC_from_cpp_ptr, "New HDC from CPP pointer");
     m.def("from_c_ptr", &new_HDC_from_c_ptr, "New HDC from hdc_t struct pointer");
 
+    // seems like we have to repeat the definition here
     py::enum_<TypeID>(m, "TypeID")
         .value("EMPTY_ID", EMPTY_ID)
         .value("STRUCT_ID", STRUCT_ID)
@@ -79,36 +80,54 @@ PYBIND11_PLUGIN(libhdc_python) {
 
             /* Request a buffer descriptor from Python */
             py::buffer_info info = b.request();
-            std::cout << "ndim: " << info.ndim << std::endl;
-            std::cout << info.format << std::to_string(info.itemsize) << std::endl;
+            // std::cout << "ndim: " << info.ndim << std::endl;
+            // std::cout << "type: " << info.format << std::to_string(info.itemsize) << std::endl;
             // std::cout << "shape: " << info.shape << std::endl;
 
-            TypeID typ = to_typeid(info.format, info.itemsize);
+            TypeID typ = numpy_format_to_typeid(info.format, info.itemsize);
             if (typ == ERROR_ID)
             {
-                std::cout << "error id" << std::endl;
+                throw std::runtime_error("Incompatible data type");
             } else {
                 self.set_data_c(info.ndim, &info.shape[0], info.ptr, typ);
             }
 
-            // /* Some sanity checks ... */
-            // if (info.format != py::format_descriptor<Scalar>::format())
-            //     throw std::runtime_error("Incompatible format: expected a double array!");
+        })
 
-            // if (info.ndim != 2)
-            //     throw std::runtime_error("Incompatible buffer dimension!");
+       .def_buffer([](HDC &hdc) -> py::buffer_info {
 
-            // auto strides = Strides(
-            //     info.strides[rowMajor ? 0 : 1] / sizeof(Scalar),
-            //     info.strides[rowMajor ? 1 : 0] / sizeof(Scalar));
+            int ndim = hdc.get_ndim();
+            size_t* shape = hdc.get_shape();
+            std::vector<size_t> shape_vec; 
+            shape_vec.assign(shape, shape + ndim);
 
-            // auto map = Eigen::Map<Matrix, 0, Strides>(
-            //     static_cat<Scalar *>(info.ptr), info.shape[0], info.shape[1], strides);
-
-            // new (&m) Matrix(map);
-            // return info.format + std::to_string(info.itemsize);
-            return typ;
-            });
+            // TODO add more data types
+            if (hdc.get_type() == DOUBLE_ID) {
+                return py::buffer_info(
+                    hdc.as<double*>(),                       /* Pointer to buffer */
+                    sizeof(double),                          /* Size of one scalar */
+                    py::format_descriptor<double>::format(), /* Python struct-style format descriptor */
+                    ndim,                                    /* Number of dimensions */
+                    shape_vec,                               /* Buffer dimensions */
+                    hdc.get_strides()                        /* Strides (in bytes) for each index  */
+                );
+            }
+            else if (hdc.get_type() == INT32_ID) {
+                return py::buffer_info(
+                    hdc.as<int32_t*>(),                       /* Pointer to buffer */
+                    sizeof(int32_t),                          /* Size of one scalar */
+                    py::format_descriptor<int32_t>::format(), /* Python struct-style format descriptor */
+                    ndim,                                    /* Number of dimensions */
+                    shape_vec,                               /* Buffer dimensions */
+                    hdc.get_strides()                        /* Strides (in bytes) for each index  */
+                );
+            }
+            else
+            {
+                throw std::runtime_error("Incompatible data type");
+            }
+        })
+        ;
 
     return m.ptr();
 

@@ -224,6 +224,7 @@ public:
     int get_ndim();
     /** Returns shape of current node. */
     size_t* get_shape();
+    std::vector<size_t> get_strides();
     bool is_external();
     bool is_readonly();
     bool is_fortranorder();

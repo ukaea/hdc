@@ -46,7 +46,7 @@ TypeID to_typeid(uint8_t a);
 TypeID to_typeid(string a);
 TypeID to_typeid(char* a);
 TypeID to_typeid(bool a);
-TypeID to_typeid(string format, size_t itemsize);
+TypeID numpy_format_to_typeid(string format, size_t itemsize);
 
 /* -------------------------  Other stuff ----------------------------- */
 

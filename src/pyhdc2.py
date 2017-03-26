@@ -91,6 +91,9 @@ class HDC(object):
         else:
             raise NotImplementedError("{typ} not supported in HDC.set_data".format(typ=type(data)))
 
+    def __array__(self, copy=False, *args, **kwargs):
+        return np.array(self._hdc_obj, *args, copy=copy, **kwargs)
+
     # def __setitem__(self, key, value):
     #     if isinstance(key, six.string_types):
     #         ckey = key.encode()

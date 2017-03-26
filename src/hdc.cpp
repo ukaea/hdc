@@ -717,6 +717,26 @@ size_t* HDC::get_shape() {
     return shape;
 }
 
+std::vector<size_t> HDC::get_strides() {
+    std::vector<size_t> strides;
+    size_t elem_size = hdc_sizeof(type);
+    size_t last_stride;
+    // TODO this is for C-arrays (row-major)
+    for (int i = 0; i < ndim; ++i)
+    {
+        if (i == 0)
+        {
+            last_stride = elem_size;
+        } else
+        {
+            last_stride = shape[ndim - i] * last_stride;
+        }
+        strides.insert(strides.begin(), last_stride);
+    }
+
+    return strides;
+}
+
 int HDC::get_ndim(string path) {
     //TODO: make more error-proof - add has check -> make it as function???
     return get(path)->get_ndim();

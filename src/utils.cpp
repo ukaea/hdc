@@ -175,7 +175,7 @@ TypeID to_typeid(string a) {return STRING_ID;};
 TypeID to_typeid(char* a) {return STRING_ID;};
 TypeID to_typeid(char const* a) {return STRING_ID;};
 TypeID to_typeid(bool a) {return BOOL_ID;};
-TypeID to_typeid(string format, size_t itemsize) {
+TypeID numpy_format_to_typeid(string format, size_t itemsize) {
     if (format == "i") {
         return INT32_ID;
     } else if (format == "d") {
