@@ -45,20 +45,26 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("set_data_int32", (void (HDC::*)(int32_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(double data)) &HDC::set_data, "Sets data to node")
         .def("set_string", (void (HDC::*)(std::string str)) &HDC::set_string, "Sets data to node")
+        .def("set_string", (void (HDC::*)(std::string path, std::string str)) &HDC::set_string, "Sets data to node")
         .def("set_data_int8", (void (HDC::*)(std::string path, int8_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_int32", (void (HDC::*)(std::string path, int32_t data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(std::string path, double data)) &HDC::set_data, "Sets data to node")
-        .def("__setitem__", (void (HDC::*)(std::string path, double data)) &HDC::set_data, "Sets data to node")
-        .def("__setitem__", (void (HDC::*)(std::string path, vector<double> data)) &HDC::set_data, "Sets data to node")
-        .def("__setitem__", (void (HDC::*)(vector<double> data)) &HDC::set_data, "Sets data to node")
-        .def("__setitem__", (void (HDC::*)(std::string path, int8_t data)) &HDC::set_data, "Sets data to node")
-        .def("__setitem__", (void (HDC::*)(std::string path, vector<int8_t> data)) &HDC::set_data, "Sets data to node")
-        .def("__setitem__", (void (HDC::*)(vector<int8_t> data)) &HDC::set_data, "Sets data to node")
+        // .def("__setitem__", (void (HDC::*)(std::string path, double data)) &HDC::set_data, "Sets data to node")
+        // .def("__setitem__", (void (HDC::*)(std::string path, vector<double> data)) &HDC::set_data, "Sets data to node")
+        // .def("__setitem__", (void (HDC::*)(vector<double> data)) &HDC::set_data, "Sets data to node")
+        // .def("__setitem__", (void (HDC::*)(std::string path, int8_t data)) &HDC::set_data, "Sets data to node")
+        // .def("__setitem__", (void (HDC::*)(std::string path, vector<int8_t> data)) &HDC::set_data, "Sets data to node")
+        // .def("__setitem__", (void (HDC::*)(vector<int8_t> data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(vector<double> data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(double data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(std::string path, vector<double> data)) &HDC::set_data, "Sets data to node")
         .def("set_data_c", (void (HDC::*)(int _ndim, size_t* _shape, void* _data, TypeID _type)) &HDC::set_data_c, "Sets data to node")
         .def("add_child", (void (HDC::*)(std::string, HDC* h)) &HDC::add_child, "Adds an empty node to tree")
+        .def("add_child", [](HDC &self, std::string key) {
+            HDC* tree = new HDC();
+            self.add_child(key, tree);
+            return tree;
+        })
         .def("get", (HDC* (HDC::*)(std::string)) &HDC::get, "Gets node from tree")
         .def("delete_child", (void (HDC::*)(std::string)) &HDC::delete_child, "Deletes node from tree")
         .def("has_child", (bool (HDC::*)(std::string)) &HDC::has_child, "Returns True if the child with given address exists.")
@@ -73,7 +79,7 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("to_json_string", (std::string (HDC::*)(int mode)) &HDC::to_json_string, "Prints JSON representation of object",
                                 py::arg("mode") = 0)
         .def("__repr__", []() {return "<libHDC.HDC>";})
-        .def("__getitem__", (HDC* (HDC::*)(std::string path)) &HDC::get, "Returns C pointer to self (Pycapsule stuff)")
+        // .def("__getitem__", (HDC* (HDC::*)(std::string path)) &HDC::get, "Returns C pointer to self (Pycapsule stuff)")
         .def("get_type_str", (std::string (HDC::*)()) &HDC::get_type_str, "get_type_str")
         // .def("set_numpy", (std::string (HDC::*)(py::buffer b)) {
         .def("set_numpy", [](HDC &self, py::buffer b) {

@@ -32,9 +32,13 @@ class HDC(object):
 
     def __init__(self, data=None):
         super(HDC, self).__init__()
-        self._hdc_obj = libhdc_.HDC()
-        if data is not None:
-            self.set_data(data)
+        if isinstance(data, libhdc_.HDC):
+            print('# copy constructor')
+            self._hdc_obj = data
+        else:
+            self._hdc_obj = libhdc_.HDC()
+            if data is not None:
+                self.set_data(data)
 
     @classmethod
     def from_cpp_ptr(cls, cpp_ptr):
@@ -94,32 +98,50 @@ class HDC(object):
     def __array__(self, copy=False, *args, **kwargs):
         return np.array(self._hdc_obj, *args, copy=copy, **kwargs)
 
-    # def __setitem__(self, key, value):
-    #     if isinstance(key, six.string_types):
-    #         ckey = key.encode()
-    #         if not _hdc_has_child(self._c_ptr, ckey):
-    #             new_hdc = self.__class__(value)
-    #             # TODO this is the problem - new_hdc gets lost from Python
-    #             # we have to explain numpy not to deallocate the buffer
-    #             libchdc.hdc_add_child(self._c_ptr, ckey, new_hdc._c_ptr)
-    #         else:
-    #             self[key].set_data(value)
-
-    #     else:
-    #         # key is numeric
-    #         libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
-
-    # def __getitem__(self, key):
-    #     if isinstance(key, six.string_types):
-    #         ckey = key.encode()
-    #         if not _hdc_has_child(self._c_ptr, ckey):
-    #             raise KeyError('key not found')
-    #         res = self.from_c_ptr(_hdc_get(self._c_ptr, ckey))
-    #         return res
-    #     else:
-    #         ckey = ctypes.c_size_t(key)
-    #         res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
-    #         return res
     def asarray(self, copy=False):
         return np.asarray(self, copy=copy)
 
+    def __contains__(self, item):
+        print('contains')
+        if isinstance(item, six.string_types):
+            return self._hdc_obj.has_child(item)
+        else:
+            raise NotImplementedError()
+
+    def __setitem__(self, key, value):
+        print('setitem')
+        if isinstance(key, six.string_types):
+            if key in self:
+                self[key].set_data(value)
+            else:
+                # TODO test if this is an empty or struct type container
+                # new_hdc = self.__class__(value)
+                # print('new_hdc')
+                # new_hdc.dump()
+                # # TODO this is the problem - new_hdc gets lost from Python
+                # # we have to explain numpy not to deallocate the buffer
+                # self._hdc_obj.add_child(key, new_hdc._hdc_obj)
+                # self.dump()
+                # print('done set')
+                print('add empty')
+                new_hdc_obj = self._hdc_obj.add_child(key)
+                new_hdc = self.__class__(new_hdc_obj)
+                # new_hdc = self.__class__(self._hdc_obj.get(key))
+                new_hdc.dump()
+                new_hdc.set_data(value)
+                new_hdc.dump()
+                self.dump()
+                print('done set')
+        else:
+            # key is numeric
+            raise NotImplementedError('Index assigment not implemented')
+
+    def __getitem__(self, key):
+        print('getitem')
+        if isinstance(key, six.string_types):
+            if key not in self:
+                raise KeyError('key not found')
+            res = self.__class__(self._hdc_obj.get(key))
+            return res
+        else:
+            raise NotImplementedError('Slicing not implemented')
