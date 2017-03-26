@@ -120,3 +120,6 @@ class HDC(object):
     #         ckey = ctypes.c_size_t(key)
     #         res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
     #         return res
+    def asarray(self, copy=False):
+        return np.asarray(self, copy=copy)
+
