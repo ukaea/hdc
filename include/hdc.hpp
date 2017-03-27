@@ -32,6 +32,14 @@
 #include <H5Cpp.h>
 #endif
 //#define DEBUG
+#define _DEBUG
+#ifdef _DEBUG
+#define DEBUG_STDERR(x) (std::cerr << (x) << std::endl)
+#define DEBUG_STDOUT(x) (std::cout << (x) << std::endl)
+#else
+#define DEBUG_STDERR(x)
+#define DEBUG_STDOUT(x)
+#endif
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
@@ -397,8 +405,7 @@ public:
 
 
 #ifdef _USE_HDF5
-    HDC from_hdf5(std::string filename, std::string dataset_name = "data");
-    HDC from_hdf5(H5::H5File* file, std::string path);
+#include "hdc_hdf5.h"
 #endif
 
 #endif // HDC_HPP

@@ -62,7 +62,7 @@ int main() {
     tree.to_json("tree.txt",0);
     tree.to_hdf5("tree.h5");
     cout << "written\n";
-    HDC hhh = from_hdf5("tree.h5","data");
+    HDC hhh = from_hdf5("tree.h5","/data");
     hhh.dump();
     // On screen
     tree.dump();
