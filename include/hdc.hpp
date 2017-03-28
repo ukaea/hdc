@@ -37,16 +37,13 @@
 #ifdef DEBUG
 #define DEBUG_STDERR(x) (std::cerr << (x) << std::endl)
 #define DEBUG_STDOUT(x) (std::cout << (x) << std::endl)
+#define D(x) x
 #else
 #define DEBUG_STDERR(x)
 #define DEBUG_STDOUT(x)
-#endif
-
-#ifdef DEBUG
-#define D(x) x
-#else
 #define D(x)
 #endif
+
 
 using namespace std;
 template<typename T> struct identity { typedef T type; };
