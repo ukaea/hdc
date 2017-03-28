@@ -59,12 +59,12 @@ PYBIND11_PLUGIN(libhdc_python) {
         .def("set_data_double", (void (HDC::*)(double data)) &HDC::set_data, "Sets data to node")
         .def("set_data_double", (void (HDC::*)(std::string path, vector<double> data)) &HDC::set_data, "Sets data to node")
         .def("set_data_c", (void (HDC::*)(int _ndim, size_t* _shape, void* _data, TypeID _type)) &HDC::set_data_c, "Sets data to node")
-        .def("add_child", (void (HDC::*)(std::string, HDC* h)) &HDC::add_child, "Adds an empty node to tree")
+        .def("add_child", (void (HDC::*)(std::string, HDC* h)) &HDC::add_child, "Adds an empty node to tree",py::return_value_policy::copy)
         .def("add_child", [](HDC &self, std::string key) {
             HDC* tree = new HDC();
             self.add_child(key, tree);
             return tree;
-        })
+        },py::return_value_policy::copy)
         .def("get", (HDC* (HDC::*)(std::string)) &HDC::get, "Gets node from tree")
         .def("delete_child", (void (HDC::*)(std::string)) &HDC::delete_child, "Deletes node from tree")
         .def("has_child", (bool (HDC::*)(std::string)) &HDC::has_child, "Returns True if the child with given address exists.")
