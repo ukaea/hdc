@@ -58,12 +58,12 @@ size_t* get_shape(const Json::Value& root) {
         curr = curr[0];
         dim++;
     }
-    #ifdef DEBUG
+    D(
     cout << "Dimension: " << dim << endl;
     cout << "Shape: (" << shape[0];
     for (int i=1; i<dim; i++) cout << ", " << shape[i];
     cout << ")" << endl;
-    #endif
+    )
     size_t* res = new size_t[dim];
     for (int i=0;i<dim;i++) res[i] = shape[i];
     return res;
@@ -87,57 +87,43 @@ HDC* json_to_hdc(const Json::Value& root) {
     switch(root.type()) {
         {
         case(Json::nullValue):
-            #ifdef DEBUG
-            cout << "root is null" << endl;
-            #endif
+            DEBUG_STDOUT("root is null");
             tree->set_type(EMPTY_ID);
             break;
         }
         case(Json::intValue):
         {
-            #ifdef DEBUG
-            cout << "root is int, value = " << root.asInt() << endl;
-            #endif
+            DEBUG_STDOUT("root is int, value = "+to_string(root.asInt()));
             tree->set_data<int32_t>(root.asInt());
             break;
         }
         case(Json::uintValue):
         {
-            #ifdef DEBUG
-            cout << "root is uint, value = " << root.asUInt() << endl;
-            #endif
+            DEBUG_STDOUT("root is uint, value = "+to_string(root.asUInt()));
             tree->set_data<uint32_t>(root.asUInt());
             break;
         }
         case(Json::realValue):
         {
-            #ifdef DEBUG
-            cout << "root is double, value = " << root.asDouble() << endl;
-            #endif
+            DEBUG_STDOUT("root is double, value = "+to_string(root.asDouble()));
             tree->set_data(root.asDouble());
             break;
         }
         case(Json::stringValue):
         {
-            #ifdef DEBUG
-            cout << "root is string, value = " << root.asCString() << endl;
-            #endif
+            DEBUG_STDOUT("root is string, value = "+string(root.asCString()));
             tree->set_string(root.asCString());
             break;
         }
         case(Json::booleanValue):
         {
-            #ifdef DEBUG
-            cout << "root is bool, value = " << root.asBool() << endl;
-            #endif
+            DEBUG_STDOUT("root is bool, value = "+to_string(root.asBool()));
             tree->set_data<bool>(root.asBool());
             break;
         }
         case(Json::arrayValue):
         {
-            #ifdef DEBUG
-            cout << "root is array, size = " << root.size() << endl;
-            #endif
+            DEBUG_STDOUT("root is array, size = "+to_string(root.size()));
             if (is_all_numeric(root)) {
                 int8_t ndim = get_ndim(root);
                 if (ndim > HDC_MAX_DIMS) {
@@ -211,13 +197,9 @@ HDC* json_to_hdc(const Json::Value& root) {
         }
         case(Json::objectValue):
         {
-            #ifdef DEBUG
-            cout << "root is object, children:" << endl;
-            #endif
+            DEBUG_STDOUT("root is object, children:\n");
             for (Json::ValueConstIterator it = root.begin(); it != root.end(); it++) {
-                #ifdef DEBUG
-                cout << "KEY: " << it.key() << endl;
-                #endif
+                DEBUG_STDOUT("KEY: "+it.key().asString());
                 tree->add_child(it.key().asCString(),json_to_hdc(*it));
             }
             break;
@@ -430,9 +412,7 @@ Json::Value HDC::to_json(int mode) {
 
 void HDC::to_json(string filename, int mode)
 {
-    #ifdef DEBUG
-    cout << "Saving output JSON to " << filename << endl;
-    #endif
+    DEBUG_STDOUT("Saving output JSON to "+filename);
     ofstream json_file;
     json_file.open(filename.c_str());
     json_file << this->to_json(mode);

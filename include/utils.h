@@ -29,7 +29,7 @@ void replace_all(string& str, const string& from, const string& to);
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);
 bool hdc_is_primitive_type(TypeID type);
-string hdc_get_type_str(TypeID type);
+string hdc_type_str(TypeID type);
 
 template <typename T>
 TypeID to_typeid(T a);

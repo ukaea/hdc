@@ -31,14 +31,21 @@
 #ifdef _USE_HDF5
 #include <H5Cpp.h>
 #endif
+
 //#define DEBUG
-#define _DEBUG
-#ifdef _DEBUG
+
+#ifdef DEBUG
 #define DEBUG_STDERR(x) (std::cerr << (x) << std::endl)
 #define DEBUG_STDOUT(x) (std::cout << (x) << std::endl)
 #else
 #define DEBUG_STDERR(x)
 #define DEBUG_STDOUT(x)
+#endif
+
+#ifdef DEBUG
+#define D(x) x
+#else
+#define D(x)
 #endif
 
 using namespace std;
@@ -104,9 +111,7 @@ public:
     template<typename T> T* get_data();
     
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
-        #ifdef DEBUG
-        printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);
-        #endif
+        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
         memcpy(&header,buffer,sizeof(header_t));
         // Start with determining of the buffer size
@@ -148,9 +153,7 @@ public:
     }
     
     template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault) {
-        #ifdef DEBUG
-        printf("template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault), %f\n",_data[0]);
-        #endif
+        DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault)"+to_string(_data[0]));
         vector<T> vec = _data;
         set_data(1,{vec.size()},&vec[0],_flags);
     };
@@ -175,9 +178,7 @@ public:
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
     template <typename T> void set_data(vector<T> data) 
     {
-        #ifdef DEBUG
-        printf("template <typename T> void set_data(vector<T> data), %f\n",data[0]);
-        #endif
+        DEBUG_STDOUT("template <typename T> void set_data(vector<T> data)"+to_string(data[0]));
         if (get_children_ptr() != nullptr) {
             cout << "The node has already children set..." << endl;
             return;
@@ -193,9 +194,7 @@ public:
         if (!this->has_child(path)) {
             HDC h;
             this->add_child(path, h);
-            #ifdef DEBUG
-            cout << "\"" << path << "\" not found, adding..." << endl;
-            #endif
+            DEBUG_STDOUT("\""+path+"\" not found, adding...\n");
         }
         get(path).set_data<T>(data);
         return;
@@ -304,9 +303,7 @@ public:
             cout << "This node is not terminal" << endl;
             return reinterpret_cast<T>(0);
         }
-        #ifdef DEBUG
-        printf("as<%s>()",get_type_str().c_str());
-        #endif
+        DEBUG_STDOUT("as<"+get_type_str()+">()");
         if (!storage->has(uuid)) {
             printf("Not found: %s\n",uuid.c_str());
             exit(-3);
@@ -329,18 +326,14 @@ public:
     /** Returns string of node under given path. Needs to have separate function */
     std::string as_string(string path)
     {
-        #ifdef DEBUG
-        printf("as_string(%s)\n",path.c_str());
-        #endif
+        DEBUG_STDOUT("as_string("+path+")\n");
         return get(path).as_string();
     }
     
     /** Returns pointer to data of node under given path. */
     template<typename T> T as(string path)
     {
-        #ifdef DEBUG
-        printf("as<T>(%s)\n",path.c_str());
-        #endif
+        DEBUG_STDOUT("as<T>("+path+")\n");
         return get(path).as<T>();
     }
     

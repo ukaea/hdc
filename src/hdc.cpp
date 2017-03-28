@@ -266,12 +266,12 @@ bool HDC::has_child(string path)
 
 bool HDC::has_child(vector<string> vs)
 {
-    #ifdef DEBUG
+    D(
     printf("has_child(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
-    #endif
+    )
     if(vs.empty()) return false; //TODO: re-do this!!!
     if (header.type != HDC_STRUCT && header.type != HDC_LIST) return false;
     string first = vs[0];
@@ -299,13 +299,13 @@ bool HDC::has_child(vector<string> vs)
 }
 
 void HDC::add_child(vector<string> vs, HDC* n) {
-    #ifdef DEBUG
+    D(
     printf("### add_child(");
     for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
     printf("%s\n",get_uuid().c_str());
-    #endif
+    )
     // sync buffer
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
@@ -367,13 +367,13 @@ void HDC::add_child(vector<string> vs, HDC* n) {
 }
 
 void HDC::add_child(vector<string> vs, HDC& n) {
-    #ifdef DEBUG
+    D(
     printf("### add_child(");
     for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
     printf("%s\n",get_uuid().c_str());
-    #endif
+    )
     // sync buffer
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
@@ -449,29 +449,25 @@ vector<string> HDC::keys() {
 
 void HDC::add_child(string path, HDC* n)
 {
-    #ifdef DEBUG
-    printf("add_child(%s)\n",path.c_str());
-    #endif
+    DEBUG_STDOUT("add_child("+path+")\n");
     add_child(split(path,'/'),n);
     return;
 }
 
 void HDC::add_child(string path, HDC& n)
 {
-    #ifdef DEBUG
-    printf("add_child(%s)\n",path.c_str());
-    #endif
+    DEBUG_STDOUT("add_child("+path+")\n");
     add_child(split(path,'/'),n);
     return;
 }
 
 void HDC::delete_child(vector<string> vs) {
-    #ifdef DEBUG
+    D(
     printf("delete_child(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
-    #endif
+    )
     if (!has_child(vs) || vs.empty())  {
         return;
     }
@@ -498,12 +494,12 @@ void HDC::delete_child(string path) {
 }
 
 HDC* HDC::get_ptr(vector<string> vs) {
-    #ifdef DEBUG
+    D(
     printf("get(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
-    #endif
+    )
     string first = vs[0];
     vs.erase(vs.begin());
     char* buffer = storage->get(uuid);
@@ -536,12 +532,12 @@ HDC* HDC::get_ptr(vector<string> vs) {
 }
 
 HDC HDC::get(vector<string> vs) {
-    #ifdef DEBUG
+    D(
     printf("get(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
-    #endif
+    )
     string first = vs[0];
     vs.erase(vs.begin());
     char* buffer = storage->get(uuid);
@@ -575,12 +571,12 @@ HDC HDC::get(vector<string> vs) {
 }
 
 HDC* HDC::get_slice(vector<string> vs, size_t i) {
-    #ifdef DEBUG
+    D(
     printf("get_slice(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(",%d)\n",i);
-    #endif
+    )
     string first = vs[0];
     vs.erase(vs.begin());
     map_t* children = get_children_ptr();
@@ -606,9 +602,7 @@ HDC* HDC::get_slice(vector<string> vs, size_t i) {
 }
 
 HDC* HDC::get_slice(size_t i) {
-    #ifdef DEBUG
-    printf("get_slice(%d)\n",i);
-    #endif
+    DEBUG_STDOUT("get_slice("+to_string(i)+")\n");
     map_t* children = get_children_ptr();
     if (header.type == LIST_ID) return new HDC(storage,children->get<by_index>()[i].address.c_str());
     return this; // return this if not list
@@ -627,12 +621,12 @@ HDC HDC::get(string path) {
 }
 
 void HDC::set_child(vector<string> vs, HDC* n) {
-    #ifdef DEBUG
+    D(
     printf("set_child(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
     printf("%s",vs[vs.size()-1].c_str());
     printf(")\n");
-    #endif
+    )
     if (!has_child(vs)) { // Nothing to set
         cout << "Nothing to set, maybe you want to add..." << endl;
         return;
@@ -667,9 +661,7 @@ void HDC::set_child(string path, HDC* n) {
 
 void HDC::set_type(size_t _type) {
     // More to be added here later
-    #ifdef DEBUG
-    printf("set_type(%d -> %d)\n",header.type,_type);
-    #endif
+    DEBUG_STDOUT("set_type("+to_string(header.type)+" -> "+to_string(_type)+")\n");
     char* old_buffer = storage->get(uuid);
     memcpy(&header,old_buffer,sizeof(header_t)); //sync header
     if (header.type == _type) return; // Nothing to do
@@ -721,9 +713,7 @@ HDC* HDC::copy(int copy_arrays) {
 }
 
 void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
-    #ifdef DEBUG
-    printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_get_type_str(_type).c_str());
-    #endif
+    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_type_str(static_cast<TypeID>(_type)).c_str());)
     if (storage->has(uuid)) storage->remove(uuid);
     header.type = _type;
     header.ndim = _ndim;
@@ -750,9 +740,7 @@ void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t
 
 void HDC::insert_slice(size_t i, HDC* h)
 {
-    #ifdef DEBUG
-    printf("insert_slice(%d)\n",i);
-    #endif
+    DEBUG_STDOUT("insert_slice("+to_string(i)+")\n");
     memcpy(&header,storage->get(uuid),sizeof(header_t));
     size_t old_size = header.buffer_size;
     if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
@@ -799,9 +787,7 @@ void HDC::insert_slice(size_t i, HDC* h)
 
 void HDC::set_slice(size_t i, HDC* h)
 {
-    #ifdef DEBUG
-    printf("set_slice(%d)\n",i);
-    #endif
+    DEBUG_STDOUT("set_slice("+to_string(i)+")\n");
     if (header.type != LIST_ID) {
         cout << "set_slice() called on non list type node\n";
         throw exception();
@@ -945,9 +931,7 @@ void HDC::grow(size_t extra_size) {
     char* old_buffer = storage->get(uuid);
     memcpy(&header,old_buffer,sizeof(header_t));
     auto new_size = header.data_size + extra_size;
-    #ifdef DEBUG
-    printf("Growing %luB->%luB\n",header.data_size,new_size);
-    #endif
+    D(printf("Growing %luB->%luB\n",header.data_size,new_size);)
     char* new_buffer = buffer_grow(old_buffer, extra_size);
     memcpy(&header,new_buffer,sizeof(header_t));
     storage->set(uuid,new_buffer,new_size);
@@ -984,9 +968,7 @@ void HDC::delete_data() {
 }
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 char* buffer_grow(char* old_buffer, size_t extra_size) {
-    #ifdef DEBUG
-    printf("grow_buffer(extra_size = %lu)\n",extra_size);
-    #endif
+    DEBUG_STDOUT("grow_buffer(extra_size = "+to_string(extra_size)+")\n");
     if (extra_size <= 0 || old_buffer == nullptr) return old_buffer;
     //load header
     header_t header;
@@ -1016,9 +998,7 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
         }
     } else {
         // copy old data to new buffer or something like this here, throw warning now
-        #ifdef DEBUG
-        printf("Warning: buffer size increased, but no data copied!!!\n");
-        #endif
+        DEBUG_STDOUT("Warning: buffer size increased, but no data copied!!!\n");
     }
     // finalize header and copy it to the new buffer
     header.data_size = new_size;
