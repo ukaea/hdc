@@ -221,24 +221,33 @@ TEST(HDC,GetKeys) {
     delete tree;
 }
 
+
+#define PREPARE_TREE()                                                                              \
+    int ndim = 1;                                                                                   \
+    size_t shape[] = {4};                                                                           \
+    double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
+    int32_t data_int[] = {777,20202020,3333,555555};                                                \
+    HDC* tree = new HDC();                                                                          \
+    HDC* scalar = new HDC();                                                                        \
+    scalar->set_data(333.333);                                                                      \
+    tree->add_child("aaa/bbb/_scalar", scalar);                                                     \
+    tree->set_data<double>("aaa/bbb/double",ndim,shape,data_double);                                \
+    tree->set_data<double>("aaa/bbb/double2",ndim,shape,data_double);                               \
+    tree->set_data<int>("aaa/bbb/int",ndim,shape,data_int);                                         \
+    tree->add_child("aaa/bbb/empty", new HDC());                                                    \
+    HDC* list = new HDC();                                                                          \
+    for (int i=0;i<5;i++) list->append_slice(new HDC());                                            \
+    tree->add_child("aaa/list", list);                                                              \
+    tree->set_string("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");     \
+
+#define CLEAN_TREE()                                                                                \
+    delete tree;                                                                                    \
+    delete scalar;                                                                                  \
+    delete list;                                                                                    \
+
 TEST(HDC,JsonComplete) {
-    // Prepare tree
-    int ndim = 1;
-    size_t shape[] = {4};
-    double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};
-    int32_t data_int[] = {777,20202020,3333,555555};
-    HDC* tree = new HDC();
-    HDC* scalar = new HDC();
-    scalar->set_data(333.333);
-    tree->add_child("aaa/bbb/_scalar", scalar);
-    tree->set_data<double>("aaa/bbb/double",ndim,shape,data_double);
-    tree->set_data<double>("aaa/bbb/double2",ndim,shape,data_double);
-    tree->set_data<int>("aaa/bbb/int",ndim,shape,data_int);
-    tree->add_child("aaa/bbb/empty", new HDC());
-    HDC* list = new HDC();
-    for (int i=0;i<5;i++) list->append_slice(new HDC());
-    tree->add_child("aaa/list", list);
-    tree->set_string("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
+    PREPARE_TREE()
+
     // Save JSON
     tree->to_json("tree.txt");
 
@@ -277,20 +286,31 @@ TEST(HDC,JsonComplete) {
     
     // Test string
     EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2->get_ptr("aaa/string")->as_string().c_str());
-    
+
+    delete s;
+    delete tree2;
+    CLEAN_TREE()
+}
+
+TEST(HDC,CopyConstructor) {
+    PREPARE_TREE()
     // test copy c-tor
-    HDC* copy = new HDC(tree2);
+    HDC* copy = new HDC(tree);
     HDC* d = copy->get_ptr("aaa/bbb/double");
     EXPECT_EQ(1,d->get_ndim());
     EXPECT_EQ(4,d->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,d->get_type());
     EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
-    delete tree;
     delete copy;
-    delete s;
     delete d;
-    delete tree2;
-    delete scalar;
-    delete list;
+    CLEAN_TREE()
 }
 
+TEST(HDC,HDF5) {
+    PREPARE_TREE()
+    tree->to_hdf5("tree.h5");
+    HDC* tree2 = from_hdf5_ptr("tree.h5");
+    
+    delete tree2;
+    CLEAN_TREE()
+}

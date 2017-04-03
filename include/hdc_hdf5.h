@@ -70,5 +70,7 @@ void hdf5_read(hid_t hdf5_id, std::string hdf5_path, HDC& dest);
 void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& node);
 HDC from_hdf5(H5File* file, std::string dataset_name);
 HDC from_hdf5(const std::string& filename, const std::string& dataset_name);
+HDC from_hdf5(const std::string& filename);
+HDC* from_hdf5_ptr(const std::string& filename);
 
 #endif // HDC_HDF5_H

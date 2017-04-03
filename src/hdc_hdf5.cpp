@@ -172,73 +172,6 @@ void HDC::to_hdf5(std::string filename, std::string dataset_name) {
     return;
 }
 
-/*
-HDC from_hdf5(H5File* file, std::string dataset_name) {
-    cout << "from_hdf5(H5File* file, std::string dataset_name)\n";getchar();
-    
-    try {
-        herr_t      status;
-        H5G_info_t  ginfo;
-    }
-    catch (Exception error) {
-        error.printError();
-        exit(111);
-    }
-    try {
-        DataSet dataset = file->openDataSet( dataset_name );
-        H5T_class_t type_class = dataset.getTypeClass();
-        switch(type_class)
-        {
-            case H5T_INTEGER:
-                cout << "integer\n";
-                break;
-            case H5T_FLOAT:
-                cout << "float\n";
-                break;
-            case H5T_STRING:
-                cout << "string\n";
-                break;
-            case H5T_VLEN:
-                cout << "vlen\n";
-                break;
-            case H5T_ARRAY:
-                cout << "array\n";
-                break;
-            default:
-                std::cout << "from_hdf5(): Unknown datatype: " << type_class << ".\n";
-                exit(5);
-        }
-    }
-    // catch failure caused by the DataSet operations
-    catch( Exception error )
-    {
-        error.printError();
-        exit(222);
-    }
-    return HDC();
-}
-
-HDC from_hdf5(std::string filename, std::string dataset_name) {
-    cout << "from_hdf5(std::string filename, std::string dataset_name)\n";
-    try {
-        H5std_string FILE_NAME( filename );
-        H5File* file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
-        cout << "opened\n";
-        return from_hdf5(file,dataset_name);
-        delete file;
-    }  // end of try block
-    catch( FileIException error )
-    {
-        error.printError();
-        exit(111);
-    }
-    return HDC();
-}*/
-/*
- The following functions are highly influenced by LLNL conduit
- */
-
-
 TypeID hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path) {
     DEBUG_STDOUT("hdf5_type_to_hdc_type("+to_string(hdf5_dtype_id)+","+ref_path+")");
     TypeID res;
@@ -321,7 +254,6 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
         size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
         size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
         size_t dims[ndim];
-        std::cout << nelems << std::endl;
         TypeID dt = hdf5_type_to_hdc_type(h5_dtype_id,ref_path);
         hid_t h5_status    = 0;
         char buffer[nelems*hdc_sizeof(dt)];
@@ -631,5 +563,19 @@ HDC from_hdf5(const std::string& filename, const std::string& dataset_name) {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
     HDC h;
     hdf5_read(filename, dataset_name, h);
+    return h;
+};
+
+HDC from_hdf5(const std::string& filename) {
+    DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
+    HDC h;
+    hdf5_read(filename, "/data", h);
+    return h;
+};
+
+HDC* from_hdf5_ptr(const std::string& filename) {
+    DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
+    HDC* h = new HDC();
+    hdf5_read(filename, "/data", *h);
     return h;
 };
