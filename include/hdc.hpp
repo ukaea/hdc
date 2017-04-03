@@ -32,7 +32,7 @@
 #include <H5Cpp.h>
 #endif
 
-//#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_STDERR(x) (std::cerr << (x) << std::endl)

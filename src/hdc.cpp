@@ -169,9 +169,8 @@ HDC::HDC(char* src_buffer) {
             }
             bip::managed_external_buffer segment(bip::create_only,buffer+sizeof(header_t),header.buffer_size-sizeof(header_t));
             auto children = segment.construct<map_t>("d")(map_t::ctor_args_list(),map_t::allocator_type(segment.get_segment_manager()));
-            for (map_t::iterator it = src_children->begin(); it != src_children->end(); ++it) {
-                auto buff = storage->get(it->address.c_str());
-                HDC n(buff);
+            for (map_t::iterator it = src_children->get<by_key>().begin(); it != src_children->get<by_key>().end(); ++it) {
+                HDC n(storage,it->address.c_str());
                 record rec(it->key.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
                 children->insert(rec);
             }
