@@ -247,13 +247,11 @@ TEST(HDC,JsonComplete) {
     tree2->to_json("tree2.txt");
     // test tree
     HDC* s = tree2->get_ptr("aaa/bbb/double");
-
     // Test double
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,s->get_type());
     EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), s->get_type_str().c_str());
-
     double* data_double_in = s->as<double*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_double[i],data_double_in[i]);
 
@@ -281,17 +279,8 @@ TEST(HDC,JsonComplete) {
     EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2->get_ptr("aaa/string")->as_string().c_str());
     
     // test copy c-tor
-    
     HDC* copy = new HDC(tree2);
     HDC* d = copy->get_ptr("aaa/bbb/double");
-
-    EXPECT_EQ(1,d->get_ndim());
-    EXPECT_EQ(4,d->get_shape()[0]);
-    EXPECT_EQ(DOUBLE_ID,d->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
-    HDC* copy_ = tree->copy();
-    // test copy() method
-    d = copy_->get_ptr("aaa/bbb/double");
     EXPECT_EQ(1,d->get_ndim());
     EXPECT_EQ(4,d->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,d->get_type());
@@ -300,7 +289,6 @@ TEST(HDC,JsonComplete) {
     delete copy;
     delete s;
     delete d;
-    delete copy_;
     delete tree2;
     delete scalar;
     delete list;
