@@ -48,3 +48,4 @@ static void BM_HDC_GetData(benchmark::State& state) {
     delete[] data;
 }
 BENCHMARK(BM_HDC_GetData)->RangeMultiplier(2)->Range(1024,1024<<5);
+
