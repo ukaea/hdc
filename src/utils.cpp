@@ -175,6 +175,26 @@ TypeID to_typeid(string a) {return STRING_ID;};
 TypeID to_typeid(char* a) {return STRING_ID;};
 TypeID to_typeid(char const* a) {return STRING_ID;};
 TypeID to_typeid(bool a) {return BOOL_ID;};
+TypeID numpy_format_to_typeid(string format, size_t itemsize) {
+    if (format == "i") {
+        return INT32_ID;
+    } else if (format == "d") {
+        return DOUBLE_ID;
+    } else if (format == "f") {
+        return FLOAT_ID;
+    } else if (format == "l") {
+        return INT64_ID;
+    } else if (format == "h") {
+        return INT16_ID;
+    // TODO crashed - bool binary compatible?
+    // } else if (format == "?") {
+    //     return BOOL_ID;
+    } else if (format == "b") {
+        return INT8_ID;
+    }
+    // return error by default
+    return ERROR_ID;
+};
 
 
 /* -------------------------  Other stuff ----------------------------- */

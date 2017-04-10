@@ -38,7 +38,7 @@ module hdc_fortran
             type(c_ptr) :: ptr
         end function hdc_get_ptr
 
-        subroutine hdc_delete_ptr(obj) bind(c,name="hdc_delete")
+        subroutine hdc_delete_ptr(obj) bind(c,name="hdc_delete_ptr")
             import
             type(c_ptr), value :: obj
         end subroutine hdc_delete_ptr
@@ -577,7 +577,8 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t), dimension(:), target :: data
-        integer(kind=c_long), dimension(1:1), target :: shape_
+        integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
+!        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
         shape_ = shape(data)
@@ -590,7 +591,8 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:), target :: data
-        integer(kind=c_long), dimension(1:1), target :: shape_
+        integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
+!        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
         shape_ = shape(data)

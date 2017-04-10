@@ -637,8 +637,8 @@ void HDC::set_type(size_t _type) {
     return;
 }
 
-void* HDC::as_void_ptr() {
-    return (void*)this;
+intptr_t HDC::as_void_ptr() {
+    return (intptr_t)(void*)this;
 }
 
 void HDC::dump() {
@@ -822,6 +822,27 @@ size_t* HDC::get_shape() {
     return header.shape;
 }
 
+std::vector<size_t> HDC::get_strides() {
+    memcpy(&header,storage->get(uuid),sizeof(header_t));
+    std::vector<size_t> strides;
+    size_t elem_size = hdc_sizeof(static_cast<TypeID>(header.type));
+    size_t last_stride;
+    // TODO this is for C-arrays (row-major)
+    for (int i = 0; i < header.ndim; ++i)
+    {
+        if (i == 0)
+        {
+            last_stride = elem_size;
+        } else
+        {
+            last_stride = header.shape[header.ndim - i] * last_stride;
+        }
+        strides.insert(strides.begin(), last_stride);
+    }
+
+    return strides;
+}
+
 int HDC::get_ndim(string path) {
     //TODO: make more error-proof - add has check -> make it as function???
     memcpy(&header,storage->get(uuid),sizeof(header_t));
@@ -949,4 +970,19 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
     header.buffer_size = new_buffer_size+sizeof(header_t);
     memcpy(new_buffer,&header,sizeof(header_t));
     return new_buffer;
+}
+
+// "static contructor" from void* HDC
+HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr) {
+    HDC* tree;
+    tree = (HDC*) cpp_ptr;
+    return tree;
+}
+
+// "static contructor" from hdc_t*
+HDC* new_HDC_from_c_ptr(intptr_t c_ptr) {
+    HDC* tree;
+    hdc_t* c_wrap = (hdc_t*) c_ptr;
+    tree = (HDC*) c_wrap->obj;
+    return tree;
 }

@@ -420,6 +420,13 @@ void HDC::to_json(string filename, int mode)
     return;
 }
 
+string HDC::to_json_string(int mode)
+{
+    Json::FastWriter fastWriter;
+    string output = fastWriter.write(this->to_json(mode));
+    return output;
+}
+
 /* Saves children to JSON strin in order to store tree hierarchy in KV stores*/
 string map_to_json(map_t& children) {
         Json::Value root;

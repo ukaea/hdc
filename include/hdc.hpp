@@ -249,6 +249,7 @@ public:
     int get_ndim();
     /** Returns shape of current node. */
     size_t* get_shape();
+    std::vector<size_t> get_strides();
     bool is_external();
     bool is_readonly();
     bool is_fortranorder();
@@ -350,10 +351,12 @@ public:
     void to_json(string filename, int mode = 0);
     /** Serialization to Json::Value object. */
     Json::Value to_json(int mode = 0);
+    /** Serialization to string object. */
+    string to_json_string(int mode = 0);
     /** Dumps JSON to cout */
     void dump();
     /** Returns void pointer to data. */
-    void* as_void_ptr();
+    intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
     string get_type_str();
     /** Returns datashape desctiption string. */
@@ -382,6 +385,7 @@ public:
 
 HDC* from_json(const string& filename); //todo: make constructor from this
 string map_to_json(map_t& children);
+
 char* buffer_grow(char* old_buffer, size_t extra_size);
 // HDC exception // TODO: convert to hdc::bad_alloc
 class hdc_bad_alloc: public exception
@@ -397,5 +401,10 @@ public:
 #ifdef _USE_HDF5
 #include "hdc_hdf5.h"
 #endif
+
+// "static contructor" from void* HDC
+HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
+// "static contructor" from hdc_t*
+HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
 
 #endif // HDC_HPP
