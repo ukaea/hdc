@@ -76,7 +76,6 @@ HDC::HDC(size_t _data_size) {
     
     if (global_storage == nullptr) {
        HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-//         HDC_init();
         atexit(HDC_destroy);
     }
     
