@@ -103,14 +103,17 @@ endif()
 # the option is here so that we can plug it into other
 # codes where HDF5 may be optional
 option(ENABLE_HDF5 "Enable HDF5 support" ON)
+option(HDF5_BUILD_OWN "Build own HDF5" OFF)
 if(ENABLE_HDF5)
     find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
-    if(HDF5_FOUND)
+    if(HDF5_FOUND AND NOT HDF5_BUILD_OWN)
         include_directories(${HDF5_INCLUDE_DIR})
         set(_hdf5_libs hdf5 hdf5_cpp)
         message("HDF5 library found: ${HDF5_INCLUDE_DIR}")
+        message("HDF5 CXX library found: ${HDF5_CXX_LIBRARIES}")
     else()
-        message("HDF5 library not found, trying to build it...")
+        message("HDF5 library not found or wanted, trying to build it...")
+	message("aaaaa curl https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_hdf5_version}.tar.gz | tar xvz -C ${PROJECT_BINARY_DIR}/hdf5_local/src")
         # we did not find it so we fetch it from the web, configure, compile, and link
         include(ExternalProject)
         set(ExternalProjectCMakeArgs
@@ -118,8 +121,8 @@ if(ENABLE_HDF5)
             )
         set(_hdf5_version "1.10.0-patch1")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-        ExternalProject_Add(hdf5_local
-            DOWNLOAD_COMMAND curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_hdf5_version}.tar.gz | tar xvz -C ${PROJECT_BINARY_DIR}/hdf5_local/src
+	ExternalProject_Add(hdf5_local
+            DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_hdf5_version}.tar.gz | tar xvz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             CMAKE_ARGS ${ExternalProjectCMakeArgs}
             SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_hdf5_version}
             BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
