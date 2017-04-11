@@ -60,10 +60,12 @@ int main() {
     cout << endl;
     //Serialize data to JSON
     tree.to_json("tree.txt",0);
+#ifdef _USE_HDF5
     tree.to_hdf5("tree.h5");
     cout << "written\n";
     HDC hhh = from_hdf5("tree.h5","/data");
     hhh.dump();
+#endif
     // On screen
     tree.dump();
     return 0;

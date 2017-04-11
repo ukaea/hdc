@@ -16,44 +16,44 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
 
     // First , try to load the file under filename, if not exists try some paths
     string pluginPath = "";
-    
-    if (boost::filesystem::exists(pluginFileName)) {
-        // OK, load this
-        pluginPath = boost::filesystem::absolute(pluginFileName).string();
-    } else {
-        // Never mind, try some default paths -- Now I don't know how do this better...
-        boost::filesystem::path p(pluginFileName);
-        string strippedName = p.filename().string();
-        vector<string> pluginSearchPath;
-        pluginSearchPath.push_back("./");
-        pluginSearchPath.push_back("./plugins");
-        pluginSearchPath.push_back(".config/hdc/plugins");
-        pluginSearchPath.push_back("/usr/local/lib");
-        pluginSearchPath.push_back("/usr/lib");
-        pluginSearchPath.push_back("/usr/local/lib64");
-        pluginSearchPath.push_back("/usr/lib64");
-        pluginSearchPath.push_back("/usr/local/lib/hdc");
-        pluginSearchPath.push_back("/usr/lib/hdc");
-        pluginSearchPath.push_back("/usr/local/lib64/hdc");
-        pluginSearchPath.push_back("/usr/lib64/hdc");
-        // Search all paths and stop if found
-        for (auto path : pluginSearchPath) {
-            string tmp = path+'/'+strippedName;
-            if (boost::filesystem::exists(tmp)) {
-                cout << "Plugin found: " << tmp << endl;
-                pluginPath = tmp;
-                break;
+    if (!pluginFileName.empty()) {
+        if (boost::filesystem::exists(pluginFileName)) {
+            // OK, load this
+            pluginPath = boost::filesystem::absolute(pluginFileName).string();
+        } else {
+            // Never mind, try some default paths -- Now I don't know how do this better...
+            boost::filesystem::path p(pluginFileName);
+            string strippedName = p.filename().string();
+            vector<string> pluginSearchPath;
+            pluginSearchPath.push_back("./");
+            pluginSearchPath.push_back("./plugins");
+            pluginSearchPath.push_back(".config/hdc/plugins");
+            pluginSearchPath.push_back("/usr/local/lib");
+            pluginSearchPath.push_back("/usr/lib");
+            pluginSearchPath.push_back("/usr/local/lib64");
+            pluginSearchPath.push_back("/usr/lib64");
+            pluginSearchPath.push_back("/usr/local/lib/hdc");
+            pluginSearchPath.push_back("/usr/lib/hdc");
+            pluginSearchPath.push_back("/usr/local/lib64/hdc");
+            pluginSearchPath.push_back("/usr/lib64/hdc");
+            // Search all paths and stop if found
+            for (auto path : pluginSearchPath) {
+                string tmp = path+'/'+strippedName;
+                if (boost::filesystem::exists(tmp)) {
+                    cout << "Plugin found: " << tmp << endl;
+                    pluginPath = tmp;
+                    break;
+                }
+            }
+        }
+        // If selected, check whether file settings file exists
+        if (pluginSettingsFileName.size() != 0) {
+            if (!boost::filesystem::exists(pluginSettingsFileName)) {
+                cerr << "Settings file set, but does not exist: " << pluginSettingsFileName << endl;
+                cerr << "Using default configuration...\n";
             }
         }
     }
-    // If selected, check whether file settings file exists
-    if (pluginSettingsFileName.size() != 0) {
-        if (!boost::filesystem::exists(pluginSettingsFileName)) {
-            cerr << "Settings file set, but does not exist: " << pluginSettingsFileName << endl;
-            cerr << "Using default configuration...\n";
-        }
-    }
-
     global_storage = new HDCStorage(pluginPath,pluginSettingsFileName);
     printf("HDC_init(): HDC storage initialized.\n");
 }
@@ -75,7 +75,8 @@ HDC::HDC(size_t _data_size) {
     header.ndim = 1;
     
     if (global_storage == nullptr) {
-       HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+       //HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+       HDC_init();
         atexit(HDC_destroy);
     }
     
