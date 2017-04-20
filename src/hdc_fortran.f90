@@ -494,7 +494,7 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         type(hdc_t) :: node
-        print *,trim(path)//c_null_char
+!         print *,trim(path)//c_null_char
         call c_hdc_add_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_add_child
 
