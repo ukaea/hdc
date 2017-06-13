@@ -14,6 +14,14 @@ struct hdc_t* hdc_new_empty() {
     return h;
 }
 
+struct hdc_t* hdc_new_size(size_t s) {
+    HDC* node = new HDC(s);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
+
 hdc_t* hdc_new_int8(int ndim, size_t* shape)
 {
     HDC* node = new HDC(ndim, shape, INT8_ID);

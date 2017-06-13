@@ -17,6 +17,13 @@ module hdc_fortran
             import
             type(hdc_t) :: obj
         end function hdc_new_empty
+        
+        !> Default constructor. This is interface to C.
+        function hdc_new_size(s) result(obj) bind(c,name="hdc_new_size")
+            import
+            integer(kind=c_size_t),value :: s
+            type(hdc_t) :: obj
+        end function hdc_new_size
 
         !> Construct empty arra of type given by string.
         function c_hdc_new_dtype(ndim, shape_, type_str) result(obj) bind(c,name="hdc_new_dtype")
@@ -484,7 +491,7 @@ module hdc_fortran
         module procedure hdc_get_ndim_path
     end interface hdc_get_ndim
     
-    public :: hello, hdc_new_empty, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
+    public :: hello, hdc_new_empty, hdc_new_size, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type
 contains
