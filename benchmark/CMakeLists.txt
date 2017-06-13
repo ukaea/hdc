@@ -13,3 +13,7 @@ file(GLOB SRCS *.cpp)
 add_executable(benchmark_hdc ${SRCS})
 target_link_libraries(benchmark_hdc benchmark hdc chdc )
 install(TARGETS benchmark_hdc DESTINATION bin)
+
+add_executable(benchmark_fortran benchmark_fortran.f90)
+target_link_libraries(benchmark_fortran hdc chdc fhdc)
+install(TARGETS benchmark_fortran DESTINATION bin)
