@@ -6,6 +6,7 @@
 #include "../plugins/umap_plugin.hpp" // Add this as fallback
 #include <iostream>
 #include <cstdio>
+#include <hdc_helpers.h>
 
 using namespace std;
 

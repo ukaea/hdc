@@ -8,6 +8,7 @@
 #include <json/json.h>
 #include <sstream>
 #include <boost/filesystem.hpp>
+#include <hdc_helpers.h>
 
 using namespace std;
 
@@ -15,12 +16,14 @@ class MDBMStorage : public Storage {
 private:
     MDBM* db;
     bool initialized = false;
+    bool persistent;
+    string filename;
 public:
     MDBMStorage() {
-        printf("MDBMStorage()\n");
+        DEBUG_STDOUT("MDBMStorage()\n");
     };
     ~MDBMStorage() {
-        printf("~MDBMStorage()\n");
+        DEBUG_STDOUT("~MDBMStorage()\n");
         cleanup();
     };
     bool usesBuffersDirectly() {
@@ -60,8 +63,11 @@ public:
         return found.dsize;
     };
     void cleanup () {
-        printf("MDBMStorage::cleanup()\n");
+        DEBUG_STDOUT("MDBMStorage::cleanup()\n");
         mdbm_close(this->db);
+        // Remove db file if the data persistence is not required
+        if (::remove(filename.c_str()) != 0) {perror("Error opening deleting file"); exit(1);}
+        initialized = false;
         return;
     };
     bool has(string path) {
@@ -79,8 +85,9 @@ public:
             stringstream ss(settings);
             ss >> root;
         }
-        string filename = root.get("filename","/tmp/db.mdbm").asString();
-        printf("Filename: %s\n", filename.c_str());
+        filename = root.get("filename","/tmp/db.mdbm").asString();
+        persistent = root.get("persistent",false).asBool();
+        D(printf("Filename: %s\n", filename.c_str());)
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
 //         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
