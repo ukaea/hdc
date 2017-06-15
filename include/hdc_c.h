@@ -30,6 +30,7 @@ void hdc_set_int8     (struct hdc_t* tree,             int ndim, size_t* shape, 
 void hdc_set_int8_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data); /**  */
 
 void hdc_set_double(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
+void hdc_set_float(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
 void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
 void hdc_set_string_path(struct hdc_t* tree, char* path, char* str);  /**  */
 void hdc_set_string(struct hdc_t* tree, char* str);  /**  */
@@ -50,6 +51,8 @@ int8_t* hdc_as_int8_1d(struct hdc_t* tree); /**  */
 int8_t** hdc_as_int8_2d(struct hdc_t* tree); /**  */
 double* hdc_as_double_1d(struct hdc_t* tree); /**  */
 double** hdc_as_double_2d(struct hdc_t* tree); /**  */
+float* hdc_as_float_1d(struct hdc_t* tree); /**  */
+float** hdc_as_float_2d(struct hdc_t* tree); /**  */
 int32_t* hdc_as_int32_1d_path(struct hdc_t* tree, char* path); /**  */
 int32_t** hdc_as_int32_2d_path(struct hdc_t* tree, char* path); /**  */
 void* hdc_as_voidptr(struct hdc_t* tree);  /**  */
@@ -61,8 +64,13 @@ void hdc_set_int32_path(struct hdc_t* tree, char* path, int ndim, size_t* shape,
 void hdc_set_double_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data); /**  */
 void hdc_set_double_scalar_path(struct hdc_t* tree, char* path, double data); /**  */
 void hdc_set_double_scalar(struct hdc_t* tree, double data); /**  */
+void hdc_set_float_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data); /**  */
+void hdc_set_float_scalar_path(struct hdc_t* tree, char* path, float data); /**  */
+void hdc_set_float_scalar(struct hdc_t* tree, float data); /**  */
 double hdc_as_double_scalar(struct hdc_t* tree); /** Returns scalar double. */
 double hdc_as_double_scalar_path(struct hdc_t* tree, char* path); /**   Returns scalar double.  */
+float hdc_as_float_scalar(struct hdc_t* tree); /** Returns scalar double. */
+float hdc_as_float_scalar_path(struct hdc_t* tree, char* path); /**   Returns scalar double.  */
 int8_t hdc_as_int8_scalar(struct hdc_t* tree); /** Returns scalar int8. */
 int8_t hdc_as_int8_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int8.  */
 int32_t hdc_as_int32_scalar(struct hdc_t* tree); /** Returns scalar int32.  */
