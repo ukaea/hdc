@@ -9,8 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(inc)
 
-file(GLOB SRCS *.cpp)
-add_executable(benchmark_hdc ${SRCS})
+add_executable(benchmark_hdc hdc_array_manipulation.cpp hdc_node_manipulation.cpp main.cpp)
 target_link_libraries(benchmark_hdc benchmark hdc chdc )
 install(TARGETS benchmark_hdc DESTINATION bin)
 
@@ -22,3 +21,7 @@ add_executable(test_hdc_get test_hdc_get.f90 timer.c)
 target_link_libraries(test_hdc_get hdc chdc fhdc)
 install(TARGETS test_hdc_get DESTINATION bin)
 set_target_properties(test_hdc_get PROPERTIES LINK_FLAGS "-lc")
+
+add_executable(benchmark_paper benchmark_paper.cpp)
+target_link_libraries(benchmark_paper benchmark hdc chdc )
+install(TARGETS benchmark_paper DESTINATION bin)
