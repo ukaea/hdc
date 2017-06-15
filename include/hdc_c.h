@@ -89,7 +89,9 @@ void hdc_print_type_str(struct hdc_t* tree);
 const char* hdc_get_type_str_path(struct hdc_t* tree, char* path); /**  */
 size_t hdc_childs_count(struct hdc_t* tree); /** */
 void test_str(char* str);
-
+void HDC_init_c(char* pluginFileName, char* pluginSettingsFileName);
+void HDC_init_c_plain();
+void HDC_destroy_c();
 #ifdef __cplusplus
 }
 #endif // __cplusplus

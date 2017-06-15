@@ -14,6 +14,7 @@ module hdc_fortran
             use iso_c_binding
         end subroutine hello
 
+
         !> Default constructor. This is interface to C.
         function hdc_new_empty() result(obj) bind(c,name="hdc_new_empty")
             import
@@ -545,6 +546,12 @@ module hdc_fortran
         module procedure hdc_get_ndim_path
     end interface hdc_get_ndim
     
+    interface hdc_init
+        module procedure hdc_init_
+        module procedure hdc_init_plain
+    end interface hdc_init
+    
+    
 ! TODO:
 !     interface hdc_new
 ! !         module procedure hdc_new_empty
@@ -556,7 +563,7 @@ module hdc_fortran
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
     hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
     hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
-    hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub
+    hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_plain, hdc_init_
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -1542,6 +1549,27 @@ contains
         res = c_loc(tree)
     end function hdc_get_ptr_f
 
+    
+    
+    !> Init HDC
+    subroutine hdc_init_plain() bind(c,name="HDC_init_c_plain")
+        use iso_c_binding
+    end subroutine hdc_init_plain
+    
+    !> Destroy HDC
+    subroutine hdc_destroy() bind(c,name="HDC_destroy_c")
+        use iso_c_binding
+    end subroutine hdc_destroy
+    
+    !> Init HDC
+    subroutine hdc_init_(pluginFileName, pluginSettingsFileName) bind(c,name="HDC_init_c")
+        use iso_c_binding
+        character(kind=c_char), intent(in) :: pluginFileName(*)
+        character(kind=c_char), intent(in) :: pluginSettingsFileName(*)
+    end subroutine hdc_init_
+    
+    
+    
 !     function c_to_f_string(s) result(str)
 !         use iso_c_binding
 !         character(kind=c_char,len=1), intent(in) :: s(*)
