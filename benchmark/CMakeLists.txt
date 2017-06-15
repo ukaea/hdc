@@ -17,3 +17,8 @@ install(TARGETS benchmark_hdc DESTINATION bin)
 add_executable(benchmark_fortran benchmark_fortran.f90)
 target_link_libraries(benchmark_fortran hdc chdc fhdc)
 install(TARGETS benchmark_fortran DESTINATION bin)
+
+add_executable(test_hdc_get test_hdc_get.f90 timer.c)
+target_link_libraries(test_hdc_get hdc chdc fhdc)
+install(TARGETS test_hdc_get DESTINATION bin)
+set_target_properties(test_hdc_get PROPERTIES LINK_FLAGS "-lc")
