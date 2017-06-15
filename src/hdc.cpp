@@ -6,7 +6,6 @@ struct hdc_t {
     void* obj;
 };
 
-
 using namespace std;
 
 HDCStorage* global_storage = nullptr;
@@ -40,7 +39,7 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
             for (auto path : pluginSearchPath) {
                 string tmp = path+'/'+strippedName;
                 if (boost::filesystem::exists(tmp)) {
-                    cout << "Plugin found: " << tmp << endl;
+                    D(cout << "Plugin found: " << tmp << endl;)
                     pluginPath = tmp;
                     break;
                 }
@@ -49,19 +48,19 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
         // If selected, check whether file settings file exists
         if (pluginSettingsFileName.size() != 0) {
             if (!boost::filesystem::exists(pluginSettingsFileName)) {
-                cerr << "Settings file set, but does not exist: " << pluginSettingsFileName << endl;
-                cerr << "Using default configuration...\n";
+                DEBUG_STDERR("Settings file set, but does not exist: "+pluginSettingsFileName);
+                DEBUG_STDERR("Using default configuration...\n");
             }
         }
     }
     global_storage = new HDCStorage(pluginPath,pluginSettingsFileName);
-    printf("HDC_init(): HDC storage initialized.\n");
+    DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
 }
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy() {
     delete global_storage;
-    printf("HDC_destroy(): HDC storage destroyed.\n");
+    DEBUG_STDERR("HDC_destroy(): HDC storage destroyed.\n");
 }
 
 //---------------------------- HDC class -----------------------------------

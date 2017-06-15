@@ -1,6 +1,6 @@
 #ifndef HDC_HELPERS
+#include <iostream>
 #define HDC_HELPERS
-
 #ifdef DEBUG
 #define DEBUG_STDERR(x) (std::cerr << (x) << std::endl)
 #define DEBUG_STDOUT(x) (std::cout << (x) << std::endl)
