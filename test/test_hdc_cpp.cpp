@@ -306,6 +306,7 @@ TEST(HDC,CopyConstructor) {
     CLEAN_TREE()
 }
 
+#ifdef _USE_HDF5
 TEST(HDC,HDF5) {
     PREPARE_TREE()
     tree->to_hdf5("tree.h5");
@@ -314,3 +315,4 @@ TEST(HDC,HDF5) {
     delete tree2;
     CLEAN_TREE()
 }
+#endif

@@ -5,7 +5,7 @@
 #include <cstdio>
 
 #include "storage_interface.hpp"
-
+#include <hdc_helpers.h>
 
 // Stolen from MDBM:
 struct datum {
@@ -20,10 +20,10 @@ private:
     unordered_map<string,datum> _map;
 public:
     UnorderedMapStorage() {
-        printf("UnorderedMapStorage()\n");
+        DEBUG_STDOUT("UnorderedMapStorage()\n");
     };
     ~UnorderedMapStorage() {
-        printf("~UnorderedMapStorage()\n");
+        DEBUG_STDOUT("~UnorderedMapStorage()\n");
     };
     bool usesBuffersDirectly() {
         return true;
@@ -64,7 +64,7 @@ public:
         return (_map.find(key) != _map.end());
     };
     void cleanup () {
-        printf("UnorderedMapStorage::cleanup()\n");
+        DEBUG_STDOUT("UnorderedMapStorage::cleanup()\n");
         return;
     };
     void remove(string key) {
@@ -76,7 +76,7 @@ public:
     };
     void init(string settings) {
         // Nothing to set here ...
-        printf("UnorderedMapStorage::init()\n");
+        DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
 };
 

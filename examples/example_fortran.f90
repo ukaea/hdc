@@ -37,7 +37,7 @@ contains
         call hdc_dump(tree)
         
         ! Prepare some data
-        array = (/7,20,3,4/)
+        array = [7,20,3,4]
         
         ! Add data to a single node
         data = hdc_new_empty()

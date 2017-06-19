@@ -6,6 +6,7 @@
 #include "../plugins/umap_plugin.hpp" // Add this as fallback
 #include <iostream>
 #include <cstdio>
+#include <hdc_helpers.h>
 
 using namespace std;
 
@@ -19,8 +20,8 @@ public:
         //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
         if (name.size() != 0) {
             if (!_pluma.load(name)) {
-                cerr << "Could not load plugin \"" << name << "\"" << endl;
-                cerr << "Using std::unordered_map as fallback" << endl;
+                DEBUG_STDERR("Could not load plugin \"" +name +"\"\n");
+                DEBUG_STDERR("Using std::unordered_map as fallback\n");
                 _pluma.addProvider( new UnorderedMapStorageProvider() );
             }
         } else {
@@ -31,7 +32,7 @@ public:
         std::vector<StorageProvider*>::iterator it = providers.begin();
         _store = providers.front()->create();
         _store->init(settings);
-        std::cout << _store->getDescription() << std::endl;
+        DEBUG_STDOUT(_store->getDescription());
     }
     ~HDCStorage() {
         _store->cleanup();

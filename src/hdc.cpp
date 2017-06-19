@@ -6,7 +6,6 @@ struct hdc_t {
     void* obj;
 };
 
-
 using namespace std;
 
 HDCStorage* global_storage = nullptr;
@@ -16,52 +15,52 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
 
     // First , try to load the file under filename, if not exists try some paths
     string pluginPath = "";
-    
-    if (boost::filesystem::exists(pluginFileName)) {
-        // OK, load this
-        pluginPath = boost::filesystem::absolute(pluginFileName).string();
-    } else {
-        // Never mind, try some default paths -- Now I don't know how do this better...
-        boost::filesystem::path p(pluginFileName);
-        string strippedName = p.filename().string();
-        vector<string> pluginSearchPath;
-        pluginSearchPath.push_back("./");
-        pluginSearchPath.push_back("./plugins");
-        pluginSearchPath.push_back(".config/hdc/plugins");
-        pluginSearchPath.push_back("/usr/local/lib");
-        pluginSearchPath.push_back("/usr/lib");
-        pluginSearchPath.push_back("/usr/local/lib64");
-        pluginSearchPath.push_back("/usr/lib64");
-        pluginSearchPath.push_back("/usr/local/lib/hdc");
-        pluginSearchPath.push_back("/usr/lib/hdc");
-        pluginSearchPath.push_back("/usr/local/lib64/hdc");
-        pluginSearchPath.push_back("/usr/lib64/hdc");
-        // Search all paths and stop if found
-        for (auto path : pluginSearchPath) {
-            string tmp = path+'/'+strippedName;
-            if (boost::filesystem::exists(tmp)) {
-                cout << "Plugin found: " << tmp << endl;
-                pluginPath = tmp;
-                break;
+    if (!pluginFileName.empty()) {
+        if (boost::filesystem::exists(pluginFileName)) {
+            // OK, load this
+            pluginPath = boost::filesystem::absolute(pluginFileName).string();
+        } else {
+            // Never mind, try some default paths -- Now I don't know how do this better...
+            boost::filesystem::path p(pluginFileName);
+            string strippedName = p.filename().string();
+            vector<string> pluginSearchPath;
+            pluginSearchPath.push_back("./");
+            pluginSearchPath.push_back("./plugins");
+            pluginSearchPath.push_back(".config/hdc/plugins");
+            pluginSearchPath.push_back("/usr/local/lib");
+            pluginSearchPath.push_back("/usr/lib");
+            pluginSearchPath.push_back("/usr/local/lib64");
+            pluginSearchPath.push_back("/usr/lib64");
+            pluginSearchPath.push_back("/usr/local/lib/hdc");
+            pluginSearchPath.push_back("/usr/lib/hdc");
+            pluginSearchPath.push_back("/usr/local/lib64/hdc");
+            pluginSearchPath.push_back("/usr/lib64/hdc");
+            // Search all paths and stop if found
+            for (auto path : pluginSearchPath) {
+                string tmp = path+'/'+strippedName;
+                if (boost::filesystem::exists(tmp)) {
+                    D(cout << "Plugin found: " << tmp << endl;)
+                    pluginPath = tmp;
+                    break;
+                }
+            }
+        }
+        // If selected, check whether file settings file exists
+        if (pluginSettingsFileName.size() != 0) {
+            if (!boost::filesystem::exists(pluginSettingsFileName)) {
+                DEBUG_STDERR("Settings file set, but does not exist: "+pluginSettingsFileName);
+                DEBUG_STDERR("Using default configuration...\n");
             }
         }
     }
-    // If selected, check whether file settings file exists
-    if (pluginSettingsFileName.size() != 0) {
-        if (!boost::filesystem::exists(pluginSettingsFileName)) {
-            cerr << "Settings file set, but does not exist: " << pluginSettingsFileName << endl;
-            cerr << "Using default configuration...\n";
-        }
-    }
-
     global_storage = new HDCStorage(pluginPath,pluginSettingsFileName);
-    printf("HDC_init(): HDC storage initialized.\n");
+    DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
 }
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy() {
     delete global_storage;
-    printf("HDC_destroy(): HDC storage destroyed.\n");
+    DEBUG_STDERR("HDC_destroy(): HDC storage destroyed.\n");
 }
 
 //---------------------------- HDC class -----------------------------------
@@ -75,7 +74,8 @@ HDC::HDC(size_t _data_size) {
     header.ndim = 1;
     
     if (global_storage == nullptr) {
-       HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+       //HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+       HDC_init();
         atexit(HDC_destroy);
     }
     
@@ -659,20 +659,31 @@ HDC* HDC::copy(int copy_arrays) {
 
 void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_type_str(static_cast<TypeID>(_type)).c_str());)
-    if (storage->has(uuid)) storage->remove(uuid);
-    header.type = _type;
-    header.ndim = _ndim;
-    header.data_size = hdc_sizeof(to_typeid(_type));
-    for (int i = 0; i < _ndim; i++) {
-        header.data_size *= _shape[i];
-        header.shape[i] = _shape[i];
+    auto buffer = storage->get(uuid);
+    memcpy(&header,buffer,sizeof(header_t));
+    // Start with determining of the buffer size
+    size_t data_size = hdc_sizeof(static_cast<TypeID>(_type));
+    for (int i=0;i<_ndim;i++) data_size *= _shape[i];
+    size_t buffer_size = data_size + sizeof(header_t);
+    if (header.buffer_size == buffer_size) {
+            storage->lock(uuid);
+            memcpy(buffer+sizeof(header_t),_data,data_size);
+            storage->unlock(uuid);
+            return;
+    } else {
+        header.buffer_size = buffer_size;
+        header.data_size = data_size;
+        memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+        for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
+        header.type = static_cast<TypeID>(_type);
+        header.ndim = _ndim;
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),_data,header.data_size);
+        storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
+        return;
     }
-    header.buffer_size = header.data_size + sizeof(header_t);
-    char* buffer = new char[header.buffer_size];
-    memcpy(buffer,&header,sizeof(header_t));
-    memcpy(buffer+sizeof(header_t),_data,header.data_size);
-    storage->set(uuid,buffer,header.buffer_size);
-    return;
 }
 
 void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type) {

@@ -34,15 +34,7 @@
 
 // #define DEBUG
 
-#ifdef DEBUG
-#define DEBUG_STDERR(x) (std::cerr << (x) << std::endl)
-#define DEBUG_STDOUT(x) (std::cout << (x) << std::endl)
-#define D(x) x
-#else
-#define DEBUG_STDERR(x)
-#define DEBUG_STDOUT(x)
-#define D(x)
-#endif
+#include "hdc_helpers.h"
 
 
 using namespace std;
@@ -52,7 +44,7 @@ template<typename T> struct identity { typedef T type; };
 extern HDCStorage* global_storage;
 
 /** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(string pluginFileName="", string pluginSettingsFileName="");
+void HDC_init(string pluginFileName="libMDBMPlugin.so", string pluginSettingsFileName="");
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();
