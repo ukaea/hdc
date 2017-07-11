@@ -22,6 +22,11 @@ target_link_libraries(test_hdc_get hdc chdc fhdc)
 install(TARGETS test_hdc_get DESTINATION bin)
 set_target_properties(test_hdc_get PROPERTIES LINK_FLAGS "-lc")
 
+add_executable(test_hdc_get_all test_hdc_get_all.f90 timer.c)
+target_link_libraries(test_hdc_get_all hdc chdc fhdc)
+install(TARGETS test_hdc_get_all DESTINATION bin)
+set_target_properties(test_hdc_get_all PROPERTIES LINK_FLAGS "-lc")
+
 add_executable(benchmark_paper benchmark_paper.cpp)
 target_link_libraries(benchmark_paper benchmark hdc chdc )
 install(TARGETS benchmark_paper DESTINATION bin)
