@@ -439,6 +439,8 @@ module hdc_fortran
         module procedure hdc_set_double_2d
         module procedure hdc_set_float_1d
         module procedure hdc_set_float_1d_path
+        module procedure hdc_set_int32_1d
+        module procedure hdc_set_int32_1d_path
 !         module procedure hdc_set_double_2d_path
         module procedure hdc_set_double_scalar
         module procedure hdc_set_double_scalar_path
@@ -513,7 +515,8 @@ module hdc_fortran
         module procedure hdc_as_int32_2d_sub
         module procedure hdc_as_double_sub
         module procedure hdc_as_float_sub
-        
+        module procedure hdc_as_string_sub
+
         module procedure hdc_as_double_1d_path_sub
         module procedure hdc_as_double_2d_path_sub
         module procedure hdc_as_float_1d_path_sub
@@ -524,6 +527,7 @@ module hdc_fortran
         module procedure hdc_as_int32_2d_path_sub
         module procedure hdc_as_double_path_sub
         module procedure hdc_as_float_path_sub
+        module procedure hdc_as_string_path_sub
     end interface hdc_get
 
     interface hdc_get_shape
@@ -563,7 +567,9 @@ module hdc_fortran
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
     hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
     hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
-    hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_plain, hdc_init_
+    hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
+    hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_plain, hdc_init_, &
+    hdc_as_string_sub, hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -1026,6 +1032,46 @@ contains
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_1d_sub
 
+    
+    function C_to_F_string(c_string_pointer) result(f_string)
+        use, intrinsic :: iso_c_binding, only: c_ptr,c_f_pointer,c_char,c_null_char
+        type(c_ptr), intent(in) :: c_string_pointer
+        character(len=:), allocatable :: f_string
+        character(kind=c_char), dimension(:), pointer :: char_array_pointer => null()
+        character(len=255) :: aux_string
+        integer :: i,length
+        call c_f_pointer(c_string_pointer,char_array_pointer,[255])
+        if (.not.associated(char_array_pointer)) then
+        allocate(character(len=4)::f_string); f_string="NULL"; return
+        end if
+        aux_string=" "
+        do i=1,255
+        if (char_array_pointer(i)==c_null_char) then
+            length=i-1; exit
+        end if
+        aux_string(i:i)=char_array_pointer(i)
+        end do
+        allocate(character(len=length)::f_string)
+        f_string=aux_string(1:length)
+    end function C_to_F_string
+    
+    function hdc_as_string_(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        type(c_ptr) :: char_ptr
+        character(len=255) :: res
+        char_ptr = c_hdc_as_voidptr(this)
+        res = C_to_F_string(char_ptr)
+    end function hdc_as_string_
+
+    subroutine hdc_as_string_sub(this, res)
+        type(hdc_t) :: this
+        type(c_ptr) :: char_ptr
+        character(len=255) :: res
+        char_ptr = c_hdc_as_voidptr(this)
+        res = C_to_F_string(char_ptr)
+    end subroutine hdc_as_string_sub
+    
     function hdc_as_int32_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -1512,6 +1558,25 @@ contains
         call c_f_pointer(shape_ptr, shape_, (/ ndim /))
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_1d_path_sub
+
+    function hdc_as_string_path(this,path) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        type(c_ptr) :: char_ptr
+        character(len=*), intent(in) :: path
+        character(len=255) :: res
+        char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
+        res = C_to_F_string(char_ptr)
+    end function hdc_as_string_path
+
+    subroutine hdc_as_string_path_sub(this, path, res)
+        type(hdc_t) :: this
+        type(c_ptr) :: char_ptr
+        character(len=*), intent(in) :: path
+        character(len=255) :: res
+        char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
+        res = C_to_F_string(char_ptr)
+    end subroutine hdc_as_string_path_sub
 
     subroutine hdc_to_json(this,path,mode)
         type(hdc_t) :: this
