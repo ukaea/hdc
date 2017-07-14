@@ -12,7 +12,7 @@ module c_perf
 end module c_perf
 
 
-program test_hdc_get
+program test_hdc_put
     use hdc_fortran
     use c_perf
     implicit none
@@ -39,14 +39,11 @@ contains
             end do
             allocate(magnetics)
             magnetics = hdc_new_empty()
-            call hdc_set(magnetics,"flux_loop(1)/flux/data",data)
-            call hdc_set(magnetics,"bpol_probe(1)/field",data)
-            call hdc_set(magnetics,"time",10.0)
             call c_getMillis(t1)
             do k2 = 1,NSTATS
-                call hdc_get(magnetics,"flux_loop(1)/flux/data",flux_data)
-                call hdc_get(magnetics,"bpol_probe(1)/field",field_data)
-                call hdc_get(magnetics,"time",time)
+                call hdc_set(magnetics,"flux_loop(1)/flux/data",data)
+                call hdc_set(magnetics,"bpol_probe(1)/field",data)
+                call hdc_set(magnetics,"time",10.0)
             end do
             call c_getMillis(t2)
             Format = "(I8.8, EN15.5)"
@@ -57,4 +54,4 @@ contains
             
 	    end do
     end subroutine f_main
-end program test_hdc_get
+end program test_hdc_put
