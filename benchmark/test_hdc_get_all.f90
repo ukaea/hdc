@@ -35,10 +35,13 @@ contains
         integer(kind=c_int32_t), pointer :: int0array_out(:)
         real(8), pointer :: float0array_out(:)
         complex(8), pointer :: complex0array_out(:)
+        real(8) :: time_full, time_single
         NSTATS = 1000
+            
+        write(*,*)'N_signal   Full          Single_field'
         
-        do k = 10, 100001, 1000
-            SIGNAL_LENGTH = k
+        do k = 1, 5
+            SIGNAL_LENGTH = 10 ** k
             allocate(data_in(SIGNAL_LENGTH),data_out(SIGNAL_LENGTH))
             do i = 1,SIGNAL_LENGTH
                 data_in(i) = float(2*i)
@@ -102,6 +105,7 @@ contains
             call hdc_set(magnetics,"code/parameters",string_in)
             call hdc_set(magnetics,"code/output_flag",float0array_in)
             call hdc_set(magnetics,"time",10.0)
+            
             call c_getMillis(t1)
             do k2 = 1,NSTATS
                 call hdc_get(magnetics,"ids_properties/comment",string_out)
@@ -163,9 +167,21 @@ contains
                 call hdc_get(magnetics,"time",float0array_out)
             end do
             call c_getMillis(t2)
-            Format = "(I8.8, EN15.5)"
-    ! 	    write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
-            write (*,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
+    !       write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
+            time_full = (t2-t1)*1e-3/float(NSTATS)
+
+            call c_getMillis(t1)
+            do k2 = 1,NSTATS
+                call hdc_get(magnetics,"flux_loop(i1)/flux/data",data_out)
+            end do
+            call c_getMillis(t2)
+    !       write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
+            time_single = (t2-t1)*1e-3/float(NSTATS)
+
+            Format = "(I8.8, EN15.5, EN15.5)"
+
+            write (*,Format) SIGNAL_LENGTH, time_full, time_single
+
             call hdc_delete(magnetics)
             deallocate(data_in)
             
