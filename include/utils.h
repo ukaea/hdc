@@ -12,8 +12,9 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include "types.h"
-
 using namespace std;
 
 /* ------------------------- UUID generation ----------------------------- */
@@ -22,9 +23,8 @@ void print_uuid(vector<char> uuid);
 vector<char> generate_uuid();
 string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
-vector<string> split(const string &s, char delim);
-void split(const string &s, char delim, vector<string>& elems);
-void replace_all(string& str, const string& from, const string& to);
+vector<string>  split(string s);
+bool try_parse(const string &s, size_t& parsed);
 
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);

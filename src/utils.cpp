@@ -1,5 +1,5 @@
 #include "utils.h"
-
+#include <tuple>
 //using namespace std;
 
 /* ------------------------- UUID generation ----------------------------- */
@@ -30,32 +30,26 @@ string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-vector<string> split(const string &s, char delim) {
-    vector<string> elems;
-    split(s, delim, elems);
-    return elems;
+vector<string> split(string s) {
+    std::string delimiters("/[]");
+    std::vector<std::string> parts;
+    boost::trim_if(s, boost::is_any_of(delimiters));
+    boost::split(parts, s, boost::is_any_of(delimiters),boost::token_compress_on);
+    return parts;
 }
 
-void split(const string &s, char delim, vector<string>& elems) {
-    stringstream ss(s);
-    string item;
-    while (getline(ss, item, delim)) {
-        if (!item.length()) {
-            cerr << "Error: empty string between slashes!" << endl;
-            exit(-1);
-        }
-        elems.push_back(item);
+bool try_parse(const string &s, size_t& parsed) {
+    try {
+        parsed = boost::lexical_cast<size_t>(s);
+        return true;
     }
-}
-
-void replace_all(string& str, const string& from, const string& to) {
-    if(from.empty())
-        return;
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    catch(...)
+    {
+        parsed = 0;
+        return false;
     }
+    // Should never go here
+    return false;
 }
 
 /* -------------------------  Types Definitions  ------------------------- */

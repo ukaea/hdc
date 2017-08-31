@@ -250,6 +250,7 @@ public:
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
     void add_child(string path, HDC* n);
     void add_child(string path, HDC& n);
+    void add_child_single(string str, HDC& n);
     /** Sets HDC subtree to given path. */
     void set_child(string path, HDC* n);
     /** Deletes HDC subtree. */
@@ -274,10 +275,16 @@ public:
     HDC* copy(int copy_arrays = 1); 
     /** Inserts node to i-th slice of current node. */
     void insert_slice(size_t i, HDC* h);
+    /** Inserts node to i-th slice of current node. */
+    void insert_slice(size_t i, HDC& h);
     /** Sets node to i-th slice of current node. */
     void set_slice(size_t i, HDC* h);
+    /** Sets node to i-th slice of current node. */
+    void set_slice(size_t i, HDC& h);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
     void append_slice(HDC* h); 
+    /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
+    void append_slice(HDC& h); 
     /** Sets HDC type of current node. */
     void set_type(size_t _type);
     /** Returns true if node is empty. */

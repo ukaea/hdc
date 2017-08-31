@@ -255,11 +255,9 @@ void HDC::info() {
 
 //---------------------------- Tree manipulation -----------------------------------
 
-
-
 bool HDC::has_child(string path)
 {
-    return has_child(split(path,'/'));
+    return has_child(split(path));
 }
 
 bool HDC::has_child(vector<string> vs)
@@ -274,27 +272,46 @@ bool HDC::has_child(vector<string> vs)
     if (header.type != HDC_STRUCT && header.type != HDC_LIST) return false;
     string first = vs[0];
     vs.erase(vs.begin());
+
     map_t* children = get_children_ptr();
     if (children == nullptr) return false;
     if (children->count(first.c_str()) == 0) return false;
-
+    // if parse succeeds call get_slice instead
+    size_t index;
+    bool is_index = try_parse(first,index);
     if (vs.empty()) {
-        return (bool)children->count(first.c_str());
+        if (is_index)
+            return (children->size() > index);
+        else
+            return (bool)children->count(first.c_str());
     } else {
-        try {
-            auto it = children->find(first.c_str());
-            if (it != children->end()) {
-                HDC ch(storage,it->address.c_str());
+        if (is_index) {
+            try {
+                auto it = children->get<by_index>()[index];
+                HDC ch(storage,it.address.c_str());
                 return ch.has_child(vs);
+            } catch (...) {
+                std::cerr << "has_child(): Caught exception: index" << "\n";
+                return false;
             }
-            else return false; // TODO Create error HDC obj here???
-        } catch (...) {
-            std::cerr << "has_child(): Caught exception" << "\n";
-            return false;
+        } else {
+            try {
+                auto it = children->find(first.c_str());
+                if (it != children->end()) {
+                    HDC ch(storage,it->address.c_str());
+                    return ch.has_child(vs);
+                }
+                else return false; // TODO Create error HDC obj here???
+            } catch (...) {
+                std::cerr << "has_child(): Caught exception: string" << "\n";
+                return false;
+            }
         }
     }
     return false; // never goes here
 }
+
+
 
 void HDC::add_child(vector<string> vs, HDC* n) {
     add_child(vs,*n);
@@ -302,10 +319,36 @@ void HDC::add_child(vector<string> vs, HDC* n) {
 }
 
 void HDC::add_child(vector<string> vs, HDC& n) {
+    string first = vs[0];
+    if (first.size() > 1024) {
+        cout << "add_child(): string too long.\n";
+        exit(111);
+    }
+    vs.erase(vs.begin());
+
+    if (!vs.empty()) { // Create intermediate nodes here
+        HDC h;
+        add_child(first,h);
+        get(first).add_child(vs,n);
+    } else {
+        size_t index;
+        if (try_parse(first,index)) {
+            if (get_shape()[0] == index) insert_slice(index,n);
+            else if (get_shape()[0] < index) {
+                cerr << "Error: supplied index greater than maximal admissible)\n";
+                exit(7);
+            }
+        } else {
+            add_child_single(first,n);
+        }
+    }
+    return;
+}
+
+void HDC::add_child_single(string str, HDC& n) {
     D(
-    printf("### add_child(");
-    for (long i = 0; i < vs.size()-1; i++) printf("%s/",vs[i].c_str());
-    printf("%s",vs[vs.size()-1].c_str());
+    printf("### add_child_single(");
+    printf(str.c_str());
     printf(")\n");
     printf("%s\n",get_uuid().c_str());
     )
@@ -319,59 +362,53 @@ void HDC::add_child(vector<string> vs, HDC& n) {
     }
     if (header.type == EMPTY_ID) set_type(STRUCT_ID);
 
-    string first = vs[0];
-    if (first.size() > 1024) {
+    if (str.size() > 1024) {
         cout << "add_child(): string too long.\n";
         exit(111);
     }
-    vs.erase(vs.begin());
 
     // load new buffer
     buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
-    
+
     bip::managed_external_buffer segment(bip::open_only,buffer+sizeof(header_t),0);
     auto children = segment.find<map_t>("d").first;
-    if (!vs.empty()) { // Create intermediate nodes here
-        HDC h;
-        add_child(first,h);
-        get(first).add_child(vs,n);
-    } else {
-        if (children->count(first.c_str()) == 0) {
-            // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
-            int redo = 1;
-            for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
-                if (redo == 0) break;
-                try {
-                    // Storing record larger than 114 bytes can mess up the heap on small buffers (1300b, key with longer than 24 characters), so we need to increase the buffer size here
-                    if (segment.get_free_memory() < 4*first.size()) {
-                        cout<<"throwing...\n";
-                        throw (hdc_bad_alloc()); // There can be problem to store large strings
-                    }
-                    record rec(first.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
-                    children->insert(rec);
-                    redo = 0;
+
+    if (children->count(str.c_str()) == 0) {
+        // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
+        int redo = 1;
+        for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
+            if (redo == 0) break;
+            try {
+                // Storing record larger than 114 bytes can mess up the heap on small buffers (1300b, key with longer than 24 characters), so we need to increase the buffer size here
+                if (segment.get_free_memory() < 4*str.size()) {
+                    cout<<"throwing...\n";
+                    throw (hdc_bad_alloc()); // There can be problem to store large strings
                 }
-                catch (exception e) {
-                    char* new_buffer = buffer_grow(buffer,max(header.buffer_size,4*first.size()));
-                    if (new_buffer == buffer) {
-                        cout << "grow called, but buffer == new_buffer.\n";
-                        exit(20);
-                    }
-                    //if (!storage->usesBuffersDirectly()) delete[] buffer;
-                    storage->remove(uuid);
-                    buffer = new_buffer;
-                    memcpy(&header,buffer,sizeof(header_t));
-                    segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
-                    children = segment.find<map_t>("d").first;
-                    redo = 1;
+                record rec(str.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
+                children->insert(rec);
+                redo = 0;
+            }
+            catch (exception e) {
+                char* new_buffer = buffer_grow(buffer,max(header.buffer_size,4*str.size()));
+                if (new_buffer == buffer) {
+                    cout << "grow called, but buffer == new_buffer.\n";
+                    exit(20);
                 }
-                if (redo == 1 && i == HDC_MAX_RESIZE_ATTEMPTS-1) {
-                    fprintf(stderr,"add_child(): Could not allocate enough memory.\n");
-                    exit(8);
-                }
+                //if (!storage->usesBuffersDirectly()) delete[] buffer;
+                storage->remove(uuid);
+                buffer = new_buffer;
+                memcpy(&header,buffer,sizeof(header_t));
+                segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
+                children = segment.find<map_t>("d").first;
+                redo = 1;
+            }
+            if (redo == 1 && i == HDC_MAX_RESIZE_ATTEMPTS-1) {
+                fprintf(stderr,"add_child(): Could not allocate enough memory.\n");
+                exit(8);
             }
         }
+
         if (header.buffer_size != old_size) {
             storage->set(uuid,buffer,header.buffer_size);
         }
@@ -395,14 +432,14 @@ vector<string> HDC::keys() {
 void HDC::add_child(string path, HDC* n)
 {
     DEBUG_STDOUT("add_child("+path+")\n");
-    add_child(split(path,'/'),n);
+    add_child(split(path),n);
     return;
 }
 
 void HDC::add_child(string path, HDC& n)
 {
     DEBUG_STDOUT("add_child("+path+")\n");
-    add_child(split(path,'/'),n);
+    add_child(split(path),n);
     return;
 }
 
@@ -420,10 +457,17 @@ void HDC::delete_child(vector<string> vs) {
     vs.erase(vs.begin());
     map_t* children = get_children_ptr();
     if (vs.empty()) {
-        auto it = children->find(first.c_str());
-        if (it!=children->end()) {
-            storage->remove(it->address.c_str());
-            children->erase(it);
+        size_t index;
+        if (try_parse(first,index)) {
+            auto it = children->get<by_index>()[index];
+            storage->remove(it.address.c_str());
+            // Maybe this should not be supported...
+        } else {
+            auto it = children->find(first.c_str());
+            if (it!=children->end()) {
+                storage->remove(it->address.c_str());
+                children->erase(it);
+            }
         }
     } else {
         get(first.c_str()).delete_child(vs);
@@ -434,7 +478,7 @@ void HDC::delete_child(vector<string> vs) {
 }
 
 void HDC::delete_child(string path) {
-    delete_child(split(path,'/'));
+    delete_child(split(path));
     return;
 }
 
@@ -447,6 +491,10 @@ HDC* HDC::get_ptr(vector<string> vs) {
     )
     string first = vs[0];
     vs.erase(vs.begin());
+    // if parse succeeds call get_slice instead
+    size_t index;
+    if (try_parse(first,index)) return get_slice(index);
+
     char* buffer = storage->get(uuid);
     header_t h;
     memcpy(&h,buffer,sizeof(header_t));
@@ -554,15 +602,15 @@ HDC* HDC::get_slice(size_t i) {
 }
 
 HDC* HDC::get_slice(string path, size_t i) {
-    return get_slice(split(path,'/'),i);
+    return get_slice(split(path),i);
 }
 
 HDC* HDC::get_ptr(string path) {
-    return get_ptr(split(path,'/'));
+    return get_ptr(split(path));
 }
 
 HDC HDC::get(string path) {
-    return get(split(path,'/'));
+    return get(split(path));
 }
 
 void HDC::set_child(vector<string> vs, HDC* n) {
@@ -581,15 +629,20 @@ void HDC::set_child(vector<string> vs, HDC* n) {
     bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
     map_t* children = get_children_ptr();
     if (vs.empty()) {
-        // check whether children container exists
-        if (children == nullptr) children = get_children_ptr();
-        // check whether given path exists
-        if (children->count(first.c_str())) {
-            shared_string str(n->get_uuid().c_str(),ca); // TODO wrap this up to try catch block
-            children->modify(children->find(first.c_str()), change_node(str));
+        size_t index;
+        if (try_parse(first,index)) {
+            set_slice(index, n);
         } else {
-            // TODO: get_allocator -- viz vyse...
-            children->insert(record(first.c_str(),n->get_uuid().c_str(),ca));
+            // check whether children container exists
+            if (children == nullptr) children = get_children_ptr();
+            // check whether given path exists
+            if (children->count(first.c_str())) {
+                shared_string str(n->get_uuid().c_str(),ca); // TODO wrap this up to try catch block
+                children->modify(children->find(first.c_str()), change_node(str));
+            } else {
+                // TODO: get_allocator -- viz vyse...
+                children->insert(record(first.c_str(),n->get_uuid().c_str(),ca));
+            }
         }
     } else get(first).set_child(vs, n);
     return;
@@ -597,7 +650,7 @@ void HDC::set_child(vector<string> vs, HDC* n) {
 
 
 void HDC::set_child(string path, HDC* n) {
-    set_child(split(path,'/'), n);
+    set_child(split(path), n);
     return;
 }
 
@@ -694,7 +747,12 @@ void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t
     get(path).set_data_c(_ndim, _shape, _data, _type);
 }
 
-void HDC::insert_slice(size_t i, HDC* h)
+void HDC::insert_slice(size_t i, HDC* h) {
+    insert_slice(i,*h);
+    return;
+}
+
+void HDC::insert_slice(size_t i, HDC& h)
 {
     DEBUG_STDOUT("insert_slice("+to_string(i)+")\n");
     memcpy(&header,storage->get(uuid),sizeof(header_t));
@@ -707,6 +765,10 @@ void HDC::insert_slice(size_t i, HDC* h)
 
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
+    if (get_shape()[0] < i) {
+        cout << "Error in insert_slice(): Supplied index larger than size" << endl;
+        exit(7);
+    }
 
     bip::managed_external_buffer segment(bip::open_only,buffer+sizeof(header_t),0);
     auto children = segment.find<map_t>("d").first;
@@ -717,7 +779,7 @@ void HDC::insert_slice(size_t i, HDC* h)
         if (redo == 0) break;
         try {
             map_t::nth_index<1>::type& ri=children->get<1>();
-            ri.insert(ri.begin()+i,record(to_string(i).c_str(),h->get_uuid().c_str(),segment.get_segment_manager()));
+            ri.insert(ri.begin()+i,record(to_string(i).c_str(),h.get_uuid().c_str(),segment.get_segment_manager()));
             redo = 0;
         } catch (exception e) {
             char* new_buffer = buffer_grow(buffer, header.buffer_size);
@@ -740,7 +802,12 @@ void HDC::insert_slice(size_t i, HDC* h)
     return;
 }
 
-void HDC::set_slice(size_t i, HDC* h)
+void HDC::set_slice(size_t i, HDC* h) {
+    set_slice(i,*h);
+    return;
+}
+
+void HDC::set_slice(size_t i, HDC& h)
 {
     DEBUG_STDOUT("set_slice("+to_string(i)+")\n");
     if (header.type != LIST_ID) {
@@ -749,7 +816,7 @@ void HDC::set_slice(size_t i, HDC* h)
     };
     auto children = get_children_ptr();
     bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
-    shared_string str(h->get_uuid().c_str(),ca); // TODO try-catch this (or make factory object/function???)
+    shared_string str(h.get_uuid().c_str(),ca); // TODO try-catch this (or make factory object/function???)
     if (i >= children->size()) {
         cout << "Error in set_slice: Index " << i << " >= list size." << endl;
         throw exception();
@@ -759,6 +826,11 @@ void HDC::set_slice(size_t i, HDC* h)
 }
 
 void HDC::append_slice(HDC* h) {
+    append_slice(*h);
+    return;
+}
+
+void HDC::append_slice(HDC& h) {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
     insert_slice(header.shape[0],h);
     return;

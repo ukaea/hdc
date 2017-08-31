@@ -54,6 +54,20 @@ TEST(HDC,NodeManipulation) {
     EXPECT_EQ(true,tree->has_child("aaa"));
     EXPECT_STREQ(n1->get_uuid().c_str(),tree->get_ptr("aaa/bbb")->get_uuid().c_str());
     EXPECT_STRNE(n2->get_uuid().c_str(),tree->get_ptr("aaa/bbb")->get_uuid().c_str());
+    // Try add and get index
+    HDC* n3 = new HDC();
+    tree->add_child("aaa/list[0]/ddd",n3);
+    tree->add_child("aaa/list[1]",new HDC());
+    tree->add_child("aaa/list[0]/eee",new HDC());
+    HDC* list = tree->get_ptr("aaa/list");
+    EXPECT_EQ(LIST_ID,list->get_type());
+    EXPECT_EQ(true,tree->has_child("aaa/list[0]/ddd"));
+    EXPECT_EQ(true,tree->has_child("aaa/list[0]/eee"));
+    tree->get_ptr("aaa/list")->get_slice(0)->add_child("kkk",new HDC());
+    size_t* shape = tree->get_ptr("aaa/list")->get_shape();
+    EXPECT_EQ(2LU,shape[0]);
+    EXPECT_EQ(true,tree->get_ptr("aaa/list")->get_slice(0)->has_child("ddd"));
+    EXPECT_EQ(true,tree->get_ptr("aaa/list")->get_slice(0)->has_child("eee"));
     // Try subtree
     HDC* sub = tree->get_ptr("aaa");
     EXPECT_EQ(true,sub->has_child("bbb"));
@@ -73,6 +87,7 @@ TEST(HDC,NodeManipulation) {
     delete tree;
     delete n1;
     delete n2;
+    delete n3;
     delete sub;
 }
 
