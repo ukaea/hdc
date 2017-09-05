@@ -506,6 +506,7 @@ module hdc_fortran
 
     !> Generic hdc_get interface
     interface hdc_get
+        module procedure hdc_as_double_sub
         module procedure hdc_as_double_1d_sub
         module procedure hdc_as_double_2d_sub
         module procedure hdc_get_child_sub
@@ -513,7 +514,7 @@ module hdc_fortran
         module procedure hdc_as_int8_2d_sub
         module procedure hdc_as_int32_1d_sub
         module procedure hdc_as_int32_2d_sub
-        module procedure hdc_as_double_sub
+        module procedure hdc_as_int32_sub
         module procedure hdc_as_float_sub
         module procedure hdc_as_string_sub
 
@@ -525,6 +526,7 @@ module hdc_fortran
         module procedure hdc_as_int8_2d_path_sub
         module procedure hdc_as_int32_1d_path_sub
         module procedure hdc_as_int32_2d_path_sub
+        module procedure hdc_as_int32_path_sub
         module procedure hdc_as_double_path_sub
         module procedure hdc_as_float_path_sub
         module procedure hdc_as_string_path_sub
@@ -1116,7 +1118,7 @@ contains
     subroutine hdc_as_double_sub(this, res)
         type(hdc_t) :: this
         real(kind=dp) :: res
-        res = hdc_as_double_(this)
+        res = c_hdc_as_double_scalar(this)
     end subroutine hdc_as_double_sub
     
     subroutine hdc_as_float_sub(this, res)
