@@ -571,7 +571,7 @@ module hdc_fortran
     hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
     hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_plain, hdc_init_, &
-    hdc_as_string_sub, hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path
+    hdc_as_string_sub, hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32
 contains
 
     subroutine hdc_add_child(this, path, node)
