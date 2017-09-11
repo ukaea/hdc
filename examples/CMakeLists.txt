@@ -24,6 +24,9 @@ if (BUILD_EXAMPLES)
 
     add_executable(cpo_hdc cpo_hdc.f90)
     target_link_libraries(cpo_hdc fhdc)
+    
+    add_executable(example_lukas example_lukas.f90)
+    target_link_libraries(example_lukas fhdc)
 
     #add_executable(calling_fortran_from_c calling_fortran_from_c.c)
     #target_link_libraries(calling_fortran_from_c fhdc)
