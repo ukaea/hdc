@@ -78,6 +78,10 @@ public:
         // Nothing to set here ...
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
+    void init(Json::Value& settings) {
+        // Nothing to set here ...
+        DEBUG_STDOUT("UnorderedMapStorage::init()\n");
+    };
 };
 
 PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage);

@@ -57,6 +57,46 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
     DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
 }
 
+/** Initializes global_storage  -- mainly due to C and Fortran */
+void HDC_init(string pluginFileName, Json::Value settings) {
+
+    // First , try to load the file under filename, if not exists try some paths
+    string pluginPath = "";
+    if (!pluginFileName.empty()) {
+        if (boost::filesystem::exists(pluginFileName)) {
+            // OK, load this
+            pluginPath = boost::filesystem::absolute(pluginFileName).string();
+        } else {
+            // Never mind, try some default paths -- Now I don't know how do this better...
+            boost::filesystem::path p(pluginFileName);
+            string strippedName = p.filename().string();
+            vector<string> pluginSearchPath;
+            pluginSearchPath.push_back("./");
+            pluginSearchPath.push_back("./plugins");
+            pluginSearchPath.push_back(".config/hdc/plugins");
+            pluginSearchPath.push_back("/usr/local/lib");
+            pluginSearchPath.push_back("/usr/lib");
+            pluginSearchPath.push_back("/usr/local/lib64");
+            pluginSearchPath.push_back("/usr/lib64");
+            pluginSearchPath.push_back("/usr/local/lib/hdc");
+            pluginSearchPath.push_back("/usr/lib/hdc");
+            pluginSearchPath.push_back("/usr/local/lib64/hdc");
+            pluginSearchPath.push_back("/usr/lib64/hdc");
+            // Search all paths and stop if found
+            for (auto path : pluginSearchPath) {
+                string tmp = path+'/'+strippedName;
+                if (boost::filesystem::exists(tmp)) {
+                    D(cout << "Plugin found: " << tmp << endl;)
+                    pluginPath = tmp;
+                    break;
+                }
+            }
+        }
+    }
+    global_storage = new HDCStorage(pluginPath,settings);
+    DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
+}
+
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy() {
     delete global_storage;
@@ -698,6 +738,16 @@ void HDC::dump() {
     cout << to_json(0) << endl;
 }
 
+/** Serializes HDC to special json file*/
+void HDC::serialize(string filename) {
+    ofstream file;
+    Json::Value root = this->storage->get_status();
+    root["uuid"] = this->uuid;
+    file.open(filename.c_str());
+    file << root;
+    file.close();
+}
+
 void HDC::resize(HDC* h, int recursively)
 {
     // TODO: discuss this with Jakub and redo this.
@@ -1067,5 +1117,26 @@ HDC* new_HDC_from_c_ptr(intptr_t c_ptr) {
     HDC* tree;
     hdc_t* c_wrap = (hdc_t*) c_ptr;
     tree = (HDC*) c_wrap->obj;
+    return tree;
+}
+
+HDC* deserialize_HDC(std::string filename) {
+    HDC* tree;
+    ifstream file;
+    file.exceptions(ifstream::failbit | ifstream::badbit);
+    try {
+        file.open(filename);
+        Json::Value root;
+        file >> root;
+        string pluginPath = root["pluginPath"].asString();
+        string uuid = root["uuid"].asString();
+        Json::Value settings = root["settings"];
+        HDC_init(pluginPath,settings);
+        tree = new HDC(global_storage,uuid);
+    }
+    catch (ifstream::failure e) {
+        cout << "Error reading / opening file." << endl;
+    }
+    file.close();
     return tree;
 }

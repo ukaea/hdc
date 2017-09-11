@@ -16,7 +16,7 @@ class MDBMStorage : public Storage {
 private:
     MDBM* db;
     bool initialized = false;
-    bool persistent;
+    bool persistent = true;
     string filename;
 public:
     MDBMStorage() {
@@ -24,7 +24,7 @@ public:
     };
     ~MDBMStorage() {
         DEBUG_STDOUT("~MDBMStorage()\n");
-        cleanup();
+        if(!persistent) cleanup();
     };
     bool usesBuffersDirectly() {
         return false;
@@ -66,7 +66,12 @@ public:
         DEBUG_STDOUT("MDBMStorage::cleanup()\n");
         mdbm_close(this->db);
         // Remove db file if the data persistence is not required
-        if (::remove(filename.c_str()) != 0) {perror("Error opening deleting file"); exit(1);}
+        if (!this->persistent) {
+            if (::remove(filename.c_str()) != 0) {
+                perror("Error opening deleting file");
+                exit(1);
+            }
+        }
         initialized = false;
         return;
     };
@@ -86,7 +91,16 @@ public:
             ss >> root;
         }
         filename = root.get("filename","/tmp/db.mdbm").asString();
-        persistent = root.get("persistent",false).asBool();
+        persistent = root.get("persistent",true).asBool();
+        D(printf("Filename: %s\n", filename.c_str());)
+        this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
+//         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
+        initialized = true;
+        return;
+    }
+    void init(Json::Value& root) {
+        filename = root.get("filename","/tmp/db.mdbm").asString();
+        persistent = root.get("persistent",true).asBool();
         D(printf("Filename: %s\n", filename.c_str());)
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
 //         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
