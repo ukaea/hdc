@@ -355,6 +355,7 @@ public:
     /** Dumps JSON to cout */
     void dump();
     /** Serializes HDC to special json file*/
+    string serialize();
     void serialize(string filename);
     /** Returns void pointer to data. */
     intptr_t as_void_ptr();
@@ -408,6 +409,8 @@ HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
 // "static contructor" from hdc_t*
 HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
 // "deserialize from storage"
-HDC* deserialize_HDC(std::string filename);
+HDC* deserialize_HDC_file(std::string filename);
+// "deserialize from storage"
+HDC* deserialize_HDC_string(std::string filename);
 
 #endif // HDC_HPP

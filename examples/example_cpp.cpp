@@ -68,5 +68,6 @@ int main() {
 #endif
     // On screen
     tree.dump();
+    tree.serialize("pokus.json");
     return 0;
 }

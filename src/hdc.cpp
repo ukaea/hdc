@@ -740,12 +740,16 @@ void HDC::dump() {
 
 /** Serializes HDC to special json file*/
 void HDC::serialize(string filename) {
-    ofstream file;
+    ofstream file(filename);
+    file << serialize();
+    file.close();
+}
+
+string HDC::serialize() {
     Json::Value root = this->storage->get_status();
     root["uuid"] = this->uuid;
-    file.open(filename.c_str());
-    file << root;
-    file.close();
+    Json::FastWriter writer;
+    return writer.write(root);
 }
 
 void HDC::resize(HDC* h, int recursively)
@@ -1120,23 +1124,34 @@ HDC* new_HDC_from_c_ptr(intptr_t c_ptr) {
     return tree;
 }
 
-HDC* deserialize_HDC(std::string filename) {
-    HDC* tree;
-    ifstream file;
-    file.exceptions(ifstream::failbit | ifstream::badbit);
+HDC* deserialize_HDC_file(std::string filename) {
     try {
-        file.open(filename);
-        Json::Value root;
-        file >> root;
-        string pluginPath = root["pluginPath"].asString();
-        string uuid = root["uuid"].asString();
-        Json::Value settings = root["settings"];
-        HDC_init(pluginPath,settings);
-        tree = new HDC(global_storage,uuid);
+        std::ifstream t(filename);
+        std::string str((std::istreambuf_iterator<char>(t)),
+        std::istreambuf_iterator<char>());
+        return deserialize_HDC_string(str);
     }
     catch (ifstream::failure e) {
         cout << "Error reading / opening file." << endl;
+        exit(-1);
     }
-    file.close();
+}
+
+HDC* deserialize_HDC_string(std::string str) {
+    HDC* tree;
+    Json::Value root;
+    Json::Reader reader;
+    bool parsingSuccessful = reader.parse( str.c_str(), root );     //parse process
+    if ( !parsingSuccessful )
+    {
+        std::cout  << "Failed to parse"
+               << reader.getFormattedErrorMessages();
+        exit(-1);
+    }
+    string pluginPath = root["pluginPath"].asString();
+    string uuid = root["uuid"].asString();
+    Json::Value settings = root["settings"];
+    HDC_init(pluginPath,settings);
+    tree = new HDC(global_storage,uuid);
     return tree;
 }
