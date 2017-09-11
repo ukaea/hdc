@@ -422,7 +422,25 @@ const char* hdc_as_string_path(hdc_t* tree, char* path)
     HDC* t = (HDC*)tree->obj;
     return t->as_string(path).c_str();
 }
+/*
+void hdc_as_string_fortran(hdc_t* tree, char* output, size_t* length) //TODO: can we do zero copy here???
+{
+    HDC* t = (HDC*)tree->obj;
+    std::string str = t->as_string(); //Unfortunatelly, we need to make copy here...
+    output = new char[str.length() + 1];
+    strcpy(output, str.c_str());
+    *length = str.length();
+}
 
+void hdc_as_string_path_fortran(hdc_t* tree, char* path, char* output, size_t* length)
+{
+    HDC* t = (HDC*)tree->obj;
+    std::string str = t->as_string(path); //Unfortunatelly, we need to make copy here...
+    output = new char[str.length() + 1];
+    strcpy(output, str.c_str());
+    *length = str.length();
+}
+*/
 
 double hdc_as_double_scalar_path(hdc_t* tree, char* path)
 {

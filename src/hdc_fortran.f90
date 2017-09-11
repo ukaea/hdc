@@ -117,6 +117,12 @@ module hdc_fortran
             import
             type(hdc_t), value :: obj
         end subroutine hdc_print_type_str
+        
+! ! !         function c_hdc_get_type_str(obj) result(res) bind(c,name="hdc_get_type_str")
+! ! !             import
+! ! !             type(hdc_t), value :: obj
+! ! !             character(len=:), allocatable :: res
+! ! !         end function c_hdc_get_type_str
 
         subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
             import
@@ -313,6 +319,21 @@ module hdc_fortran
             type(hdc_t), value:: obj
             type(c_ptr) :: res
         end function c_hdc_as_voidptr
+        !> Sets arbitrary data casted to void pointer. This is interface to C.
+        subroutine c_hdc_as_string_fortran(obj,str,strlen) bind(c,name="hdc_as_string_fortran")
+            import
+            type(hdc_t), value:: obj
+            integer(c_int) :: strlen
+            character(kind=c_char) :: str(*)
+        end subroutine c_hdc_as_string_fortran
+        !> Sets arbitrary data casted to void pointer. This is interface to C.
+        subroutine c_hdc_as_string_path_fortran(obj,path,str,strlen)  bind(c,name="hdc_as_string_path_fortran")
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            integer(c_int) :: strlen
+            character(kind=c_char) :: str(*)
+        end subroutine c_hdc_as_string_path_fortran
         !> Sets arbitrary data casted to void pointer to given path. This is interface to C.
         function c_hdc_as_voidptr_path(obj, path) result(res) bind(c,name="hdc_as_voidptr_path")
             import
@@ -474,6 +495,11 @@ module hdc_fortran
         module procedure hdc_as_double_2d_path
      end interface hdc_as_double_2d
 
+     interface hdc_as_string
+        module procedure hdc_as_string_
+        module procedure hdc_as_string_path
+    end interface hdc_as_string
+     
      interface hdc_as_int8
         module procedure hdc_as_int8_
         module procedure hdc_as_int8_path
@@ -571,7 +597,7 @@ module hdc_fortran
     hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
     hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_plain, hdc_init_, &
-    hdc_as_string_sub, hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32
+    hdc_as_string_sub, hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32, hdc_as_string
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -1061,7 +1087,7 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         type(c_ptr) :: char_ptr
-        character(len=255) :: res
+        character(len=:),allocatable :: res
         char_ptr = c_hdc_as_voidptr(this)
         res = C_to_F_string(char_ptr)
     end function hdc_as_string_
@@ -1069,7 +1095,7 @@ contains
     subroutine hdc_as_string_sub(this, res)
         type(hdc_t) :: this
         type(c_ptr) :: char_ptr
-        character(len=255) :: res
+        character(len=:),allocatable :: res
         char_ptr = c_hdc_as_voidptr(this)
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_sub
@@ -1503,7 +1529,7 @@ contains
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_1d_path_sub
 
-        function hdc_as_int32_2d_path(this, path) result(res)
+    function hdc_as_int32_2d_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
@@ -1566,19 +1592,31 @@ contains
         type(hdc_t) :: this
         type(c_ptr) :: char_ptr
         character(len=*), intent(in) :: path
-        character(len=255) :: res
+        character(len=:), allocatable :: res
         char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         res = C_to_F_string(char_ptr)
     end function hdc_as_string_path
-
+    
     subroutine hdc_as_string_path_sub(this, path, res)
         type(hdc_t) :: this
         type(c_ptr) :: char_ptr
         character(len=*), intent(in) :: path
-        character(len=255) :: res
+        character(len=*) :: res
         char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
+    
+! !     subroutine hdc_as_string_path_sub(this, path, res)
+! !         use iso_c_binding
+! !         type(hdc_t) :: this
+! !         type(c_ptr) :: char_ptr
+! !         character(len=*), intent(in) :: path
+! !         integer(c_int) :: strlen
+! !         character(len=*) :: res
+! !         call c_hdc_as_string_path_fortran(this,trim(path)//c_null_char,res,cloc(strlen))
+! !         char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
+! !         res = C_to_F_string(char_ptr)
+! !     end subroutine hdc_as_string_path_sub
 
     subroutine hdc_to_json(this,path,mode)
         type(hdc_t) :: this

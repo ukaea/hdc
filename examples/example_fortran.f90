@@ -11,6 +11,7 @@ contains
         integer, dimension(:), pointer:: array2
         integer(kind=c_long), dimension(1:1) :: shape2
         integer(kind=8) :: ndim2
+        character(len=:), allocatable :: str
         allocate(tree)
         allocate(subtree)
         allocate(data)
@@ -22,7 +23,9 @@ contains
         call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new_empty())
         call hdc_add_child(tree,"aaa/bbb/eee",hdc_new_empty())
         call hdc_add_child(tree,"bbb/eee/aaa",hdc_new_empty())
-        
+        call hdc_set_data(tree,"aaa/bbb/ccc","pokus")
+        str = hdc_as_string(tree,"aaa/bbb/ccc")
+        print *,"AAA: ",str
         ! Get subtree
         subtree = hdc_get_child(tree,"aaa/bbb")
         ! Get node

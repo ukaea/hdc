@@ -51,7 +51,6 @@ contains
             write (*,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
             call hdc_delete(magnetics)
             deallocate(data)
-            
-	    end do
+        end do
     end subroutine f_main
 end program test_hdc_put

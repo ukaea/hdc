@@ -83,6 +83,9 @@ void hdc_dump(struct hdc_t* tree);
 const char* hdc_dumps(struct hdc_t* tree);
 const char* hdc_get_datashape_str(struct hdc_t* tree);
 
+// void hdc_as_string_fortran(struct hdc_t* tree, char* output, size_t* length);
+// void hdc_as_string_path_fortran(struct hdc_t* tree, char* path, char* output, size_t* length);
+
 int8_t hdc_as_int8_sc_path(struct hdc_t* tree, char* path); /**  */
 const char* hdc_get_type_str(struct hdc_t* tree); /**  */
 void hdc_print_type_str(struct hdc_t* tree);
