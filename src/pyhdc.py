@@ -53,6 +53,10 @@ _hdc_childs_count = libchdc.hdc_childs_count
 _hdc_childs_count.restype = ctypes.c_ulong
 _hdc_keys_py = libchdc.hdc_keys_py
 _hdc_keys_py.argtypes = [_HDC_T_P, ctypes.POINTER(ctypes.c_char_p)]
+_hdc_serialize = libchdc.hdc_serialize
+_hdc_serialize.restype = ctypes.c_char_p
+_hdc_deserialize = libchdc.hdc_deserialize
+_hdc_deserialize.restype = _HDC_T_P
 
 
 class HDC(object):
@@ -63,6 +67,13 @@ class HDC(object):
         self._c_ptr = _hdc_new_empty()
         if data is not None:
             self.set_data(data)
+
+    def __getstate__(self):
+        state = _hdc_serialize(self.c_ptr)
+        return state
+
+    def __setstate__(self, state):
+        self._c_ptr = _hdc_deserialize(state)
 
     @classmethod
     def from_c_ptr(cls, c_ptr):

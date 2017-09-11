@@ -576,5 +576,22 @@ void HDC_destroy_c() {
     HDC_destroy();
 }
 
+const char* hdc_serialize(hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    stringstream tmp;
+    tmp << t->serialize();
+    string dump_str = tmp.str();
+    return strdup(dump_str.c_str());
+  
+}
+
+struct hdc_t* hdc_deserialize(const char* str) {
+    HDC* node = deserialize_HDC_string((string) str);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
+
 // end extern C
 }
