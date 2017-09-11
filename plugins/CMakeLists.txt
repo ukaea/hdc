@@ -24,7 +24,7 @@ if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
     message("Found MDBM library: ${MDBM_LIBRARY}")
 
     add_library(MDBMPlugin SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
-    target_link_libraries(MDBMPlugin ${MDBM_LIBRARY} Pluma dl)
+    target_link_libraries(MDBMPlugin ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})
 else ()
     message("MDBM Not found, Building of MDBM Plugin will be skipped...")
 endif()
