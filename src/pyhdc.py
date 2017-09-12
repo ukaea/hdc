@@ -2,6 +2,7 @@ import ctypes
 from ctypes import byref
 import numpy as np
 import six
+import collections
 # import libhdc_python as _libhdc
 
 __all__ = ['HDC']
@@ -64,9 +65,22 @@ class HDC(object):
 
     def __init__(self, data=None):
         super(HDC, self).__init__()
-        self._c_ptr = _hdc_new_empty()
-        if data is not None:
-            self.set_data(data)
+        if isinstance(data, self.__class__):
+            self._c_ptr = data._c_ptr
+        elif data is None:
+            self._c_ptr = _hdc_new_empty()
+        else:
+            self._c_ptr = _hdc_new_empty()
+            if isinstance(data, collections.Mapping):
+                # dict-like data
+                for key, value in data.items():
+                    self[key] = self.__class__(value)
+            elif isinstance(data, collections.Sequence) and not isinstance(data, six.string_types):
+                # list, tuple etc., not string
+                for value in data:
+                    self.append(self.__class__(value))
+            else:
+                self.set_data(data)
 
     def __getstate__(self):
         state = _hdc_serialize(self.c_ptr)
