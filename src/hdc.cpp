@@ -1008,9 +1008,12 @@ string HDC::get_uuid() {
 bip::managed_external_buffer HDC::get_segment() {
     char* buffer = storage->get(uuid);
     bip::managed_external_buffer segment;
+    return bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t), 0);
+    /*
     // attach managed buffer
     try {
         segment = bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t), 0);
+
     }
     catch (std::exception& e) {
         std::cerr << "get_segment(): Caught: " << e.what() << "\n";
@@ -1018,7 +1021,7 @@ bip::managed_external_buffer HDC::get_segment() {
         segment = bip::managed_external_buffer(bip::create_only, buffer+sizeof(header_t), header.buffer_size-sizeof(header_t));
     }
     // FIXME: not necessary
-    return segment;
+    return segment;*/
 }
 
 map_t* HDC::get_children_ptr() {
