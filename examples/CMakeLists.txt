@@ -28,11 +28,8 @@ if (BUILD_EXAMPLES)
     add_executable(example_lukas example_lukas.f90)
     target_link_libraries(example_lukas fhdc)
     
-    add_executable(process_master process_master.cpp)
-    target_link_libraries(process_master hdc)
-    
-    add_executable(process_slave process_slave.cpp)
-    target_link_libraries(process_slave hdc)
+    add_executable(example_interprocess example_interprocess.cpp)
+    target_link_libraries(example_interprocess hdc rt)
 
     #add_executable(calling_fortran_from_c calling_fortran_from_c.c)
     #target_link_libraries(calling_fortran_from_c fhdc)
