@@ -95,6 +95,8 @@ void test_str(char* str);
 void HDC_init_c(char* pluginFileName, char* pluginSettingsFileName);
 void HDC_init_c_plain();
 void HDC_destroy_c();
+const char* hdc_serialize(struct hdc_t* tree);
+struct hdc_t* hdc_deserialize(const char* str);
 #ifdef __cplusplus
 }
 #endif // __cplusplus
