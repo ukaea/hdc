@@ -1,7 +1,4 @@
 #include "hdc.hpp"
-#include <json/json.h>
-
-
 
 bool is_all_numeric(const Json::Value& root)
 {
@@ -61,11 +58,11 @@ size_t* get_shape(const Json::Value& root) {
     D(
     cout << "Dimension: " << dim << endl;
     cout << "Shape: (" << shape[0];
-    for (int i=1; i<dim; i++) cout << ", " << shape[i];
+    for (unsigned int i=1; i<dim; i++) cout << ", " << shape[i];
     cout << ")" << endl;
     )
     size_t* res = new size_t[dim];
-    for (int i=0;i<dim;i++) res[i] = shape[i];
+    for (unsigned int i=0;i<dim;i++) res[i] = shape[i];
     return res;
 }
 
@@ -142,7 +139,7 @@ HDC* json_to_hdc(const Json::Value& root) {
                         case 1:
                         {
                             andres::View<double> view(shape, shape+1, (double*)data_ptr);
-                            for (int i = 0; i < shape[0]; i++) {
+                            for (unsigned int i = 0; i < shape[0]; i++) {
                                 view(i) = root[i].asDouble();
                             }
                             break;
@@ -150,8 +147,8 @@ HDC* json_to_hdc(const Json::Value& root) {
                         case 2:
                         {
                             andres::View<double> view(shape, shape+2, (double*)data_ptr);
-                            for (int i = 0; i < shape[0]; i++)
-                                for (int j = 0; j < shape[1]; j++)
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i,j) = root[i][j].asDouble();
                             break;
                         }
@@ -167,14 +164,14 @@ HDC* json_to_hdc(const Json::Value& root) {
                         case 1:
                         {
                             andres::View<int32_t> view(shape, shape+1, (int32_t*)data_ptr);
-                            for (int i = 0; i < shape[0]; i++) view(i) = root[i].asInt();
+                            for (unsigned int i = 0; i < shape[0]; i++) view(i) = root[i].asInt();
                             break;
                         }
                         case 2:
                         {
                             andres::View<int32_t> view(shape, shape+2, (int32_t*)data_ptr);
-                            for (int i = 0; i < shape[0]; i++)
-                                for (int j = 0; j < shape[1]; j++)
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i,j) = root[i][j].asInt();
                             break;
                         }
@@ -222,78 +219,78 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
         }
         case (1):
         {
-            for (int i0=0;i0<shape[0];i0++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
                 root[i0] = (T)view(i0);
             break;
         }
         case (2):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
                     root[i0][i1] = view(i0,i1);
             break;
         }
         case (3):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
-                    for (int i2=0;i2<shape[2];i2++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
+                    for (unsigned int i2=0;i2<shape[2];i2++)
                         root[i0][i1][i2] = view(i0,i1,i2);
             break;
         }
         case (4):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
-                    for (int i2=0;i2<shape[2];i2++)
-                        for (int i3=0;i3<shape[3];i3++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
+                    for (unsigned int i2=0;i2<shape[2];i2++)
+                        for (unsigned int i3=0;i3<shape[3];i3++)
                             root[i0][i1][i2][i3] = view(i0,i1,i2,i3);
             break;
         }
         case (5):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
-                    for (int i2=0;i2<shape[2];i2++)
-                        for (int i3=0;i3<shape[3];i3++)
-                            for (int i4=0;i4<shape[4];i4++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
+                    for (unsigned int i2=0;i2<shape[2];i2++)
+                        for (unsigned int i3=0;i3<shape[3];i3++)
+                            for (unsigned int i4=0;i4<shape[4];i4++)
                                 root[i0][i1][i2][i3][i4] = view(i0,i1,i2,i3,i4);
             break;
         }
         /*
         case (6):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
-                    for (int i2=0;i2<shape[2];i2++)
-                        for (int i3=0;i3<shape[3];i3++)
-                            for (int i4=0;i4<shape[4];i4++)
-                                for (int i5=0;i5<shape[5];i5++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
+                    for (unsigned int i2=0;i2<shape[2];i2++)
+                        for (unsigned int i3=0;i3<shape[3];i3++)
+                            for (unsigned int i4=0;i4<shape[4];i4++)
+                                for (unsigned int i5=0;i5<shape[5];i5++)
                                     root[i0][i1][i2][i3][i4][i5] = view(i0,i1,i2,i3,i4,i5);
             break;
         }
         case (7):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
-                    for (int i2=0;i2<shape[2];i2++)
-                        for (int i3=0;i3<shape[3];i3++)
-                            for (int i4=0;i4<shape[4];i4++)
-                                for (int i5=0;i5<shape[5];i5++)
-                                    for (int i6=0;i6<shape[5];i6++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
+                    for (unsigned int i2=0;i2<shape[2];i2++)
+                        for (unsigned int i3=0;i3<shape[3];i3++)
+                            for (unsigned int i4=0;i4<shape[4];i4++)
+                                for (unsigned int i5=0;i5<shape[5];i5++)
+                                    for (unsigned int i6=0;i6<shape[5];i6++)
                                         root[i0][i1][i2][i3][i4][i5][i6] = view(i0,i1,i2,i3,i4,i5,i6);
             break;
         }
         case (8):
         {
-            for (int i0=0;i0<shape[0];i0++)
-                for (int i1=0;i1<shape[1];i1++)
-                    for (int i2=0;i2<shape[2];i2++)
-                        for (int i3=0;i3<shape[3];i3++)
-                            for (int i4=0;i4<shape[4];i4++)
-                                for (int i5=0;i5<shape[5];i5++)
-                                    for (int i6=0;i6<shape[5];i6++)
-                                        for (int i7=0;i7<shape[5];i7++)
+            for (unsigned int i0=0;i0<shape[0];i0++)
+                for (unsigned int i1=0;i1<shape[1];i1++)
+                    for (unsigned int i2=0;i2<shape[2];i2++)
+                        for (unsigned int i3=0;i3<shape[3];i3++)
+                            for (unsigned int i4=0;i4<shape[4];i4++)
+                                for (unsigned int i5=0;i5<shape[5];i5++)
+                                    for (unsigned int i6=0;i6<shape[5];i6++)
+                                        for (unsigned int i7=0;i7<shape[5];i7++)
                                             root[i0][i1][i2][i3][i4][i5][i6][i7] = view(i0,i1,i2,i3,i4,i5,i6,i7);
             break;
         }*/
