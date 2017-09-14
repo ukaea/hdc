@@ -48,13 +48,16 @@ extern pt::ptree options;
 extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
-
+void HDC_parse_cmdline(int argc, const char *argv[]);
 void HDC_load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
 void HDC_search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
 void HDC_list_plugins();
-
+void HDC_set_storage(std::string storage="umap");
+std::vector<std::string> HDC_get_available_plugins();
+std::string HDC_get_library_dir(void);
 /** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init();
+void HDC_init(std::string storage="umap",std::string storage_options="");
+void HDC_set_default_storage_options(std::string storage="umap", std::string storage_options="");
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();

@@ -576,6 +576,15 @@ void HDC_destroy_c() {
     HDC_destroy();
 }
 
+char** HDC_get_available_plugins_c() {
+    std::vector<std::string> cppkeys = HDC_get_available_plugins();
+    const char** keys = new const char* [cppkeys.size()+1];
+    for (int i=0;i<cppkeys.size();i++) {
+        keys[i] = cppkeys[i].c_str();
+    }
+    keys[cppkeys.size()] = NULL;
+};
+
 const char* hdc_serialize(hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     stringstream tmp;
