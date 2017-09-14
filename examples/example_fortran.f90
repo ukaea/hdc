@@ -7,8 +7,8 @@ contains
 
     subroutine f_main()
         type(hdc_t), pointer :: tree, subtree, data, node
-        integer, dimension(1:4) :: array
-        integer, dimension(:), pointer:: array2
+        integer(kind=8), dimension(1:4) :: array
+        integer(kind=8), dimension(:), pointer:: array2
         integer(kind=c_long), dimension(1:1) :: shape2
         integer(kind=8) :: ndim2
         character(len=:), allocatable :: str
