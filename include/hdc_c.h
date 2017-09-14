@@ -83,6 +83,20 @@ void hdc_dump(struct hdc_t* tree);
 const char* hdc_dumps(struct hdc_t* tree);
 const char* hdc_get_datashape_str(struct hdc_t* tree);
 
+struct hdc_t* hdc_new_int64(int ndim, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
+void hdc_set_int64(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
+int64_t* hdc_as_int64_1d(struct hdc_t* tree); /**  */
+int64_t** hdc_as_int64_2d(struct hdc_t* tree); /**  */
+int64_t*** hdc_as_int64_3d(struct hdc_t* tree); /**  */
+int64_t**** hdc_as_int64_4d(struct hdc_t* tree); /**  */
+int64_t* hdc_as_int64_1d_path(struct hdc_t* tree, char* path); /**  */
+int64_t** hdc_as_int64_2d_path(struct hdc_t* tree, char* path); /**  */
+void hdc_set_int64_scalar_path(struct hdc_t* tree, char* path, int64_t data); /**  */
+void hdc_set_int64_scalar(struct hdc_t* tree, int64_t data); /**  */
+void hdc_set_int64_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data);
+int64_t hdc_as_int64_scalar(struct hdc_t* tree); /** Returns scalar int64.  */
+int64_t hdc_as_int64_scalar_path(struct hdc_t* tree, char* path); /** Returns scalar int64.  */
+
 // void hdc_as_string_fortran(struct hdc_t* tree, char* output, size_t* length);
 // void hdc_as_string_path_fortran(struct hdc_t* tree, char* path, char* output, size_t* length);
 

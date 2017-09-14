@@ -34,6 +34,13 @@ TEST(CHDC,EmptyArrayNode) {
     EXPECT_STREQ("int32",hdc_get_type_str(hi32));
     hdc_delete(hi32);
     
+    struct hdc_t* hi64 = hdc_new_dtype(ndim, shape, INT64_ID);
+    EXPECT_EQ(1,hdc_get_ndim(hi64));
+    EXPECT_EQ(4,hdc_get_shape(hi64)[0]);
+    EXPECT_EQ(INT64_ID,hdc_get_type(hi64));
+    EXPECT_STREQ("int64",hdc_get_type_str(hi64));
+    hdc_delete(hi64);
+    
     struct hdc_t* hd = hdc_new_dtype(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hdc_get_ndim(hd));
     EXPECT_EQ(4,hdc_get_shape(hd)[0]);
@@ -118,6 +125,25 @@ TEST(CHDC,Int32DataManipulation) {
     data2 = hdc_as_int32_1d(h);
     EXPECT_EQ(666,data2[3]);
 }
+
+TEST(CHDC,Int64DataManipulation) {
+    int ndim = 1;
+    size_t shape[] = {4};
+    int64_t data[] = {777,20202020,3333,555555};
+    struct hdc_t* h = hdc_new_empty();
+    hdc_set_int64(h,ndim,shape,(void*)data);
+    EXPECT_EQ(INT64_ID,hdc_get_type(h));
+    EXPECT_EQ(1,hdc_get_ndim(h));
+    EXPECT_EQ(4,hdc_get_shape(h)[0]);
+    EXPECT_STREQ("int64",hdc_get_type_str(h));
+    int64_t* data2 = hdc_as_int64_1d(h);
+    for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
+    data[3] = 666;
+    hdc_set_int64(h,ndim,shape,(void*)data);
+    data2 = hdc_as_int64_1d(h);
+    EXPECT_EQ(666,data2[3]);
+}
+
 
 TEST(CHDC,DoubleDataManipulation) {
     int ndim = 1;

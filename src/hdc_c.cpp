@@ -38,6 +38,14 @@ hdc_t* hdc_new_int32(int ndim, size_t* shape)
     return h;
 }
 
+hdc_t* hdc_new_int64(int ndim, size_t* shape)
+{
+    HDC* node = new HDC(ndim, shape, INT64_ID);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
 hdc_t* hdc_new_double(int ndim, size_t* shape)
 {
     HDC* node = new HDC(ndim, shape,DOUBLE_ID);
@@ -170,6 +178,18 @@ void hdc_set_int32_path(struct hdc_t* tree, char* path, int ndim, size_t* shape,
     return;
 }
 
+void hdc_set_int64(struct hdc_t* tree, int ndim, size_t* shape, void* data) {
+    HDC* t = (HDC*)tree->obj;
+    t->set_data_c(ndim, shape, data, INT64_ID);
+    return;
+}
+
+void hdc_set_int64_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data) {
+    HDC* t = (HDC*)tree->obj;
+    t->set_data_c((string)path, ndim, shape, data, INT64_ID);
+    return;
+}
+
 void hdc_set_int8_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data) {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c((string)path, ndim, shape, data, INT8_ID);
@@ -231,6 +251,26 @@ int32_t**** hdc_as_int32_4d(struct hdc_t* tree) {
     return t->as<int32_t****>();
 }
 
+int64_t* hdc_as_int64_1d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int64_t*>();
+}
+
+int64_t** hdc_as_int64_2d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int64_t**>();
+}
+
+int64_t*** hdc_as_int64_3d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int64_t***>();
+}
+
+int64_t**** hdc_as_int64_4d(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int64_t****>();
+}
+
 int8_t* hdc_as_int8_1d(struct hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;
     return t->as<int8_t*>();
@@ -271,6 +311,15 @@ int32_t** hdc_as_int32_2d_path(struct hdc_t* tree, char* path) {
     return t->as<int32_t**>((string)path);
 }
 
+int64_t* hdc_as_int64_1d_path(struct hdc_t* tree, char* path) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int64_t*>((string)path);
+}
+
+int64_t** hdc_as_int64_2d_path(struct hdc_t* tree, char* path) {
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int64_t**>((string)path);
+}
 
 double* hdc_as_double_1d_path(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
@@ -320,6 +369,19 @@ void hdc_set_int32_scalar_path(hdc_t* tree, char* path, int32_t data)
     return;
 }
 
+void hdc_set_int64_scalar(hdc_t* tree, int64_t data)
+{
+    HDC* t = (HDC*)tree->obj;
+    t->set_data(data);
+    return;
+}
+
+void hdc_set_int64_scalar_path(hdc_t* tree, char* path, int64_t data)
+{
+    HDC* t = (HDC*)tree->obj;
+    t->set_data((string)path, data);
+    return;
+}
 
 void hello() {cout << "Hello" << endl; return;}
 
@@ -477,6 +539,19 @@ int32_t hdc_as_int32_scalar_path(hdc_t* tree, char* path)
     HDC* t = (HDC*)tree->obj;
     return (t->as<int32_t*>((string)path))[0];
 }
+
+int64_t hdc_as_int64_scalar(hdc_t* tree)
+{
+    HDC* t = (HDC*)tree->obj;
+    return (t->as<int64_t*>())[0];
+}
+
+int64_t hdc_as_int64_scalar_path(hdc_t* tree, char* path)
+{
+    HDC* t = (HDC*)tree->obj;
+    return (t->as<int64_t*>((string)path))[0];
+}
+
 
 void test_str(char* str) {
     cout << "test_str(): " << (string)str << endl;
