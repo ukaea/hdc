@@ -5,8 +5,38 @@
 #include <string>
 using namespace std;
 
+void HDC_parse_cmdline(int argc, const char *argv[]) {
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options:");
+    desc.add_options()
+        ("help", "produce help message")
+        ("list-plugins", "list available storage plugins")
+        ("storage", po::value<std::string>(),"use given storage plugin")
+    ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);    
 
-int main() {
+    if (vm.count("help")) {
+        cout << desc << "\n";
+        exit(1);
+    }
+
+    if (vm.count("list-plugins")) {
+        HDC_init();
+        HDC_list_plugins();
+        exit(0);
+    }
+    
+    if (vm.count("storage")) {
+        string plugin_name = vm["storage"].as<std::string>();
+        options.put("storage_cmdline",plugin_name);
+    }
+}
+
+
+int main(int argc, const char *argv[]) {
+    HDC_parse_cmdline(argc,argv);
     // Create new HDC tree
     HDC tree;
     // Add some children
@@ -59,13 +89,13 @@ int main() {
     for (int i=0; i<shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;
     //Serialize data to JSON
-    tree.to_json("tree.txt",0);
-#ifdef _USE_HDF5
-    tree.to_hdf5("tree.h5");
-    cout << "written\n";
-    HDC hhh = from_hdf5("tree.h5","/data");
-    hhh.dump();
-#endif
+//    tree.to_json("tree.txt",0);
+// #ifdef _USE_HDF5
+//     tree.to_hdf5("tree.h5");
+//     cout << "written\n";
+//     HDC hhh = from_hdf5("tree.h5","/data");
+//     hhh.dump();
+// #endif
     // On screen
     tree.dump();
     tree.serialize("pokus.json");

@@ -19,6 +19,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstdio>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <json/json.h>
 #include <exception>
 
@@ -35,16 +37,24 @@
 // #define DEBUG
 
 #include "hdc_helpers.h"
-
+#include <unordered_map>
 
 using namespace std;
+namespace pt = boost::property_tree;
 template<typename T> struct identity { typedef T type; };
-
+//this will hold all the settings, instead of boost::property_tree json we will use the jsoncpp for actual reading of them.
+extern pt::ptree options;
 //this is default global storage
 extern HDCStorage* global_storage;
+//list of found plugins
+extern unordered_map<string,string> avail_stores;
+
+void HDC_load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
+void HDC_search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
+void HDC_list_plugins();
 
 /** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(string pluginFileName="libMDBMPlugin.so", string pluginSettingsFileName="");
+void HDC_init();
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();

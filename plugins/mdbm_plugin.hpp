@@ -5,7 +5,8 @@
 #include <mdbm.h>
 #include <iostream>
 #include <cstdio>
-#include <json/json.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include <hdc_helpers.h>
@@ -85,27 +86,29 @@ public:
         return;
     };
     void init(string settings) {
-        Json::Value root;
-        if (boost::filesystem::exists(settings)) {
-            stringstream ss(settings);
-            ss >> root;
-        }
-        filename = root.get("filename","/tmp/db.mdbm").asString();
-        persistent = root.get("persistent",true).asBool();
+        boost::property_tree::ptree root;
+        std::stringstream ss;
+        ss << settings;
+        boost::property_tree::read_json(ss,root);
+        filename = root.get<std::string>("filename","/tmp/db.mdbm");
+        persistent = root.get<bool>("persistent",true);
         D(printf("Filename: %s\n", filename.c_str());)
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
 //         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
         return;
     }
-    void init(Json::Value& root) {
-        filename = root.get("filename","/tmp/db.mdbm").asString();
-        persistent = root.get("persistent",true).asBool();
+    void init(boost::property_tree::ptree& root) {
+        filename = root.get<std::string>("filename","/tmp/db.mdbm");
+        persistent = root.get<bool>("persistent",true);
         D(printf("Filename: %s\n", filename.c_str());)
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
 //         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
         return;
+    }
+    string name() {
+        return "mdbm";
     }
 };
 

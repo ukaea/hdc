@@ -565,7 +565,7 @@ size_t hdc_childs_count(hdc_t* tree) {
 }
 
 void HDC_init_c(char* pluginFileName, char* pluginSettingsFileName) {
-    HDC_init(string(pluginFileName),string(pluginSettingsFileName));
+    HDC_init();
 }
 
 void HDC_init_c_plain() {

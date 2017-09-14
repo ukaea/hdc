@@ -1,6 +1,7 @@
 #include "hdc.hpp"
 #include <fstream>
 #include <memory>
+#include <glob.h>
 //#define DEBUG
 struct hdc_t {
     void* obj;
@@ -10,9 +11,102 @@ using namespace std;
 
 HDCStorage* global_storage = nullptr;
 
-/** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(string pluginFileName, string pluginSettingsFileName) {
+unordered_map<string,string> avail_stores;
 
+pt::ptree options;
+
+void HDC_load_config(string configPath) {
+    std::string delimiters(":");
+    std::vector<std::string> parts;
+    boost::trim_if(configPath, boost::is_any_of(delimiters));
+    boost::split(parts, configPath, boost::is_any_of(delimiters),boost::token_compress_on);
+    pt::ptree settings_read;
+    for (auto path : parts) {
+        if (boost::filesystem::exists(path)) {
+            try {
+                pt::read_json(path,settings_read);
+            }
+            catch (...) {
+                cout << "HDC_load_config(): something bad happened" << endl;
+            }
+        }
+    }
+    options.put("storage",settings_read.get<std::string>("storage","umap"));
+    boost::optional<pt::ptree&> s = settings_read.get_child_optional("storage_options");
+    if (s.is_initialized())
+        options.add_child("storage_options",s.value());
+    else
+        options.add_child("storage_options",pt::ptree());
+}
+
+void HDC_search_plugins(string searchPath) {
+    std::string delimiters(":");
+    std::vector<std::string> parts;
+    boost::trim_if(searchPath, boost::is_any_of(delimiters));
+    boost::split(parts, searchPath, boost::is_any_of(delimiters),boost::token_compress_on);
+    glob_t globbuf;
+    for (auto path : parts) {
+        //cout << path << " " << endl;
+        string tmp_pth = path+"/libhdc_plugin_*.so*";
+        int err = glob(tmp_pth.c_str(),0,NULL,&globbuf);
+        if (err == 0) {
+        for (size_t i = 0; i < globbuf.gl_pathc; i++)
+        {
+            string pluginPath = globbuf.gl_pathv[i];
+            //cout << pluginPath << endl;
+            // try to load the plugin and if it runs if succeeds, bring it into map_t
+            try {
+                HDCStorage stor(globbuf.gl_pathv[i],"");
+                string name = stor.name();
+                if (!name.empty()) {
+                    if (avail_stores.find(name)==avail_stores.end())
+                        avail_stores[name] = pluginPath;
+                }
+            } catch(...) {
+                cout << "Nope\n";
+            }
+        }
+        globfree(&globbuf);
+        }
+    }
+};
+
+void HDC_list_plugins() {
+    cout << "Available storage plugins:\n";
+    for (const auto& store : avail_stores) {
+        cout << "  - " << store.first << " : " << store.second << "\n";
+    }
+}
+
+void HDC_set_storage() {
+    boost::optional<std::string> storage_cmd =  options.get_optional<std::string>("storage_cmdline");
+    if (storage_cmd) {
+        cout << "here\n";
+        options.erase("storage");
+        options.put("storage",storage_cmd.value());
+        options.erase("storage_cmdline");
+    }
+    string selected_store_name = options.get<std::string>("storage","umap");
+    cout << "Selected storage: " << selected_store_name <<endl;
+    if (avail_stores.find(selected_store_name) != avail_stores.end()) {
+        cout << avail_stores[selected_store_name] << endl;
+        global_storage = new HDCStorage(avail_stores[selected_store_name],options.get_child("storage_options"));
+    } else {
+        cerr << "Unable to select the store.\n";
+        exit(2);
+    }
+}
+
+void HDC_init() {
+    cout << "HDC_init()\n";
+    HDC_search_plugins();
+    HDC_load_config();
+    HDC_set_storage();
+}
+/** Initializes global_storage  -- mainly due to C and Fortran */
+/*
+void HDC_init(string pluginFileName, string pluginSettingsFileName) {
+    HDC_search_plugins();
     // First , try to load the file under filename, if not exists try some paths
     string pluginPath = "";
     if (!pluginFileName.empty()) {
@@ -56,8 +150,9 @@ void HDC_init(string pluginFileName, string pluginSettingsFileName) {
     global_storage = new HDCStorage(pluginPath,pluginSettingsFileName);
     DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
 }
-
+*/
 /** Initializes global_storage  -- mainly due to C and Fortran */
+/*
 void HDC_init(string pluginFileName, Json::Value settings) {
 
     // First , try to load the file under filename, if not exists try some paths
@@ -96,7 +191,7 @@ void HDC_init(string pluginFileName, Json::Value settings) {
     global_storage = new HDCStorage(pluginPath,settings);
     DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
 }
-
+*/
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy() {
     delete global_storage;
@@ -116,7 +211,7 @@ HDC::HDC(size_t _data_size) {
     if (global_storage == nullptr) {
        //HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
        HDC_init();
-        atexit(HDC_destroy);
+       atexit(HDC_destroy);
     }
     
     // Start by creating segment
@@ -746,10 +841,11 @@ void HDC::serialize(string filename) {
 }
 
 string HDC::serialize() {
-    Json::Value root = this->storage->get_status();
-    root["uuid"] = this->uuid;
-    Json::FastWriter writer;
-    return writer.write(root);
+    pt::ptree root = this->storage->get_status();
+    root.put("uuid",this->uuid);
+    std::stringstream ss;
+    write_json(ss, root);
+    return ss.str();
 }
 
 void HDC::resize(HDC* h, int recursively)
@@ -1008,6 +1104,8 @@ string HDC::get_uuid() {
 bip::managed_external_buffer HDC::get_segment() {
     char* buffer = storage->get(uuid);
     bip::managed_external_buffer segment;
+    return bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t), 0);
+    /*
     // attach managed buffer
     try {
         segment = bip::managed_external_buffer(bip::open_only, buffer+sizeof(header_t), 0);
@@ -1018,7 +1116,7 @@ bip::managed_external_buffer HDC::get_segment() {
         segment = bip::managed_external_buffer(bip::create_only, buffer+sizeof(header_t), header.buffer_size-sizeof(header_t));
     }
     // FIXME: not necessary
-    return segment;
+    return segment;*/
 }
 
 map_t* HDC::get_children_ptr() {
@@ -1139,19 +1237,23 @@ HDC* deserialize_HDC_file(std::string filename) {
 
 HDC* deserialize_HDC_string(std::string str) {
     HDC* tree;
-    Json::Value root;
-    Json::Reader reader;
-    bool parsingSuccessful = reader.parse( str.c_str(), root );     //parse process
-    if ( !parsingSuccessful )
+    boost::property_tree::ptree root;
+    try
     {
-        std::cout  << "Failed to parse"
-               << reader.getFormattedErrorMessages();
+        stringstream ss;
+        ss << str;
+        pt::read_json(ss,root);
+    }
+    catch (...)
+    {
+        cout << "deserialize_HDC_string(): Something bad happened while parsing the string\n";
         exit(-1);
     }
-    string pluginPath = root["pluginPath"].asString();
-    string uuid = root["uuid"].asString();
-    Json::Value settings = root["settings"];
-    HDC_init(pluginPath,settings);
+    string pluginPath = root.get<std::string>("pluginPath");
+    string uuid = root.get<std::string>("uuid");
+    boost::property_tree::ptree settings = root.get_child("settings");
+    options.add_child("storage_options",settings);
+    HDC_init();
     tree = new HDC(global_storage,uuid);
     return tree;
 }

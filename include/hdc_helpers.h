@@ -11,4 +11,7 @@
 #define D(x)
 #endif
 
+#define REGISTER_PO() ()
+
+
 #endif
