@@ -323,11 +323,11 @@ Json::Value HDC::to_json(int mode) {
                 root =  buffer_to_json<int32_t>(get_data_ptr(),get_ndim(),get_shape());
                 break;
             }
-            /*case(INT64_ID):
+            case(INT64_ID):
             {
             root =  buffer_to_json<int64_t>(get_data_ptr(),get_ndim(),get_shape());
                 break;
-            }*/
+            }
             case(UINT8_ID):
             {
                 root = buffer_to_json<uint8_t>(get_data_ptr(),get_ndim(),get_shape());
