@@ -3,6 +3,7 @@ from ctypes import byref
 import numpy as np
 import six
 import collections
+import numbers
 # import libhdc_python as _libhdc
 
 __all__ = ['HDC']
@@ -172,6 +173,10 @@ class HDC(object):
     def set_data(self, data):
         """Store data into the container
         """
+        if isinstance(data, numbers.Number):
+            # convert numbers to numpy
+            data = np.asarray(data)
+
         if isinstance(data, np.ndarray):
             # cdata = np.ctypeslib.as_ctypes(data)
             data = np.require(data, requirements=('C', 'O'))
