@@ -1,4 +1,7 @@
 Things to do:
+- unit tests for plugin storage seletion and settings
+- unit test for serialization
+- rewrite unit tests to test all storage plugins
 - proper ordering of init
 - clean up:
   - in c++:

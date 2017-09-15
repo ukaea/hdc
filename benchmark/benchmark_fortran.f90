@@ -6,7 +6,7 @@ program benchmark_fortran
 contains
     subroutine storage_reset()
         call hdc_destroy()
-        call hdc_init()
+        call hdc_init("umap","")
     end subroutine storage_reset
 
     subroutine bm_create_delete(n_items)
