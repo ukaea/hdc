@@ -112,7 +112,7 @@ public:
     };
     boost::property_tree::ptree get_status() {
         boost::property_tree::ptree root;
-        root.put("pluginPath",this->pluginPath);
+        root.put("storage", this->name());
         root.add_child("settings",this->settings);
         return root;
     };

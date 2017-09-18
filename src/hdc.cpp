@@ -1224,25 +1224,23 @@ HDC* deserialize_HDC_file(std::string filename) {
 HDC* deserialize_HDC_string(std::string str) {
     HDC* tree;
     boost::property_tree::ptree root;
-    cout << "deserialize_HDC_string(): fixme\n";
-    exit(999);
-//     try
-//     {
+    try
+    {
         cout << str;
         stringstream ss;
         ss << str;
         pt::read_json(ss,root);
-//     }
-//     catch (...)
-//     {
-//         cout << "deserialize_HDC_string(): Something bad happened while parsing the string\n";
-//         exit(-1);
-//     }
-    string pluginPath = root.get<std::string>("pluginPath");
+    }
+    catch (...)
+    {
+        cout << "deserialize_HDC_string(): Something bad happened while parsing the string\n";
+        exit(-1);
+    }
+    string storage = root.get<std::string>("storage");
     string uuid = root.get<std::string>("uuid");
     boost::property_tree::ptree settings = root.get_child("settings");
     options.add_child("storage_options",settings);
-    HDC_init();
+    HDC_init(storage);
     tree = new HDC(global_storage,uuid);
     return tree;
 }

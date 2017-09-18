@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
             shm_remove() { shared_memory_object::remove("MySharedMemory"); }
             ~shm_remove(){ shared_memory_object::remove("MySharedMemory"); }
         } remover;
-
+        HDC_init("mdbm");
         // Create new HDC tree
         HDC tree;
         // Add some children
@@ -78,8 +78,7 @@ int main(int argc, char *argv[]) {
         shared_memory_object shm (open_only, "MySharedMemory", read_only);
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
-        std::string str;
-        str.assign(mem,10000);
+        std::string str(mem);
         HDC* tree = deserialize_HDC_string(str);
         tree->dump();
     }
