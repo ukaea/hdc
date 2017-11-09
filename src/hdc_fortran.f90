@@ -14,7 +14,6 @@ module hdc_fortran
             use iso_c_binding
         end subroutine hello
 
-
         !> Default constructor. This is interface to C.
         function hdc_new_empty() result(obj) bind(c,name="hdc_new_empty")
             import
@@ -89,6 +88,13 @@ module hdc_fortran
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value :: node
         end subroutine c_hdc_add_child
+
+        !> Initializations of HDC library
+        subroutine c_hdc_init(pluginFileName,pluginSettingsString) bind(c,name="HDC_init_c")
+            import
+            character(kind=c_char), intent(in) :: pluginFileName(*)
+            character(kind=c_char), intent(in) :: pluginSettingsString(*)
+        end subroutine c_hdc_init
 
         !> Sets slice to a given position. This is interface to C.
         subroutine hdc_set_slice(obj, pos, node) bind(c,name="hdc_set_slice")
@@ -663,7 +669,6 @@ module hdc_fortran
     
     interface hdc_init
         module procedure hdc_init_
-        module procedure hdc_init_plain
     end interface hdc_init
     
     
@@ -679,10 +684,9 @@ module hdc_fortran
     hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
     hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_get_slice_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
-    hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_plain, hdc_init_, &
-    hdc_as_string_sub, hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32, hdc_as_string, hdc_as_int64_1d_, hdc_as_int64_2d_, &
-    hdc_as_int64_path_sub, hdc_as_int64_sub, hdc_as_int64_2d_path, hdc_as_int64_1d_path, hdc_as_int64
-
+    hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_, hdc_as_string_sub, &
+    hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32, hdc_as_string, hdc_as_int64_1d_, hdc_as_int64_2d_, hdc_as_int64_path_sub, &
+    hdc_as_int64_sub, hdc_as_int64_2d_path, hdc_as_int64_1d_path, hdc_as_int64
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -1740,22 +1744,19 @@ contains
     end function hdc_get_ptr_f
 
     
-    
-    !> Init HDC
-    subroutine hdc_init_plain() bind(c,name="HDC_init_c_plain")
-        use iso_c_binding
-    end subroutine hdc_init_plain
-    
     !> Destroy HDC
     subroutine hdc_destroy() bind(c,name="HDC_destroy_c")
         use iso_c_binding
     end subroutine hdc_destroy
     
     !> Init HDC
-    subroutine hdc_init_(pluginFileName, pluginSettingsFileName) bind(c,name="HDC_init_c")
+    subroutine hdc_init_(pluginFileName, pluginSettingsString)
         use iso_c_binding
-        character(kind=c_char), intent(in) :: pluginFileName(*)
-        character(kind=c_char), intent(in) :: pluginSettingsFileName(*)
+        character(kind=c_char,len=*), optional :: pluginFileName
+        character(kind=c_char,len=*), optional :: pluginSettingsString
+        if (.not.present(pluginFileName)) pluginFileName = ""
+        if (.not.present(pluginSettingsString)) pluginSettingsString = ""
+        call c_hdc_init(trim(pluginFileName)//c_null_char,trim(pluginSettingsString)//c_null_char)
     end subroutine hdc_init_
     
 

@@ -1,5 +1,4 @@
 #include "hdc_benchmark_common.hpp"
-
 // Empty child creation and deletion
 static void BM_HDC_CreationAndDeletion(benchmark::State& state) {
     while (state.KeepRunning()) {
@@ -15,13 +14,13 @@ BENCHMARK(BM_HDC_CreationAndDeletion);
 static void BM_HDC_AddChild(benchmark::State& state) {
     HDC* tree = new HDC();
     while (state.KeepRunning()) {
-        for (size_t i = 0;i < state.range(0);i++) tree->add_child(std::to_string(i),new HDC());
+        for (size_t i = 0;i < state.range(0);i++) tree->add_child("_"+std::to_string(i),new HDC());
     }
     delete tree;
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
 }
-BENCHMARK(BM_HDC_AddChild)->RangeMultiplier(2)->Range(1024,1024<<5);
+BENCHMARK(BM_HDC_AddChild)->RangeMultiplier(2)->Range(1024<<2,1024<<5);
 
 static void BM_HDC_AddChildPreallocated(benchmark::State& state) {
     while (state.KeepRunning()) {
@@ -173,3 +172,4 @@ static void BM_HDC_GetSliceMultipleItems(benchmark::State& state) {
     StorageReset();
 }
 BENCHMARK(BM_HDC_GetSliceMultipleItems)->RangeMultiplier(2)->Range(16,1024<<5);
+

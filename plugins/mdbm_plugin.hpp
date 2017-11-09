@@ -5,7 +5,8 @@
 #include <mdbm.h>
 #include <iostream>
 #include <cstdio>
-#include <json/json.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include <hdc_helpers.h>
@@ -16,7 +17,7 @@ class MDBMStorage : public Storage {
 private:
     MDBM* db;
     bool initialized = false;
-    bool persistent = true;
+    bool persistent = false;
     string filename;
 public:
     MDBMStorage() {
@@ -24,7 +25,11 @@ public:
     };
     ~MDBMStorage() {
         DEBUG_STDOUT("~MDBMStorage()\n");
-        if(!persistent) cleanup();
+        cout << "in destructor\n";
+        if(!persistent) {
+            cout << "Calling cleanup()\n";
+            cleanup();
+        } else cout << "persistent!!!\n";
     };
     bool usesBuffersDirectly() {
         return false;
@@ -65,12 +70,13 @@ public:
     void cleanup () {
         DEBUG_STDOUT("MDBMStorage::cleanup()\n");
         mdbm_close(this->db);
+        mdbm_delete_lockfiles(this->filename.c_str());
         // Remove db file if the data persistence is not required
         if (!this->persistent) {
             if (::remove(filename.c_str()) != 0) {
-                perror("Error opening deleting file");
+                perror("Error deleting file");
                 exit(1);
-            }
+            };
         }
         initialized = false;
         return;
@@ -85,27 +91,24 @@ public:
         return;
     };
     void init(string settings) {
-        Json::Value root;
-        if (boost::filesystem::exists(settings)) {
-            stringstream ss(settings);
-            ss >> root;
-        }
-        filename = root.get("filename","/tmp/db.mdbm").asString();
-        persistent = root.get("persistent",true).asBool();
+        boost::property_tree::ptree root;
+        std::stringstream ss;
+        ss << settings;
+        boost::property_tree::read_json(ss,root);
+        init(root);
+        return;
+    }
+    void init(boost::property_tree::ptree& root) {
+        filename = root.get<std::string>("filename","/tmp/db.mdbm");
+        persistent = root.get<bool>("persistent",true);
         D(printf("Filename: %s\n", filename.c_str());)
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
-//         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
+        mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
         return;
     }
-    void init(Json::Value& root) {
-        filename = root.get("filename","/tmp/db.mdbm").asString();
-        persistent = root.get("persistent",true).asBool();
-        D(printf("Filename: %s\n", filename.c_str());)
-        this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
-//         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
-        initialized = true;
-        return;
+    string name() {
+        return "mdbm";
     }
 };
 

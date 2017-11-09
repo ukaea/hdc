@@ -19,6 +19,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstdio>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <json/json.h>
 #include <exception>
 
@@ -35,16 +37,27 @@
 // #define DEBUG
 
 #include "hdc_helpers.h"
-
+#include <unordered_map>
 
 using namespace std;
+namespace pt = boost::property_tree;
 template<typename T> struct identity { typedef T type; };
-
+//this will hold all the settings, instead of boost::property_tree json we will use the jsoncpp for actual reading of them.
+extern pt::ptree* options;
 //this is default global storage
 extern HDCStorage* global_storage;
-
+//list of found plugins
+extern unordered_map<string,string> avail_stores;
+void HDC_parse_cmdline(int argc, const char *argv[]);
+void HDC_load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
+void HDC_search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
+void HDC_list_plugins();
+void HDC_set_storage(std::string storage="umap");
+std::vector<std::string> HDC_get_available_plugins();
+std::string HDC_get_library_dir(void);
 /** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(string pluginFileName="libMDBMPlugin.so", string pluginSettingsFileName="");
+void HDC_init(std::string storage="umap",std::string storage_options="");
+void HDC_set_default_storage_options(std::string storage="umap", std::string storage_options="");
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy();
@@ -98,7 +111,7 @@ public:
     size_t get_type();
     size_t get_flags();
     template<typename T> T* get_data();
-    
+
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
@@ -128,11 +141,11 @@ public:
             return;
         }
     }
-    
+
     template<typename T> void set_data(int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
         set_data(_ndim,_shape,_data,_flags);
     };
-    
+
     template<typename T> void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
@@ -140,13 +153,13 @@ public:
         }
         get(path).set_data(_ndim, _shape, _data, _flags);
     }
-    
+
     template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault) {
         DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault)"+to_string(_data[0]));
         vector<T> vec = _data;
         set_data(1,{vec.size()},&vec[0],_flags);
     };
-    
+
     template<typename T> void set_data(string path, initializer_list<T> _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
@@ -154,8 +167,8 @@ public:
         }
         get(path).set_data(_data, _flags);
     }
-    
-    
+
+
     template<typename T> void set_data(string path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
@@ -163,9 +176,9 @@ public:
         }
         get(path).set_data(_ndim, _shape, _data, _flags);
     }
-    
+
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
-    template <typename T> void set_data(vector<T> data) 
+    template <typename T> void set_data(vector<T> data)
     {
         DEBUG_STDOUT("template <typename T> void set_data(vector<T> data)"+to_string(data[0]));
         if (get_children_ptr() != nullptr) {
@@ -178,7 +191,7 @@ public:
     };
 
     /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
-    template <typename T> void set_data(string path, vector<T> data) 
+    template <typename T> void set_data(string path, vector<T> data)
     {
         if (!this->has_child(path)) {
             HDC h;
@@ -205,7 +218,7 @@ public:
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
-    
+
     void set_string(string path, string str) {
         if(!has_child(path)) {
             HDC h;
@@ -259,20 +272,20 @@ public:
     HDC* get_ptr(string path);
     HDC get(string path);
     /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC* get_slice(string path, size_t i); 
+    HDC* get_slice(string path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC* get_slice(size_t i); 
+    HDC* get_slice(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
     bool has_child(string path);
-    
+
     HDC* json_to_hdc(Json::Value* root);
 
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
-    void set_list(deque<HDC*>* list); 
+    void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
-    void resize(HDC* h, int recursively = 0); 
+    void resize(HDC* h, int recursively = 0);
     /** Returns copy of current object. */
-    HDC* copy(int copy_arrays = 1); 
+    HDC* copy(int copy_arrays = 1);
     /** Inserts node to i-th slice of current node. */
     void insert_slice(size_t i, HDC* h);
     /** Inserts node to i-th slice of current node. */
@@ -282,9 +295,9 @@ public:
     /** Sets node to i-th slice of current node. */
     void set_slice(size_t i, HDC& h);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
-    void append_slice(HDC* h); 
+    void append_slice(HDC* h);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
-    void append_slice(HDC& h); 
+    void append_slice(HDC& h);
     /** Sets HDC type of current node. */
     void set_type(size_t _type);
     /** Returns true if node is empty. */
@@ -319,28 +332,28 @@ public:
             return oss.str();
         }
     }
-    
+
     /** Returns string of node under given path. Needs to have separate function */
     std::string as_string(string path)
     {
         DEBUG_STDOUT("as_string("+path+")\n");
         return get(path).as_string();
     }
-    
+
     /** Returns pointer to data of node under given path. */
     template<typename T> T as(string path)
     {
         DEBUG_STDOUT("as<T>("+path+")\n");
         return get(path).as<T>();
     }
-    
+
     /** Returns double. */
     double as_double()
     {
         return as<double*>()[0];
     }
     /** Returns double. */
-    double as_double(string path) 
+    double as_double(string path)
     {
         return as<double*>(path)[0];
     }

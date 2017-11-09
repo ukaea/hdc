@@ -5,8 +5,9 @@
 #include <string>
 using namespace std;
 
-
-int main() {
+int main(int argc, const char *argv[]) {
+    HDC_parse_cmdline(argc,argv);
+    HDC_init("mdbm");
     // Create new HDC tree
     HDC tree;
     // Add some children
@@ -59,13 +60,13 @@ int main() {
     for (int i=0; i<shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;
     //Serialize data to JSON
-    tree.to_json("tree.txt",0);
-#ifdef _USE_HDF5
-    tree.to_hdf5("tree.h5");
-    cout << "written\n";
-    HDC hhh = from_hdf5("tree.h5","/data");
-    hhh.dump();
-#endif
+//    tree.to_json("tree.txt",0);
+// #ifdef _USE_HDF5
+//     tree.to_hdf5("tree.h5");
+//     cout << "written\n";
+//     HDC hhh = from_hdf5("tree.h5","/data");
+//     hhh.dump();
+// #endif
     // On screen
     tree.dump();
     tree.serialize("pokus.json");

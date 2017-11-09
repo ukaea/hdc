@@ -1,5 +1,4 @@
 #include "hdc_benchmark_common.hpp"
-
 // Plain memcpy test to show over overhead of HDC
 static void BM_memcpy(benchmark::State& state) {
     size_t n = state.range(0);

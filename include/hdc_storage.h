@@ -7,6 +7,8 @@
 #include <iostream>
 #include <cstdio>
 #include <hdc_helpers.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace std;
 
@@ -14,10 +16,10 @@ class HDCStorage {
 private:
     pluma::Pluma _pluma;
     Storage* _store;
-    Json::Value settings;
+    boost::property_tree::ptree settings;
     string pluginPath;
 public:
-    HDCStorage(std::string name, std::string settingsFileName) { // TODO: this is ugly...
+    HDCStorage(std::string name, std::string settings_str) {
         _pluma.acceptProviderType<StorageProvider>();
         //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
         if (name.size() != 0) {
@@ -32,50 +34,23 @@ public:
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);
         std::vector<StorageProvider*>::iterator it = providers.begin();
-        _store = providers.front()->create();
-        _store->init(settings);
-        Json::Value _settings = Json::nullValue;
-        if (!settingsFileName.empty()) {
-            ifstream file;
-            file.exceptions(ifstream::failbit | ifstream::badbit);
+        if (!settings_str.empty()) {
             try {
-                cout << "HERE: " << "\n";
-
-                file.open(settingsFileName);
-                file >> _settings;
+                stringstream ss(settings_str);
+                boost::property_tree::read_json(ss,settings);
             }
             catch (ifstream::failure e) {
                 cout << "Error reading / opening file." << endl;
             }
-            file.close();
         }
-        this->settings = _settings;
-        
+        _store = providers.front()->create();
+        if (!settings.get("do_not_init",false))
+            _store->init(settings);
         this->pluginPath = name;
         DEBUG_STDOUT(_store->getDescription());
     }
-    /*HDCStorage(std::string name, std::string settingsFileName) {
-        Json::Value _settings;
-        ifstream file;
-        file.exceptions(ifstream::failbit | ifstream::badbit);
-        if (!settingsFileName.empty()) {
-            try {
-                cout << "HERE: " << "\n";
 
-                file.open(settingsFileName);
-                file >> _settings;
-            }
-            catch (ifstream::failure e) {
-                cout << "Error reading / opening file." << endl;
-            }
-            file.close();
-        } else {
-            _settings = Json::nullValue;
-        }
-        HDCStorage(name, _settings);
-    }*/
-    
-    HDCStorage(std::string name, Json::Value& _settings) {
+    HDCStorage(std::string name, boost::property_tree::ptree _settings) {
         _pluma.acceptProviderType<StorageProvider>();
         //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
         if (!name.empty()) {
@@ -93,11 +68,13 @@ public:
         _store = providers.front()->create();
         this->settings = _settings;
         this->pluginPath = name;
-        _store->init(this->settings);
+        if (!settings.get("do_not_init",false))
+            _store->init(this->settings);
         DEBUG_STDOUT(_store->getDescription());
     }
     ~HDCStorage() {
-        _store->cleanup();
+        if (!settings.get("do_not_init",false))
+            _store->cleanup();
         delete _store;
         _pluma.unloadAll();
     }
@@ -137,12 +114,15 @@ public:
     void sync() {
         _store-> sync();
     };
-    Json::Value get_status() {
-        Json::Value root;
-        root["pluginPath"] = this->pluginPath;
-        root["settings"] = this->settings;
+    boost::property_tree::ptree get_status() {
+        boost::property_tree::ptree root;
+        root.put("storage", this->name());
+        root.add_child("settings",this->settings);
         return root;
     };
+    string name() {
+        return _store->name();
+    }
 };
 
 #endif

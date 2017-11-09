@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <cstdio>
-
+#include <boost/property_tree/ptree.hpp>
 #include "storage_interface.hpp"
 #include <hdc_helpers.h>
 
@@ -34,7 +34,7 @@ public:
         return false;
     };
     void sync() {};
-    
+
     string getDescription() {
         return "This is unordered_map based storage.";
     };
@@ -78,10 +78,13 @@ public:
         // Nothing to set here ...
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
-    void init(Json::Value& settings) {
+    void init(boost::property_tree::ptree& settings) {
         // Nothing to set here ...
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
+    string name() {
+        return "umap";
+    }
 };
 
 PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage);

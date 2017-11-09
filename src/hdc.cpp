@@ -1,6 +1,8 @@
 #include "hdc.hpp"
 #include <fstream>
 #include <memory>
+#include <glob.h>
+#include <dlfcn.h>
 //#define DEBUG
 struct hdc_t {
     void* obj;
@@ -10,96 +12,180 @@ using namespace std;
 
 HDCStorage* global_storage = nullptr;
 
-/** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(string pluginFileName, string pluginSettingsFileName) {
+unordered_map<string,string> avail_stores;
 
-    // First , try to load the file under filename, if not exists try some paths
-    string pluginPath = "";
-    if (!pluginFileName.empty()) {
-        if (boost::filesystem::exists(pluginFileName)) {
-            // OK, load this
-            pluginPath = boost::filesystem::absolute(pluginFileName).string();
-        } else {
-            // Never mind, try some default paths -- Now I don't know how do this better...
-            boost::filesystem::path p(pluginFileName);
-            string strippedName = p.filename().string();
-            vector<string> pluginSearchPath;
-            pluginSearchPath.push_back("./");
-            pluginSearchPath.push_back("./plugins");
-            pluginSearchPath.push_back(".config/hdc/plugins");
-            pluginSearchPath.push_back("/usr/local/lib");
-            pluginSearchPath.push_back("/usr/lib");
-            pluginSearchPath.push_back("/usr/local/lib64");
-            pluginSearchPath.push_back("/usr/lib64");
-            pluginSearchPath.push_back("/usr/local/lib/hdc");
-            pluginSearchPath.push_back("/usr/lib/hdc");
-            pluginSearchPath.push_back("/usr/local/lib64/hdc");
-            pluginSearchPath.push_back("/usr/lib64/hdc");
-            // Search all paths and stop if found
-            for (auto path : pluginSearchPath) {
-                string tmp = path+'/'+strippedName;
-                if (boost::filesystem::exists(tmp)) {
-                    D(cout << "Plugin found: " << tmp << endl;)
-                    pluginPath = tmp;
-                    break;
-                }
+pt::ptree* options;
+
+void HDC_parse_cmdline(int argc, const char *argv[]) {
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options:");
+    desc.add_options()
+        ("help", "produce help message")
+        ("list-plugins", "list available storage plugins")
+        ("storage", po::value<std::string>(),"use given storage plugin")
+    ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        cout << desc << "\n";
+        exit(1);
+    }
+
+    if (vm.count("list-plugins")) {
+        HDC_search_plugins();
+        HDC_list_plugins();
+        exit(0);
+    }
+
+    if (vm.count("storage")) {
+        string plugin_name = vm["storage"].as<std::string>();
+        options->put("storage_cmdline",plugin_name);
+    }
+}
+
+void HDC_load_config(string configPath) {
+    std::string delimiters(":");
+    std::vector<std::string> parts;
+    boost::trim_if(configPath, boost::is_any_of(delimiters));
+    boost::split(parts, configPath, boost::is_any_of(delimiters),boost::token_compress_on);
+    pt::ptree settings_read;
+    bool config_found = false;
+    for (auto path : parts) {
+        if (boost::filesystem::exists(path)) {
+            try {
+                pt::read_json(path,settings_read);
+                config_found = true;
+                break;
             }
-        }
-        // If selected, check whether file settings file exists
-        if (pluginSettingsFileName.size() != 0) {
-            if (!boost::filesystem::exists(pluginSettingsFileName)) {
-                DEBUG_STDERR("Settings file set, but does not exist: "+pluginSettingsFileName);
-                DEBUG_STDERR("Using default configuration...\n");
+            catch (...) {
+                cout << "HDC_load_config(): something bad happened" << endl;
             }
         }
     }
-    global_storage = new HDCStorage(pluginPath,pluginSettingsFileName);
-    DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
+    if (config_found) {
+        options->put("storage",settings_read.get<std::string>("storage","umap"));
+        boost::optional<pt::ptree&> s = settings_read.get_child_optional("storage_options");
+        if (s.is_initialized())
+            options->add_child("storage_options",s.value());
+//         else
+//             options->add_child("storage_options",pt::ptree());
+    }
 }
 
-/** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(string pluginFileName, Json::Value settings) {
-
-    // First , try to load the file under filename, if not exists try some paths
-    string pluginPath = "";
-    if (!pluginFileName.empty()) {
-        if (boost::filesystem::exists(pluginFileName)) {
-            // OK, load this
-            pluginPath = boost::filesystem::absolute(pluginFileName).string();
-        } else {
-            // Never mind, try some default paths -- Now I don't know how do this better...
-            boost::filesystem::path p(pluginFileName);
-            string strippedName = p.filename().string();
-            vector<string> pluginSearchPath;
-            pluginSearchPath.push_back("./");
-            pluginSearchPath.push_back("./plugins");
-            pluginSearchPath.push_back(".config/hdc/plugins");
-            pluginSearchPath.push_back("/usr/local/lib");
-            pluginSearchPath.push_back("/usr/lib");
-            pluginSearchPath.push_back("/usr/local/lib64");
-            pluginSearchPath.push_back("/usr/lib64");
-            pluginSearchPath.push_back("/usr/local/lib/hdc");
-            pluginSearchPath.push_back("/usr/lib/hdc");
-            pluginSearchPath.push_back("/usr/local/lib64/hdc");
-            pluginSearchPath.push_back("/usr/lib64/hdc");
-            // Search all paths and stop if found
-            for (auto path : pluginSearchPath) {
-                string tmp = path+'/'+strippedName;
-                if (boost::filesystem::exists(tmp)) {
-                    D(cout << "Plugin found: " << tmp << endl;)
-                    pluginPath = tmp;
-                    break;
+void HDC_search_plugins(string searchPath) {
+    std::string delimiters(":");
+    std::vector<std::string> parts;
+    boost::trim_if(searchPath, boost::is_any_of(delimiters));
+    boost::split(parts, searchPath, boost::is_any_of(delimiters),boost::token_compress_on);
+    std::string lib_dir = HDC_get_library_dir();
+    parts.push_back(lib_dir);
+    parts.push_back(lib_dir+"/plugins");
+    glob_t globbuf;
+    for (auto path : parts) {
+        //cout << path << " " << endl;
+        string tmp_pth = path+"/libhdc_plugin_*.so*";
+        int err = glob(tmp_pth.c_str(),0,NULL,&globbuf);
+        if (err == 0) {
+        for (size_t i = 0; i < globbuf.gl_pathc; i++)
+        {
+            string pluginPath = globbuf.gl_pathv[i];
+            //cout << pluginPath << endl;
+            // try to load the plugin and if it runs if succeeds, bring it into map_t
+            try {
+                HDCStorage stor(globbuf.gl_pathv[i],"{\"do_not_init\": true}");
+                string name = stor.name();
+                if (!name.empty()) {
+                    if (avail_stores.find(name)==avail_stores.end())
+                        avail_stores[name] = pluginPath;
                 }
+            } catch(...) {
+                cout << "Nope\n";
             }
         }
+        globfree(&globbuf);
+        }
     }
-    global_storage = new HDCStorage(pluginPath,settings);
-    DEBUG_STDERR("HDC_init(): HDC storage initialized.\n");
+};
+
+std::vector<std::string> HDC_get_available_plugins() {
+    std::vector<std::string> keys;
+    for (auto kv : avail_stores) {
+        keys.push_back(kv.first);
+    }
+    return keys;
 }
+
+void HDC_list_plugins() {
+    cout << "Available storage plugins:\n";
+    for (const auto& store : avail_stores) {
+        cout << "  - " << store.first << " : " << store.second << "\n";
+    }
+}
+
+void HDC_set_storage(std::string storage) {
+    if (global_storage != nullptr) {
+        cerr << "Storage is already set!\n";
+        exit(3);
+    }
+    boost::optional<std::string> storage_cmd =  options->get_optional<std::string>("storage_cmdline");
+    if (storage_cmd) {
+        while (options->count("storage") > 0) options->erase("storage");
+        options->put("storage",storage_cmd.value());
+        while (options->count("storage_cmdline") > 0) options->erase("storage_cmdline");
+    }
+    string selected_store_name = options->get<std::string>("storage",storage);
+    //cout << "Selected storage: " << selected_store_name <<endl;
+    if (avail_stores.find(selected_store_name) != avail_stores.end()) {
+        //cout << avail_stores[selected_store_name] << endl;
+        if (!options->count("storage_options")) options->add_child("storage_options",pt::ptree());
+        global_storage = new HDCStorage(avail_stores[selected_store_name],options->get_child("storage_options"));
+    } else {
+        cerr << "Unable to select the store.\n";
+        exit(2);
+    }
+}
+
+void HDC_set_default_storage_options(std::string storage, std::string storage_options) {
+    options->put("storage",storage);
+    if (!storage_options.empty()) {
+        try {
+            std::stringstream ss(storage_options);
+            pt::ptree* parsed_stor_opt = new pt::ptree();
+            pt::read_json(ss,*parsed_stor_opt);
+            options->add_child("storage_options",*parsed_stor_opt);
+        }
+        catch (...) {
+            cerr << "HDC_set_storage(): Something bad happened while parsing settings\n";
+            exit(-1);
+        }
+    }
+}
+
+std::string HDC_get_library_dir(void) {
+    Dl_info dl_info;
+    dladdr((void *)HDC_get_library_dir, &dl_info);
+    boost::filesystem::path p(dl_info.dli_fname);
+    return boost::filesystem::canonical(p.parent_path()).string();
+}
+
+void HDC_init(std::string storage_str, std::string storage_options) {
+    options = new pt::ptree();
+    HDC_set_default_storage_options(storage_str,storage_options);
+    HDC_search_plugins();
+    //HDC_load_config();
+    HDC_set_storage(storage_str);
+}
+
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
 void HDC_destroy() {
+    if (global_storage == nullptr) return;
     delete global_storage;
+    global_storage = nullptr;
+    delete options;
+    options = nullptr;
     DEBUG_STDERR("HDC_destroy(): HDC storage destroyed.\n");
 }
 
@@ -112,19 +198,19 @@ HDC::HDC(size_t _data_size) {
     header.buffer_size = _data_size + sizeof(header_t);
     header.data_size = _data_size;
     header.ndim = 1;
-    
+
     if (global_storage == nullptr) {
        //HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
        HDC_init();
-        atexit(HDC_destroy);
+       atexit(HDC_destroy);
     }
-    
+
     // Start by creating segment
     char* buffer = new char[header.buffer_size];
 
     // copy header there -- we need that, hopefully it will be optimized out
     memcpy(buffer,&header,sizeof(header_t));
-    
+
     //Store to some storage
     uuid = generate_uuid_str();
     storage = global_storage;
@@ -170,13 +256,13 @@ HDC::HDC(string str) {
     header.data_size = _data_size;
     header.ndim = 1;
     header.type = STRING_ID;
-    
+
     if (global_storage == nullptr) {
 //        HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
         HDC_init();
         atexit(HDC_destroy);
     }
-    
+
     // Start by creating segment
     char* buffer = new char[header.buffer_size];
 
@@ -422,7 +508,6 @@ void HDC::add_child_single(string str, HDC& n) {
             try {
                 // Storing record larger than 114 bytes can mess up the heap on small buffers (1300b, key with longer than 24 characters), so we need to increase the buffer size here
                 if (segment.get_free_memory() < 4*str.size()) {
-                    cout<<"throwing...\n";
                     throw (hdc_bad_alloc()); // There can be problem to store large strings
                 }
                 record rec(str.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
@@ -538,7 +623,7 @@ HDC* HDC::get_ptr(vector<string> vs) {
     char* buffer = storage->get(uuid);
     header_t h;
     memcpy(&h,buffer,sizeof(header_t));
-    
+
     auto segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
 
     map_t* children = segment.find<map_t>("d").first;
@@ -746,10 +831,11 @@ void HDC::serialize(string filename) {
 }
 
 string HDC::serialize() {
-    Json::Value root = this->storage->get_status();
-    root["uuid"] = this->uuid;
-    Json::FastWriter writer;
-    return writer.write(root);
+    pt::ptree root = this->storage->get_status();
+    root.put("uuid",this->uuid);
+    std::stringstream ss;
+    write_json(ss, root);
+    return ss.str();
 }
 
 void HDC::resize(HDC* h, int recursively)
@@ -1032,6 +1118,7 @@ map_t* HDC::get_children_ptr() {
 }
 /* Grows underlying storage by given extra size, it does nothing if extra_size <= 0.*/
 void HDC::grow(size_t extra_size) {
+    cout << "Growing  " << extra_size << endl;
     if (extra_size <= 0) return;
     char* old_buffer = storage->get(uuid);
     memcpy(&header,old_buffer,sizeof(header_t));
@@ -1107,7 +1194,7 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
     }
     // finalize header and copy it to the new buffer
     header.data_size = new_data_size;
-    header.buffer_size = new_buffer_size+sizeof(header_t);
+    header.buffer_size = new_buffer_size;
     memcpy(new_buffer,&header,sizeof(header_t));
     return new_buffer;
 }
@@ -1142,19 +1229,30 @@ HDC* deserialize_HDC_file(std::string filename) {
 
 HDC* deserialize_HDC_string(std::string str) {
     HDC* tree;
-    Json::Value root;
-    Json::Reader reader;
-    bool parsingSuccessful = reader.parse( str.c_str(), root );     //parse process
-    if ( !parsingSuccessful )
+    pt::ptree root;
+    try
     {
-        std::cout  << "Failed to parse"
-               << reader.getFormattedErrorMessages();
+        stringstream ss;
+        ss << str;
+        pt::read_json(ss,root);
+    }
+    catch (...)
+    {
+        cout << "deserialize_HDC_string(): Something bad happened while parsing the string\n";
         exit(-1);
     }
-    string pluginPath = root["pluginPath"].asString();
-    string uuid = root["uuid"].asString();
-    Json::Value settings = root["settings"];
-    HDC_init(pluginPath,settings);
+    string storage_str = root.get<std::string>("storage");
+    options = new pt::ptree();
+    HDC_set_default_storage_options(storage_str);
+    auto storage_options = root.get_child("settings");
+    for (const auto& kv : storage_options) {
+        options->add_child("storage-options/"+kv.first,kv.second);
+    }
+    HDC_search_plugins();
+    //HDC_load_config();
+    HDC_set_storage(storage_str);
+    string uuid = root.get<std::string>("uuid");
+
     tree = new HDC(global_storage,uuid);
     return tree;
 }
