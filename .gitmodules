@@ -1,0 +1,3 @@
+[submodule "apidoc"]
+	path = apidoc
+	url = git@gitlab.com:ipp.cr/hdc-api.git
