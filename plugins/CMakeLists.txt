@@ -12,8 +12,8 @@ find_library(MDBM_LIBRARY
     HINTS "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/sw/mdbm/lib64"
 )
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/plugins)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/plugins)
 
 # Create MDBM plugin
 if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
@@ -22,12 +22,12 @@ if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
 
     message("Found MDBM library: ${MDBM_LIBRARY}")
 
-    add_library(MDBMPlugin SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
-    target_link_libraries(MDBMPlugin ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})
+    add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
+    target_link_libraries(hdc_plugin_mdbm ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})
 else ()
     message("MDBM Not found, Building of MDBM Plugin will be skipped...")
 endif()
 
 # Create Unordered map storage
-add_library(UMapPlugin SHARED umap_plugin.cpp ../src/storage_interface.cpp)
-target_link_libraries(UMapPlugin Pluma dl)
+add_library(hdc_plugin_umap SHARED umap_plugin.cpp ../src/storage_interface.cpp)
+target_link_libraries(hdc_plugin_umap Pluma dl)

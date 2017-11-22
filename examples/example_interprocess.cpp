@@ -7,20 +7,23 @@
 #include <string>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
+#include <boost/algorithm/string/erase.hpp>
 
 using namespace std;
 using namespace boost::interprocess;
 
 int main(int argc, char *argv[]) {
-    
+
     if (argc == 1) {
+        cout << "master\n";
         //Remove shared memory on construction and destruction
         struct shm_remove
         {
             shm_remove() { shared_memory_object::remove("MySharedMemory"); }
             ~shm_remove(){ shared_memory_object::remove("MySharedMemory"); }
         } remover;
-
+        HDC_init("mdbm","{\"filename\": \"/tmp/db.mdbm\", \"persistent\": true}");
+        //HDC_init("mdbm","{\"filename\": \"/tmp/db.mdbm\"}");
         // Create new HDC tree
         HDC tree;
         // Add some children
@@ -63,9 +66,10 @@ int main(int argc, char *argv[]) {
         int32_t* array2 = node.as<int32_t*>();
         // get settings string
         std::string settings = tree.serialize();
+        boost::algorithm::erase_all(settings,"\\"); // hack to remove wrongly escaped path
 
         shared_memory_object shm (create_only, "MySharedMemory", read_write);
-        shm.truncate(1000);
+        shm.truncate(65536);
         mapped_region region(shm, read_write);
         std::memset(region.get_address(), 0, region.get_size());
         std::memcpy(region.get_address(), settings.c_str(),settings.length());
@@ -78,8 +82,7 @@ int main(int argc, char *argv[]) {
         shared_memory_object shm (open_only, "MySharedMemory", read_only);
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
-        std::string str;
-        str.assign(mem,10000);
+        std::string str(mem);
         HDC* tree = deserialize_HDC_string(str);
         tree->dump();
     }

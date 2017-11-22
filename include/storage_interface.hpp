@@ -2,7 +2,7 @@
 #define STORAGE_INTERFACE
 
 #include <Pluma/Pluma.hpp>
-#include <json/json.h>
+#include <boost/property_tree/ptree.hpp>
 
 using namespace std;
 
@@ -21,7 +21,8 @@ public:
     virtual bool has(string path) = 0;
     virtual void remove(string path) = 0;
     virtual void init(string settings) = 0;
-    virtual void init(Json::Value& settings) = 0;
+    virtual void init(boost::property_tree::ptree& settings) = 0;
+    virtual string name() = 0;
 };
 
 PLUMA_PROVIDER_HEADER(Storage);

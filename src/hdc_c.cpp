@@ -639,17 +639,29 @@ size_t hdc_childs_count(hdc_t* tree) {
     return t->childs_count();
 }
 
-void HDC_init_c(char* pluginFileName, char* pluginSettingsFileName) {
-    HDC_init(string(pluginFileName),string(pluginSettingsFileName));
-}
-
-void HDC_init_c_plain() {
-    HDC_init();
+void HDC_init_c(char* pluginFileName, char* pluginSettingsString) {
+    if (strlen(pluginFileName) != 0) {
+        if (strlen(pluginSettingsString)== 0)
+            HDC_init(std::string(pluginFileName));
+        else
+            HDC_init(std::string(pluginFileName),std::string(pluginSettingsString));
+    }
+    else
+        HDC_init();
 }
 
 void HDC_destroy_c() {
     HDC_destroy();
 }
+
+char** HDC_get_available_plugins_c() {
+    std::vector<std::string> cppkeys = HDC_get_available_plugins();
+    const char** keys = new const char* [cppkeys.size()+1];
+    for (int i=0;i<cppkeys.size();i++) {
+        keys[i] = cppkeys[i].c_str();
+    }
+    keys[cppkeys.size()] = NULL;
+};
 
 const char* hdc_serialize(hdc_t* tree) {
     HDC* t = (HDC*)tree->obj;

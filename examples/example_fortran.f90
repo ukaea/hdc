@@ -16,6 +16,7 @@ contains
         allocate(subtree)
         allocate(data)
         allocate(node)
+        call hdc_init("mdbm")
         ! Create new HDC tree
         tree = hdc_new_empty()
 
@@ -25,7 +26,6 @@ contains
         call hdc_add_child(tree,"bbb/eee/aaa",hdc_new_empty())
         call hdc_set_data(tree,"aaa/bbb/ccc","pokus")
         str = hdc_as_string(tree,"aaa/bbb/ccc")
-        print *,"AAA: ",str
         ! Get subtree
         subtree = hdc_get_child(tree,"aaa/bbb")
         ! Get node
