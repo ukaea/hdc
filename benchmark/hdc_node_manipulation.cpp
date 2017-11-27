@@ -8,13 +8,13 @@ static void BM_HDC_CreationAndDeletion(benchmark::State& state) {
     state.SetItemsProcessed(state.iterations());
     StorageReset();
 }
-BENCHMARK(BM_HDC_CreationAndDeletion);
+BENCHMARK(BM_HDC_CreationAndDeletion)->Arg(1000000);
 
 // Adding childs
 static void BM_HDC_AddChild(benchmark::State& state) {
     HDC* tree = new HDC();
     while (state.KeepRunning()) {
-        for (size_t i = 0;i < state.range(0);i++) tree->add_child("_"+std::to_string(i),new HDC());
+        for (size_t i = 0;i < state.range(0);i++) tree->add_child(std::to_string(i),new HDC());
     }
     delete tree;
     state.SetItemsProcessed(state.range(0) * state.iterations());

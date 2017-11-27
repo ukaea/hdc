@@ -125,10 +125,10 @@ void HDC_list_plugins() {
 }
 
 void HDC_set_storage(std::string storage) {
-    if (global_storage != nullptr) {
+    /*if (global_storage != nullptr) {
         cerr << "Storage is already set!\n";
         exit(3);
-    }
+    }*/
     boost::optional<std::string> storage_cmd =  options->get_optional<std::string>("storage_cmdline");
     if (storage_cmd) {
         while (options->count("storage") > 0) options->erase("storage");

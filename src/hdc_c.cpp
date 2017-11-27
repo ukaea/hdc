@@ -74,7 +74,7 @@ void* hdc_get_ptr(struct hdc_t* tree) {
 
 void hdc_add_child(struct hdc_t* tree, char* path, struct hdc_t* n) {
     HDC* t = (HDC*)tree->obj;
-    t->add_child((string)path,(HDC*)n->obj);
+    t->add_child(path,(HDC*)n->obj);
     return;
 }
 
@@ -91,7 +91,7 @@ void hdc_delete_child(struct hdc_t* tree, char* path) {
 
 struct hdc_t* hdc_get(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_ptr((string)path);
+    HDC* node = t->get_ptr(path);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -651,7 +651,7 @@ void HDC_init_c(char* pluginFileName, char* pluginSettingsString) {
 }
 
 void HDC_destroy_c() {
-    HDC_destroy();
+    if (global_storage != nullptr) HDC_destroy();
 }
 
 char** HDC_get_available_plugins_c() {
@@ -669,7 +669,7 @@ const char* hdc_serialize(hdc_t* tree) {
     tmp << t->serialize();
     string dump_str = tmp.str();
     return strdup(dump_str.c_str());
-  
+
 }
 
 struct hdc_t* hdc_deserialize(const char* str) {

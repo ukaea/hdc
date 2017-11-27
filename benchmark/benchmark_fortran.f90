@@ -6,7 +6,7 @@ program benchmark_fortran
 contains
     subroutine storage_reset()
         call hdc_destroy()
-        call hdc_init("umap","")
+        call hdc_init("mdbm","{""filename"": ""/tmp/db1.mdbm"", ""persistent"": false}");
     end subroutine storage_reset
 
     subroutine bm_create_delete(n_items)
@@ -23,12 +23,11 @@ contains
             tree = hdc_new_empty()
             call hdc_delete(tree)
             deallocate(tree)
-            call storage_reset()
         end do
-
+        call storage_reset()
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_create_delete, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s")',n_items,e_time,1.0e-3/e_time*n_items
+        print '("bm_create_delete, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
         call storage_reset()
     end subroutine bm_create_delete
 
@@ -49,14 +48,14 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_create_delete_no_alloc, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s")',n_items,e_time,1.0e-3/e_time*n_items
+        print '("bm_create_delete_no_alloc, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
         deallocate(tree)
         call storage_reset()
     end subroutine bm_create_delete_no_alloc
 
-    subroutine bm_add_child(n_items)
+    subroutine bm_add_child(n_items,child_size)
         implicit none
-        integer(8), intent(in) :: n_items
+        integer(8), intent(in) :: n_items, child_size
         integer(8) :: i, clock_rate, clock_start, clock_stop
         real(8) :: e_time
         type(hdc_t), pointer :: tree
@@ -64,21 +63,49 @@ contains
         character(len=30) :: path ! format descriptor
         fmt = '(I10)' ! an integer of width 5 with zeros at the left
         allocate(tree)
-        tree = hdc_new_size(1024_8*1024_8*4)
+        tree = hdc_new_size(child_size)
         call system_clock(count_rate=clock_rate) !Find the time rate
         call system_clock(count=clock_start)     !Start Timer
 
         do i = 1,n_items
             write (path,fmt)i
-            call hdc_add_child(tree,trim(path),hdc_new_empty())
+            call hdc_add_child(tree,path,hdc_new_empty())
         end do
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_add_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s")',n_items,e_time,1.0e-3/e_time*n_items
+        print '("bm_add_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
         deallocate(tree)
         call storage_reset()
     end subroutine bm_add_child
+
+    subroutine bm_add_child_depth(depth,child_size)
+        implicit none
+        integer(8), intent(in) :: depth, child_size
+        integer(8) :: i, clock_rate, clock_start, clock_stop
+        real(8) :: e_time
+        type(hdc_t), pointer :: tree
+        character(len=2*depth) :: path ! format descriptor
+        path = ""
+        do i=1,depth-1
+            path = trim(path)//"a/"
+        end do
+        path = trim(path)//"a"
+        allocate(tree)
+        call system_clock(count_rate=clock_rate) !Find the time rate
+        e_time = 0
+        do i=1,1000
+            tree = hdc_new_size(child_size)
+            call system_clock(count=clock_start)     !Start Timer
+            call hdc_add_child(tree,trim(path),hdc_new_empty())
+            call system_clock(count=clock_stop)      ! Stop Timer
+            e_time = e_time + real(clock_stop-clock_start)/real(clock_rate)
+            call hdc_delete(tree)
+        end do
+        print '("bm_add_child_depth, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',depth,e_time/100,1.0e-3/e_time*1000,e_time/1000
+        deallocate(tree)
+        call storage_reset()
+    end subroutine bm_add_child_depth
 
     subroutine bm_get_child(max_items)
         implicit none
@@ -93,7 +120,7 @@ contains
         allocate(tree)
         allocate(node)
         tree = hdc_new_size(1024_8*1024_8*4)
-        do i = 1,max_items
+        do i = 0,max_items-1
             write (path,fmt)i
             call hdc_add_child(tree,trim(path),hdc_new_empty())
         end do
@@ -104,14 +131,14 @@ contains
         end do
         call system_clock(count_rate=clock_rate) !Find the time rate
         call system_clock(count=clock_start)     !Start Timer
-
-        do k = 1,100
-            node = hdc_get_child(tree,trim(paths(k)))
-        end do
-
+!         do i = 1, 10
+            do k = 1,100
+                node = hdc_get_child(tree,paths(k))
+            end do
+!         end do
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s")',max_items,e_time/100,1.0e-3/e_time*100
+        print '("bm_get_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f16.2,"k items/s")',max_items,e_time/100,100_dp/dble(e_time*1000)
 
         deallocate(tree)
         deallocate(node)
@@ -145,7 +172,7 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_child_path, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s")',depth,e_time/100,1.0e-3/e_time*100000
+        print '("bm_get_child_path, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.6,"us/item")',depth,e_time/100,1.0e-3/e_time*100000,e_time/100000/1000000
         deallocate(tree)
         deallocate(node)
         call storage_reset()
@@ -170,10 +197,84 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_set_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f4.2," GB/s")',array_size,e_time/100,8.0_dp*array_size/2**30/e_time*100
+        print '("bm_set_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8.0_dp*array_size/dble(2**30*e_time)*100
         deallocate(tree)
         call storage_reset()
     end subroutine bm_set_data
+
+    subroutine bm_set_ets()
+        implicit none
+        integer(8) :: array_size = 100
+        integer(8) :: i, clock_rate, clock_start, clock_stop, j, k
+        real(8) :: e_time
+        real(8) :: data(100)
+        type(hdc_t), pointer :: tree
+        character(len=32) :: fmt
+        character(len=32) :: path
+        data = 1!.0d0
+        fmt = '("a"I0.2,"/a",I0.2,"/a",I0.2)' ! an integer of width 3 with zeros at the left
+        allocate(tree)
+        tree = hdc_new_size(4096_8)
+
+        do i = 0,100
+            do j = 0,100
+                do k = 0,100
+                    write (path,fmt)i,j,k
+                    call hdc_add_child(tree,trim(path),hdc_new_empty())
+                end do
+            end do
+        end do
+
+        call system_clock(count_rate=clock_rate) !Find the time rate
+        call system_clock(count=clock_start)     !Start Timer
+
+        do i = 1,100
+            call hdc_set_data(tree,"a10/a10/a10",data)
+        end do
+
+        call system_clock(count=clock_stop)      ! Stop Timer
+        e_time = real(clock_stop-clock_start)/real(clock_rate)
+        print '("bm_set_ets, n = ",i10,",Time = ",f16.12,"s")',array_size,e_time
+        deallocate(tree)
+        call storage_reset()
+    end subroutine bm_set_ets
+
+    subroutine bm_get_ets()
+        implicit none
+        integer(8) :: array_size = 100
+        integer(8) :: i, clock_rate, clock_start, clock_stop,j,k
+        real(8) :: e_time
+        real(8) :: data(100)
+        real(8) :: gdata(100)
+        type(hdc_t), pointer :: tree
+        character(len=32) :: fmt
+        character(len=32) :: path
+        data = 1!.0d0
+        allocate(tree)
+        tree = hdc_new_size(4096_8)
+        fmt = '("a"I0.2,"/a",I0.2,"/a",I0.2)' ! an integer of width 3 with zeros at the left
+        do i = 0,100
+            do j = 0,100
+                do k = 0,100
+                    write (path,fmt)i,j,k
+                    call hdc_add_child(tree,trim(path),hdc_new_empty())
+                end do
+            end do
+        end do
+        call hdc_set_data(tree,"a10/a10/a10",data)
+        call system_clock(count_rate=clock_rate) !Find the time rate
+        call system_clock(count=clock_start)     !Start Timer
+
+        do i = 1,100
+            gdata = hdc_as_double_1d(tree,"a10/a10/a10")
+        end do
+
+        call system_clock(count=clock_stop)      ! Stop Timer
+        e_time = real(clock_stop-clock_start)/real(clock_rate)
+        print '("bm_get_ets, n = ",i10,",Time = ",f16.12,"s")',array_size,e_time
+        deallocate(tree)
+        call storage_reset()
+    end subroutine bm_get_ets
 
     subroutine bm_set_data_preallocated(array_size)
         implicit none
@@ -194,7 +295,7 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_set_data_preallocated, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8.0_dp*array_size/2**30/e_time*100
+        print '("bm_set_data_preallocated, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8.0_dp*array_size/dble(2**30*e_time)*100
         deallocate(tree)
         call storage_reset()
     end subroutine bm_set_data_preallocated
@@ -215,7 +316,7 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_array_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,32.0_dp/2**10/e_time*100
+        print '("bm_array_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         call storage_reset()
     end subroutine bm_array_copy
 
@@ -234,7 +335,7 @@ contains
         end do
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_array_copy_ptr, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,32.0_dp/2**10/e_time*100
+        print '("bm_array_copy_ptr, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         deallocate(data, data_copy)
         call storage_reset()
     end subroutine bm_array_copy_ptr
@@ -261,7 +362,7 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,32.0_dp/2**10/e_time*100
+        print '("bm_get_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,100*8_8*array_size/dble(2**30*e_time)
         deallocate(tree)
         call storage_reset()
     end subroutine bm_get_data
@@ -291,7 +392,7 @@ contains
         call system_clock(count=clock_stop)      ! Stop Timer
         if (s < 0) print *,s
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,32.0_dp/2**10/e_time*100
+        print '("bm_get_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         deallocate(tree)
         call storage_reset()
     end subroutine bm_get_data_zero_copy
@@ -321,19 +422,46 @@ contains
         call system_clock(count=clock_stop)      ! Stop Timer
         if (s < 0) print *,s
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_set_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,32.0_dp/2**10/e_time*100
+        print '("bm_set_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         deallocate(tree)
         call storage_reset()
     end subroutine bm_set_data_zero_copy
 
     subroutine f_main()
         implicit none
+        integer(8) :: k, n
         call bm_array_copy(1024_8*1024_8*4_8)
-        call bm_set_data(1024_8*1024_8*4_8)
-        call bm_get_data(1024_8*1024_8*4_8)
-        call bm_get_data_zero_copy(1024_8*1024_8*4_8)
-        call bm_set_data_zero_copy(1024_8*1024_8*4_8)
-        call bm_get_child(100000_8)
-        call bm_add_child(100000_8)
+        do k=1,6
+            n = 2**k
+            call bm_set_data(1024_8*1024_8*n)
+        end do
+        do k=1,6
+            n = 2**k
+            call bm_get_data(1024_8*1024_8*n)
+        end do
+        do k=1,6
+            n = 2**k
+            call bm_get_data_zero_copy(1024_8*1024_8*n)
+        end do
+        do k=1,6
+            n = 2**k
+            call bm_set_data_zero_copy(1024_8*1024_8*n)
+        end do
+        call bm_create_delete(1000000_8)
+        call bm_create_delete_no_alloc(1000000_8)
+        do k=4,15
+            n = 2**k
+            call bm_get_child(n)
+        end do
+        do k=2,5
+            n = 2**k
+            call bm_add_child(n*1024_8,0_8)
+        end do
+        do k=0,5
+            n = 2**k
+            call bm_add_child_depth(n,1024_8)
+        end do
+        call bm_set_ets()
+        call bm_get_ets()
     end subroutine f_main
 end program benchmark_fortran

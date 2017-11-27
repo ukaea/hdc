@@ -13,7 +13,7 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9)
     export CC=/usr/bin/gcc-4.9
     export CXX=/usr/bin/g++-4.9
     ")
-endif()### 
+endif()###
 
 
 
