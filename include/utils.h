@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <tuple>
 // add uuid generation
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -14,6 +15,7 @@
 #include <boost/random.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/variant.hpp>
 #include "types.h"
 using namespace std;
 
@@ -23,8 +25,7 @@ void print_uuid(vector<char> uuid);
 vector<char> generate_uuid();
 string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
-vector<string>  split(string s);
-bool try_parse(const string &s, size_t& parsed);
+vector <boost::variant<size_t,std::string>> split(std::string s);
 
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);

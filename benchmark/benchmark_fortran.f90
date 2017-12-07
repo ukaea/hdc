@@ -1,6 +1,20 @@
+module c_perf
+  use iso_c_binding
+  implicit none
+
+  interface
+     subroutine c_getMillis(t) bind(c,name='getMillis')
+       use iso_c_binding
+       integer(kind=c_long_long), intent(out) :: t
+     end subroutine c_getMillis
+  end interface
+
+end module c_perf
+
 program benchmark_fortran
     use hdc_fortran
     use iso_c_binding
+    use c_perf
     implicit none
     call f_main()
 contains
@@ -83,6 +97,7 @@ contains
         implicit none
         integer(8), intent(in) :: depth, child_size
         integer(8) :: i, clock_rate, clock_start, clock_stop
+        integer(8) :: t1, t2
         real(8) :: e_time
         type(hdc_t), pointer :: tree
         character(len=2*depth) :: path ! format descriptor
@@ -111,7 +126,8 @@ contains
         implicit none
         integer(8), intent(in) :: max_items
         integer(8) :: i, clock_rate, clock_start, clock_stop, k
-        real(8) :: e_time,r
+        integer(8) :: t1, t2
+        real(8) :: e_time,r,ts,tf
         type(hdc_t), pointer :: tree, node
         character(len=8) :: fmt ! format descriptor
         character(len=10) :: paths(100)
@@ -131,14 +147,20 @@ contains
         end do
         call system_clock(count_rate=clock_rate) !Find the time rate
         call system_clock(count=clock_start)     !Start Timer
-!         do i = 1, 10
+!         call c_getMillis(t1)
+!         call cpu_time(ts)
+        do i = 1, 100
             do k = 1,100
                 node = hdc_get_child(tree,paths(k))
             end do
-!         end do
+        end do
+!         call c_getMillis(t2)
         call system_clock(count=clock_stop)      ! Stop Timer
+!         call cpu_time(tf)
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f16.2,"k items/s")',max_items,e_time/100,100_dp/dble(e_time*1000)
+!         e_time = (t2-t1)/dble(10000)
+!         e_time = (tf-ts)
+        print '("bm_get_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f16.2,"k items/s")',max_items,e_time/100_dp,100_dp/dble(e_time*1000/100)
 
         deallocate(tree)
         deallocate(node)
@@ -204,10 +226,10 @@ contains
 
     subroutine bm_set_ets()
         implicit none
-        integer(8) :: array_size = 100
+        integer(8), parameter :: array_size = 100000
         integer(8) :: i, clock_rate, clock_start, clock_stop, j, k
         real(8) :: e_time
-        real(8) :: data(100)
+        real(8) :: data(array_size)
         type(hdc_t), pointer :: tree
         character(len=32) :: fmt
         character(len=32) :: path
@@ -241,11 +263,12 @@ contains
 
     subroutine bm_get_ets()
         implicit none
-        integer(8) :: array_size = 100
+        integer(8), parameter :: array_size = 100000
         integer(8) :: i, clock_rate, clock_start, clock_stop,j,k
         real(8) :: e_time
-        real(8) :: data(100)
-        real(8) :: gdata(100)
+        real(8) :: data(array_size)
+        real(8) :: gdata(array_size)
+        real(8), pointer :: gdatap(:)
         type(hdc_t), pointer :: tree
         character(len=32) :: fmt
         character(len=32) :: path
@@ -253,9 +276,9 @@ contains
         allocate(tree)
         tree = hdc_new_size(4096_8)
         fmt = '("a"I0.2,"/a",I0.2,"/a",I0.2)' ! an integer of width 3 with zeros at the left
-        do i = 0,100
-            do j = 0,100
-                do k = 0,100
+        do i = 1,100
+            do j = 1,100
+                do k = 1,100
                     write (path,fmt)i,j,k
                     call hdc_add_child(tree,trim(path),hdc_new_empty())
                 end do
@@ -267,6 +290,7 @@ contains
 
         do i = 1,100
             gdata = hdc_as_double_1d(tree,"a10/a10/a10")
+!             call hdc_get(tree,"a10/a10/a10",gdatap)
         end do
 
         call system_clock(count=clock_stop)      ! Stop Timer
@@ -275,6 +299,45 @@ contains
         deallocate(tree)
         call storage_reset()
     end subroutine bm_get_ets
+
+    subroutine bm_construct_ets()
+        implicit none
+        integer(8) :: array_size = 100
+        integer(8) :: i, clock_rate, clock_start, clock_stop,j,k,l
+        real(8) :: e_time
+        real(8) :: data(100)
+        real(8) :: gdata(100)
+        type(hdc_t), pointer :: tree
+        character(len=32) :: fmt
+        character(len=32) :: path(1000000)
+        data = 1!.0d0
+        allocate(tree)
+        tree = hdc_new_size(4096_8)
+        fmt = '("a"I0.2,"/a",I0.2,"/a",I0.2)' ! an integer of width 3 with zeros at the left
+        l = 1
+        do i = 1,100
+            do j = 1,100
+                do k = 1,100
+                    write (path(l),fmt)i,j,k
+                    l = l + 1
+                end do
+            end do
+        end do
+        call hdc_set_data(tree,"a10/a10/a10",data)
+        call system_clock(count_rate=clock_rate) !Find the time rate
+        call system_clock(count=clock_start)     !Start Timer
+
+            do l = 1, 1000000
+                call hdc_add_child(tree,trim(path(l)),hdc_new_empty())
+            end do
+
+        call system_clock(count=clock_stop)      ! Stop Timer
+        e_time = real(clock_stop-clock_start)/real(clock_rate)
+        print '("bm_construct_ets, n = ",i10,",Time = ",f16.12,"s")',array_size,e_time
+        deallocate(tree)
+        call storage_reset()
+    end subroutine bm_construct_ets
+
 
     subroutine bm_set_data_preallocated(array_size)
         implicit none
@@ -430,37 +493,38 @@ contains
     subroutine f_main()
         implicit none
         integer(8) :: k, n
-        call bm_array_copy(1024_8*1024_8*4_8)
-        do k=1,6
-            n = 2**k
-            call bm_set_data(1024_8*1024_8*n)
-        end do
-        do k=1,6
-            n = 2**k
-            call bm_get_data(1024_8*1024_8*n)
-        end do
-        do k=1,6
-            n = 2**k
-            call bm_get_data_zero_copy(1024_8*1024_8*n)
-        end do
-        do k=1,6
-            n = 2**k
-            call bm_set_data_zero_copy(1024_8*1024_8*n)
-        end do
-        call bm_create_delete(1000000_8)
-        call bm_create_delete_no_alloc(1000000_8)
-        do k=4,15
-            n = 2**k
-            call bm_get_child(n)
-        end do
-        do k=2,5
-            n = 2**k
-            call bm_add_child(n*1024_8,0_8)
-        end do
-        do k=0,5
-            n = 2**k
-            call bm_add_child_depth(n,1024_8)
-        end do
+!         call bm_array_copy(1024_8*1024_8*4_8)
+!         do k=1,6
+!             n = 2**k
+!             call bm_set_data(1024_8*1024_8*n)
+!         end do
+!         do k=1,6
+!             n = 2**k
+!             call bm_get_data(1024_8*1024_8*n)
+!         end do
+!         do k=1,6
+!             n = 2**k
+!             call bm_get_data_zero_copy(1024_8*1024_8*n)
+!         end do
+!         do k=1,6
+!             n = 2**k
+!             call bm_set_data_zero_copy(1024_8*1024_8*n)
+!         end do
+!         call bm_create_delete(1000000_8)
+!         call bm_create_delete_no_alloc(1000000_8)
+!         do k=4,4
+!             n = 2**k
+!             call bm_get_child(n)
+!         end do
+!         do k=2,5
+!             n = 2**k
+!             call bm_add_child(n*1024_8,0_8)
+!         end do
+!         do k=0,5
+!             n = 2**k
+!             call bm_add_child_depth(n,1024_8)
+!         end do
+!         call bm_construct_ets()
         call bm_set_ets()
         call bm_get_ets()
     end subroutine f_main

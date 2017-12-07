@@ -1,5 +1,7 @@
 #include "utils.h"
 #include <tuple>
+#include <boost/tokenizer.hpp>
+#include <boost/variant.hpp>
 //using namespace std;
 
 /* ------------------------- UUID generation ----------------------------- */
@@ -30,26 +32,50 @@ string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-vector<string> split(string s) {
-    std::string delimiters("/[]");
-    std::vector<std::string> parts;
-    boost::trim_if(s, boost::is_any_of(delimiters));
-    boost::split(parts, s, boost::is_any_of(delimiters),boost::token_compress_on);
+
+vector<std::tuple<bool, std::string>> split_(std::string s) {
+    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    boost::char_separator<char> sep("/]", "[");
+    tokenizer tok{s, sep};
+    std::vector<std::tuple<bool,std::string>> parts;
+    bool is_index = false;
+    bool was_bracket = false;
+    for (const auto &t : tok) {
+        was_bracket = (t.operator[](0) == '[');
+        if (was_bracket) {
+            is_index = true;
+            continue;
+        }
+        parts.push_back(std::make_tuple(is_index,t));
+        if (is_index) is_index = false;
+    }
     return parts;
 }
 
-bool try_parse(const string &s, size_t& parsed) {
-    try {
-        parsed = boost::lexical_cast<size_t>(s);
-        return true;
+vector <boost::variant<size_t,std::string>> split(std::string s) {
+    std::vector<boost::variant<size_t,std::string>> parts;
+    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    boost::char_separator<char> sep("/]", "[");
+    tokenizer tok{s, sep};
+    bool is_index = false;
+    bool was_bracket = false;
+    for (const auto &t : tok) {
+        was_bracket = (t.operator[](0) == '[');
+        if (was_bracket) {
+            is_index = true;
+            continue;
+        }
+        boost::variant<size_t,std::string> var;
+        if (is_index) var = boost::lexical_cast<size_t>(t);
+        else var = t;
+        parts.push_back(var);
+        if (is_index) is_index = false;
     }
-    catch(...)
-    {
-        parsed = 0;
-        return false;
-    }
-    // Should never go here
-    return false;
+//     for (auto &p : parts) {
+//         std::cout << p << " " << (p.type() == typeid(size_t)) << std::endl;
+//     }
+//     exit(0);
+    return parts;
 }
 
 /* -------------------------  Types Definitions  ------------------------- */

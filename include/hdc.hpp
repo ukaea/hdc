@@ -80,14 +80,15 @@ private:
     header_t header;
 
 /* ------------------------------- methods ----------------------------------------- */
-    void add_child(vector<string> vs, HDC* n);
-    void add_child(vector<string> vs, HDC& n);
-    void set_child(vector<string> vs, HDC* n);
-    void delete_child(vector<string> vs);
-    HDC* get_ptr(vector<string> vs);
-    HDC get(vector<string> vs);
-    HDC* get_slice(vector<string> vs, size_t i);
-    bool has_child(vector<string> vs);
+    void add_child(vector<boost::variant<size_t,std::string>> vs, HDC* n);
+    void add_child(vector<boost::variant<size_t,std::string>> vs, HDC& n);
+    void set_child(vector<boost::variant<size_t,std::string>> vs, HDC* n);
+    void delete_child(vector<boost::variant<size_t,std::string>> vs);
+    HDC* get_ptr(vector<boost::variant<size_t,std::string>> vs);
+    HDC get(vector<boost::variant<size_t,std::string>> vs);
+    HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
+    HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
+    bool has_child(vector<boost::variant<size_t,std::string>> vs);
 
 public:
     /** Creates empty HDC with specified buffer size */
@@ -272,9 +273,12 @@ public:
     HDC* get_ptr(string path);
     HDC get(string path);
     /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC* get_slice(string path, size_t i);
+    HDC get_slice(string path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC* get_slice(size_t i);
+    HDC get_slice(size_t i);
+    HDC* get_slice_ptr(string path, size_t i);
+    /** Returns i-th subnode if HDC_LIST is the type. */
+    HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
     bool has_child(string path);
 

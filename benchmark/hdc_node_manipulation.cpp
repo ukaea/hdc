@@ -164,7 +164,7 @@ static void BM_HDC_GetSliceMultipleItems(benchmark::State& state) {
     while (state.KeepRunning()) {
         // measure
         for (int i=0;i<100;i++) {
-            HDC* slice = tree->get_slice(i*n/100);
+            HDC* slice = tree->get_slice_ptr(i*n/100);
         }
     }
     state.SetItemsProcessed(100 * state.iterations());
