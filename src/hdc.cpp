@@ -16,7 +16,7 @@ unordered_map<string,string> avail_stores;
 
 pt::ptree* options;
 
-void HDC_parse_cmdline(int argc, const char *argv[]) {
+void HDC::parse_cmdline(int argc, const char *argv[]) {
     namespace po = boost::program_options;
     po::options_description desc("Allowed options:");
     desc.add_options()
@@ -34,8 +34,8 @@ void HDC_parse_cmdline(int argc, const char *argv[]) {
     }
 
     if (vm.count("list-plugins")) {
-        HDC_search_plugins();
-        HDC_list_plugins();
+        HDC::search_plugins();
+        HDC::list_plugins();
         exit(0);
     }
 
@@ -45,7 +45,7 @@ void HDC_parse_cmdline(int argc, const char *argv[]) {
     }
 }
 
-void HDC_load_config(string configPath) {
+void HDC::load_config(string configPath) {
     std::string delimiters(":");
     std::vector<std::string> parts;
     boost::trim_if(configPath, boost::is_any_of(delimiters));
@@ -60,7 +60,7 @@ void HDC_load_config(string configPath) {
                 break;
             }
             catch (...) {
-                cout << "HDC_load_config(): something bad happened" << endl;
+                cout << "HDC::load_config(): something bad happened" << endl;
             }
         }
     }
@@ -74,12 +74,12 @@ void HDC_load_config(string configPath) {
     }
 }
 
-void HDC_search_plugins(string searchPath) {
+void HDC::search_plugins(string searchPath) {
     std::string delimiters(":");
     std::vector<std::string> parts;
     boost::trim_if(searchPath, boost::is_any_of(delimiters));
     boost::split(parts, searchPath, boost::is_any_of(delimiters),boost::token_compress_on);
-    std::string lib_dir = HDC_get_library_dir();
+    std::string lib_dir = HDC::get_library_dir();
     parts.push_back(lib_dir);
     parts.push_back(lib_dir+"/plugins");
     glob_t globbuf;
@@ -109,7 +109,7 @@ void HDC_search_plugins(string searchPath) {
     }
 };
 
-std::vector<std::string> HDC_get_available_plugins() {
+std::vector<std::string> HDC::get_available_plugins() {
     std::vector<std::string> keys;
     for (auto kv : avail_stores) {
         keys.push_back(kv.first);
@@ -117,14 +117,14 @@ std::vector<std::string> HDC_get_available_plugins() {
     return keys;
 }
 
-void HDC_list_plugins() {
+void HDC::list_plugins() {
     cout << "Available storage plugins:\n";
     for (const auto& store : avail_stores) {
         cout << "  - " << store.first << " : " << store.second << "\n";
     }
 }
 
-void HDC_set_storage(std::string storage) {
+void HDC::set_storage(std::string storage) {
     /*if (global_storage != nullptr) {
         cerr << "Storage is already set!\n";
         exit(3);
@@ -147,7 +147,7 @@ void HDC_set_storage(std::string storage) {
     }
 }
 
-void HDC_set_default_storage_options(std::string storage, std::string storage_options) {
+void HDC::set_default_storage_options(std::string storage, std::string storage_options) {
     options->put("storage",storage);
     if (!storage_options.empty()) {
         try {
@@ -157,36 +157,36 @@ void HDC_set_default_storage_options(std::string storage, std::string storage_op
             options->add_child("storage_options",*parsed_stor_opt);
         }
         catch (...) {
-            cerr << "HDC_set_storage(): Something bad happened while parsing settings\n";
+            cerr << "HDC::set_storage(): Something bad happened while parsing settings\n";
             exit(-1);
         }
     }
 }
 
-std::string HDC_get_library_dir(void) {
+std::string HDC::get_library_dir(void) {
     Dl_info dl_info;
-    dladdr((void *)HDC_get_library_dir, &dl_info);
+    dladdr((void *)HDC::get_library_dir, &dl_info);
     boost::filesystem::path p(dl_info.dli_fname);
     return boost::filesystem::canonical(p.parent_path()).string();
 }
 
-void HDC_init(std::string storage_str, std::string storage_options) {
+void HDC::init(std::string storage_str, std::string storage_options) {
     options = new pt::ptree();
-    HDC_set_default_storage_options(storage_str,storage_options);
-    HDC_search_plugins();
-    //HDC_load_config();
-    HDC_set_storage(storage_str);
+    HDC::set_default_storage_options(storage_str,storage_options);
+    HDC::search_plugins();
+    //HDC::load_config();
+    HDC::set_storage(storage_str);
 }
 
 
 /** Cleans up global_storage  -- mainly due to C and Fortran */
-void HDC_destroy() {
+void HDC::destroy() {
     if (global_storage == nullptr) return;
     delete global_storage;
     global_storage = nullptr;
     delete options;
     options = nullptr;
-    DEBUG_STDERR("HDC_destroy(): HDC storage destroyed.\n");
+    DEBUG_STDERR("HDC::destroy(): HDC storage destroyed.\n");
 }
 
 //---------------------------- HDC class -----------------------------------
@@ -200,9 +200,9 @@ HDC::HDC(size_t _data_size) {
     header.ndim = 1;
 
     if (global_storage == nullptr) {
-       //HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-       HDC_init();
-       atexit(HDC_destroy);
+       //HDC::init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+       HDC::init();
+       atexit(HDC::destroy);
     }
 
     // Start by creating segment
@@ -258,9 +258,9 @@ HDC::HDC(string str) {
     header.type = STRING_ID;
 
     if (global_storage == nullptr) {
-//        HDC_init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-        HDC_init();
-        atexit(HDC_destroy);
+//        HDC::init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
+        HDC::init();
+        atexit(HDC::destroy);
     }
 
     // Start by creating segment
@@ -1304,19 +1304,19 @@ HDC* deserialize_HDC_string(std::string str) {
     }
     catch (...)
     {
-        cout << "deserialize_HDC_string(): Something bad happened while parsing the string\n";
+        cout << "deserialize_HDC::string(): Something bad happened while parsing the string\n";
         exit(-1);
     }
     string storage_str = root.get<std::string>("storage");
     options = new pt::ptree();
-    HDC_set_default_storage_options(storage_str);
+    HDC::set_default_storage_options(storage_str);
     auto storage_options = root.get_child("settings");
     for (const auto& kv : storage_options) {
         options->add_child("storage-options/"+kv.first,kv.second);
     }
-    HDC_search_plugins();
-    //HDC_load_config();
-    HDC_set_storage(storage_str);
+    HDC::search_plugins();
+    //HDC::load_config();
+    HDC::set_storage(storage_str);
     string uuid = root.get<std::string>("uuid");
 
     tree = new HDC(global_storage,uuid);

@@ -21,20 +21,20 @@ PYBIND11_PLUGIN(libhdc_python) {
     py::enum_<TypeID>(m, "TypeID")
         .value("EMPTY_ID", EMPTY_ID)
         .value("STRUCT_ID", STRUCT_ID)
-        .value("LIST_ID", LIST_ID)     
-        .value("INT8_ID", INT8_ID)     
-        .value("INT16_ID", INT16_ID)    
-        .value("INT32_ID", INT32_ID)    
-        .value("INT64_ID", INT64_ID)    
-        .value("UINT8_ID", UINT8_ID)    
-        .value("UINT16_ID", UINT16_ID)   
-        .value("UINT32_ID", UINT32_ID)   
-        .value("UINT64_ID", UINT64_ID)   
-        .value("FLOAT_ID", FLOAT_ID)    
-        .value("DOUBLE_ID", DOUBLE_ID)   
-        .value("STRING_ID", STRING_ID)   
-        .value("BOOL_ID", BOOL_ID)     
-        .value("ERROR_ID", ERROR_ID)    
+        .value("LIST_ID", LIST_ID)
+        .value("INT8_ID", INT8_ID)
+        .value("INT16_ID", INT16_ID)
+        .value("INT32_ID", INT32_ID)
+        .value("INT64_ID", INT64_ID)
+        .value("UINT8_ID", UINT8_ID)
+        .value("UINT16_ID", UINT16_ID)
+        .value("UINT32_ID", UINT32_ID)
+        .value("UINT64_ID", UINT64_ID)
+        .value("FLOAT_ID", FLOAT_ID)
+        .value("DOUBLE_ID", DOUBLE_ID)
+        .value("STRING_ID", STRING_ID)
+        .value("BOOL_ID", BOOL_ID)
+        .value("ERROR_ID", ERROR_ID)
         .value("Internal_ForceMyEnumIntSize", Internal_ForceMyEnumIntSize)
         ;
 
@@ -104,7 +104,7 @@ PYBIND11_PLUGIN(libhdc_python) {
 
             int ndim = hdc.get_ndim();
             size_t* shape = hdc.get_shape();
-            std::vector<size_t> shape_vec; 
+            std::vector<size_t> shape_vec;
             shape_vec.assign(shape, shape + ndim);
 
             // TODO add more data types

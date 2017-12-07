@@ -41,26 +41,13 @@
 
 using namespace std;
 namespace pt = boost::property_tree;
-template<typename T> struct identity { typedef T type; };
+
 //this will hold all the settings, instead of boost::property_tree json we will use the jsoncpp for actual reading of them.
 extern pt::ptree* options;
 //this is default global storage
 extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
-void HDC_parse_cmdline(int argc, const char *argv[]);
-void HDC_load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
-void HDC_search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
-void HDC_list_plugins();
-void HDC_set_storage(std::string storage="umap");
-std::vector<std::string> HDC_get_available_plugins();
-std::string HDC_get_library_dir(void);
-/** Initializes global_storage  -- mainly due to C and Fortran */
-void HDC_init(std::string storage="umap",std::string storage_options="");
-void HDC_set_default_storage_options(std::string storage="umap", std::string storage_options="");
-
-/** Cleans up global_storage  -- mainly due to C and Fortran */
-void HDC_destroy();
 
 class HDCException: public std::exception
 {
@@ -89,6 +76,7 @@ private:
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
+    void add_child_single(string str, HDC& n);
 
 public:
     /** Creates empty HDC with specified buffer size */
@@ -101,18 +89,43 @@ public:
     HDC(string str);
     /** Copy contructor */
     HDC(HDC* h);
-    // Deserializing constructor
+    /** Deserializing constructor */
     HDC(HDCStorage* _storage, string _uuid);
+    /** constructor from object buffer */
     HDC(char* src_buffer);
     /** Destructor */
     ~HDC();
+    /** Parses command line arguments */
+    static void parse_cmdline(int argc, const char *argv[]);
+    /** Loads settings from file */
+    static void load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
+    /** Searches for available storage plugins */
+    static void search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
+    /** Prints out all found storage plugins. */
+    static void list_plugins();
+    /** Sets the default storage to be used. */
+    static void set_storage(std::string storage="umap");
+    /** Returns list of all available storage plugins */
+    static std::vector<std::string> get_available_plugins();
+    /** Returns a directory path where the HDC library is loaded from.  */
+    static std::string get_library_dir(void);
+    /** Initializes global_storage  -- mainly due to C and Fortran */
+    static void init(std::string storage="umap",std::string storage_options="");
+    /** Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions. */
+    static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
+    /** Cleans up global_storage  -- mainly due to C and Fortran */
+    static void destroy();
+    /** Returns the available space in buffer (in bytes) */
     size_t get_datasize();
+    /** Returns the the size of object buffer (= header+data, in bytes) */
     size_t get_size();
     /** Returns type of current node. */
     size_t get_type();
+    /** Returns object flags (i.e. array ordering)*/
     size_t get_flags();
+    /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data();
-
+    /** Stores data in node's buffer */
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
@@ -261,10 +274,10 @@ public:
     bool is_fortranorder();
     void info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
-    /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. */
+    /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
     void add_child(string path, HDC* n);
+    /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version. */
     void add_child(string path, HDC& n);
-    void add_child_single(string str, HDC& n);
     /** Sets HDC subtree to given path. */
     void set_child(string path, HDC* n);
     /** Deletes HDC subtree. */

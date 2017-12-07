@@ -17,20 +17,19 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
 #include "types.h"
-using namespace std;
 
 /* ------------------------- UUID generation ----------------------------- */
 
-void print_uuid(vector<char> uuid);
-vector<char> generate_uuid();
-string generate_uuid_str();
+void print_uuid(std::vector<char> uuid);
+std::vector<char> generate_uuid();
+std::string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
-vector <boost::variant<size_t,std::string>> split(std::string s);
+std::vector <boost::variant<size_t,std::string>> split(std::string s);
 
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);
 bool hdc_is_primitive_type(TypeID type);
-string hdc_type_str(TypeID type);
+std::string hdc_type_str(TypeID type);
 
 template <typename T>
 TypeID to_typeid(T a);
@@ -44,10 +43,10 @@ TypeID to_typeid(uint64_t a);
 TypeID to_typeid(uint32_t a);
 TypeID to_typeid(uint16_t a);
 TypeID to_typeid(uint8_t a);
-TypeID to_typeid(string a);
+TypeID to_typeid(std::string a);
 TypeID to_typeid(char* a);
 TypeID to_typeid(bool a);
-TypeID numpy_format_to_typeid(string format, size_t itemsize);
+TypeID numpy_format_to_typeid(std::string format, size_t itemsize);
 
 /* -------------------------  Other stuff ----------------------------- */
 
