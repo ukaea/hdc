@@ -10,23 +10,23 @@ from libcpp.string cimport string
 
 cdef extern from "hdc.hpp":
 
-    cdef cppclass HDC:
-        HDC()
+    cdef cppclass CppHDC "HDC":
+        CppHDC()
         string serialize()
         string to_json_string(int mode = 0)
-        void set_child(string path, HDC* n)
-        void add_child(string path, HDC* n)
+        void set_child(string path, CppHDC* n)
+        void add_child(string path, CppHDC* n)
         void set_string(string data)
 
 
-cdef class pyHDC:
+cdef class HDC:
     # cdef unique_ptr[HDC] thisptr
-    cdef HDC* thisptr
+    cdef CppHDC* thisptr
 
     def __init__(self):
-        self.thisptr = new HDC()
+        self.thisptr = new CppHDC()
         # create a new HDC object to test that it's not deallocated
-        cdef HDC* n = new HDC()
+        cdef CppHDC* n = new CppHDC()
         deref(self.thisptr).add_child('test', n)
         deref(n).set_string('n-data Ͼ Ϣ')
 
