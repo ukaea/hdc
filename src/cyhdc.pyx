@@ -3,8 +3,6 @@
 # https://dmtn-013.lsst.io/
 
 from cython.operator cimport dereference as deref
-
-from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 
 
@@ -20,7 +18,7 @@ cdef extern from "hdc.hpp":
 
 
 cdef class HDC:
-    # cdef unique_ptr[HDC] thisptr
+    # data handle
     cdef CppHDC* thisptr
 
     def __init__(self):
