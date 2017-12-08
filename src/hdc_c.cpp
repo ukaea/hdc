@@ -107,7 +107,7 @@ const char* hdc_get_uuid(struct hdc_t* tree) {
 
 struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_slice(i);
+    HDC* node = t->get_slice_ptr(i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -115,7 +115,7 @@ struct hdc_t* hdc_get_slice(struct hdc_t* tree, size_t i) {
 
 struct hdc_t* hdc_get_slice_path(struct hdc_t* tree, char* path, size_t i) {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_slice((string)path, i);
+    HDC* node = t->get_slice_ptr((string)path, i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -642,20 +642,20 @@ size_t hdc_childs_count(hdc_t* tree) {
 void HDC_init_c(char* pluginFileName, char* pluginSettingsString) {
     if (strlen(pluginFileName) != 0) {
         if (strlen(pluginSettingsString)== 0)
-            HDC_init(std::string(pluginFileName));
+            HDC::init(std::string(pluginFileName));
         else
-            HDC_init(std::string(pluginFileName),std::string(pluginSettingsString));
+            HDC::init(std::string(pluginFileName),std::string(pluginSettingsString));
     }
     else
-        HDC_init();
+        HDC::init();
 }
 
 void HDC_destroy_c() {
-    if (global_storage != nullptr) HDC_destroy();
+    if (global_storage != nullptr) HDC::destroy();
 }
 
 char** HDC_get_available_plugins_c() {
-    std::vector<std::string> cppkeys = HDC_get_available_plugins();
+    std::vector<std::string> cppkeys = HDC::get_available_plugins();
     const char** keys = new const char* [cppkeys.size()+1];
     for (int i=0;i<cppkeys.size();i++) {
         keys[i] = cppkeys[i].c_str();

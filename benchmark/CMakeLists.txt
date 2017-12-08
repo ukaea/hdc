@@ -17,9 +17,10 @@ add_executable(benchmark_hdc_c hdc_array_manipulation_c.cpp hdc_node_manipulatio
 target_link_libraries(benchmark_hdc_c benchmark hdc chdc )
 install(TARGETS benchmark_hdc_c DESTINATION bin)
 
-add_executable(benchmark_fortran benchmark_fortran.f90)
+add_executable(benchmark_fortran benchmark_fortran.f90 timer.c)
 target_link_libraries(benchmark_fortran hdc chdc fhdc)
 install(TARGETS benchmark_fortran DESTINATION bin)
+set_target_properties(benchmark_fortran PROPERTIES LINK_FLAGS "-lc")
 
 add_executable(test_hdc_get test_hdc_get.f90 timer.c)
 target_link_libraries(test_hdc_get hdc chdc fhdc)

@@ -6,8 +6,8 @@
 using namespace std;
 
 int main(int argc, const char *argv[]) {
-    HDC_parse_cmdline(argc,argv);
-    HDC_init("mdbm");
+    HDC::parse_cmdline(argc,argv);
+    HDC::init("mdbm");
     // Create new HDC tree
     HDC tree;
     // Add some children
