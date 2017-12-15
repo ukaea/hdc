@@ -82,6 +82,7 @@ void HDC::search_plugins(string searchPath) {
     std::string lib_dir = HDC::get_library_dir();
     parts.push_back(lib_dir);
     parts.push_back(lib_dir+"/plugins");
+    parts.push_back(lib_dir+"/hdc");
     glob_t globbuf;
     for (auto path : parts) {
         //cout << path << " " << endl;
