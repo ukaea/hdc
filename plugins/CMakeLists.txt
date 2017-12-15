@@ -1,9 +1,11 @@
-# Ensure CMake to find mdbm:
-# include_directories("/usr/local/include")
+# Ensure CMake to find mdbm: include_directories("/usr/local/include")
 # link_directories("/usr/local/lib64")
-find_path(MDBM_INCLUDE_DIR
+find_path(
+  MDBM_INCLUDE_DIR
   NAMES mdbm.h
-  HINTS "/usr/include" "/usr/local/include" "/sw/mdbm/include"
+  HINTS
+    
+    "/usr/include" "/usr/local/include" "/sw/mdbm/include"
 )
 
 
@@ -25,7 +27,8 @@ if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
     add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
     target_link_libraries(hdc_plugin_mdbm ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})
 else ()
-    message("MDBM Not found, Building of MDBM Plugin will be skipped...")
+    message("MDBM Not found, Building of MDBM Plugin will be skipped..."
+ )
 endif()
 
 # Create Unordered map storage

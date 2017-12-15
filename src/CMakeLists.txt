@@ -1,6 +1,8 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-enable_language (Fortran)
-set(CMAKE_Fortran_MODULE_DIRECTORY "${hdc_new_BINARY_DIR}/mod")
+enable_language(Fortran)
+set(
+  CMAKE_Fortran_MODULE_DIRECTORY
+  "${hdc_new_BINARY_DIR}/mod")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -58,13 +60,11 @@ find_package(Cython REQUIRED)
 
 cmake_policy(SET CMP0057 NEW)
 
-add_cython_target(cyhdc "CXX")
+add_cython_target(cyhdc "CXX"
+ )
 add_library(cyhdc MODULE ${cyhdc})
 target_link_libraries(cyhdc hdc)
 python_extension_module(cyhdc)
 
-# install(TARGETS hdc chdc fhdc
-#     RUNTIME DESTINATION bin
-#     LIBRARY DESTINATION lib
-#     ARCHIVE DESTINATION lib/static
-#     )
+# install(TARGETS hdc chdc fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib
+# ARCHIVE DESTINATION lib/static )

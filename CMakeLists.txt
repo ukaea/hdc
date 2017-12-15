@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 project(hdc_new)
-enable_language (Fortran)
+enable_language(Fortran)
 
-### Set minimal compiler requirements
-if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9)
-    message(FATAL_ERROR "
+# ## Set minimal compiler requirements
+if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9)
+  message(
+    FATAL_ERROR
+      
+      "
     I require at least gcc-4.9. Please, obtain higher version of gcc toolset and run me again after exporting path to newer compiler.
 
     For example:
@@ -162,29 +165,31 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("Binary dir is: ${hdc_BINARY_DIR}")
-message("Source dir is: ${hdc_SOURCE_DIR}")
+message("Source dir is: ${hdc_SOURCE_DIR}"
+   )
 
-########################## Pluma ###############################
-file(GLOB Pluma_HEADERS ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/include/Pluma/*)
-file(GLOB Pluma_SOURCES ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/src/Pluma/*)
-include_directories(${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/include ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/src/)
-add_library(Pluma STATIC ${Pluma_SOURCES})
+  # ######################### Pluma ###############################
+  file(GLOB Pluma_HEADERS
+            ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/include/Pluma/*)
+  file(GLOB Pluma_SOURCES ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/src/Pluma/*)
+  include_directories(${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/include
+                      ${CMAKE_SOURCE_DIR}/thirdparty/Pluma-1.1/src/)
+  add_library(Pluma STATIC ${Pluma_SOURCES})
 
+  # file(COPY include DESTINATION ${CMAKE_BINARY_DIR}/include)
 
-# file(COPY include DESTINATION ${CMAKE_BINARY_DIR}/include)
+  include_directories(include)
+  # add_subdirectory(docs)
+  add_subdirectory(doxy)
+  add_subdirectory(src)
 
-include_directories(include)
-# add_subdirectory(docs)
-add_subdirectory(doxy)
-add_subdirectory(src)
-
-if (BUILD_TESTS)
+  if(BUILD_TESTS)
     add_subdirectory(test)
-endif()
+  endif()
 
-add_subdirectory(examples)
-if (BUILD_BENCHMARKS)
+  add_subdirectory(examples)
+  if(BUILD_BENCHMARKS)
     add_subdirectory(benchmark)
-endif()
+  endif()
 
-add_subdirectory(plugins)
+  add_subdirectory(plugins)

@@ -1,7 +1,9 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-enable_language (Fortran)
+enable_language(Fortran)
 
-set(CMAKE_Fortran_MODULE_DIRECTORY "${hdc_new_BINARY_DIR}/mod")
+set(
+  CMAKE_Fortran_MODULE_DIRECTORY
+  "${hdc_new_BINARY_DIR}/mod")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -31,15 +33,12 @@ if (BUILD_EXAMPLES)
     add_executable(example_interprocess example_interprocess.cpp)
     target_link_libraries(example_interprocess hdc rt)
 
-    #add_executable(calling_fortran_from_c calling_fortran_from_c.c)
-    #target_link_libraries(calling_fortran_from_c fhdc)
-
-#     #set(CMAKE_INSTALL_RPATH "/usr/local/lib")
-#     #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# 
-    install(TARGETS hdc_fortran_module  example_cpp example_c example_fortran cpo_hdc  
+    install(TARGETS hdc_fortran_module
+                example_cpp
+                example_c
+                example_fortran
+                cpo_hdc
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION share/examples)
-    
 endif(BUILD_EXAMPLES)
 
