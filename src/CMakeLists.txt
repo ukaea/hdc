@@ -45,8 +45,25 @@ target_link_libraries(chdc hdc stdc++)
 add_library(fhdc SHARED hdc_fortran.f90)
 target_link_libraries(fhdc chdc)
 
+#get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+#message( "------- LANGUAGES:  ${languages}" )
 
-# install(TARGETS hdc chdc fhdc 
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../cmake )
+include( UseCython )
+
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+find_package(PythonExtensions REQUIRED)
+find_package(Cython REQUIRED)
+
+cmake_policy(SET CMP0057 NEW)
+
+add_cython_target(cyhdc "CXX")
+add_library(cyhdc MODULE ${cyhdc})
+target_link_libraries(cyhdc hdc)
+python_extension_module(cyhdc)
+
+# install(TARGETS hdc chdc fhdc
 #     RUNTIME DESTINATION bin
 #     LIBRARY DESTINATION lib
 #     ARCHIVE DESTINATION lib/static
