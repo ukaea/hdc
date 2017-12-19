@@ -17,7 +17,7 @@ To build HDC, you will need:
 - Boost >= 1.48 (does not work with 1.41, versions 1.41-1.48 untested)
 - Yahoo MDBM 
 - Python 2.7 or any Python 3 (tested only with 3.4 and 3.5)
-- CMake >= 3.1
+- CMake >= 3.3
 - Doxygen for documentation building
 - git for building gtest and benchmark dependencies
 

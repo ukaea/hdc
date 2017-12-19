@@ -2,7 +2,7 @@ module c_perf
   use iso_c_binding
   implicit none
 
-  interface 
+  interface
      subroutine c_getMillis(t) bind(c,name='getMillis')
        use iso_c_binding
        integer(kind=c_long_long), intent(out) :: t
@@ -12,14 +12,14 @@ module c_perf
 end module c_perf
 
 
-program test_hdc_put
+program hdc_benchmark_get
     use hdc_fortran
     use c_perf
     implicit none
     call f_main()
 contains
     subroutine f_main()
-    
+
         type(hdc_t), pointer :: magnetics
         integer              :: idx, shot, run, refshot, refrun, status, i
         integer              :: j, k, n, k2, SIGNAL_LENGTH, NSTATS
@@ -28,9 +28,9 @@ contains
         real(4)              :: time
         integer, parameter   :: out_unit=20
         CHARACTER(LEN=30)    :: Format
-        
+
         NSTATS = 10000
-        
+
         do k = 10, 100001, 1000
             SIGNAL_LENGTH = k
             allocate(data(SIGNAL_LENGTH),flux_data(SIGNAL_LENGTH),field_data(SIGNAL_LENGTH))
@@ -39,11 +39,14 @@ contains
             end do
             allocate(magnetics)
             magnetics = hdc_new_empty()
+            call hdc_set(magnetics,"flux_loop(1)/flux/data",data)
+            call hdc_set(magnetics,"bpol_probe(1)/field",data)
+            call hdc_set(magnetics,"time",10.0)
             call c_getMillis(t1)
             do k2 = 1,NSTATS
-                call hdc_set(magnetics,"flux_loop(1)/flux/data",data)
-                call hdc_set(magnetics,"bpol_probe(1)/field",data)
-                call hdc_set(magnetics,"time",10.0)
+                call hdc_get(magnetics,"flux_loop(1)/flux/data",flux_data)
+                call hdc_get(magnetics,"bpol_probe(1)/field",field_data)
+                call hdc_get(magnetics,"time",time)
             end do
             call c_getMillis(t2)
             Format = "(I8.8, EN15.5)"
@@ -51,6 +54,7 @@ contains
             write (*,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
             call hdc_delete(magnetics)
             deallocate(data)
-        end do
+
+	    end do
     end subroutine f_main
-end program test_hdc_put
+end program hdc_benchmark_get
