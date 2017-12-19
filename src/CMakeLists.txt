@@ -29,3 +29,8 @@ target_link_libraries(cyhdc hdc)
 python_extension_module(cyhdc)
 
 install(TARGETS hdc chdc fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
+# TODO temporary Python install
+# create Python install package in dist in the future
+install(TARGETS cyhdc RUNTIME DESTINATION bin LIBRARY DESTINATION python)
+add_file_copy_target(pyhdc python pyhdc.py)
+install_file_copy_target(pyhdc DESTINATION python)

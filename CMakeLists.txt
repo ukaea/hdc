@@ -14,6 +14,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 include( UseCython )
 include( CTest )
+include( FileCopyTargets )
 
 ########################################################################################################################
 # Compiler configuration
