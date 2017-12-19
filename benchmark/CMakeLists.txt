@@ -1,48 +1,42 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-enable_language (Fortran)
+set(CMAKE_Fortran_MODULE_DIRECTORY "${hdc_BINARY_DIR}/mod")
 
-set(CMAKE_Fortran_MODULE_DIRECTORY "${hdc_new_BINARY_DIR}/mod")
+add_executable(hdc_benchmark hdc_array_manipulation.cpp hdc_node_manipulation.cpp main.cpp)
+target_link_libraries(hdc_benchmark benchmark hdc chdc )
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+add_executable(hdc_benchmark_c hdc_array_manipulation_c.cpp hdc_node_manipulation_c.cpp main.cpp)
+target_link_libraries(hdc_benchmark_c benchmark hdc chdc )
 
-include_directories(inc)
+add_executable(hdc_benchmark_fortran hdc_benchmark_fortran.f90 timer.c)
+target_link_libraries(hdc_benchmark_fortran hdc chdc fhdc)
+set_target_properties(hdc_benchmark_fortran PROPERTIES LINK_FLAGS "-lc")
 
-add_executable(benchmark_hdc hdc_array_manipulation.cpp hdc_node_manipulation.cpp main.cpp)
-target_link_libraries(benchmark_hdc benchmark hdc chdc )
-install(TARGETS benchmark_hdc DESTINATION bin)
+add_executable(hdc_benchmark_get hdc_benchmark_get.f90 timer.c)
+target_link_libraries(hdc_benchmark_get hdc chdc fhdc)
+set_target_properties(hdc_benchmark_get PROPERTIES LINK_FLAGS "-lc")
 
-add_executable(benchmark_hdc_c hdc_array_manipulation_c.cpp hdc_node_manipulation_c.cpp main.cpp)
-target_link_libraries(benchmark_hdc_c benchmark hdc chdc )
-install(TARGETS benchmark_hdc_c DESTINATION bin)
+add_executable(hdc_benchmark_get_all hdc_benchmark_get_all.f90 timer.c)
+target_link_libraries(hdc_benchmark_get_all hdc chdc fhdc)
+set_target_properties(hdc_benchmark_get_all PROPERTIES LINK_FLAGS "-lc")
 
-add_executable(benchmark_fortran benchmark_fortran.f90)
-target_link_libraries(benchmark_fortran hdc chdc fhdc)
-install(TARGETS benchmark_fortran DESTINATION bin)
+add_executable(hdc_benchmark_put hdc_benchmark_put.f90 timer.c)
+target_link_libraries(hdc_benchmark_put hdc chdc fhdc)
+set_target_properties(hdc_benchmark_put PROPERTIES LINK_FLAGS "-lc")
 
-add_executable(test_hdc_get test_hdc_get.f90 timer.c)
-target_link_libraries(test_hdc_get hdc chdc fhdc)
-install(TARGETS test_hdc_get DESTINATION bin)
-set_target_properties(test_hdc_get PROPERTIES LINK_FLAGS "-lc")
+add_executable(hdc_benchmark_put_all hdc_benchmark_put_all.f90 timer.c)
+target_link_libraries(hdc_benchmark_put_all hdc chdc fhdc)
+set_target_properties(hdc_benchmark_put_all PROPERTIES LINK_FLAGS "-lc")
 
-add_executable(test_hdc_get_all test_hdc_get_all.f90 timer.c)
-target_link_libraries(test_hdc_get_all hdc chdc fhdc)
-install(TARGETS test_hdc_get_all DESTINATION bin)
-set_target_properties(test_hdc_get_all PROPERTIES LINK_FLAGS "-lc")
+add_executable(hdc_benchmark_paper hdc_benchmark_paper.cpp)
+target_link_libraries(hdc_benchmark_paper benchmark hdc chdc)
 
-add_executable(test_hdc_put test_hdc_put.f90 timer.c)
-target_link_libraries(test_hdc_put hdc chdc fhdc)
-install(TARGETS test_hdc_put DESTINATION bin)
-set_target_properties(test_hdc_put PROPERTIES LINK_FLAGS "-lc")
-
-add_executable(test_hdc_put_all test_hdc_put_all.f90 timer.c)
-target_link_libraries(test_hdc_put_all hdc chdc fhdc)
-install(TARGETS test_hdc_put_all DESTINATION bin)
-set_target_properties(test_hdc_put_all PROPERTIES LINK_FLAGS "-lc")
-
-
-add_executable(benchmark_paper benchmark_paper.cpp)
-target_link_libraries(benchmark_paper benchmark hdc chdc )
-install(TARGETS benchmark_paper DESTINATION bin)
-
+install(TARGETS
+        hdc_benchmark
+        hdc_benchmark_c
+        hdc_benchmark_fortran
+        hdc_benchmark_get
+        hdc_benchmark_get_all
+        hdc_benchmark_put
+        hdc_benchmark_put_all
+        hdc_benchmark_paper
+        DESTINATION bin)

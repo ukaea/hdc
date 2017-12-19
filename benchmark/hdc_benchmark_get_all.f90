@@ -2,7 +2,7 @@ module c_perf
   use iso_c_binding
   implicit none
 
-  interface 
+  interface
      subroutine c_getMillis(t) bind(c,name='getMillis')
        use iso_c_binding
        integer(kind=c_long_long), intent(out) :: t
@@ -12,14 +12,14 @@ module c_perf
 end module c_perf
 
 
-program test_hdc_get
+program hdc_benchmark_get_all
     use hdc_fortran
     use c_perf
     implicit none
     call f_main()
 contains
     subroutine f_main()
-    
+
         type(hdc_t), pointer :: magnetics
         integer              :: idx, shot, run, refshot, refrun, status, i
         integer              :: j, k, n, k2, SIGNAL_LENGTH, NSTATS
@@ -37,9 +37,9 @@ contains
         complex(8), pointer :: complex0array_out(:)
         real(8) :: time_full, time_single
         NSTATS = 1000
-            
+
         write(*,*)'N_signal   Full          Single_field'
-        
+
         do k = 1, 5
             SIGNAL_LENGTH = 10 ** k
             allocate(data_in(SIGNAL_LENGTH),data_out(SIGNAL_LENGTH))
@@ -105,7 +105,7 @@ contains
             call hdc_set(magnetics,"code/parameters",string_in)
             call hdc_set(magnetics,"code/output_flag",float0array_in)
             call hdc_set(magnetics,"time",10.0)
-            
+
             call c_getMillis(t1)
             do k2 = 1,NSTATS
                 call hdc_get(magnetics,"ids_properties/comment",string_out)
@@ -184,7 +184,7 @@ contains
 
             call hdc_delete(magnetics)
             deallocate(data_in)
-            
+
 	    end do
     end subroutine f_main
-end program test_hdc_get
+end program hdc_benchmark_get_all

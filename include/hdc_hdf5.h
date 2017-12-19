@@ -52,7 +52,7 @@ struct h5_read_opdata
     struct h5_read_opdata   *prev;        /* Pointer to previous opdata */
     haddr_t                 addr;        /* Group address */
 
-    // pointer to HDC node, anchors traversal to 
+    // pointer to HDC node, anchors traversal to
     HDC*             node;
     std::string      ref_path;
 };

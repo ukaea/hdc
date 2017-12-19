@@ -3,6 +3,15 @@
 #include <string>
 
 TEST(HDC,EmptyNode) {
+    HDC h = HDC();
+    EXPECT_EQ(0,h.get_shape()[0]);
+    EXPECT_EQ(1,h.get_ndim());
+    EXPECT_EQ(HDC_EMPTY,h.get_type());
+    EXPECT_STREQ("null",h.get_type_str().c_str());
+    EXPECT_EQ(false,h.has_child("aaa"));
+}
+
+TEST(HDC,EmptyNodePtr) {
     HDC* h = new HDC();
     EXPECT_EQ(0,h->get_shape()[0]);
     EXPECT_EQ(1,h->get_ndim());
@@ -11,6 +20,7 @@ TEST(HDC,EmptyNode) {
     EXPECT_EQ(false,h->has_child("aaa"));
     delete h;
 }
+
 
 TEST(HDC,EmptyArrayNode) {
     int8_t ndim = 1;
@@ -21,14 +31,14 @@ TEST(HDC,EmptyArrayNode) {
     EXPECT_EQ(INT8_ID,hi8->get_type());
     EXPECT_STREQ("int8",hi8->get_type_str().c_str());
     delete hi8;
-    
+
     HDC* hi32 = new HDC(ndim, shape, INT32_ID);
     EXPECT_EQ(1,hi32->get_ndim());
     EXPECT_EQ(4,hi32->get_shape()[0]);
     EXPECT_EQ(INT32_ID,hi32->get_type());
     EXPECT_STREQ("int32",hi32->get_type_str().c_str());
     delete hi32;
-    
+
     HDC* hd = new HDC(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hd->get_ndim());
     EXPECT_EQ(4,hd->get_shape()[0]);
@@ -45,7 +55,7 @@ TEST(HDC,NodeManipulation) {
     EXPECT_STRNE(n1->get_uuid().c_str(),tree->get_uuid().c_str());
     EXPECT_STRNE(n2->get_uuid().c_str(),tree->get_uuid().c_str());
     EXPECT_STRNE(n1->get_uuid().c_str(),n2->get_uuid().c_str());
-    
+
     // Try add
     tree->add_child("aaa/bbb",n1);
     EXPECT_EQ(HDC_STRUCT,tree->get_type());
@@ -61,13 +71,14 @@ TEST(HDC,NodeManipulation) {
     tree->add_child("aaa/list[0]/eee",new HDC());
     HDC* list = tree->get_ptr("aaa/list");
     EXPECT_EQ(LIST_ID,list->get_type());
+    HDC h = tree->get("aaa/list[0]/ddd");
     EXPECT_EQ(true,tree->has_child("aaa/list[0]/ddd"));
     EXPECT_EQ(true,tree->has_child("aaa/list[0]/eee"));
-    tree->get_ptr("aaa/list")->get_slice(0)->add_child("kkk",new HDC());
+    tree->get_ptr("aaa/list")->get_slice_ptr(0)->add_child("kkk",new HDC());
     size_t* shape = tree->get_ptr("aaa/list")->get_shape();
     EXPECT_EQ(2LU,shape[0]);
-    EXPECT_EQ(true,tree->get_ptr("aaa/list")->get_slice(0)->has_child("ddd"));
-    EXPECT_EQ(true,tree->get_ptr("aaa/list")->get_slice(0)->has_child("eee"));
+    EXPECT_EQ(true,tree->get_ptr("aaa/list")->get_slice_ptr(0)->has_child("ddd"));
+    EXPECT_EQ(true,tree->get_ptr("aaa/list")->get_slice_ptr(0)->has_child("eee"));
     // Try subtree
     HDC* sub = tree->get_ptr("aaa");
     EXPECT_EQ(true,sub->has_child("bbb"));
@@ -196,18 +207,18 @@ TEST(HDC,SliceManipulation) {
     EXPECT_STREQ("list", h->get_type_str().c_str());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(2,h->get_shape()[0]);
-    EXPECT_STREQ("1",h->get_slice(0)->as_string().c_str());
-    EXPECT_STREQ("2",h->get_slice(1)->as_string().c_str());
+    EXPECT_STREQ("1",h->get_slice_ptr(0)->as_string().c_str());
+    EXPECT_STREQ("2",h->get_slice_ptr(1)->as_string().c_str());
     HDC* sl3 = new HDC();
     sl3->set_string("3");
     h->insert_slice(1,sl3);
     vector<string> keys = h->keys();
-    EXPECT_STREQ("3",h->get_slice(1)->as_string().c_str());
-    EXPECT_STREQ("2",h->get_slice(2)->as_string().c_str());
+    EXPECT_STREQ("3",h->get_slice_ptr(1)->as_string().c_str());
+    EXPECT_STREQ("2",h->get_slice_ptr(2)->as_string().c_str());
     HDC* sl4 = new HDC();
     sl4->set_string("4");
     h->set_slice(1,sl4);
-    EXPECT_STREQ("4",h->get_slice(1)->as_string().c_str());
+    EXPECT_STREQ("4",h->get_slice_ptr(1)->as_string().c_str());
     delete h;
     delete sl;
     delete sl2;
@@ -287,18 +298,18 @@ TEST(HDC,JsonComplete) {
     EXPECT_STREQ(tree->get_ptr("aaa/bbb/int")->get_type_str().c_str(), tree2->get_ptr("aaa/bbb/int")->get_type_str().c_str());
     int32_t* data_int_in = s->as<int32_t*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_int[i],data_int_in[i]);
-    
+
     // Test empty
     EXPECT_EQ(HDC_EMPTY,tree2->get_ptr("aaa/bbb/empty")->get_type());
-    
+
     // Test list
     s = tree2->get_ptr("aaa/list");
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(5,s->get_shape()[0]);
     EXPECT_EQ(HDC_LIST,s->get_type());
     EXPECT_STREQ(tree->get_ptr("aaa/list")->get_type_str().c_str(), tree2->get_ptr("aaa/list")->get_type_str().c_str());
-    for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice(i)->get_type());
-    
+    for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice_ptr(i)->get_type());
+
     // Test string
     EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2->get_ptr("aaa/string")->as_string().c_str());
 
@@ -326,7 +337,7 @@ TEST(HDC,HDF5) {
     PREPARE_TREE()
     tree->to_hdf5("tree.h5");
     HDC* tree2 = from_hdf5_ptr("tree.h5");
-    
+
     delete tree2;
     CLEAN_TREE()
 }

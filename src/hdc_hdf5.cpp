@@ -233,7 +233,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
     hid_t h5_dspace_id = H5Dget_space(hdf5_dset_id);
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_dspace_id,
                                            ref_path,
-                                           "Error reading HDF5 Dataspace: " 
+                                           "Error reading HDF5 Dataspace: "
                                            << hdf5_dset_id);
 
     // check for empty case
@@ -244,8 +244,8 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
     }
     else
     {
-        hid_t h5_dtype_id  = H5Dget_type(hdf5_dset_id); 
-    
+        hid_t h5_dtype_id  = H5Dget_type(hdf5_dset_id);
+
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_dtype_id,
                                                ref_path,
                                                "Error reading HDF5 Datatype: "
@@ -267,7 +267,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
                                                ref_path,
                                                "Error reading HDF5 Dataset: "
                                                 << hdf5_dset_id);
-    
+
         HDC_CHECK_HDF5_ERROR_WITH_REF(H5Tclose(h5_dtype_id),
                                                ref_path,
                                                "Error closing HDF5 Datatype: "
@@ -327,11 +327,11 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                            h5_od->ref_path,
                                            "Error fetching HDF5 Object info: "
-                                           << " parent: " << hdf5_id 
+                                           << " parent: " << hdf5_id
                                            << " path:"    << hdf5_path) ;
 
-    std::string chld_ref_path = h5_od->ref_path  + 
-                                std::string("/") + 
+    std::string chld_ref_path = h5_od->ref_path  +
+                                std::string("/") +
                                 std::string(hdf5_path);
     switch (h5_info_buf.type)
     {
@@ -360,9 +360,9 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
                 HDC_CHECK_HDF5_ERROR_WITH_REF(h5_group_id,
                                                        h5_od->ref_path,
                                                        "Error opening HDF5 "
-                                                       << "Group: " 
+                                                       << "Group: "
                                                        << " parent: "
-                                                       << hdf5_id 
+                                                       << hdf5_id
                                                        << " path:"
                                                        << hdf5_path);
 
@@ -394,9 +394,9 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
             HDC_CHECK_HDF5_ERROR_WITH_REF(h5_dset_id,
                                                    h5_od->ref_path,
                                                    "Error opening HDF5 "
-                                                   << " Dataset: " 
+                                                   << " Dataset: "
                                                    << " parent: "
-                                                   << hdf5_id 
+                                                   << hdf5_id
                                                    << " path:"
                                                    << hdf5_path);
 
@@ -408,7 +408,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
             HDC_CHECK_HDF5_ERROR_WITH_REF(H5Dclose(h5_dset_id),
                                                    h5_od->ref_path,
                                                    "Error closing HDF5 "
-                                                   << " Dataset: " 
+                                                   << " Dataset: "
                                                    << h5_dset_id);
             break;
         }
@@ -424,7 +424,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
 void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& dest) {
     DEBUG_STDOUT("void hdf5_group_to_hdc("+to_string(hdf5_group_id)+","+ref_path+","+")");
     //dest.set_type(EMPTY_ID);
-    
+
     // get info, we need to get the obj addr for cycle tracking
     H5O_info_t h5_info_buf;
     herr_t h5_status = H5Oget_info(hdf5_group_id,
@@ -442,7 +442,7 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& d
     h5_od.ref_path = ref_path;
 
     H5_index_t h5_grp_index_type = H5_INDEX_NAME;
-    
+
     // check for creation order index using propertylist
 
     hid_t h5_gc_plist = H5Gget_create_plist(hdf5_group_id);
@@ -463,15 +463,15 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& d
                 h5_grp_index_type = H5_INDEX_CRT_ORDER;
             }
         }
-    
+
         HDC_CHECK_HDF5_ERROR_WITH_REF(H5Pclose(h5_gc_plist),
                                                ref_path,
                                                "Failed to close HDF5 "
                                                << "H5P_GROUP_CREATE "
-                                               << "property list: " 
+                                               << "property list: "
                                                << h5_gc_plist);
     }
-    
+
     // use H5Literate to traverse
     h5_status = H5Literate(hdf5_group_id,
                            h5_grp_index_type,

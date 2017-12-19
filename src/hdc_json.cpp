@@ -208,7 +208,7 @@ HDC* json_to_hdc(const Json::Value& root) {
 template<typename T>
 Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
     // TODO: Add Fortran column order
-    
+
     Json::Value root;
     andres::View<T> view(shape, shape+ndim, (T*)buffer);
     switch(ndim) {

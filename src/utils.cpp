@@ -1,27 +1,28 @@
 #include "utils.h"
 #include <tuple>
-//using namespace std;
+#include <boost/tokenizer.hpp>
+#include <boost/variant.hpp>
 
 /* ------------------------- UUID generation ----------------------------- */
 
 boost::mt19937 ran;
 
-void print_uuid(vector<char> uuid) {
+void print_uuid(std::vector<char> uuid) {
     for (int i = 0; i < 16; ++i)
-        cout << hex << setfill('0') << setw(2) << (uint)uuid[i] << " ";
-    cout << endl;
+        std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint)uuid[i] << " ";
+    std::cout << std::endl;
     printf("\n");
 }
 
-vector<char> generate_uuid() {
+std::vector<char> generate_uuid() {
     boost::uuids::random_generator gen(&ran);
     boost::uuids::uuid u = gen();
-    vector<char> v(u.size());
+    std::vector<char> v(u.size());
     copy(u.begin(), u.end(), v.begin());
     return v;
 }
 
-string generate_uuid_str() {
+std::string generate_uuid_str() {
     boost::uuids::random_generator gen(&ran);
     boost::uuids::uuid u = gen();
     const std::string str = boost::lexical_cast<std::string>(u);
@@ -30,26 +31,46 @@ string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-vector<string> split(string s) {
-    std::string delimiters("/[]");
-    std::vector<std::string> parts;
-    boost::trim_if(s, boost::is_any_of(delimiters));
-    boost::split(parts, s, boost::is_any_of(delimiters),boost::token_compress_on);
+
+std::vector<std::tuple<bool, std::string>> split_(std::string s) {
+    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    boost::char_separator<char> sep("/]", "[");
+    tokenizer tok{s, sep};
+    std::vector<std::tuple<bool,std::string>> parts;
+    bool is_index = false;
+    bool was_bracket = false;
+    for (const auto &t : tok) {
+        was_bracket = (t.operator[](0) == '[');
+        if (was_bracket) {
+            is_index = true;
+            continue;
+        }
+        parts.push_back(std::make_tuple(is_index,t));
+        if (is_index) is_index = false;
+    }
     return parts;
 }
 
-bool try_parse(const string &s, size_t& parsed) {
-    try {
-        parsed = boost::lexical_cast<size_t>(s);
-        return true;
+std::vector <boost::variant<size_t,std::string>> split(std::string s) {
+    std::vector<boost::variant<size_t,std::string>> parts;
+    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    boost::char_separator<char> sep("/]", "[");
+    tokenizer tok{s, sep};
+    bool is_index = false;
+    bool was_bracket = false;
+    for (const auto &t : tok) {
+        was_bracket = (t.operator[](0) == '[');
+        if (was_bracket) {
+            is_index = true;
+            continue;
+        }
+        boost::variant<size_t,std::string> var;
+        if (is_index) var = boost::lexical_cast<size_t>(t);
+        else var = t;
+        parts.push_back(var);
+        if (is_index) is_index = false;
     }
-    catch(...)
-    {
-        parsed = 0;
-        return false;
-    }
-    // Should never go here
-    return false;
+    return parts;
 }
 
 /* -------------------------  Types Definitions  ------------------------- */
@@ -83,7 +104,7 @@ size_t hdc_sizeof (TypeID type) {
         case BOOL_ID:
             return sizeof(bool);
         default:
-            cerr << "hdc_sizeof(): Wrong type " << type << endl;
+            std::cerr << "hdc_sizeof(): Wrong type " << type << std::endl;
             exit(-1);
     }
 };
@@ -109,12 +130,12 @@ bool hdc_is_primitive_type(TypeID type) {
         case BOOL_ID:
             return true;
         default:
-            cerr << "hdc_is_primitive_type(): Wrong type " << type << endl;
+            std::cerr << "hdc_is_primitive_type(): Wrong type " << type << std::endl;
             exit(-1);
     }
 }
 
-string hdc_type_str(TypeID _type) {
+std::string hdc_type_str(TypeID _type) {
     switch(_type) {
         case EMPTY_ID:
             return "null";
@@ -165,11 +186,11 @@ TypeID to_typeid(uint64_t a) {return UINT64_ID;};
 TypeID to_typeid(uint32_t a) {return UINT32_ID;};
 TypeID to_typeid(uint16_t a) {return UINT16_ID;};
 TypeID to_typeid(uint8_t a) {return UINT8_ID;};
-TypeID to_typeid(string a) {return STRING_ID;};
+TypeID to_typeid(std::string a) {return STRING_ID;};
 TypeID to_typeid(char* a) {return STRING_ID;};
 TypeID to_typeid(char const* a) {return STRING_ID;};
 TypeID to_typeid(bool a) {return BOOL_ID;};
-TypeID numpy_format_to_typeid(string format, size_t itemsize) {
+TypeID numpy_format_to_typeid(std::string format, size_t itemsize) {
     if (format == "i") {
         return INT32_ID;
     } else if (format == "d") {
@@ -194,7 +215,7 @@ TypeID numpy_format_to_typeid(string format, size_t itemsize) {
 /* -------------------------  Other stuff ----------------------------- */
 
 void hello__() {
-    cout << "Hello from c++" << endl;
+    std::cout << "Hello from c++" << std::endl;
     return;
 }
 /*
