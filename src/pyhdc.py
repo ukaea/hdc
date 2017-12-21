@@ -265,9 +265,6 @@ class HDC(object):
         """
         n = _hdc_childs_count(self.c_ptr)
         string_buffers = [ctypes.create_string_buffer(1000) for i in range(n)]
-        _keys = (ctypes.c_char_p * 4)(*map(ctypes.addressof, string_buffers))
+        _keys = (ctypes.c_char_p * len(string_buffers))(*map(ctypes.addressof, string_buffers))
         _hdc_keys_py(ctypes.cast(self.c_ptr, _HDC_T_P), _keys)
-        keys_lst = []
-        for i in range(n):
-            keys_lst.append(_keys[i].decode())
-        return keys_lst
+        return tuple((k.decode() for k in _keys))
