@@ -82,6 +82,7 @@ option(BUILD_OWN_HDF5 "Build own HDF5" OFF)
 option(DEBUG "Turns some debug output on or off." OFF)
 option(GOPTION "adds -g to compiler flags" ON)
 option(BUILD_DOC "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+option(BUILD_MDBM_PLUGIN "Enables MDBM storage plugin." ON)
 
 if (GOPTION)
     set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g" )

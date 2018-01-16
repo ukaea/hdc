@@ -16,7 +16,7 @@ contains
         allocate(subtree)
         allocate(data)
         allocate(node)
-        call hdc_init("mdbm")
+        call hdc_init()
         ! Create new HDC tree
         tree = hdc_new_empty()
 
@@ -30,7 +30,7 @@ contains
         subtree = hdc_get_child(tree,"aaa/bbb")
         ! Get node
         node = hdc_get_child(subtree,"ccc")
-        
+
         ! Ask whether child exists
         print *,"has_child: ", hdc_has_child(tree,"aaa/bbb/ccc")
 
@@ -38,17 +38,17 @@ contains
         call hdc_delete_child(tree,"aaa/eee")
 
         call hdc_dump(tree)
-        
+
         ! Prepare some data
         array = [7,20,3,4]
-        
+
         ! Add data to a single node
         data = hdc_new_empty()
         call hdc_set_data(data,array)
-        
+
         ! Add data to subtree
         call hdc_set_data(tree,"aaa/bbb/ccc",array)
-        
+
         ! Ask on some data details, use subtree to shorten path
         ndim2 = hdc_get_ndim(node)
         shape2 = hdc_get_shape(node)
@@ -67,5 +67,5 @@ contains
         ! test dump
         call hdc_dump(tree)
     end subroutine f_main
-    
+
 end program test_hdc_fortran
