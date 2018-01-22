@@ -7,6 +7,17 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import ctypes
 import six
+import numpy as np
+cimport numpy as cnp
+from cython cimport view
+from libc.stdint cimport uint32_t, int64_t, intptr_t, int8_t
+import numbers
+
+# NP_TYPES_MAP = {
+#     'float64': cnp.float64_t),
+#     'int32': cnp.int32_t,
+#     'int64': cnp.int64_t,
+# }
 
 
 cdef extern from "hdc.hpp":
@@ -20,6 +31,13 @@ cdef extern from "hdc.hpp":
         CppHDC* get_ptr(string path)
         bool has_child(string path)
         void set_string(string data)
+        string get_type_str()
+        intptr_t as_void_ptr()
+        int8_t get_ndim()
+        size_t* get_shape()
+        # typedef unsigned long Flags;
+        void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags)
+        # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
 
 
 cdef class HDC:
@@ -92,10 +110,69 @@ cdef class HDC:
     #         return res
 
     def set_data(self, data):
+
+        cdef cnp.float64_t [:] data_view
+        cdef double* data_ptr
+        cdef size_t shape[1]
+        cdef int ndim
+
+        if isinstance(data, numbers.Number):
+            # convert numbers to numpy
+            data = np.asarray(data)
+
         if isinstance(data, six.string_types):
             deref(self._thisptr).set_string(data.encode())
+        elif isinstance(data, np.ndarray):
+            # data = np.require(data, requirements=('C', 'O'))
+            # data.setflags(write=False)
+            # data = np.ascontiguousarray(data)
+
+            # Memoryview on a NumPy array
+            print("Memoryview on a NumPy array")
+            data_view = data
+            print("data_ptr")
+            # data_ptr = <double*> &data_view[0]
+            print("shape")
+            shape[0] = data_view.shape[0]
+            print("ndim")
+            ndim = data_view.ndim
+            deref(self._thisptr).set_data(ndim, shape, <double*> &data_view[0], 0)
+            print("set_data_c")
+            # deref(self._thisptr).set_data_c(ndim, shape, <void*> data_ptr, <size_t> 13)
+
         else:
             raise ValueError('{} type not supported'.format(type(data)))
 
     def dumps(self):
         return deref(self._thisptr).to_json_string().decode()
+
+    def get_type_str(self):
+        return deref(self._thisptr).get_type_str().decode()
+
+    def __array__(self):
+        type_str = self.get_type_str()
+        print('type_str: {}',format(type_str))
+        # if type_str == 'hdc':
+        #     return np.array(self.tolist())
+        # ctype = cnp.float64_t
+        # ctype = NP_TYPES_MAP.get(type_str, None)
+        # if ctype is None:
+        #     raise ValueError('Cannot convert {} to numpy array'.format(type_str))
+
+        cdef int ndim = deref(self._thisptr).get_ndim()
+        cdef size_t* shape = deref(self._thisptr).get_shape()
+
+        cdef void* data_ptr
+        data_ptr = <void*> deref(self._thisptr).as_void_ptr() 
+        cdef view.array my_array
+        my_array = <cnp.float64_t[:shape[0]]> data_ptr
+
+        # cdef view.array my_array = <cnp.float64_t[:shape[0]]> deref(self._thisptr).as_void_ptr() 
+
+        # numpy_array = np.asarray(my_array)
+
+        # return numpy_array
+
+    def asarray(self):
+        return self.__array__()
+

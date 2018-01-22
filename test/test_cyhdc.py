@@ -1,4 +1,5 @@
 from cyhdc import HDC
+import numpy as np
 
 empty = HDC()
 assert empty.dumps().strip() == 'null'
@@ -17,3 +18,9 @@ assert 'SUB' not in tree
 
 print(tree.dumps())
 print(tree['sub/sub'].dumps())
+
+print("-- set data")
+x = np.arange(2, dtype=np.float64)
+h = HDC()
+h.set_data(x)
+print(h.dumps())
