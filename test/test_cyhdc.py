@@ -39,3 +39,9 @@ print('-- modify x2[0] y[1] and dump HDC')
 x2[0] = - 1 / 2
 y[1] = - 1 / 4
 print(h.dumps())
+
+print("-- set data 2D")
+x2d = np.arange(30, dtype=np.float64).reshape((2, -1))
+h = HDC()
+h.set_data(x2d)
+print(h.dumps())

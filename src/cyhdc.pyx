@@ -117,26 +117,13 @@ cdef class HDC:
 
         print('set data cython')
 
-        cdef cnp.float64_t [:] data_view
-        cdef size_t shape[1]
-        cdef int ndim
-
         # require contiguous C-array
-        data = np.require(data, requirements=('C', 'O'))
-        data.setflags(write=True)
-        data = np.ascontiguousarray(data)
+        cdef cnp.ndarray data_view
+        data_view = np.require(data, requirements=('C', 'O'))
+        data_view.setflags(write=True)
+        data_view = np.ascontiguousarray(data_view)
 
-        # Memoryview on a NumPy array
-        print("Memoryview on a NumPy array")
-        data_view = data
-        shape[0] = data_view.shape[0]
-        print("shape: {}".format(shape))
-        ndim = data_view.ndim
-        print("ndim: {}".format(ndim))
-        deref(self._thisptr).set_data(ndim, shape, <double*> &data_view[0], 0)
-        # deref(self._thisptr).set_data(ndim, shape, <double*> &data.data, 0)
-        print("set_data_c")
-        # deref(self._thisptr).set_data_c(ndim, shape, <void*> data_ptr, <size_t> 13)
+        deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, 0)
 
     def set_data(self, data):
 
