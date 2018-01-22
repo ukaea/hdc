@@ -71,31 +71,29 @@ if(NOT CMAKE_FIND_ANACONDA_PYTHON_INCLUDED)
     
     if( NOT DEFINED ENV{CONDA_DEFAULT_ENV} )
       set( env_CONDA_DEFAULT_ENV "root" )
-      message( WARNING "Could not find anaconda environment setting; using default root" )
+      # message( WARNING "Could not find anaconda environment setting; using default root" )
     else()
       set( env_CONDA_DEFAULT_ENV $ENV{CONDA_DEFAULT_ENV} )
     endif()
 
     message( "Using anaconda ${env_CONDA_DEFAULT_ENV} environment" )
-    if( env_CONDA_DEFAULT_ENV STREQUAL "root" )
-      set(PYTHON_INCLUDE_DIR "${ANACONDA_PYTHON_DIR}/include/${_py_id}" CACHE INTERNAL "")
-      set(PYTHON_LIBRARY "${ANACONDA_PYTHON_DIR}/lib/lib${_py_id}${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    else()
-      set(PYTHON_INCLUDE_DIR "${ANACONDA_PYTHON_DIR}/envs/${env_CONDA_DEFAULT_ENV}/include/${_py_id}" CACHE INTERNAL "")
-      set(PYTHON_LIBRARY "${ANACONDA_PYTHON_DIR}/envs/${env_CONDA_DEFAULT_ENV}/lib/lib${_py_id}${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    endif()
-    
-    set(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
-    set(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
+
+    # find include path and Python dynamic library
+    exec_program("python -c \"import sysconfig; print\(sysconfig.get_path\('include'\)\)\"" OUTPUT_VARIABLE PYTHON_INCLUDE_DIR_)
+    exec_program("python -c \"from sysconfig import get_config_var; print\(\\\"%s/%s\\\" % \(get_config_var\(\\\"LIBDIR\\\"\), get_config_var\(\\\"INSTSONAME\\\"\)\)\)\"" OUTPUT_VARIABLE PYTHON_LIBRARY_)
+
+    set( PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR_}" CACHE INTERNAL "")
+    set( PYTHON_LIBRARY "${PYTHON_LIBRARY_}" CACHE INTERNAL "")
+
+    message( "PYTHON_INCLUDE_DIR = ${PYTHON_INCLUDE_DIR}")
+    message( "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
 
     set(FOUND_PYTHONLIBS TRUE)
+
   else()
     message( "Not found: anaconda root directory..." )    
     message( "Trying system python install..." )    
-    FindPythonLibs()
   endif()
   
-  message( "PYTHON_INCLUDE_DIR = ${PYTHON_INCLUDE_DIR}")
-  message( "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
 endif()
 
