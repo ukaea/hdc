@@ -19,6 +19,9 @@ import numbers
 #     'int64': cnp.int64_t,
 # }
 
+# TODO workaroud for https://github.com/cython/cython/issues/534
+ctypedef double* doubleptr
+
 
 cdef extern from "hdc.hpp":
 
@@ -38,6 +41,7 @@ cdef extern from "hdc.hpp":
         # typedef unsigned long Flags;
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags)
         # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
+        T as[T]()
 
 
 cdef class HDC:
@@ -109,36 +113,42 @@ cdef class HDC:
     #         res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
     #         return res
 
-    def set_data(self, data):
+    cdef _set_data(self, cnp.ndarray data):
+
+        print('set data cython')
 
         cdef cnp.float64_t [:] data_view
-        cdef double* data_ptr
         cdef size_t shape[1]
         cdef int ndim
 
-        if isinstance(data, numbers.Number):
-            # convert numbers to numpy
-            data = np.asarray(data)
+        # require contiguous C-array
+        data = np.require(data, requirements=('C', 'O'))
+        data.setflags(write=True)
+        data = np.ascontiguousarray(data)
+
+        # Memoryview on a NumPy array
+        print("Memoryview on a NumPy array")
+        data_view = data
+        shape[0] = data_view.shape[0]
+        print("shape: {}".format(shape))
+        ndim = data_view.ndim
+        print("ndim: {}".format(ndim))
+        deref(self._thisptr).set_data(ndim, shape, <double*> &data_view[0], 0)
+        # deref(self._thisptr).set_data(ndim, shape, <double*> &data.data, 0)
+        print("set_data_c")
+        # deref(self._thisptr).set_data_c(ndim, shape, <void*> data_ptr, <size_t> 13)
+
+    def set_data(self, data):
+
+        print('set data DEFAULT')
 
         if isinstance(data, six.string_types):
             deref(self._thisptr).set_string(data.encode())
         elif isinstance(data, np.ndarray):
-            # data = np.require(data, requirements=('C', 'O'))
-            # data.setflags(write=False)
-            # data = np.ascontiguousarray(data)
-
-            # Memoryview on a NumPy array
-            print("Memoryview on a NumPy array")
-            data_view = data
-            print("data_ptr")
-            # data_ptr = <double*> &data_view[0]
-            print("shape")
-            shape[0] = data_view.shape[0]
-            print("ndim")
-            ndim = data_view.ndim
-            deref(self._thisptr).set_data(ndim, shape, <double*> &data_view[0], 0)
-            print("set_data_c")
-            # deref(self._thisptr).set_data_c(ndim, shape, <void*> data_ptr, <size_t> 13)
+            self._set_data(data)
+        elif isinstance(data, numbers.Number):
+            # convert numbers to numpy
+            self._set_data(np.asarray(data))
 
         else:
             raise ValueError('{} type not supported'.format(type(data)))
@@ -162,16 +172,18 @@ cdef class HDC:
         cdef int ndim = deref(self._thisptr).get_ndim()
         cdef size_t* shape = deref(self._thisptr).get_shape()
 
-        cdef void* data_ptr
-        data_ptr = <void*> deref(self._thisptr).as_void_ptr() 
+        # cdef void* data_ptr
+        # data_ptr = <void*> deref(self._thisptr).as_void_ptr() 
+        cdef double* data_ptr
+        data_ptr = deref(self._thisptr).as[doubleptr]()
         cdef view.array my_array
         my_array = <cnp.float64_t[:shape[0]]> data_ptr
 
         # cdef view.array my_array = <cnp.float64_t[:shape[0]]> deref(self._thisptr).as_void_ptr() 
 
-        # numpy_array = np.asarray(my_array)
+        numpy_array = np.asarray(my_array[:])
 
-        # return numpy_array
+        return numpy_array
 
     def asarray(self):
         return self.__array__()
