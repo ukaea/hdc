@@ -150,30 +150,6 @@ cdef class HDC:
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
 
-    # def __array__(self):
-
-    #     type_str = self.get_type_str()
-    #     print('type_str: {}',format(type_str))
-    #     cdef int ndim = deref(self._thisptr).get_ndim()
-    #     cdef size_t* shape = deref(self._thisptr).get_shape()
-
-    #     cdef void* data_ptr
-    #     data_ptr = deref(self._thisptr).as[voidptr]()
-
-    #     if type_str == 'hdc':
-    #         return np.array(self.tolist())
-    #     ctype = C_TYPES_MAP.get(type_str, None)
-    #     if ctype is None:
-    #         raise ValueError('Cannot convert {} to numpy array'.format(type_str))
-    #     c_void_ptr = _hdc_as_voidptr(self._c_ptr)
-    #     cdata = ctypes.cast(c_void_ptr, ctype)
-    #     res = np.ctypeslib.as_array(cdata, self.get_shape())
-
-    #     return res
-
-    # def asarray(self):
-    #     return self.__array__()
-
     def __getbuffer__(self, Py_buffer *buffer, int flags):
 
         # TODO raise exception for non-buffer types
