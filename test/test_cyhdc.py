@@ -41,7 +41,24 @@ y[1] = - 1 / 4
 print(h.dumps())
 
 print("-- set data 2D")
-x2d = np.arange(30, dtype=np.float64).reshape((2, -1))
+x2d = np.arange(12, dtype=np.float64).reshape((2, -1))
+print(x2d)
 h = HDC()
 h.set_data(x2d)
 print(h.dumps())
+x2d2 = np.asarray(h)
+print(x2d2)
+
+print("-- set data 3D")
+x3d = np.arange(24, dtype=np.float64).reshape((4, 3, -1))
+print(x3d)
+h = HDC()
+h.set_data(x3d)
+print(h.dumps())
+x3d2 = np.asarray(h)
+print(x3d2)
+assert x3d2.shape == x3d.shape
+assert x3d2.size == x3d.size
+assert x3d2.dtype == x3d.dtype
+assert x3d2.strides == x3d.strides
+assert np.all(x3d2 == x3d)

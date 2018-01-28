@@ -12,6 +12,8 @@ cimport numpy as cnp
 from cython cimport view
 from libc.stdint cimport uint32_t, int64_t, intptr_t, int8_t
 import numbers
+from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
+
 
 # NP_TYPES_MAP = {
 #     'float64': cnp.float64_t),
@@ -21,6 +23,7 @@ import numbers
 
 # TODO workaroud for https://github.com/cython/cython/issues/534
 ctypedef double* doubleptr
+ctypedef void* voidptr
 
 
 cdef extern from "hdc.hpp":
@@ -123,6 +126,7 @@ cdef class HDC:
         data_view.setflags(write=True)
         data_view = np.ascontiguousarray(data_view)
 
+        # TODO support other types
         deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, 0)
 
     def set_data(self, data):
@@ -146,32 +150,76 @@ cdef class HDC:
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
 
-    def __array__(self):
-        type_str = self.get_type_str()
-        print('type_str: {}',format(type_str))
-        # if type_str == 'hdc':
-        #     return np.array(self.tolist())
-        # ctype = cnp.float64_t
-        # ctype = NP_TYPES_MAP.get(type_str, None)
-        # if ctype is None:
-        #     raise ValueError('Cannot convert {} to numpy array'.format(type_str))
+    # def __array__(self):
 
+    #     type_str = self.get_type_str()
+    #     print('type_str: {}',format(type_str))
+    #     cdef int ndim = deref(self._thisptr).get_ndim()
+    #     cdef size_t* shape = deref(self._thisptr).get_shape()
+
+    #     cdef void* data_ptr
+    #     data_ptr = deref(self._thisptr).as[voidptr]()
+
+    #     if type_str == 'hdc':
+    #         return np.array(self.tolist())
+    #     ctype = C_TYPES_MAP.get(type_str, None)
+    #     if ctype is None:
+    #         raise ValueError('Cannot convert {} to numpy array'.format(type_str))
+    #     c_void_ptr = _hdc_as_voidptr(self._c_ptr)
+    #     cdata = ctypes.cast(c_void_ptr, ctype)
+    #     res = np.ctypeslib.as_array(cdata, self.get_shape())
+
+    #     return res
+
+    # def asarray(self):
+    #     return self.__array__()
+
+    def __getbuffer__(self, Py_buffer *buffer, int flags):
+
+        # TODO realize contiguity
+        flags = PyBUF_ND & PyBUF_C_CONTIGUOUS
+        
+        # TODO generalize
+        cdef Py_ssize_t itemsize = sizeof(double)
+
+        cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
         cdef int ndim = deref(self._thisptr).get_ndim()
-        cdef size_t* shape = deref(self._thisptr).get_shape()
+        # cdef Py_ssize_t strides[3]
+        cdef Py_ssize_t size
+        cdef int i
 
-        # cdef void* data_ptr
-        # data_ptr = <void*> deref(self._thisptr).as_void_ptr() 
-        cdef double* data_ptr
-        data_ptr = deref(self._thisptr).as[doubleptr]()
-        cdef view.array my_array
-        my_array = <cnp.float64_t[:shape[0]]> data_ptr
+        # C-order
+        # strides[ndim - 1] = itemsize
+        size = shape[ndim]
+        for i in range(ndim - 2, -1, -1):
+            # strides[i] = itemsize * shape[i + 1]
+            size *= shape[i]
 
-        # cdef view.array my_array = <cnp.float64_t[:shape[0]]> deref(self._thisptr).as_void_ptr() 
+        # size = product(shape)
+        size = 1
+        for i in range(ndim):
+            size *= shape[i]
 
-        numpy_array = np.asarray(my_array[:])
+        buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
+        # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
+        buffer.format = 'd'
+        # This is for use internally by the exporting object
+        buffer.internal = NULL
+        # Item size in bytes of a single element
+        buffer.itemsize = itemsize
+        # product(shape) * itemsize
+        buffer.len = size * itemsize
+        buffer.ndim = ndim
+        # A new reference to the exporting object - for reference counting
+        buffer.obj = self
+        # An indicator of whether the buffer is read-only
+        buffer.readonly = 0
+        # the shape of the memory as an n-dimensional array
+        buffer.shape = shape
+        # strides can be NULL if contiguity is not explicitely requested
+        buffer.strides = NULL  # strides
+        # for pointer arrays only
+        buffer.suboffsets = NULL                
 
-        return numpy_array
-
-    def asarray(self):
-        return self.__array__()
-
+    def __releasebuffer__(self, Py_buffer *buffer):
+        pass
