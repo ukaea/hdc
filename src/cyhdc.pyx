@@ -176,6 +176,8 @@ cdef class HDC:
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
 
+        # TODO raise exception for non-buffer types
+
         # TODO realize contiguity
         assert flags & PyBUF_ND
         assert flags & PyBUF_C_CONTIGUOUS
