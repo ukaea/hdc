@@ -177,7 +177,8 @@ cdef class HDC:
     def __getbuffer__(self, Py_buffer *buffer, int flags):
 
         # TODO realize contiguity
-        flags = PyBUF_ND & PyBUF_C_CONTIGUOUS
+        assert flags & PyBUF_ND
+        assert flags & PyBUF_C_CONTIGUOUS
         
         # TODO generalize
         cdef Py_ssize_t itemsize = sizeof(double)
