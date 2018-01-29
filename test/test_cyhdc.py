@@ -1,5 +1,32 @@
+import pytest
 from cyhdc import HDC
 import numpy as np
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
+def test_types_1d(dtype):
+    x_in = np.arange(5, dtype=dtype)
+    h = HDC()
+    h.set_data(x_in)
+    x_out = np.asarray(h)
+    assert x_in.shape == x_out.shape
+    assert x_in.size == x_out.size
+    assert x_in.dtype == x_out.dtype
+    assert x_in.strides == x_out.strides
+    assert np.all(x_in == x_out)
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
+def test_types_2d(dtype):
+    x_in = np.arange(6, dtype=dtype).reshape((2, -1))
+    h = HDC()
+    h.set_data(x_in)
+    x_out = np.asarray(h)
+    assert x_in.shape == x_out.shape
+    assert x_in.size == x_out.size
+    assert x_in.dtype == x_out.dtype
+    assert x_in.strides == x_out.strides
+    assert np.all(x_in == x_out)
+
 
 def test_1():
 
@@ -18,8 +45,8 @@ def test_1():
     assert 'SUB' not in tree
     # assert tree['sub']['sub'] == tree['sub/sub']
 
-    print(tree.dumps())
-    print(tree['sub/sub'].dumps())
+
+def test_2():
 
     print("-- set data")
     x = np.arange(30, dtype=np.float64)
@@ -42,100 +69,6 @@ def test_1():
     y[1] = - 1 / 4
     print(h.dumps())
 
-    print("-- set data 2D")
-    x2d = np.arange(12, dtype=np.float64).reshape((2, -1))
-    print(x2d)
-    h = HDC()
-    h.set_data(x2d)
-    print(h.dumps())
-    x2d2 = np.asarray(h)
-    print(x2d2)
-
-    print("-- set data 3D")
-    x3d = np.arange(24, dtype=np.float64).reshape((4, 3, -1))
-    print(x3d)
-    h = HDC()
-    h.set_data(x3d)
-    print(h.dumps())
-    x3d2 = np.asarray(h)
-    print(x3d2)
-    assert x3d2.shape == x3d.shape
-    assert x3d2.size == x3d.size
-    assert x3d2.dtype == x3d.dtype
-    assert x3d2.strides == x3d.strides
-    assert np.all(x3d2 == x3d)
-
-
-    print("-- set data 2D float32")
-    x2d = np.arange(12, dtype=np.float32).reshape((2, -1))
-    print(x2d)
-    h = HDC()
-    h.set_data(x2d)
-    print(h.dumps())
-    x2d2 = np.asarray(h)
-    print(x2d2)
-    assert x2d.shape == x2d2.shape
-    assert x2d.size == x2d2.size
-    assert x2d.dtype == x2d2.dtype
-    assert x2d.strides == x2d2.strides
-    assert np.all(x2d == x2d2)
-
-    print("-- set data 2D int32")
-    x2d = np.arange(12, dtype=np.int32).reshape((2, -1))
-    print(x2d)
-    h = HDC()
-    h.set_data(x2d)
-    print(h.dumps())
-    x2d2 = np.asarray(h)
-    print(x2d2)
-    assert x2d.shape == x2d2.shape
-    assert x2d.size == x2d2.size
-    assert x2d.dtype == x2d2.dtype
-    assert x2d.strides == x2d2.strides
-    assert np.all(x2d == x2d2)
-
-    print("-- set data 2D int64")
-    x2d = np.arange(12, dtype=np.int64).reshape((2, -1))
-    print(x2d)
-    h = HDC()
-    h.set_data(x2d)
-    print(h.dumps())
-    x2d2 = np.asarray(h)
-    print(x2d2)
-    assert x2d.shape == x2d2.shape
-    assert x2d.size == x2d2.size
-    assert x2d.dtype == x2d2.dtype
-    assert x2d.strides == x2d2.strides
-    assert np.all(x2d == x2d2)
-
-    print("-- set data 2D int16")
-    x2d = np.arange(12, dtype=np.int16).reshape((2, -1))
-    print(x2d)
-    h = HDC()
-    h.set_data(x2d)
-    print(h.dumps())
-    x2d2 = np.asarray(h)
-    print(x2d2)
-    assert x2d.shape == x2d2.shape
-    assert x2d.size == x2d2.size
-    assert x2d.dtype == x2d2.dtype
-    assert x2d.strides == x2d2.strides
-    assert np.all(x2d == x2d2)
-
-    print("-- set data 2D float16")
-    x2d = np.arange(12, dtype=np.float16).reshape((2, -1))
-    print(x2d)
-    h = HDC()
-    h.set_data(x2d)
-    print(h.dumps())
-    x2d2 = np.asarray(h)
-    print(x2d2)
-    assert x2d.shape == x2d2.shape
-    assert x2d.size == x2d2.size
-    assert x2d.dtype == x2d2.dtype
-    assert x2d.strides == x2d2.strides
-    assert np.all(x2d == x2d2)
-
 
 if __name__ == '__main__':
-    test_1()
+    pytest.main()

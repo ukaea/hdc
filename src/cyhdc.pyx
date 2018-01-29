@@ -10,7 +10,8 @@ import six
 import numpy as np
 cimport numpy as cnp
 from cython cimport view
-from libc.stdint cimport uint32_t, int64_t, intptr_t, int8_t
+from libc.stdint cimport uint32_t, intptr_t
+from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 import numbers
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 
@@ -132,11 +133,13 @@ cdef class HDC:
 
         # TODO support other types
         if np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <short*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, 0)
+        elif np.issubdtype(data.dtype, np.int16):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, 0)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int32_t*> data_view.data, 0)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <long*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int64_t*> data_view.data, 0)
         elif np.issubdtype(data.dtype, np.float32):
             deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, 0)
         elif np.issubdtype(data.dtype, np.float64):
