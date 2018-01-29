@@ -4,8 +4,12 @@ import numpy as np
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
-def test_types_1d(dtype):
-    x_in = np.arange(5, dtype=dtype)
+@pytest.mark.parametrize("shape", [(1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
+                                   (1, 3, 4), (7, 2, 3)])
+def test_ndarray(dtype, shape):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
     h = HDC()
     h.set_data(x_in)
     x_out = np.asarray(h)
@@ -15,17 +19,20 @@ def test_types_1d(dtype):
     assert x_in.strides == x_out.strides
     assert np.all(x_in == x_out)
 
-@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
-def test_types_2d(dtype):
-    x_in = np.arange(6, dtype=dtype).reshape((2, -1))
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64])
+@pytest.mark.parametrize("shape", [(5, ), (6, 8), (7, 2, 3)])
+def test_zerocopy(dtype, shape):
+    """Test whether asarray is zero copy
+    """
+    x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
     h = HDC()
     h.set_data(x_in)
     x_out = np.asarray(h)
-    assert x_in.shape == x_out.shape
-    assert x_in.size == x_out.size
-    assert x_in.dtype == x_out.dtype
-    assert x_in.strides == x_out.strides
-    assert np.all(x_in == x_out)
+    x_out *= -1
+    x_out_2 = np.asarray(h)
+    assert np.all(x_in * -1 == x_out)
+    assert np.all(x_out_2 == x_out)
 
 
 def test_1():
@@ -44,30 +51,6 @@ def test_1():
     assert 'A' not in tree
     assert 'SUB' not in tree
     # assert tree['sub']['sub'] == tree['sub/sub']
-
-
-def test_2():
-
-    print("-- set data")
-    x = np.arange(30, dtype=np.float64)
-    h = HDC()
-    h.set_data(x)
-    print(h.dumps())
-
-    print("-- set data slice")
-    x2 = np.arange(2 * x.size, dtype=np.float64)
-    h = HDC()
-    h.set_data(x2[::2])
-    print(h.dumps())
-    print(h.dumps())
-
-    print("-- asarray")
-    y = np.asarray(h)
-    print(y)
-    print('-- modify x2[0] y[1] and dump HDC')
-    x2[0] = - 1 / 2
-    y[1] = - 1 / 4
-    print(h.dumps())
 
 
 if __name__ == '__main__':
