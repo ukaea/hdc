@@ -350,6 +350,11 @@ size_t HDC::get_size() {
 size_t HDC::get_type() {
     return header.type;
 }
+/** Returns the size of a single item in bytes */
+size_t HDC::get_itemsize()
+{
+    return hdc_sizeof(static_cast<TypeID>(header.type));
+}
 size_t HDC::get_flags()
 {
     return header.flags;
@@ -1081,6 +1086,49 @@ string HDC::get_type_str() {
             return "string";
         case BOOL_ID:
             return "bool";
+        case ERROR_ID:
+            return "error";
+        default:
+            return "unknown";
+    };
+    return "unknown";
+}
+
+char * HDC::get_pybuf_format() {
+    // TODO
+    // Ref https://docs.python.org/3/c-api/arg.html#arg-parsing
+    switch(header.type) {
+        case EMPTY_ID:
+            return "null";
+        case STRUCT_ID:
+            return "struct";
+        case LIST_ID:
+            return "list";
+        case INT8_ID:
+            return "b";
+        case INT16_ID:
+            return "h";
+        case INT32_ID:
+            return "i";
+        case INT64_ID:
+            return "l";
+        case UINT8_ID:
+            return "B";
+        case UINT16_ID:
+            return "H";
+        case UINT32_ID:
+            return "I";
+        case UINT64_ID:
+            return "L";
+        case FLOAT_ID:
+            return "f";
+        case DOUBLE_ID:
+            return "d";
+        case STRING_ID:
+            // TODO There are multiple options
+            return "s*";
+        case BOOL_ID:
+            return "p";
         case ERROR_ID:
             return "error";
         default:

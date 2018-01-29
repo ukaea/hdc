@@ -121,6 +121,8 @@ public:
     size_t get_size();
     /** Returns type of current node. */
     size_t get_type();
+    /** Returns the size of a single item in bytes */
+    size_t get_itemsize();
     /** Returns object flags (i.e. array ordering)*/
     size_t get_flags();
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
@@ -391,6 +393,8 @@ public:
     intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
     string get_type_str();
+    /** Returns Python buffer format string (https://docs.python.org/3/c-api/arg.html#arg-parsing) */
+    char * get_pybuf_format();
     /** Returns datashape desctiption string. */
     string get_datashape_str();
     /** Returns string representing data/node type. */

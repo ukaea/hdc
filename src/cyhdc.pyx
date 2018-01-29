@@ -31,6 +31,9 @@ cdef extern from "hdc.hpp":
     cdef cppclass CppHDC "HDC":
         CppHDC()
         string serialize()
+        size_t get_itemsize()
+        size_t get_datasize()
+        const char * get_pybuf_format()
         string to_json_string(int mode = 0)
         void set_child(string path, CppHDC* n)
         void add_child(string path, CppHDC* n)
@@ -122,12 +125,25 @@ cdef class HDC:
 
         # require contiguous C-array
         cdef cnp.ndarray data_view
-        data_view = np.require(data, requirements=('C', 'O'))
+        # data_view = np.require(data, requirements=('C', 'O'))
+        # TODO C-ordering vs Fortran
+        data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
-        data_view = np.ascontiguousarray(data_view)
 
         # TODO support other types
-        deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, 0)
+        if np.issubdtype(data.dtype, np.int8):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <short*> data_view.data, 0)
+        elif np.issubdtype(data.dtype, np.int32):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int*> data_view.data, 0)
+        elif np.issubdtype(data.dtype, np.int64):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <long*> data_view.data, 0)
+        elif np.issubdtype(data.dtype, np.float32):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, 0)
+        elif np.issubdtype(data.dtype, np.float64):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, 0)
+
+        else:
+            NotImplementedError('Type not supported')
 
     def set_data(self, data):
 
@@ -150,6 +166,11 @@ cdef class HDC:
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
 
+    def __str__(self):
+        # return string representation
+        # TODO
+        return "TODO"
+
     def __getbuffer__(self, Py_buffer *buffer, int flags):
 
         # TODO raise exception for non-buffer types
@@ -159,35 +180,22 @@ cdef class HDC:
         assert flags & PyBUF_C_CONTIGUOUS
         
         # TODO generalize
-        cdef Py_ssize_t itemsize = sizeof(double)
+        cdef Py_ssize_t itemsize = deref(self._thisptr).get_itemsize()
 
         cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
         cdef int ndim = deref(self._thisptr).get_ndim()
-        # cdef Py_ssize_t strides[3]
-        cdef Py_ssize_t size
-        cdef int i
-
-        # C-order
-        # strides[ndim - 1] = itemsize
-        size = shape[ndim]
-        for i in range(ndim - 2, -1, -1):
-            # strides[i] = itemsize * shape[i + 1]
-            size *= shape[i]
-
-        # size = product(shape)
-        size = 1
-        for i in range(ndim):
-            size *= shape[i]
 
         buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
-        buffer.format = 'd'
+        buffer.format = deref(self._thisptr).get_pybuf_format()  # 'd'
+        print("type = {}".format(str(deref(self._thisptr).get_type_str())))
+        print("format = {}".format(str(buffer.format)))
         # This is for use internally by the exporting object
         buffer.internal = NULL
         # Item size in bytes of a single element
         buffer.itemsize = itemsize
         # product(shape) * itemsize
-        buffer.len = size * itemsize
+        buffer.len = deref(self._thisptr).get_datasize()
         buffer.ndim = ndim
         # A new reference to the exporting object - for reference counting
         buffer.obj = self
