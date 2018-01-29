@@ -13,6 +13,7 @@ from cython cimport view
 from libc.stdint cimport uint32_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 import numbers
+import collections
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 
 
@@ -37,7 +38,9 @@ cdef extern from "hdc.hpp":
         const char * get_pybuf_format()
         string to_json_string(int mode = 0)
         void set_child(string path, CppHDC* n)
+        void append_slice(CppHDC* h)
         void add_child(string path, CppHDC* n)
+        CppHDC* get_slice_ptr(size_t i)
         CppHDC* get_ptr(string path)
         bool has_child(string path)
         void set_string(string data)
@@ -67,17 +70,6 @@ cdef class HDC:
             # assert NotImplementedError()
             self._thisptr = new CppHDC()
             self.set_data(data)
-            # self._c_ptr = _hdc_new_empty()
-            # if isinstance(data, collections.Mapping):
-            #     # dict-like data
-            #     for key, value in data.items():
-            #         self[key] = self.__class__(value)
-            # elif isinstance(data, collections.Sequence) and not isinstance(data, six.string_types):
-            #     # list, tuple etc., not string
-            #     for value in data:
-            #         self.append(self.__class__(value))
-            # else:
-            #     self.set_data(data)
 
     def __contains__(self, key):
         if isinstance(key, six.string_types):
@@ -109,10 +101,13 @@ cdef class HDC:
             res._thisptr = deref(self._thisptr).get_ptr(ckey)
             # deref(self._thisptr).get_ptr(ckey)
             return res
-    #     else:
-    #         ckey = ctypes.c_size_t(key)
-    #         res = self.from_c_ptr(_hdc_get_slice(self._c_ptr, ckey))
-    #         return res
+        elif isinstance(key, numbers.Integral):
+            res = <HDC> self.__class__()
+            # TODO move to constructor
+            res._thisptr = deref(self._thisptr).get_slice_ptr(<size_t> key)
+            return res
+        else:
+            raise ValueError("key must be either string or integer")
 
     cdef _set_data(self, cnp.ndarray data):
 
@@ -149,9 +144,20 @@ cdef class HDC:
         elif isinstance(data, numbers.Number):
             # convert numbers to numpy
             self._set_data(np.asarray(data))
-
+        elif isinstance(data, collections.Mapping):
+            # dict-like data
+            for key, value in data.items():
+                self[key] = self.__class__(value)
+        elif isinstance(data, collections.Sequence):
+            # list, tuple etc., not string
+            for value in data:
+                self.append(self.__class__(value))
         else:
             raise ValueError('{} type not supported'.format(type(data)))
+
+    def append(self, data):
+        new_hdc = HDC(data)
+        deref(self._thisptr).append_slice(new_hdc._thisptr)
 
     def dumps(self):
         return deref(self._thisptr).to_json_string().decode()

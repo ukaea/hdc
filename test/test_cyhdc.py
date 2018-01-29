@@ -1,6 +1,7 @@
 import pytest
 from cyhdc import HDC
 import numpy as np
+import json
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
@@ -33,6 +34,25 @@ def test_zerocopy(dtype, shape):
     x_out_2 = np.asarray(h)
     assert np.all(x_in * -1 == x_out)
     assert np.all(x_out_2 == x_out)
+
+
+def test_list_type():
+    h = HDC()
+    test_list = ["jedna", "dva"]
+    h.append(test_list[0])
+    h.append(test_list[1])
+    assert test_list == json.loads(h.dumps())
+
+    test_list = ["jedna", "dva"]
+    h = HDC(test_list)
+    assert test_list == json.loads(h.dumps())
+
+
+def test_map_type():
+    h = HDC()
+    test_map = {"jedna": "one", "dva": "two"}
+    h = HDC(test_map)
+    assert test_map == json.loads(h.dumps())
 
 
 def test_1():
