@@ -63,12 +63,6 @@ cdef class HDC:
         elif isinstance(data, self.__class__):
             #  copy constructor
             self._thisptr = (<HDC> data)._thisptr
-        # elif isinstance(data, CppHDC):
-        #     #  copy constructor
-        #     self._thisptr = <CppHDC> data
-        # elif isinstance(data, ctypes.POINTER):
-        #     # from C-pointer
-        #     assert NotImplementedError()
         else:
             # assert NotImplementedError()
             self._thisptr = new CppHDC()
@@ -122,8 +116,6 @@ cdef class HDC:
 
     cdef _set_data(self, cnp.ndarray data):
 
-        print('set data cython')
-
         # require contiguous C-array
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
@@ -149,8 +141,6 @@ cdef class HDC:
             NotImplementedError('Type not supported')
 
     def set_data(self, data):
-
-        print('set data DEFAULT')
 
         if isinstance(data, six.string_types):
             deref(self._thisptr).set_string(data.encode())
@@ -191,8 +181,6 @@ cdef class HDC:
         buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
         buffer.format = deref(self._thisptr).get_pybuf_format()  # 'd'
-        print("type = {}".format(str(deref(self._thisptr).get_type_str())))
-        print("format = {}".format(str(buffer.format)))
         # This is for use internally by the exporting object
         buffer.internal = NULL
         # Item size in bytes of a single element
