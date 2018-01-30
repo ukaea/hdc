@@ -5,17 +5,16 @@
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp cimport bool
-import ctypes
-import six
-import numpy as np
 cimport numpy as cnp
 from cython cimport view
 from libc.stdint cimport uint32_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
-import numbers
-import collections
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 
+import numbers
+import collections
+import six
+import numpy as np
 
 # NP_TYPES_MAP = {
 #     'float64': cnp.float64_t),
