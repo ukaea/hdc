@@ -111,11 +111,15 @@ cdef class HDC:
 
     cdef _set_data(self, cnp.ndarray data):
 
-        # require contiguous C-array
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
-        # TODO C-ordering vs Fortran
-        data_view = np.ascontiguousarray(data)
+        if data.ndim == 0:
+            # ascontiguousarray forces ndim >0= 1
+            data_view = data
+        else:
+            # require contiguous C-array
+            # TODO C-ordering vs Fortran
+            data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
 
         # TODO support other types
