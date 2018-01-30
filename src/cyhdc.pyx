@@ -27,6 +27,24 @@ from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 ctypedef double* doubleptr
 ctypedef void* voidptr
 
+cdef extern from "types.h":
+    cdef size_t HDC_EMPTY
+    cdef size_t HDC_STRUCT
+    cdef size_t HDC_LIST
+    cdef size_t HDC_INT8
+    cdef size_t HDC_INT16
+    cdef size_t HDC_INT32
+    cdef size_t HDC_INT64
+    cdef size_t HDC_UINT8
+    cdef size_t HDC_UINT16
+    cdef size_t HDC_UINT32
+    cdef size_t HDC_UINT64
+    cdef size_t HDC_FLOAT
+    cdef size_t HDC_DOUBLE
+    cdef size_t HDC_STRING
+    cdef size_t HDC_BOOL
+    cdef size_t HDC_ERROR
+
 
 cdef extern from "hdc.hpp":
 
@@ -44,6 +62,7 @@ cdef extern from "hdc.hpp":
         CppHDC* get_ptr(string path)
         bool has_child(string path)
         void set_string(string data)
+        size_t get_type()
         string get_type_str()
         intptr_t as_void_ptr()
         int8_t get_ndim()
@@ -52,6 +71,7 @@ cdef extern from "hdc.hpp":
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags)
         # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
         T as[T]()
+        string as_string()
 
 
 cdef class HDC:
@@ -169,10 +189,29 @@ cdef class HDC:
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
 
+    cdef is_array(self):
+        type_id = deref(self._thisptr).get_type()
+        # check whether type id is not in non-array types
+        return  type_id not in (HDC_EMPTY,
+                                HDC_STRUCT,
+                                HDC_LIST,
+                                HDC_STRING,
+                                HDC_BOOL,
+                                HDC_ERROR)
+
     def __str__(self):
         # return string representation
         # TODO
-        return "TODO"
+        if deref(self._thisptr).get_type() == HDC_STRING:
+            return deref(self._thisptr).as_string().decode()
+
+        if self.is_array():
+            return(str(np.asarray(self)))
+
+        else:
+            # fall back to repr
+            return repr(self)
+            # raise NotImplementedError('HDC type {} not implemented'.format(self.get_type_str()))
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
 

@@ -55,6 +55,13 @@ def test_map_type():
     assert test_map == json.loads(h.dumps())
 
 
+def test_str_type():
+    h = HDC()
+    value = "test string"
+    h = HDC(value)
+    assert value == str(h)
+
+
 def test_1():
 
     empty = HDC()
