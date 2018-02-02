@@ -47,7 +47,7 @@ TypeID to_typeid(std::string a);
 TypeID to_typeid(char* a);
 TypeID to_typeid(bool a);
 TypeID numpy_format_to_typeid(std::string format, size_t itemsize);
-
+TypeID to_typeid(const std::type_info& t);
 /* -------------------------  Other stuff ----------------------------- */
 
 void hello__();

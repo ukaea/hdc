@@ -116,6 +116,7 @@ public:
     /** Cleans up global_storage  -- mainly due to C and Fortran */
     static void destroy();
     /** Returns the available space in buffer (in bytes) */
+
     size_t get_datasize();
     /** Returns the the size of object buffer (= header+data, in bytes) */
     size_t get_size();
@@ -294,9 +295,7 @@ public:
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
     bool has_child(string path);
-
     HDC* json_to_hdc(Json::Value* root);
-
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -433,6 +432,11 @@ public:
 #ifdef _USE_HDF5
 #include "hdc_hdf5.h"
 #endif
+
+#ifdef _USE_UDA
+#include "hdc_uda.h"
+#endif
+
 
 // "static contructor" from void* HDC
 HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);

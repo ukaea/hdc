@@ -70,5 +70,8 @@ int main(int argc, const char *argv[]) {
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
+
+    HDC t = from_uda("TESTPLUGIN::test0()","");
+
     return 0;
 }

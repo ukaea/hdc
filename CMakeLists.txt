@@ -57,7 +57,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -78,6 +78,7 @@ option(BUILD_TESTS "Build and install Google tests" ON)
 option(BUILD_EXAMPLES "Build and install examples" ON)
 option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." ON)
 option(ENABLE_HDF5 "Enable HDF5 support" ON)
+option(ENABLE_UDA "Enable UDA support" OFF)
 option(BUILD_OWN_HDF5 "Build own HDF5" OFF)
 option(DEBUG "Turns some debug output on or off." OFF)
 option(GOPTION "adds -g to compiler flags" ON)
@@ -154,6 +155,19 @@ if(ENABLE_HDF5)
     endif() # BUILD_OWN_HDF5
     add_definitions(-D_USE_HDF5=1)
 endif() # ENABLE_HDF5
+
+if(ENABLE_UDA)
+    find_path(UDA_INCLUDE_DIR
+        NAMES uda.h
+        HINTS "/usr/include" "/usr/local/include" "/home/david/sw/uda-git/install/include/uda"
+    )
+    find_library(UDA_CPP_LIB
+        NAMES uda_cpp
+        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda-git/install/lib/"
+    )
+    list(APPEND UDA_LIBRARIES ${UDA_CPP_LIB})
+    add_definitions(-D_USE_UDA=1)
+endif() # ENABLE_UDA
 
 if(DEBUG)
     add_definitions(-DDEBUG)

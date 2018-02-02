@@ -2,6 +2,7 @@
 #include <tuple>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
+#include <typeinfo>
 
 /* ------------------------- UUID generation ----------------------------- */
 
@@ -211,6 +212,12 @@ TypeID numpy_format_to_typeid(std::string format, size_t itemsize) {
     return ERROR_ID;
 };
 
+
+TypeID to_typeid(const std::type_info& t) {
+    const std::string type_str = t.name();
+    std::cout << type_str << std::endl;
+    return ERROR_ID;
+}
 
 /* -------------------------  Other stuff ----------------------------- */
 
