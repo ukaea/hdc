@@ -210,7 +210,8 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
     // TODO: Add Fortran column order
 
     Json::Value root;
-    andres::View<T> view(shape, shape+ndim, (T*)buffer);
+    andres::View<T> view(shape, shape+ndim, (T*)buffer,andres::FirstMajorOrder);
+    //TODO add fortran - C order switch
     switch(ndim) {
         case(0):
         {
