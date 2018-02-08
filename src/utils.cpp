@@ -215,7 +215,32 @@ TypeID numpy_format_to_typeid(std::string format, size_t itemsize) {
 
 TypeID to_typeid(const std::type_info& t) {
     const std::string type_str = t.name();
-    std::cout << type_str << std::endl;
+    if (t == typeid(std::string) || t == typeid(char) || t == typeid(char*)) {
+        return STRING_ID;
+    } else if (t == typeid(double)) {
+        return DOUBLE_ID;
+    } else if (t == typeid(int)) {
+        return INT64_ID;
+    } else if (t == typeid(short)) {
+        return INT64_ID;
+    } else {
+        return ERROR_ID;
+    }
+}
+
+TypeID uda_str_to_typeid(std::string& str) {
+    if (str == "STRING") {
+        return STRING_ID;
+    } else if (str =="STRING *") {
+        std::cerr << "Warning: STRING * type is not supported!\n";
+        return LIST_ID;
+    } else if (str =="int") {
+        return INT64_ID;
+    } else if (str =="short") {
+        return INT64_ID;
+    } else if (str =="double") {
+        return DOUBLE_ID;
+    }
     return ERROR_ID;
 }
 

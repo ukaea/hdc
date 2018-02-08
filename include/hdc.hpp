@@ -243,6 +243,8 @@ public:
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
     void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
+    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type);
+    void set_data_c(string path, int _ndim, size_t* _shape, const void* _data, size_t _type);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -252,7 +254,19 @@ public:
         header.buffer_size = header.data_size + sizeof(header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(header_t));
-        memcpy(buffer+sizeof(header_t),&data,sizeof(T));
+        memcpy(buffer+sizeof(header_t),&data,header.data_size);
+        storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
+    }
+    /** Sets scalar data to given node - UDA version. */
+    void set_data(const unsigned char* data, size_t _type) {
+        memset(&header,0,sizeof(header_t));
+        header.type = _type;
+        header.data_size = hdc_sizeof(static_cast<TypeID>(_type));
+        header.buffer_size = header.data_size + sizeof(header_t);
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),&data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
@@ -265,6 +279,13 @@ public:
         get(path).set_data(data);
     }
 
+    void set_data(string path, const unsigned char* data, size_t _type) {
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h);
+        }
+        get(path).set_data(data,_type);
+    }
     /** Returns number of dimensions of current node. */
     int get_ndim();
     /** Returns shape of current node. */
@@ -408,6 +429,7 @@ public:
     bip::managed_external_buffer get_segment();
     map_t* get_children_ptr();
     void delete_data();
+    static HDC from_uda(const std::string& signalName, const std::string& dataSource);
 #ifdef _USE_HDF5
     void to_hdf5(std::string filename, std::string dataset_name = "data");
     void write_node(H5::H5File* file, std::string path);
@@ -428,14 +450,10 @@ public:
   }
 };
 
-
 #ifdef _USE_HDF5
 #include "hdc_hdf5.h"
 #endif
 
-#ifdef _USE_UDA
-#include "hdc_uda.h"
-#endif
 
 
 // "static contructor" from void* HDC

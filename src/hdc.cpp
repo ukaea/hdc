@@ -954,6 +954,43 @@ void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t
     get(path).set_data_c(_ndim, _shape, _data, _type);
 }
 
+void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type) {
+    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_type_str(static_cast<TypeID>(_type)).c_str());)
+    auto buffer = storage->get(uuid);
+    memcpy(&header,buffer,sizeof(header_t));
+    // Start with determining of the buffer size
+    size_t data_size = hdc_sizeof(static_cast<TypeID>(_type));
+    for (int i=0;i<_ndim;i++) data_size *= _shape[i];
+    size_t buffer_size = data_size + sizeof(header_t);
+    if (header.buffer_size == buffer_size) {
+            storage->lock(uuid);
+            memcpy(buffer+sizeof(header_t),_data,data_size);
+            storage->unlock(uuid);
+            return;
+    } else {
+        header.buffer_size = buffer_size;
+        header.data_size = data_size;
+        memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+        for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
+        header.type = static_cast<TypeID>(_type);
+        header.ndim = _ndim;
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),_data,header.data_size);
+        storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
+        return;
+    }
+}
+
+void HDC::set_data_c(string path, int _ndim, size_t* _shape, const void* _data, size_t _type) {
+    if(!has_child(path)) {
+        HDC h;
+        add_child(path, h); // TODO: add constructor for this!!
+    }
+    get(path).set_data_c(_ndim, _shape, _data, _type);
+}
+
 void HDC::insert_slice(size_t i, HDC* h) {
     insert_slice(i,*h);
     return;
