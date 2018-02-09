@@ -71,104 +71,6 @@ HDC udaData2HDC(uda::Data* data, int rank) {
     return h;
 }
 
-HDC udaData2HDC(uda::Scalar& data, int rank) {
-    std::cout << "--- udaData2HDC(Scalar&)\n";
-
-    std::cout << "data.size       : " << data.size() << std::endl;
-    std::cout << "data.type       : " << data.type().name() << std::endl;
-    std::cout << "data.byte_length: " << data.byte_length() << std::endl;
-    HDC h;
-    if (data.type().name() == typeid(char).name() || data.type().name() == typeid(char*).name()) {
-        if (rank <= 1) {
-            h.set_string(std::string(data.as<char*>()));
-        } else if (rank == 2) {
-//             auto array = dynamic_cast<uda::Array*>(&data);
-//             auto dims = array.dims();
-//             std::cout << "array.size: " << dims[0].size() << " " << dims[1].size() << std::endl;
-//             std::vector<char> vec = array.as<char>();
-//             for (int i=0;i<dims[1].size();i++) {
-//                 std::cout << "Setting string "<<"["+std::to_string(i)+"]\n";
-//                 h.set_string("["+std::to_string(i)+"]",std::string(vec.data() + i * dims[0].size(), strlen(vec.data() + i * dims[0].size())));
-//             }
-            std::cerr << "TBD\n";
-            exit(-1);
-        } else {
-            std::cerr << "UDA string rank too high, not implemented yet\n";
-            exit(-1);
-        }
-    } else if (data.type().name() == typeid(std::string).name()) {
-        std::cerr << "string!!!\n";exit(0);
-        /*auto array = dynamic_cast<uda::Array*>(&data);
-        std::vector<uda::Dim> dims = array.dims();
-        std::vector<std::string> strings = array.as<std::string>();
-        for (int i=0;i<strings.size();i++) {
-            std::cout << "Setting string "<<"["+std::to_string(i)+"]\n";
-            h.set_string("["+std::to_string(i)+"]",strings[i]);
-        }*/
-//             TODO: move to char* case??
-    } else if (data.type().name() == typeid(uda::Scalar).name()) {
-        std::cout << "scalar\n";
-        exit(0);
-    } else if (data.type().name() == typeid(uda::Vector).name()) {
-        std::cout << "vector\n";
-        exit(0);
-    } else if (data.type().name() == typeid(uda::Array).name()) {
-        std::cout << "array\n";
-        exit(0);
-    } else {
-        std::cerr << "Type not supported yet\n";
-        exit(0);
-    }
-    return h;
-}
-
-HDC udaData2HDC(uda::Vector& data, int rank) {
-    std::cout << "--- udaData2HDC(Vector&)\n";
-
-    std::cout << "data.size       : " << data.size() << std::endl;
-    std::cout << "data.type       : " << data.type().name() << std::endl;
-    std::cout << "data.byte_length: " << data.byte_length() << std::endl;
-    HDC h;
-    if (data.type().name() == typeid(char).name() || data.type().name() == typeid(char*).name()) {
-        if (rank <= 1) {
-            std::cerr << "should not be here\n";exit(0);
-        } else if (rank == 2) {
-            auto vec = data.as<char*>();
-            for (int i=0;i<vec.size();i++) {
-                h.set_string("["+to_string(i)+"]",vec[i]);
-            }
-//             auto array = dynamic_cast<uda::Array*>(&data);
-//             auto dims = array.dims();
-//             std::cout << "array.size: " << dims[0].size() << " " << dims[1].size() << std::endl;
-//             std::vector<char> vec = array.as<char>();
-//             for (int i=0;i<dims[1].size();i++) {
-//                 std::cout << "Setting string "<<"["+std::to_string(i)+"]\n";
-//                 h.set_string("["+std::to_string(i)+"]",std::string(vec.data() + i * dims[0].size(), strlen(vec.data() + i * dims[0].size())));
-//             }
-            std::cerr << "TBD\n";
-            exit(-1);
-        } else {
-            std::cerr << "UDA string rank too high, not implemented yet\n";
-            exit(-1);
-        }
-    } else if (data.type().name() == typeid(std::string).name()) {
-        std::cerr << "string!!!\n";exit(0);
-        /*auto array = dynamic_cast<uda::Array*>(&data);
-        std::vector<uda::Dim> dims = array.dims();
-        std::vector<std::string> strings = array.as<std::string>();
-        for (int i=0;i<strings.size();i++) {
-            std::cout << "Setting string "<<"["+std::to_string(i)+"]\n";
-            h.set_string("["+std::to_string(i)+"]",strings[i]);
-        }*/
-//             TODO: move to char* case??
-    } else {
-        std::cerr << "Type not supported yet\n";
-        exit(0);
-    }
-    return h;
-}
-
-
 HDC udaTreeNode2HDC(uda::TreeNode& tree) {
     std::cout << "--- udaTreeNode2HDC\n";
     HDC h;
@@ -373,8 +275,9 @@ HDC HDC::from_uda(const std::string& signalName, const std::string& dataSource) 
     try {
         const uda::Result& result = client.get(signalName,dataSource);
         return udaResult2HDC(result);
-    } catch (uda::UDAException) {
+    } catch (uda::UDAException &exc) {
         std::cerr << "Error fetching uda result\n" << "signalName:     " << signalName << "\ndataSource:     " << dataSource << std::endl;
+        std::cerr << exc.what();
         return HDC();
     }
 }

@@ -159,11 +159,11 @@ endif() # ENABLE_HDF5
 if(ENABLE_UDA)
     find_path(UDA_INCLUDE_DIR
         NAMES uda.h
-        HINTS "/usr/include" "/usr/local/include" "/home/david/sw/uda-git/install/include/uda"
+        HINTS "/usr/include" "/usr/local/include" "/home/david/sw/uda/install/include/uda"
     )
     find_library(UDA_CPP_LIB
         NAMES uda_cpp
-        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda-git/install/lib/"
+        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda/install/lib/"
     )
     list(APPEND UDA_LIBRARIES ${UDA_CPP_LIB})
     add_definitions(-D_USE_UDA=1)
