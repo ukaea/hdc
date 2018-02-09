@@ -173,25 +173,38 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
     std::cout << "--- udaTreeNode2HDC\n";
     HDC h;
     auto n_children = tree.numChildren();
+    std::cout << "tree.numChildren   : " << n_children << std::endl;
+    std::cout << "tree.printNode   : " << std::endl;
+    tree.printNode();
+    std::cout << "tree.name   : " << tree.name() << std::endl;
     if (n_children) {
-        for (auto& ch : tree.children()) {
-            std::cout << ">> Adding child: " << tree.name() << " " << tree.name().length() << std::endl;
+        if (n_children == 1) {
+            auto children = tree.children();
+            auto& ch = children[0];
+            std::cout << ">> Adding single child: " << ch.name() << " " << ch.name().length() << std::endl;
             HDC n = udaTreeNode2HDC(ch);
-            if (tree.name().length()) {
+            if (ch.name().length()) {
                 h.add_child(ch.name(),n);
             } else {
-                if (tree.numChildren() > 1)
+                h = n;
+            }
+        } else {
+            // This should be list
+            for (auto& ch : tree.children()) {
+                std::cout << ">> Adding multiple childs: " << ch.name() << " " << ch.name().length() << std::endl;
+                HDC n = udaTreeNode2HDC(ch);
+                if (ch.name().length()) {
+                    std::cout << "/*-+/*-+/*-+ 1\n";
+                    HDC nn;
+                    nn.add_child(ch.name(),n);
+                    h.append_slice(nn);
+                } else {
+                    std::cout << "/*-+/*-+/*-+ 2\n";
                     h.append_slice(n);
-                else
-                    h = n;
+                }
             }
         }
     } else {
-        std::cout << "tree.numChildren   : " << n_children << std::endl;
-        std::cout << "tree.printNode   : " << std::endl;
-        tree.printNode();
-        std::cout << "tree.name   : " << tree.name() << std::endl;
-
         auto a_shape = tree.atomicShape();
         auto a_rank = tree.atomicRank();
         auto a_names = tree.atomicNames();
