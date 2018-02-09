@@ -43,6 +43,7 @@ TypeID to_typeid(uint64_t a);
 TypeID to_typeid(uint32_t a);
 TypeID to_typeid(uint16_t a);
 TypeID to_typeid(uint8_t a);
+TypeID to_typeid(char a);
 TypeID to_typeid(std::string a);
 TypeID to_typeid(char* a);
 TypeID to_typeid(bool a);

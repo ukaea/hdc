@@ -183,6 +183,7 @@ TypeID to_typeid(int64_t a) {return INT64_ID;};
 TypeID to_typeid(int32_t a) {return INT32_ID;};
 TypeID to_typeid(int16_t a) {return INT16_ID;};
 TypeID to_typeid(int8_t a) {return INT8_ID;};
+TypeID to_typeid(char a) {return INT8_ID;};
 TypeID to_typeid(uint64_t a) {return UINT64_ID;};
 TypeID to_typeid(uint32_t a) {return UINT32_ID;};
 TypeID to_typeid(uint16_t a) {return UINT16_ID;};

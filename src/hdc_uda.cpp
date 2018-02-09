@@ -41,29 +41,78 @@ HDC udaData2HDC(uda::Data* data, int rank) {
         std::cout << "here\n";
         exit(0);
     } else if (type.name() == typeid(int).name()) {
-        if (rank <= 1) {
+        if (rank == 0) {
             uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
             std::cout << "Type " << data->type().name() << "\n";
             h.set_data(value->as<int>());
         } else {
-            std::cerr << "Unsupported rank\n";
+//           TODO: swapping conditions could posibly enable some code reuse
+            uda::Array* value = dynamic_cast<uda::Array*>(data);
+            auto shape = value->shape();
+            auto ndim = shape.size();
+            size_t myshape[ndim];
+            for (int i=0;i<ndim;i++) myshape[i] = shape[i];
+            auto data = value->as<short>();
+            h.set_data(ndim,myshape,&data[0]);
         }
     } else if (type.name() == typeid(short).name()) {
-        if (rank <= 1) {
+        if (rank == 0) {
             uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
             std::cout << "Type " << data->type().name() << "\n";
             h.set_data(value->as<short>());
         } else {
-            std::cerr << "Unsupported rank\n";
+            uda::Array* value = dynamic_cast<uda::Array*>(data);
+            auto shape = value->shape();
+            auto ndim = shape.size();
+            size_t myshape[ndim];
+            for (int i=0;i<ndim;i++) myshape[i] = shape[i];
+            auto data = value->as<short>();
+            h.set_data(ndim,myshape,&data[0]);
         }
     } else if (type.name() == typeid(double).name()) {
-        if (rank <= 1) {
+        if (rank == 0) {
             uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
             std::cout << "Type " << data->type().name() << "\n";
             h.set_data(value->as<double>());
         } else {
+            uda::Array* value = dynamic_cast<uda::Array*>(data);
+            auto shape = value->shape();
+            auto ndim = shape.size();
+            size_t myshape[ndim];
+            for (int i=0;i<ndim;i++) myshape[i] = shape[i];
+            auto data = value->as<double>();
+            h.set_data(ndim,myshape,&data[0]);
+        }
+    } else if (type.name() == typeid(float).name()) {
+        if (rank == 0) {
+            uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
+            std::cout << "Type " << data->type().name() << "\n";
+            h.set_data(value->as<float>());
+        } else {
+            uda::Array* value = dynamic_cast<uda::Array*>(data);
+            auto shape = value->shape();
+            auto ndim = shape.size();
+            size_t myshape[ndim];
+            for (int i=0;i<ndim;i++) myshape[i] = shape[i];
+            auto data = value->as<float>();
+            h.set_data(ndim,myshape,&data[0]);
+        }
+    } else if (type.name() == typeid(char).name()) {
+        if (rank == 0) {
+            uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
+            std::cout << "Type " << data->type().name() << "\n";
+            h.set_data(value->as<char>());
+        } else {
             std::cerr << "Unsupported rank\n";
         }
+/*    } else if (type.name() == typeid(byte).name()) {
+        if (rank <= 1) {
+            uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
+            std::cout << "Type " << data->type().name() << "\n";
+            h.set_data(value->as<float>());
+        } else {
+            std::cerr << "Unsupported rank\n";
+        }*/
     } else {
         std::cerr << "Type " << data->type().name() << " not yet supported\n";
         exit(0);
@@ -181,18 +230,40 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                     uda::Scalar value = tree.atomicScalar(name);
                     h.set_data(name,value.as<double>());
                 } else {
-                    std::cout << "+++++ vector double\n";
-                    uda::Vector value = tree.atomicVector(name);
-                    std::vector<double> vec = value.as<double>();
-
-                    /*HDC n;
-                    size_t myshape[HDC_MAX_DIMS];
-                    int ndim = a_rank[i];
-                    std::vector<size_t> shape = value.shape();
+                    std::cout << "DOUBLE ARRAY\n";
+                    uda::Array value = tree.atomicArray(name);
+                    auto shape = value.shape();
+                    auto ndim = shape.size();
+                    size_t myshape[ndim];
                     for (int i=0;i<ndim;i++) myshape[i] = shape[i];
-                    auto& type = value.type();
-                    n.set_data(ndim,myshape,&vec[0]);
-                    h.add_child(name,n);*/
+                    auto data = value.as<double>();
+                    h.set_data(ndim,myshape,&data[0]);
+                }
+            } else if (a_types[i] == "float") {
+                std::cout << "+++++ FLOAT\n";
+                if (a_rank[i] == 0) {
+                    std::cout << "singlefloat\n";
+                    uda::Scalar value = tree.atomicScalar(name);
+                    h.set_data(name,value.as<float>());
+                } else {
+                    std::cout << "FLOAT ARRAY\n";
+                    uda::Array value = tree.atomicArray(name);
+                    auto shape = value.shape();
+                    auto ndim = shape.size();
+                    size_t myshape[ndim];
+                    for (int i=0;i<ndim;i++) myshape[i] = shape[i];
+                    auto data = value.as<float>();
+                    h.set_data(ndim,myshape,&data[0]);
+                }
+            } else if (a_types[i] == "char") {
+                std::cout << "+++++ CHAR\n";
+                if (a_rank[i] == 0) {
+                    std::cout << "singlechar\n";
+                    uda::Scalar value = tree.atomicScalar(name);
+                    h.set_data(name,value.as<char>());
+                } else {
+                    std::cerr << "Unsupported rank on char\n";
+                        exit(0);
                 }
             } else {
                 std::cout << "**** something else: ****\n";
@@ -206,6 +277,8 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                         h.set_data(value.as<short>());
                     } else if (type.name() == typeid(double).name()) {
                         h.set_data(value.as<double>());
+                    } else if (type.name() == typeid(float).name()) {
+                        h.set_data(value.as<float>());
                     } else {
                         std::cerr << "Unsupported type: " << type.name() << "\n";
                         exit(0);
@@ -227,6 +300,8 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                         h.set_data(ndim,myshape,&(value.as<short>()[0]));
                     } else if (type.name() == typeid(double).name()) {
                         h.set_data(ndim,myshape,&(value.as<double>()[0]));
+                    } else if (type.name() == typeid(float).name()) {
+                        h.set_data(ndim,myshape,&(value.as<float>()[0]));
                     } else {
                         std::cerr << "Unsupported type: " << type.name() << "\n";
                         exit(0);
