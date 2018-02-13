@@ -370,12 +370,11 @@ Json::Value HDC::to_json(int mode) {
             }
             case(LIST_ID):
             {
-                Json::Value elements;
+                root = Json::arrayValue;
                 auto children = get_children_ptr();
                 int i=0;
-                for (auto it = children->begin(); it != children->end(); ++it) {
-                    HDC node(storage,it->address.c_str());
-                    root[i++] = node.to_json(mode);
+                for (int i=0;i<this->childs_count();i++) {
+                    root[i] = this->get_slice(i).to_json(mode);
                 }
                 break;
             }
