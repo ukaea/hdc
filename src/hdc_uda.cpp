@@ -19,11 +19,14 @@ HDC udaData2HDC(uda::Data* data, int rank) {
         if (rank <= 1) {
             h.set_string(std::string(reinterpret_cast<const char*>(data->byte_data())));
         } else if (rank == 2) {
+            h.set_type(LIST_ID);
             auto array = dynamic_cast<uda::Array*>(data);
             auto dims = array->dims();
             std::vector<char> vec = array->as<char>();
             for (int i=0;i<dims[1].size();i++) {
-                h.set_string("["+std::to_string(i)+"]",std::string(vec.data() + i * dims[0].size(), strlen(vec.data() + i * dims[0].size())));
+                HDC n;
+                n.set_string(std::string(vec.data() + i * dims[0].size(), strlen(vec.data() + i * dims[0].size())));
+                h.append_slice(n);
             }
         } else {
             std::cerr << "UDA string rank too high, not implemented yet\n";
@@ -34,7 +37,9 @@ HDC udaData2HDC(uda::Data* data, int rank) {
         std::vector<uda::Dim> dims = array->dims();
         std::vector<std::string> strings = array->as<std::string>();
         for (int i=0;i<strings.size();i++) {
-            h.set_string("["+std::to_string(i)+"]",strings[i]);
+            HDC n;
+            n.set_string(strings[i]);
+            h.append_slice(n);
         }
     } else if (type_name == typeid(short).name() || type_name == typeid(int).name() || type_name == typeid(float).name() || type_name == typeid(double).name()) {
         if (rank == 0) {
