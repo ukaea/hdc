@@ -429,7 +429,7 @@ public:
     bip::managed_external_buffer get_segment();
     map_t* get_children_ptr();
     void delete_data();
-    static HDC from_uda(const std::string& signalName, const std::string& dataSource);
+    static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
 #ifdef _USE_HDF5
     void to_hdf5(std::string filename, std::string dataset_name = "data");
     void write_node(H5::H5File* file, std::string path);
