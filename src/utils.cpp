@@ -2,6 +2,7 @@
 #include <tuple>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
+#include <typeinfo>
 
 /* ------------------------- UUID generation ----------------------------- */
 
@@ -182,6 +183,7 @@ TypeID to_typeid(int64_t a) {return INT64_ID;};
 TypeID to_typeid(int32_t a) {return INT32_ID;};
 TypeID to_typeid(int16_t a) {return INT16_ID;};
 TypeID to_typeid(int8_t a) {return INT8_ID;};
+TypeID to_typeid(char a) {return INT8_ID;};
 TypeID to_typeid(uint64_t a) {return UINT64_ID;};
 TypeID to_typeid(uint32_t a) {return UINT32_ID;};
 TypeID to_typeid(uint16_t a) {return UINT16_ID;};
@@ -211,6 +213,37 @@ TypeID numpy_format_to_typeid(std::string format, size_t itemsize) {
     return ERROR_ID;
 };
 
+
+TypeID to_typeid(const std::type_info& t) {
+    const std::string type_str = t.name();
+    if (t == typeid(std::string) || t == typeid(char) || t == typeid(char*)) {
+        return STRING_ID;
+    } else if (t == typeid(double)) {
+        return DOUBLE_ID;
+    } else if (t == typeid(int)) {
+        return INT64_ID;
+    } else if (t == typeid(short)) {
+        return INT64_ID;
+    } else {
+        return ERROR_ID;
+    }
+}
+
+TypeID uda_str_to_typeid(std::string& str) {
+    if (str == "STRING") {
+        return STRING_ID;
+    } else if (str =="STRING *") {
+        std::cerr << "Warning: STRING * type is not supported!\n";
+        return LIST_ID;
+    } else if (str =="int") {
+        return INT64_ID;
+    } else if (str =="short") {
+        return INT64_ID;
+    } else if (str =="double") {
+        return DOUBLE_ID;
+    }
+    return ERROR_ID;
+}
 
 /* -------------------------  Other stuff ----------------------------- */
 

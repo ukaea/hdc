@@ -43,11 +43,13 @@ TypeID to_typeid(uint64_t a);
 TypeID to_typeid(uint32_t a);
 TypeID to_typeid(uint16_t a);
 TypeID to_typeid(uint8_t a);
+TypeID to_typeid(char a);
 TypeID to_typeid(std::string a);
 TypeID to_typeid(char* a);
 TypeID to_typeid(bool a);
 TypeID numpy_format_to_typeid(std::string format, size_t itemsize);
-
+TypeID to_typeid(const std::type_info& t);
+TypeID uda_str_to_typeid(std::string& str);
 /* -------------------------  Other stuff ----------------------------- */
 
 void hello__();

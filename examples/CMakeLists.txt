@@ -22,6 +22,14 @@ target_link_libraries(hdc_example_lukas fhdc)
 add_executable(hdc_example_interprocess example_interprocess.cpp)
 target_link_libraries(hdc_example_interprocess hdc rt)
 
+if(ENABLE_UDA)
+    add_executable(hdc_example_uda example_uda.cpp)
+    target_link_libraries(hdc_example_uda hdc rt)
+    install(TARGETS hdc_example_uda
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+endif(ENABLE_UDA)
+
 install(TARGETS hdc_fortran_module
             hdc_example_cpp
             hdc_example_c
