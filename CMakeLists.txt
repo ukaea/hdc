@@ -92,30 +92,14 @@ if (GOPTION)
 endif() # GOPTION
 
 if (BUILD_TESTS)
-    include(CTest)
-    set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
-    include(DownloadProject)
-    download_project(PROJ                googletest
-                    GIT_REPOSITORY      https://github.com/google/googletest.git
-                    GIT_TAG             release-1.8.0
-                    ${UPDATE_DISCONNECTED_IF_AVAILABLE}
-    )
     # Prevent GoogleTest from overriding our compiler/linker options
     # when building with Visual Studio
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+    add_subdirectory("thirdparty/googletest/")
 endif() # BUILD_TESTS
 
 if (BUILD_BENCHMARKS)
-    set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
-    include(DownloadProject)
-    download_project(PROJ                googlebenchmark
-                    GIT_REPOSITORY      https://github.com/google/benchmark.git
-                    GIT_TAG             v1.1.0
-                    ${UPDATE_DISCONNECTED_IF_AVAILABLE}
-    )
-    add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
-    include_directories("${googlebenchmark_SOURCE_DIR}/include")
+    add_subdirectory("thirdparty/googlebenchmark/")
 endif() # BUILD_BENCHMARKS
 
 if(ENABLE_HDF5)
