@@ -3,6 +3,8 @@
 #include <memory>
 #include <glob.h>
 #include <dlfcn.h>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string_regex.hpp>
 //#define DEBUG
 struct hdc_t {
     void* obj;
@@ -248,35 +250,74 @@ HDC::HDC(int _ndim, size_t* _shape, TypeID _type,long _flags) {
     if (!storage->usesBuffersDirectly()) delete[] buffer;
 }
 
-/** Creates empty HDC with specified buffer size */
-HDC::HDC(string str) {
-    // fill some data
-    memset(&header,0,sizeof(header_t));
-    size_t _data_size = str.length()+1;
-    header.buffer_size = _data_size + sizeof(header_t);
-    header.data_size = _data_size;
-    header.ndim = 1;
-    header.type = STRING_ID;
-
-    if (global_storage == nullptr) {
-//        HDC::init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-        HDC::init();
-        atexit(HDC::destroy);
+/** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
+HDC::HDC(string str): HDC() {
+    // start by parsing the string
+    std::vector<std::string> result;
+    boost::algorithm::split_regex( result, str, boost::regex( "://" ) ) ;
+    int i = 0;
+    for (auto& r : result) {
+        std::cout << "--- PARSE: " << i++ << " " << r << std::endl;
     }
+    if (result.size() > 1) {
+        std::cout << "here1\n" << result[1] << "\n";
+        std::vector<std::string> split_res;
+        boost::split( split_res, result[1], boost::is_any_of("|"), boost::token_compress_on );
+        std::cout << "here2\n";
+        if (split_res.size() == 1) split_res.push_back("");
+        auto prefix = result[0];
+        if (prefix == "hdf5") {
+            std::cout << "hdf5\n";
+            std::cout << split_res[0] << " " << split_res[1] << std::endl;
+            HDC h = from_hdf5(split_res[0],split_res[1]);
+            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
+            uuid = h.get_uuid();
+            storage = global_storage;
+        }
+        else if (prefix == "json") {
+            std::cout << "json\n";
+            HDC h = from_json(split_res[0],split_res[1]);
+            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
+            uuid = h.get_uuid();
+            storage = global_storage;
+        } else if (prefix == "uda") {
+            HDC h = from_uda(split_res[0],split_res[1]);
+            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
+            uuid = h.get_uuid();
+            storage = global_storage;
+        } else {
+            std::cout << "error\n";
+            throw std::runtime_error("uri "+prefix+" not known\n");
+        }
 
-    // Start by creating segment
-    char* buffer = new char[header.buffer_size];
+    } else {
+        // fill some data
+        memset(&header,0,sizeof(header_t));
+        size_t _data_size = str.length()+1;
+        header.buffer_size = _data_size + sizeof(header_t);
+        header.data_size = _data_size;
+        header.ndim = 1;
+        header.type = STRING_ID;
 
-    // copy header there -- we need that, hopefully it will be optimized out
-    memcpy(buffer,&header,sizeof(header_t));
-    // Copy char* data
-    memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
-    //Store to some storage
-    uuid = generate_uuid_str();
-    storage = global_storage;
-    storage->set(uuid,buffer,header.buffer_size);
-    // Now it is safe to
-    if (!storage->usesBuffersDirectly()) delete[] buffer;
+        if (global_storage == nullptr) {
+            HDC::init();
+            atexit(HDC::destroy);
+        }
+
+        // Start by creating segment
+        char* buffer = new char[header.buffer_size];
+
+        // copy header there -- we need that, hopefully it will be optimized out
+        memcpy(buffer,&header,sizeof(header_t));
+        // Copy char* data
+        memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
+        //Store to some storage
+        uuid = generate_uuid_str();
+        storage = global_storage;
+        storage->set(uuid,buffer,header.buffer_size);
+        // Now it is safe to
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
+    }
 }
 
 HDC::HDC(char* src_buffer) {
@@ -637,9 +678,7 @@ HDC* HDC::get_ptr(vector<boost::variant<size_t,std::string>> vs) {
     char* buffer = storage->get(uuid);
     header_t h;
     memcpy(&h,buffer,sizeof(header_t));
-
-    auto segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(header_t),0);
-
+    bip::managed_external_buffer segment(bip::open_only,buffer+sizeof(header_t),0);
     map_t* children = segment.find<map_t>("d").first;
     if (children == nullptr) {
         cout << "This node has no children." << endl;
@@ -708,12 +747,12 @@ HDC HDC::get(vector<boost::variant<size_t,std::string>> vs) {
 }
 
 HDC HDC::get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i) {
-    //D(
+    D(
     printf("get_slice(");
     for (size_t i = 0; i < vs.size()-1; i++) printf("%s/",boost::get<std::string>(vs[i]).c_str());
     printf("%s",boost::get<std::string>(vs[vs.size()-1]).c_str());
-    printf(",%d)\n",i);
-    //)
+    printf(",%zu)\n",i);
+    )
     auto first = vs[0];
     vs.erase(vs.begin());
     map_t* children = get_children_ptr();

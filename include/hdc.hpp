@@ -49,16 +49,6 @@ extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
 
-class HDCException: public std::exception
-{
-public:
-    const char* what() const throw() {
-        return "HDCException happened.\n";
-    };
-};
-
-
-
 class HDC
 {
 private:
@@ -316,7 +306,7 @@ public:
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
     bool has_child(string path);
-    HDC* json_to_hdc(Json::Value* root);
+    HDC json_to_hdc(Json::Value* root);
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -436,7 +426,8 @@ public:
 #endif
 };
 
-HDC* from_json(const string& filename); //todo: make constructor from this
+HDC from_json(const string& filename, const std::string& datapath = ""); //todo: make constructor from this
+HDC json_to_HDC(const Json::Value& root);
 string map_to_json(map_t& children);
 
 char* buffer_grow(char* old_buffer, size_t extra_size);

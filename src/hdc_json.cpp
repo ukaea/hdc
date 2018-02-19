@@ -79,43 +79,43 @@ int get_ndim(const Json::Value& root) {
     return dim;
 }
 
-HDC* json_to_hdc(const Json::Value& root) {
-    HDC* tree = new HDC();
+HDC json_to_hdc(const Json::Value& root) {
+    HDC tree;
     switch(root.type()) {
         {
         case(Json::nullValue):
             DEBUG_STDOUT("root is null");
-            tree->set_type(EMPTY_ID);
+            tree.set_type(EMPTY_ID);
             break;
         }
         case(Json::intValue):
         {
             DEBUG_STDOUT("root is int, value = "+to_string(root.asInt()));
-            tree->set_data<int32_t>(root.asInt());
+            tree.set_data<int32_t>(root.asInt());
             break;
         }
         case(Json::uintValue):
         {
             DEBUG_STDOUT("root is uint, value = "+to_string(root.asUInt()));
-            tree->set_data<uint32_t>(root.asUInt());
+            tree.set_data<uint32_t>(root.asUInt());
             break;
         }
         case(Json::realValue):
         {
             DEBUG_STDOUT("root is double, value = "+to_string(root.asDouble()));
-            tree->set_data(root.asDouble());
+            tree.set_data(root.asDouble());
             break;
         }
         case(Json::stringValue):
         {
             DEBUG_STDOUT("root is string, value = "+string(root.asCString()));
-            tree->set_string(root.asCString());
+            tree.set_string(root.asCString());
             break;
         }
         case(Json::booleanValue):
         {
             DEBUG_STDOUT("root is bool, value = "+to_string(root.asBool()));
-            tree->set_data<bool>(root.asBool());
+            tree.set_data<bool>(root.asBool());
             break;
         }
         case(Json::arrayValue):
@@ -131,9 +131,9 @@ HDC* json_to_hdc(const Json::Value& root) {
                 TypeID dt;
                 if (is_double(root)) dt = DOUBLE_ID;
                 else dt = INT32_ID;
-                delete tree;
-                tree = new HDC(ndim,shape,dt);
-                void* data_ptr = tree->as<void*>();
+                HDC d(ndim,shape,dt);
+                tree = d;
+                void* data_ptr = tree.as<void*>();
                 if (dt == DOUBLE_ID) {
                     switch(ndim) {
                         case 1:
@@ -185,9 +185,10 @@ HDC* json_to_hdc(const Json::Value& root) {
                 delete[] shape;
             } else {
                 // call recursively -- save list
-                tree->set_type(LIST_ID);
+                tree.set_type(LIST_ID);
                 for (unsigned int i = 0;i<root.size();i++) {
-                    tree->append_slice(json_to_hdc(root[i]));
+                    HDC h = json_to_hdc(root[i]);
+                    tree.append_slice(h);
                 }
             }
             break;
@@ -195,9 +196,10 @@ HDC* json_to_hdc(const Json::Value& root) {
         case(Json::objectValue):
         {
             DEBUG_STDOUT("root is object, children:\n");
-            for (Json::ValueConstIterator it = root.begin(); it != root.end(); it++) {
+            for (Json::ValueConstIterator it = root.begin(); it != root.end(); ++it) {
                 DEBUG_STDOUT("KEY: "+it.key().asString());
-                tree->add_child(it.key().asCString(),json_to_hdc(*it));
+                HDC h = json_to_hdc(*it);
+                tree.add_child(it.key().asCString(),h);
             }
             break;
         }
@@ -438,16 +440,17 @@ string map_to_json(map_t& children) {
     return ss.str();
 }
 
-HDC* from_json(const string& filename)
+HDC from_json(const string& filename, const string& datapath)
 {
-    HDC* tree;
+    HDC tree;
     ifstream file;
     file.exceptions(ifstream::failbit | ifstream::badbit);
     try {
         file.open(filename);
         Json::Value root;
         file >> root;
-        tree = json_to_hdc(root);
+        if (datapath != "") tree = json_to_hdc(root[datapath]);
+        else tree = json_to_hdc(root);
     }
     catch (ifstream::failure e) {
         cout << "Error reading / opening file." << endl;
