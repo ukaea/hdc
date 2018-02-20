@@ -22,7 +22,7 @@
         cerr << "HDF5 Error (error code: "                                \
             <<  hdf5_err                                                  \
             <<  ") " << msg;                                              \
-            exit(111);                                                    \
+            throw HDCException();                                         \
     }                                                                     \
 }
 
@@ -35,7 +35,7 @@
             <<  ", reference path: \""                                    \
             <<  ref_path << "\""                                          \
             <<  ") " << msg;                                              \
-            exit(111);                                                    \
+            throw HDCException();                                         \
     }                                                                     \
 }
 
@@ -43,7 +43,7 @@
 {                                                                         \
     cerr << "HDF5 Error (reference path: \"" << ref_path                  \
                     << ref_path << "\") " <<  msg;                        \
-    exit(111);                                                            \
+    throw HDCException();                                                 \
 }
 
 struct h5_read_opdata

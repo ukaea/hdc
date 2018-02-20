@@ -221,9 +221,7 @@ TypeID hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path) {
     }
     else
     {
-        HDC_HDF5_ERROR(ref_path,
-                           "Error with HDF5 DataType to conduit::DataType "
-                           << "Leaf Conversion");
+       throw HDCException("Error with HDF5 DataType to conduit::DataType Leaf Conversion");
     }
     return res;
 };

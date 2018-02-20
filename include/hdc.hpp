@@ -49,6 +49,28 @@ extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
 
+class HDCException: public std::exception {
+private:
+    std::string message_;
+public:
+    explicit HDCException(const std::string& message);
+    explicit HDCException();
+    virtual const char* what() const throw() {
+        return message_.c_str();
+    }
+};
+
+class HDCBadAllocException: public std::bad_alloc {
+private:
+    std::string message_;
+public:
+    explicit HDCBadAllocException(const std::string& message);
+    explicit HDCBadAllocException();
+    virtual const char* what() const throw() {
+        return message_.c_str();
+    }
+};
+
 class HDC
 {
 private:
@@ -341,8 +363,7 @@ public:
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
         if (!storage->has(uuid)) {
-            printf("Not found: %s\n",uuid.c_str());
-            exit(-3);
+            throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
         return reinterpret_cast<T>(storage->get(uuid)+sizeof(header_t));
     }
@@ -430,21 +451,10 @@ HDC json_to_HDC(const Json::Value& root);
 string map_to_json(map_t& children);
 
 char* buffer_grow(char* old_buffer, size_t extra_size);
-// HDC exception // TODO: convert to hdc::bad_alloc
-class hdc_bad_alloc: public exception
-{
-public:
-  virtual const char* what() const throw()
-  {
-    return "HDC Bad Alloc";
-  }
-};
 
 #ifdef _USE_HDF5
 #include "hdc_hdf5.h"
 #endif
-
-
 
 // "static contructor" from void* HDC
 HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
