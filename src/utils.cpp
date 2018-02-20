@@ -32,26 +32,6 @@ std::string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-
-std::vector<std::tuple<bool, std::string>> split_(std::string s) {
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-    boost::char_separator<char> sep("/]", "[");
-    tokenizer tok{s, sep};
-    std::vector<std::tuple<bool,std::string>> parts;
-    bool is_index = false;
-    bool was_bracket = false;
-    for (const auto &t : tok) {
-        was_bracket = (t.operator[](0) == '[');
-        if (was_bracket) {
-            is_index = true;
-            continue;
-        }
-        parts.push_back(std::make_tuple(is_index,t));
-        if (is_index) is_index = false;
-    }
-    return parts;
-}
-
 std::vector <boost::variant<size_t,std::string>> split(std::string s) {
     std::vector<boost::variant<size_t,std::string>> parts;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;

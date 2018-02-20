@@ -559,17 +559,13 @@ HDC from_hdf5(hid_t file, const std::string& dataset_name) {
     return h;
 };
 
-HDC from_hdf5(const std::string& filename, const std::string& dataset_name) {
+HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data") {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
     HDC h;
-    hdf5_read(filename, dataset_name, h);
-    return h;
-};
-
-HDC from_hdf5(const std::string& filename) {
-    DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
-    HDC h;
-    hdf5_read(filename, "/data", h);
+    if (dataset_name != "")
+        hdf5_read(filename, dataset_name, h);
+    else
+        hdf5_read(filename, "/data", h);
     return h;
 };
 

@@ -1,6 +1,7 @@
 #include "hdc.hpp"
 #include "gtest/gtest.h"
 #include <string>
+#include <cstdio>
 
 TEST(HDC,EmptyNode) {
     HDC h = HDC();
@@ -276,12 +277,11 @@ TEST(HDC,JsonComplete) {
 
     // Save JSON
     tree->to_json("tree.txt");
-
     // Load JSON
-    HDC* tree2 = from_json("tree.txt");
-    tree2->to_json("tree2.txt");
+    HDC tree2 = from_json("tree.txt");
+    tree2.to_json("tree2.txt");
     // test tree
-    HDC* s = tree2->get_ptr("aaa/bbb/double");
+    HDC* s = tree2.get_ptr("aaa/bbb/double");
     // Test double
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
@@ -291,30 +291,31 @@ TEST(HDC,JsonComplete) {
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_double[i],data_double_in[i]);
 
     // Test int
-    s = tree2->get_ptr("aaa/bbb/int");
+    s = tree2.get_ptr("aaa/bbb/int");
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(INT32_ID,s->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/bbb/int")->get_type_str().c_str(), tree2->get_ptr("aaa/bbb/int")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/int")->get_type_str().c_str(), tree2.get_ptr("aaa/bbb/int")->get_type_str().c_str());
     int32_t* data_int_in = s->as<int32_t*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_int[i],data_int_in[i]);
 
     // Test empty
-    EXPECT_EQ(HDC_EMPTY,tree2->get_ptr("aaa/bbb/empty")->get_type());
+    EXPECT_EQ(HDC_EMPTY,tree2.get_ptr("aaa/bbb/empty")->get_type());
 
     // Test list
-    s = tree2->get_ptr("aaa/list");
+    s = tree2.get_ptr("aaa/list");
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(5,s->get_shape()[0]);
     EXPECT_EQ(HDC_LIST,s->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/list")->get_type_str().c_str(), tree2->get_ptr("aaa/list")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/list")->get_type_str().c_str(), tree2.get_ptr("aaa/list")->get_type_str().c_str());
     for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice_ptr(i)->get_type());
 
     // Test string
-    EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2->get_ptr("aaa/string")->as_string().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2.get_ptr("aaa/string")->as_string().c_str());
 
     delete s;
-    delete tree2;
+    HDC j = HDC("json://tree2.txt|aaa/string");
+    EXPECT_STREQ(j.as_string().c_str(),"Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
     CLEAN_TREE()
 }
 
@@ -336,9 +337,19 @@ TEST(HDC,CopyConstructor) {
 TEST(HDC,HDF5) {
     PREPARE_TREE()
     tree->to_hdf5("tree.h5");
-    HDC* tree2 = from_hdf5_ptr("tree.h5");
-
-    delete tree2;
+    HDC tree2 = from_hdf5_ptr("tree.h5");
+    double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
+    EXPECT_EQ(data,333.333);
+    HDC h5 = HDC("hdf5://tree.h5|/data/aaa/bbb/_scalar");
+    data = h5.as<double*>()[0];
+    EXPECT_EQ(data,333.333);
     CLEAN_TREE()
+}
+#endif
+
+#ifdef _USE_UDA
+TEST(HDC,StringConstructor) {
+    HDC h = HDC("uda://TESTPLUGIN::test0()");
+    EXPECT_STREQ(h.as_string().c_str(),"Hello World!");
 }
 #endif
