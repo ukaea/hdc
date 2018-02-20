@@ -251,31 +251,22 @@ HDC::HDC(int _ndim, size_t* _shape, TypeID _type,long _flags) {
 }
 
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
-HDC::HDC(string str): HDC() {
+HDC::HDC(const std::string str): HDC() {
     // start by parsing the string
     std::vector<std::string> result;
     boost::algorithm::split_regex( result, str, boost::regex( "://" ) ) ;
     int i = 0;
-    for (auto& r : result) {
-        std::cout << "--- PARSE: " << i++ << " " << r << std::endl;
-    }
     if (result.size() > 1) {
-        std::cout << "here1\n" << result[1] << "\n";
         std::vector<std::string> split_res;
         boost::split( split_res, result[1], boost::is_any_of("|"), boost::token_compress_on );
-        std::cout << "here2\n";
         if (split_res.size() == 1) split_res.push_back("");
         auto prefix = result[0];
         if (prefix == "hdf5") {
-            std::cout << "hdf5\n";
-            std::cout << split_res[0] << " " << split_res[1] << std::endl;
             HDC h = from_hdf5(split_res[0],split_res[1]);
             memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
             uuid = h.get_uuid();
             storage = global_storage;
-        }
-        else if (prefix == "json") {
-            std::cout << "json\n";
+        } else if (prefix == "json") {
             HDC h = from_json(split_res[0],split_res[1]);
             memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
             uuid = h.get_uuid();
@@ -286,10 +277,8 @@ HDC::HDC(string str): HDC() {
             uuid = h.get_uuid();
             storage = global_storage;
         } else {
-            std::cout << "error\n";
-            throw std::runtime_error("uri "+prefix+" not known\n");
+            throw std::runtime_error("Protocol "+prefix+" not known\n");
         }
-
     } else {
         // fill some data
         memset(&header,0,sizeof(header_t));
@@ -320,7 +309,7 @@ HDC::HDC(string str): HDC() {
     }
 }
 
-HDC::HDC(char* src_buffer) {
+HDC::HDC(void* src_buffer) {
     storage = global_storage;
     uuid = generate_uuid_str();
     memcpy(&header,src_buffer,sizeof(header_t));

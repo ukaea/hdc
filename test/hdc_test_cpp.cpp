@@ -1,6 +1,7 @@
 #include "hdc.hpp"
 #include "gtest/gtest.h"
 #include <string>
+#include <cstdio>
 
 TEST(HDC,EmptyNode) {
     HDC h = HDC();
@@ -313,6 +314,8 @@ TEST(HDC,JsonComplete) {
     EXPECT_STREQ(tree->get_ptr("aaa/string")->as_string().c_str(), tree2.get_ptr("aaa/string")->as_string().c_str());
 
     delete s;
+    HDC j = HDC("json://tree2.txt|aaa/string");
+    EXPECT_STREQ(j.as_string().c_str(),"Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");
     CLEAN_TREE()
 }
 
@@ -335,24 +338,18 @@ TEST(HDC,HDF5) {
     PREPARE_TREE()
     tree->to_hdf5("tree.h5");
     HDC tree2 = from_hdf5_ptr("tree.h5");
-    tree2.dump();
-
-    //delete tree2;
+    double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
+    EXPECT_EQ(data,333.333);
+    HDC h5 = HDC("hdf5://tree.h5|/data/aaa/bbb/_scalar");
+    data = h5.as<double*>()[0];
+    EXPECT_EQ(data,333.333);
     CLEAN_TREE()
 }
 #endif
 
+#ifdef _USE_UDA
 TEST(HDC,StringConstructor) {
-    std::string str("uda://TESTPLUGIN::test0()");
-    HDC h = HDC(str);
-    h.dump();
-    str = "json://tree2.txt";
-    HDC j = HDC(str);
-    j.dump();
-    str = "hdf5://tree.h5|/data";
-    str = "hdf5://tree.h5";
-    HDC h5 = HDC(str);
-    h5.dump();
-//     std::string str2 = std::string(h.as_string());
-//     EXPECT_STREQ(str.c_str(), str2.c_str());
+    HDC h = HDC("uda://TESTPLUGIN::test0()");
+    EXPECT_STREQ(h.as_string().c_str(),"Hello World!");
 }
+#endif

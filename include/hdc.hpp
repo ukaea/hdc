@@ -76,13 +76,13 @@ public:
     /** Creates empty HDC with specified type and shape */
     HDC(int _ndim, size_t* _shape, TypeID _type,long _flags = HDCDefault);
     /** Constructor from string */
-    HDC(string str);
+    HDC(const std::string str);
     /** Copy contructor */
     HDC(HDC* h);
     /** Deserializing constructor */
     HDC(HDCStorage* _storage, string _uuid);
-    /** constructor from object buffer */
-    HDC(char* src_buffer);
+    /** constructor from object buffer -- this should be void* as we want cha* to be used for strings */
+    HDC(void* src_buffer);
     /** Destructor */
     ~HDC();
     /** Parses command line arguments */
@@ -337,8 +337,7 @@ public:
     template<typename T> T as()
     {
         if (header.type == STRUCT_ID || header.type == LIST_ID) {
-            cout << "This node is not terminal" << endl;
-            return reinterpret_cast<T>(0);
+            throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
         if (!storage->has(uuid)) {

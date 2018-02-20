@@ -449,8 +449,16 @@ HDC from_json(const string& filename, const string& datapath)
         file.open(filename);
         Json::Value root;
         file >> root;
-        if (datapath != "") tree = json_to_hdc(root[datapath]);
-        else tree = json_to_hdc(root);
+        if (datapath != "") {
+            auto split_path = split(datapath);
+            for (auto& k : split_path) {
+                if (k.type() == typeid(size_t))
+                    root = root[static_cast<int>(boost::get<size_t>(k))];
+                else
+                    root = root[boost::get<std::string>(k)];
+            }
+        }
+        tree = json_to_hdc(root);
     }
     catch (ifstream::failure e) {
         cout << "Error reading / opening file." << endl;
