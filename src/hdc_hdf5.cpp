@@ -126,8 +126,8 @@ void HDC::write_node(H5File* file, std::string path) {
                 dataset.write( edata, PredType::NATIVE_DOUBLE );
                 return;
             default:
-                cout << "Unknown data type."<<header.type<<"\n";
-                exit(-5);
+                throw HDCException("Unknown data type."+std::to_string(header.type)+"\n");
+
         }
     }  // end of try block
     // catch failure caused by the H5File operations

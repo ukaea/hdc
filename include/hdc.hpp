@@ -29,6 +29,7 @@
 #include "hdc_map.h"
 #include "utils.h"
 #include "hdc_storage.h"
+#include "hdc_errors.hpp"
 
 #ifdef _USE_HDF5
 #include <H5Cpp.h>
@@ -48,28 +49,6 @@ extern pt::ptree* options;
 extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
-
-class HDCException: public std::exception {
-private:
-    std::string message_;
-public:
-    explicit HDCException(const std::string& message);
-    explicit HDCException();
-    virtual const char* what() const throw() {
-        return message_.c_str();
-    }
-};
-
-class HDCBadAllocException: public std::bad_alloc {
-private:
-    std::string message_;
-public:
-    explicit HDCBadAllocException(const std::string& message);
-    explicit HDCBadAllocException();
-    virtual const char* what() const throw() {
-        return message_.c_str();
-    }
-};
 
 class HDC
 {

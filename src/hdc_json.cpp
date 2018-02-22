@@ -124,8 +124,7 @@ HDC json_to_hdc(const Json::Value& root) {
             if (is_all_numeric(root)) {
                 int8_t ndim = get_ndim(root);
                 if (ndim > HDC_MAX_DIMS) {
-                    cerr << "Unsupported number of dimensions: " << ndim << endl;
-                    exit(-5);
+                    throw HDCException("json_to_hdc(): Unsupported number of dimensions: "+std::to_string(ndim)+"\n");
                 }
                 size_t* shape = get_shape(root);
                 TypeID dt;
@@ -154,8 +153,7 @@ HDC json_to_hdc(const Json::Value& root) {
                         }
                         default:
                         {
-                            cerr << "Unsupported number of dimensions: " << ndim << endl;
-                            exit(-5);
+                            throw HDCException("json_to_hdc(): Requested number of dimensions: "+std::to_string(ndim)+" not implemented yet\n");
                         }
                     }
                 }
@@ -177,8 +175,7 @@ HDC json_to_hdc(const Json::Value& root) {
                         }
                         default:
                         {
-                            cerr << "Unsupported number of dimensions: " << ndim << endl;
-                            exit(-5);
+                            throw HDCException("json_to_hdc(): Requested number of dimensions: "+std::to_string(ndim)+" not implemented yet\n");
                         }
                     }
                 }
@@ -299,8 +296,7 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
         }*/
         default:
         {
-            cerr << "buffer_to_json(): unsupported number of dimensions: " << ndim << endl;
-            exit(-5);
+            throw HDCException("buffer_to_json(): unsupported number of dimensions: "+std::to_string(ndim)+"\n");
         }
     }
     return root;
@@ -397,14 +393,12 @@ Json::Value HDC::to_json(int mode) {
             }
             default:
             {
-                cerr << "to_json(): Type " << get_type_str() << " not supported yet.";
-                exit(-1);
+                throw HDCException("to_json(): Type "+get_type_str()+" not supported yet.");
             }
         }
     }
     else {
-        cerr << "to_json(): Mode " << mode << " not supported yet.";
-        exit(-1);
+        throw HDCException("to_json(): Mode "+std::to_string(mode)+" not supported yet.\n");
     }
     return root;
 }

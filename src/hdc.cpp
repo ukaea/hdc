@@ -17,10 +17,7 @@ HDCStorage* global_storage = nullptr;
 unordered_map<string,string> avail_stores;
 
 pt::ptree* options;
-HDCException::HDCException() {}
-HDCException::HDCException(const std::string& message) : message_(message) {}
-HDCBadAllocException::HDCBadAllocException() {}
-HDCBadAllocException::HDCBadAllocException(const std::string& message) : message_(message) {}
+
 void HDC::parse_cmdline(int argc, const char *argv[]) {
     namespace po = boost::program_options;
     po::options_description desc("Allowed options:");

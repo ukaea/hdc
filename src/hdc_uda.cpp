@@ -29,8 +29,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank) {
                 result.append_slice(n);
             }
         } else {
-            std::cerr << "UDA string rank too high, not implemented yet\n";
-            exit(-1);
+            throw HDCException("UDA string rank too high, not implemented yet\n");
         }
     } else if (uda_data->type().name() == typeid(std::string).name()) {
         auto array = dynamic_cast<uda::Array*>(uda_data);
@@ -196,13 +195,6 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                     if (type_name == "int") result.set_data(ndim,myshape,&(value.as<int>())[0]);
                     if (type_name == "float") result.set_data(ndim,myshape,&(value.as<float>())[0]);
                     if (type_name == "double") result.set_data(ndim,myshape,&(value.as<double>())[0]);
-//                     if (type_name == "char") {
-//                         if (a_rank[i] > 1) {
-//                             std::cerr << "Unsupported rank for \"char\"\n";
-//                             exit(1);
-//                         }
-//                         result.set_string(name,&(value.as<char*>())[0]);
-//                     }
                 }
             } else {
                 if (a_rank[i] == 0) {

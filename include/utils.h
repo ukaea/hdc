@@ -17,6 +17,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
 #include "types.h"
+#include "hdc_errors.hpp"
 
 /* ------------------------- UUID generation ----------------------------- */
 
