@@ -278,7 +278,7 @@ TEST(HDC,JsonComplete) {
     // Save JSON
     tree->to_json("tree.txt");
     // Load JSON
-    HDC tree2 = from_json("tree.txt");
+    HDC tree2 = HDC::from_json("tree.txt");
     tree2.to_json("tree2.txt");
     // test tree
     HDC* s = tree2.get_ptr("aaa/bbb/double");
@@ -337,7 +337,7 @@ TEST(HDC,CopyConstructor) {
 TEST(HDC,HDF5) {
     PREPARE_TREE()
     tree->to_hdf5("tree.h5");
-    HDC tree2 = from_hdf5_ptr("tree.h5");
+    HDC tree2 = HDC::from_hdf5("tree.h5");
     double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
     EXPECT_EQ(data,333.333);
     HDC h5 = HDC("hdf5://tree.h5|/data/aaa/bbb/_scalar");

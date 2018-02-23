@@ -673,7 +673,7 @@ const char* hdc_serialize(hdc_t* tree) {
 }
 
 struct hdc_t* hdc_deserialize(const char* str) {
-    HDC* node = deserialize_HDC_string((string) str);
+    HDC* node = HDC::deserialize_HDC_string((string) str);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;

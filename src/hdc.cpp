@@ -1216,7 +1216,7 @@ void HDC::delete_data() {
     uuid = "";
 }
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
-char* buffer_grow(char* old_buffer, size_t extra_size) {
+char* HDC::buffer_grow(char* old_buffer, size_t extra_size) {
     DEBUG_STDOUT("buffer_grow(extra_size = "+to_string(extra_size)+")\n");
     if (extra_size <= 0 || old_buffer == nullptr) return old_buffer;
     //load header
@@ -1254,21 +1254,21 @@ char* buffer_grow(char* old_buffer, size_t extra_size) {
 }
 
 // "static contructor" from void* HDC
-HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr) {
+HDC* HDC::new_HDC_from_cpp_ptr(intptr_t cpp_ptr) {
     HDC* tree;
     tree = (HDC*) cpp_ptr;
     return tree;
 }
 
 // "static contructor" from hdc_t*
-HDC* new_HDC_from_c_ptr(intptr_t c_ptr) {
+HDC* HDC::new_HDC_from_c_ptr(intptr_t c_ptr) {
     HDC* tree;
     hdc_t* c_wrap = (hdc_t*) c_ptr;
     tree = (HDC*) c_wrap->obj;
     return tree;
 }
 
-HDC* deserialize_HDC_file(std::string filename) {
+HDC* HDC::deserialize_HDC_file(std::string filename) {
     try {
         std::ifstream t(filename);
         std::string str((std::istreambuf_iterator<char>(t)),
@@ -1281,7 +1281,7 @@ HDC* deserialize_HDC_file(std::string filename) {
     }
 }
 
-HDC* deserialize_HDC_string(std::string str) {
+HDC* HDC::deserialize_HDC_string(std::string str) {
     HDC* tree;
     pt::ptree root;
 

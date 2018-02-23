@@ -307,7 +307,6 @@ public:
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
     bool has_child(string path);
-    HDC json_to_hdc(Json::Value* root);
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -419,29 +418,21 @@ public:
     map_t* get_children_ptr();
     void delete_data();
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
-#ifdef _USE_HDF5
+    // "static contructor" from void* HDC
+    static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
+    // "static contructor" from hdc_t*
+    static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
+    // "deserialize from storage"
+    static HDC* deserialize_HDC_file(std::string filename);
+    // "deserialize from storage"
+    static HDC* deserialize_HDC_string(std::string filename);
+    static HDC from_json(const string& filename, const std::string& datapath = "");
+    static string map_to_json(map_t& children);
+    static char* buffer_grow(char* old_buffer, size_t extra_size);
+    static HDC json_to_HDC(const ::Json::Value& root);
     void to_hdf5(std::string filename, std::string dataset_name = "data");
-    void write_node(H5::H5File* file, std::string path);
-#endif
+    static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
+    static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
 };
-
-HDC from_json(const string& filename, const std::string& datapath = ""); //todo: make constructor from this
-HDC json_to_HDC(const Json::Value& root);
-string map_to_json(map_t& children);
-
-char* buffer_grow(char* old_buffer, size_t extra_size);
-
-#ifdef _USE_HDF5
-#include "hdc_hdf5.h"
-#endif
-
-// "static contructor" from void* HDC
-HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
-// "static contructor" from hdc_t*
-HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
-// "deserialize from storage"
-HDC* deserialize_HDC_file(std::string filename);
-// "deserialize from storage"
-HDC* deserialize_HDC_string(std::string filename);
 
 #endif // HDC_HPP

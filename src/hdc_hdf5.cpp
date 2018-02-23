@@ -1,9 +1,11 @@
 // TODO: add license
 
 #include "hdc_hdf5.h"
-
-void HDC::write_node(H5File* file, std::string path) {
-    auto buffer = storage->get(uuid);
+#ifdef _USE_HDF5
+void write_node(HDC h, H5File* file, std::string path) {
+    auto buffer = h.get_buffer();
+    header_t header;
+    memcpy(&header,buffer,sizeof(header_t));
     auto data = buffer + sizeof(header_t);
     H5std_string DATASET_NAME(path);
     memcpy(&header,buffer,sizeof(header_t));
@@ -45,21 +47,20 @@ void HDC::write_node(H5File* file, std::string path) {
 
         switch(header.type) {
             case STRUCT_ID:
-                children = get_children_ptr();
+                children = h.get_children_ptr();
                 if (children != nullptr) {
                     Group* group = new Group(file->createGroup(path));
                     map_t::nth_index<1>::type& ri=children->get<1>();
                     for (auto it = ri.begin(); it != ri.end(); ++it) {
                         auto key = it->key.c_str();
                         auto uuid = it->address.c_str();
-                        HDC h(storage,uuid);
-                        h.write_node(file,path+"/"+key);
+                        write_node(HDC(global_storage,uuid),file,path+"/"+key);
                     }
                     delete group;
                 }
                 return;
             case LIST_ID:
-                children = get_children_ptr();
+                children = h.get_children_ptr();
                 if (children != nullptr) {
                     Group* group = new Group(file->createGroup(path));
                     map_t::nth_index<1>::type& ri=children->get<1>();
@@ -67,8 +68,7 @@ void HDC::write_node(H5File* file, std::string path) {
                     for (auto it = ri.begin(); it != ri.end(); ++it) {
                         auto key = it->key.c_str();
                         auto uuid = it->address.c_str();
-                        HDC h(storage,uuid);
-                        h.write_node(file,path+"/"+to_string(i++));
+                        write_node(HDC(global_storage,uuid),file,path+"/"+to_string(i++));
                     }
                     delete group;
                 }
@@ -161,7 +161,7 @@ void HDC::to_hdf5(std::string filename, std::string dataset_name) {
     try {
         H5std_string FILE_NAME( filename );
         H5File* file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
-        write_node(file,"data");
+        write_node(HDC(this->storage,this->uuid),file,"data");
         delete file;
     }  // end of try block
     catch( FileIException error )
@@ -557,7 +557,7 @@ HDC from_hdf5(hid_t file, const std::string& dataset_name) {
     return h;
 };
 
-HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data") {
+HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name) {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
     HDC h;
     if (dataset_name != "")
@@ -567,9 +567,23 @@ HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/d
     return h;
 };
 
-HDC* from_hdf5_ptr(const std::string& filename) {
+HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name) {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
     HDC* h = new HDC();
-    hdf5_read(filename, "/data", *h);
+    if (dataset_name != "")
+        hdf5_read(filename, dataset_name, *h);
+    else
+        hdf5_read(filename, "/data", *h);
     return h;
 };
+#else // _USE_HDF5
+void to_hdf5(std::string filename, std::string dataset_name) {
+    throw HDCException("HDC has not been compiled with HDF5 support!\n");
+}
+HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name) {
+    throw HDCException("HDC has not been compiled with HDF5 support!\n");
+}
+HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name) {
+    throw HDCException("HDC has not been compiled with HDF5 support!\n");
+}
+#endif // _USE_HDF5

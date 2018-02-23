@@ -79,7 +79,7 @@ int get_ndim(const Json::Value& root) {
     return dim;
 }
 
-HDC json_to_hdc(const Json::Value& root) {
+HDC HDC::json_to_HDC(const ::Json::Value& root) {
     HDC tree;
     switch(root.type()) {
         {
@@ -122,11 +122,11 @@ HDC json_to_hdc(const Json::Value& root) {
         {
             DEBUG_STDOUT("root is array, size = "+to_string(root.size()));
             if (is_all_numeric(root)) {
-                int8_t ndim = get_ndim(root);
+                int8_t ndim = ::get_ndim(root);
                 if (ndim > HDC_MAX_DIMS) {
                     throw HDCException("json_to_hdc(): Unsupported number of dimensions: "+std::to_string(ndim)+"\n");
                 }
-                size_t* shape = get_shape(root);
+                size_t* shape = ::get_shape(root);
                 TypeID dt;
                 if (is_double(root)) dt = DOUBLE_ID;
                 else dt = INT32_ID;
@@ -184,7 +184,7 @@ HDC json_to_hdc(const Json::Value& root) {
                 // call recursively -- save list
                 tree.set_type(LIST_ID);
                 for (unsigned int i = 0;i<root.size();i++) {
-                    HDC h = json_to_hdc(root[i]);
+                    HDC h = HDC::json_to_HDC(root[i]);
                     tree.append_slice(h);
                 }
             }
@@ -195,7 +195,7 @@ HDC json_to_hdc(const Json::Value& root) {
             DEBUG_STDOUT("root is object, children:\n");
             for (Json::ValueConstIterator it = root.begin(); it != root.end(); ++it) {
                 DEBUG_STDOUT("KEY: "+it.key().asString());
-                HDC h = json_to_hdc(*it);
+                HDC h = json_to_HDC(*it);
                 tree.add_child(it.key().asCString(),h);
             }
             break;
@@ -421,7 +421,7 @@ string HDC::to_json_string(int mode)
 }
 
 /* Saves children to JSON strin in order to store tree hierarchy in KV stores*/
-string map_to_json(map_t& children) {
+string HDC::map_to_json(map_t& children) {
         Json::Value root;
     //root["size"] = Json::UInt64(children.size());
     for (size_t i=0;i<children.size();i++) {
@@ -434,7 +434,7 @@ string map_to_json(map_t& children) {
     return ss.str();
 }
 
-HDC from_json(const string& filename, const string& datapath)
+HDC HDC::from_json(const string& filename, const string& datapath)
 {
     HDC tree;
     ifstream file;
@@ -452,7 +452,7 @@ HDC from_json(const string& filename, const string& datapath)
                     root = root[boost::get<std::string>(k)];
             }
         }
-        tree = json_to_hdc(root);
+        tree = HDC::json_to_HDC(root);
     }
     catch (ifstream::failure e) {
         cout << "Error reading / opening file." << endl;
