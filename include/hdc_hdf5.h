@@ -2,7 +2,7 @@
 #define HDC_HDF5_H
 
 #include <iostream>
-#include "types.h"
+#include "hdc_types.h"
 #include "hdc.hpp"
 #include <H5Cpp.h>
 #include <hdf5.h>

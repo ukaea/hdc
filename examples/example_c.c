@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "types.h"
+#include "hdc_types.h"
 #include "hdc_c.h"
 
 struct hdc_t* init_hdc_data();

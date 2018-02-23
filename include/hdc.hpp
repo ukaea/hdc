@@ -25,9 +25,9 @@
 #include <exception>
 
 // our stuff
-#include "types.h"
+#include "hdc_types.h"
 #include "hdc_map.h"
-#include "utils.h"
+#include "hdc_utils.h"
 #include "hdc_storage.h"
 #include "hdc_errors.hpp"
 
@@ -89,7 +89,7 @@ public:
     /** Parses command line arguments */
     static void parse_cmdline(int argc, const char *argv[]);
     /** Loads settings from file */
-    static void load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
+    static void load_config(std::string configPath="./hdc.conf:~/.config/hdc.conf");
     /** Searches for available storage plugins */
     static void search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
     /** Prints out all found storage plugins. */

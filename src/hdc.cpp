@@ -47,7 +47,7 @@ void HDC::parse_cmdline(int argc, const char *argv[]) {
     }
 }
 
-void HDC::load_config(string configPath) {
+void HDC::load_config(std::string configPath) {
     std::string delimiters(":");
     std::vector<std::string> parts;
     boost::trim_if(configPath, boost::is_any_of(delimiters));

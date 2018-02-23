@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef HDC_UTILS_H
+#define HDC_UTILS_H
 #include <string>
 #include <vector>
 #include <iostream>
@@ -16,7 +16,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
-#include "types.h"
+#include "hdc_types.h"
 #include "hdc_errors.hpp"
 
 /* ------------------------- UUID generation ----------------------------- */

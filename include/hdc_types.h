@@ -1,6 +1,6 @@
 #include <stddef.h>
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef HDC_TYPES_H
+#define HDC_TYPES_H
 
 #include <stdlib.h>
 #include <stdbool.h>

@@ -1,6 +1,6 @@
 #include "hdc_c.h"
 #include "hdc.hpp"
-#include "types.h"
+#include "hdc_types.h"
 struct hdc_t {
     void* obj;
 };

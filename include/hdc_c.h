@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "types.h"
+#include "hdc_types.h"
 
 struct hdc_t* hdc_new_empty(); /** Default constructor. Creates empty HDC  */
 struct hdc_t* hdc_new_size(size_t size); /** Creates empty HDC of given size */
