@@ -412,7 +412,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
         }
         default:
         {
-            // unsupported
+            throw HDCException("h5_literate_traverse_op_func(): Unsupported H5O_TYPE\n");
         }
     }
 
