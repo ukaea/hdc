@@ -32,7 +32,7 @@ std::string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-std::vector <boost::variant<size_t,std::string>> split(std::string s) {
+std::vector <boost::variant<size_t,std::string>> split(const std::string& s) {
     std::vector<boost::variant<size_t,std::string>> parts;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     boost::char_separator<char> sep("/]", "[");

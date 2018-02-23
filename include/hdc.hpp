@@ -81,7 +81,7 @@ public:
     /** Copy contructor */
     HDC(HDC* h);
     /** Deserializing constructor */
-    HDC(HDCStorage* _storage, string _uuid);
+    HDC(HDCStorage* _storage, const std::string& _uuid);
     /** constructor from object buffer -- this should be void* as we want cha* to be used for strings */
     HDC(void* src_buffer);
     /** Destructor */
@@ -152,7 +152,7 @@ public:
         set_data(_ndim,_shape,_data,_flags);
     };
 
-    template<typename T> void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
@@ -166,7 +166,7 @@ public:
         set_data(1,{vec.size()},&vec[0],_flags);
     };
 
-    template<typename T> void set_data(string path, initializer_list<T> _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, initializer_list<T> _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -175,7 +175,7 @@ public:
     }
 
 
-    template<typename T> void set_data(string path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -197,7 +197,7 @@ public:
     };
 
     /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
-    template <typename T> void set_data(string path, vector<T> data)
+    template <typename T> void set_data(const std::string& path, vector<T> data)
     {
         if (!this->has_child(path)) {
             HDC h;
@@ -225,7 +225,7 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
 
-    void set_string(string path, string str) {
+    void set_string(const std::string& path, string str) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
@@ -233,9 +233,9 @@ public:
         get(path).set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
-    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type);
     void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type);
-    void set_data_c(string path, int _ndim, size_t* _shape, const void* _data, size_t _type);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -262,7 +262,7 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     template <typename T>
-    void set_data(string path, T data) {
+    void set_data(const std::string& path, T data) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -270,7 +270,7 @@ public:
         get(path).set_data(data);
     }
 
-    void set_data(string path, const unsigned char* data, size_t _type) {
+    void set_data(const std::string& path, const unsigned char* data, size_t _type) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -288,25 +288,25 @@ public:
     void info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
-    void add_child(string path, HDC* n);
+    void add_child(const std::string& path, HDC* n);
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version. */
-    void add_child(string path, HDC& n);
+    void add_child(const std::string& path, HDC& n);
     /** Sets HDC subtree to given path. */
-    void set_child(string path, HDC* n);
+    void set_child(const std::string& path, HDC* n);
     /** Deletes HDC subtree. */
-    void delete_child(string path);
+    void delete_child(const std::string& path);
     /** Returns subtree by path. */
-    HDC* get_ptr(string path);
-    HDC get(string path);
+    HDC* get_ptr(const std::string& path);
+    HDC get(const std::string& path);
     /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC get_slice(string path, size_t i);
+    HDC get_slice(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC get_slice(size_t i);
-    HDC* get_slice_ptr(string path, size_t i);
+    HDC* get_slice_ptr(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
-    bool has_child(string path);
+    bool has_child(const std::string& path);
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -330,9 +330,9 @@ public:
     /** Returns true if node is empty. */
     bool is_empty();
     /** Returns number of dimensions of node under path. */
-    int get_ndim(string path);
+    int get_ndim(const std::string& path);
     /** Returns shape of node under path. */
-    size_t* get_shape(string path);
+    size_t* get_shape(const std::string& path);
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
@@ -359,14 +359,14 @@ public:
     }
 
     /** Returns string of node under given path. Needs to have separate function */
-    std::string as_string(string path)
+    std::string as_string(const std::string& path)
     {
         DEBUG_STDOUT("as_string("+path+")\n");
         return get(path).as_string();
     }
 
     /** Returns pointer to data of node under given path. */
-    template<typename T> T as(string path)
+    template<typename T> T as(const std::string& path)
     {
         DEBUG_STDOUT("as<T>("+path+")\n");
         return get(path).as<T>();
@@ -378,7 +378,7 @@ public:
         return as<double*>()[0];
     }
     /** Returns double. */
-    double as_double(string path)
+    double as_double(const std::string& path)
     {
         return as<double*>(path)[0];
     }
@@ -402,9 +402,9 @@ public:
     /** Returns datashape desctiption string. */
     string get_datashape_str();
     /** Returns string representing data/node type. */
-    string get_type_str(string path);
+    string get_type_str(const std::string& path);
     /** Returns datashape desctiption string. */
-    string get_datashape_str(string path);
+    string get_datashape_str(const std::string& path);
     /** Returns void pointer to data */
     char* get_data_ptr();
     /** Returns vector of keys of a struct node and empty vector otherwise. */

@@ -328,7 +328,7 @@ HDC::HDC(void* src_buffer) {
 HDC::HDC(HDC* h) : HDC(h->get_buffer()) {};
 
 /** Deserializing constructor */
-HDC::HDC(HDCStorage* _storage, string _uuid) {
+HDC::HDC(HDCStorage* _storage, const std::string& _uuid) {
     uuid = _uuid;
     storage = _storage;
     memcpy(&header,storage->get(uuid),sizeof(header_t));
@@ -392,7 +392,7 @@ void HDC::info() {
 
 //---------------------------- Tree manipulation -----------------------------------
 
-bool HDC::has_child(string path)
+bool HDC::has_child(const std::string& path)
 {
     return has_child(split(path));
 }
@@ -570,14 +570,14 @@ vector<string> HDC::keys() {
     return k;
 }
 
-void HDC::add_child(string path, HDC* n)
+void HDC::add_child(const std::string& path, HDC* n)
 {
     DEBUG_STDOUT("add_child("+path+")\n");
     add_child(split(path),n);
     return;
 }
 
-void HDC::add_child(string path, HDC& n)
+void HDC::add_child(const std::string& path, HDC& n)
 {
     DEBUG_STDOUT("add_child("+path+")\n");
     add_child(split(path),n);
@@ -620,7 +620,7 @@ void HDC::delete_child(vector<boost::variant<size_t,std::string>> vs) {
     return;
 }
 
-void HDC::delete_child(string path) {
+void HDC::delete_child(const std::string& path) {
     delete_child(split(path));
     return;
 }
@@ -771,19 +771,19 @@ HDC* HDC::get_slice_ptr(size_t i) {
     return this; // return this if not list
 }
 
-HDC HDC::get_slice(string path, size_t i) {
+HDC HDC::get_slice(const std::string& path, size_t i) {
     return get_slice(split(path),i);
 }
 
-HDC* HDC::get_slice_ptr(string path, size_t i) {
+HDC* HDC::get_slice_ptr(const std::string& path, size_t i) {
     return get_slice_ptr(split(path),i);
 }
 
-HDC* HDC::get_ptr(string path) {
+HDC* HDC::get_ptr(const std::string& path) {
     return get_ptr(split(path));
 }
 
-HDC HDC::get(string path) {
+HDC HDC::get(const std::string& path) {
     return get(split(path));
 }
 
@@ -824,7 +824,7 @@ void HDC::set_child(vector<boost::variant<size_t,std::string>> vs, HDC* n) {
 }
 
 
-void HDC::set_child(string path, HDC* n) {
+void HDC::set_child(const std::string& path, HDC* n) {
     set_child(split(path), n);
     return;
 }
@@ -921,7 +921,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
     }
 }
 
-void HDC::set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type) {
+void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type) {
     if(!has_child(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
@@ -958,7 +958,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type)
     }
 }
 
-void HDC::set_data_c(string path, int _ndim, size_t* _shape, const void* _data, size_t _type) {
+void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type) {
     if(!has_child(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
@@ -1096,11 +1096,11 @@ string HDC::get_type_str() {
     return "unknown";
 }
 
-string HDC::get_type_str(string path) {
+string HDC::get_type_str(const std::string& path) {
     return get(path).get_type_str();
 }
 
-string HDC::get_datashape_str(string path) {
+string HDC::get_datashape_str(const std::string& path) {
     return get(path).get_datashape_str();
 }
 
@@ -1140,13 +1140,13 @@ std::vector<size_t> HDC::get_strides() {
     return strides;
 }
 
-int HDC::get_ndim(string path) {
+int HDC::get_ndim(const std::string& path) {
     //TODO: make more error-proof - add has check -> make it as function???
     memcpy(&header,storage->get(uuid),sizeof(header_t));
     return get(path).get_ndim();
 }
 
-size_t* HDC::get_shape(string path) {
+size_t* HDC::get_shape(const std::string& path) {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
     return get(path).get_shape();
 }
