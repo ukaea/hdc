@@ -67,7 +67,7 @@ private:
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
-    void add_child_single(string str, HDC& n);
+    void add_child_single(const std::__cxx11::string& path, HDC& n);
 
 public:
     /** Creates empty HDC with specified buffer size */
@@ -423,9 +423,9 @@ public:
     // "static contructor" from hdc_t*
     static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
     // "deserialize from storage"
-    static HDC* deserialize_HDC_file(std::string filename);
+    static HDC* deserialize_HDC_file(const std::string& filename);
     // "deserialize from storage"
-    static HDC* deserialize_HDC_string(std::string filename);
+    static HDC* deserialize_HDC_string(const std::string& filename);
     static HDC from_json(const string& filename, const std::string& datapath = "");
     static string map_to_json(map_t& children);
     static char* buffer_grow(char* old_buffer, size_t extra_size);

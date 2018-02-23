@@ -494,9 +494,9 @@ void HDC::add_child(vector<boost::variant<size_t,std::string>> vs, HDC& n) {
     return;
 }
 
-void HDC::add_child_single(string str, HDC& n) {
+void HDC::add_child_single(const std::string& path, HDC& n) {
     D(
-    cout << "add_child_single("+str+")\n";
+    cout << "add_child_single("+path+")\n";
     )
     // sync buffer
     auto buffer = storage->get(uuid);
@@ -507,7 +507,7 @@ void HDC::add_child_single(string str, HDC& n) {
     }
     if (header.type == EMPTY_ID) set_type(STRUCT_ID);
 
-    if (str.size() > 1024) {
+    if (path.size() > 1024) {
         throw HDCException("add_child_single(): string too long.\n");
     }
 
@@ -518,22 +518,22 @@ void HDC::add_child_single(string str, HDC& n) {
     bip::managed_external_buffer segment(bip::open_only,buffer+sizeof(header_t),0);
     auto children = segment.find<map_t>("d").first;
 
-    if (children->count(str.c_str()) == 0) {
+    if (children->count(path.c_str()) == 0) {
         // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
         int redo = 1;
         for (int i=0;i<HDC_MAX_RESIZE_ATTEMPTS-1;i++) {
             if (redo == 0) break;
             try {
                 // Storing record larger than 114 bytes can mess up the heap on small buffers (1300b, key with longer than 24 characters), so we need to increase the buffer size here
-                if (segment.get_free_memory() < 4*str.size()) {
+                if (segment.get_free_memory() < 4*path.size()) {
                     throw (HDCBadAllocException()); // There can be problem to store large strings
                 }
-                record rec(str.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
+                record rec(path.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
                 children->insert(rec);
                 redo = 0;
             }
             catch (HDCBadAllocException e) {
-                char* new_buffer = buffer_grow(buffer,max(header.buffer_size,4*str.size()));
+                char* new_buffer = buffer_grow(buffer,max(header.buffer_size,4*path.size()));
                 if (new_buffer == buffer) {
                     throw HDCException("grow called, but buffer == new_buffer.\n");
                 }
@@ -1268,7 +1268,7 @@ HDC* HDC::new_HDC_from_c_ptr(intptr_t c_ptr) {
     return tree;
 }
 
-HDC* HDC::deserialize_HDC_file(std::string filename) {
+HDC* HDC::deserialize_HDC_file(const std::string& filename) {
     try {
         std::ifstream t(filename);
         std::string str((std::istreambuf_iterator<char>(t)),
@@ -1281,7 +1281,7 @@ HDC* HDC::deserialize_HDC_file(std::string filename) {
     }
 }
 
-HDC* HDC::deserialize_HDC_string(std::string str) {
+HDC* HDC::deserialize_HDC_string(const std::string& str) {
     HDC* tree;
     pt::ptree root;
 
