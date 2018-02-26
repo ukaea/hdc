@@ -25,10 +25,11 @@
 #include <exception>
 
 // our stuff
-#include "types.h"
+#include "hdc_types.h"
 #include "hdc_map.h"
-#include "utils.h"
+#include "hdc_utils.h"
 #include "hdc_storage.h"
+#include "hdc_errors.hpp"
 
 #ifdef _USE_HDF5
 #include <H5Cpp.h>
@@ -49,16 +50,6 @@ extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
 
-class HDCException: public std::exception
-{
-public:
-    const char* what() const throw() {
-        return "HDCException happened.\n";
-    };
-};
-
-
-
 class HDC
 {
 private:
@@ -76,7 +67,7 @@ private:
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
-    void add_child_single(string str, HDC& n);
+    void add_child_single(const std::__cxx11::string& path, HDC& n);
 
 public:
     /** Creates empty HDC with specified buffer size */
@@ -86,19 +77,19 @@ public:
     /** Creates empty HDC with specified type and shape */
     HDC(int _ndim, size_t* _shape, TypeID _type,long _flags = HDCDefault);
     /** Constructor from string */
-    HDC(string str);
+    HDC(const std::string str);
     /** Copy contructor */
     HDC(HDC* h);
     /** Deserializing constructor */
-    HDC(HDCStorage* _storage, string _uuid);
-    /** constructor from object buffer */
-    HDC(char* src_buffer);
+    HDC(HDCStorage* _storage, const std::string& _uuid);
+    /** constructor from object buffer -- this should be void* as we want cha* to be used for strings */
+    HDC(void* src_buffer);
     /** Destructor */
     ~HDC();
     /** Parses command line arguments */
     static void parse_cmdline(int argc, const char *argv[]);
     /** Loads settings from file */
-    static void load_config(string configPath="./hdc.conf:~/.config/hdc.conf");
+    static void load_config(std::string configPath="./hdc.conf:~/.config/hdc.conf");
     /** Searches for available storage plugins */
     static void search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
     /** Prints out all found storage plugins. */
@@ -116,6 +107,7 @@ public:
     /** Cleans up global_storage  -- mainly due to C and Fortran */
     static void destroy();
     /** Returns the available space in buffer (in bytes) */
+
     size_t get_datasize();
     /** Returns the the size of object buffer (= header+data, in bytes) */
     size_t get_size();
@@ -162,7 +154,7 @@ public:
         set_data(_ndim,_shape,_data,_flags);
     };
 
-    template<typename T> void set_data(string path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
@@ -176,7 +168,7 @@ public:
         set_data(1,{vec.size()},&vec[0],_flags);
     };
 
-    template<typename T> void set_data(string path, initializer_list<T> _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, initializer_list<T> _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -185,7 +177,7 @@ public:
     }
 
 
-    template<typename T> void set_data(string path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -207,7 +199,7 @@ public:
     };
 
     /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
-    template <typename T> void set_data(string path, vector<T> data)
+    template <typename T> void set_data(const std::string& path, vector<T> data)
     {
         if (!this->has_child(path)) {
             HDC h;
@@ -235,7 +227,7 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
 
-    void set_string(string path, string str) {
+    void set_string(const std::string& path, string str) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
@@ -243,7 +235,9 @@ public:
         get(path).set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
-    void set_data_c(string path, int _ndim, size_t* _shape, void* _data, size_t _type);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type);
+    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -253,12 +247,24 @@ public:
         header.buffer_size = header.data_size + sizeof(header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(header_t));
-        memcpy(buffer+sizeof(header_t),&data,sizeof(T));
+        memcpy(buffer+sizeof(header_t),&data,header.data_size);
+        storage->set(uuid,buffer,header.buffer_size);
+        if (!storage->usesBuffersDirectly()) delete[] buffer;
+    }
+    /** Sets scalar data to given node - UDA version. */
+    void set_data(const unsigned char* data, size_t _type) {
+        memset(&header,0,sizeof(header_t));
+        header.type = _type;
+        header.data_size = hdc_sizeof(static_cast<TypeID>(_type));
+        header.buffer_size = header.data_size + sizeof(header_t);
+        char* buffer = new char[header.buffer_size];
+        memcpy(buffer,&header,sizeof(header_t));
+        memcpy(buffer+sizeof(header_t),&data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     template <typename T>
-    void set_data(string path, T data) {
+    void set_data(const std::string& path, T data) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -266,6 +272,13 @@ public:
         get(path).set_data(data);
     }
 
+    void set_data(const std::string& path, const unsigned char* data, size_t _type) {
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h);
+        }
+        get(path).set_data(data,_type);
+    }
     /** Returns number of dimensions of current node. */
     int get_ndim();
     /** Returns shape of current node. */
@@ -277,28 +290,25 @@ public:
     void info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
-    void add_child(string path, HDC* n);
+    void add_child(const std::string& path, HDC* n);
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version. */
-    void add_child(string path, HDC& n);
+    void add_child(const std::string& path, HDC& n);
     /** Sets HDC subtree to given path. */
-    void set_child(string path, HDC* n);
+    void set_child(const std::string& path, HDC* n);
     /** Deletes HDC subtree. */
-    void delete_child(string path);
+    void delete_child(const std::string& path);
     /** Returns subtree by path. */
-    HDC* get_ptr(string path);
-    HDC get(string path);
+    HDC* get_ptr(const std::string& path);
+    HDC get(const std::string& path);
     /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC get_slice(string path, size_t i);
+    HDC get_slice(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC get_slice(size_t i);
-    HDC* get_slice_ptr(string path, size_t i);
+    HDC* get_slice_ptr(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
-    bool has_child(string path);
-
-    HDC* json_to_hdc(Json::Value* root);
-
+    bool has_child(const std::string& path);
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -322,20 +332,18 @@ public:
     /** Returns true if node is empty. */
     bool is_empty();
     /** Returns number of dimensions of node under path. */
-    int get_ndim(string path);
+    int get_ndim(const std::string& path);
     /** Returns shape of node under path. */
-    size_t* get_shape(string path);
+    size_t* get_shape(const std::string& path);
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
         if (header.type == STRUCT_ID || header.type == LIST_ID) {
-            cout << "This node is not terminal" << endl;
-            return reinterpret_cast<T>(0);
+            throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
         if (!storage->has(uuid)) {
-            printf("Not found: %s\n",uuid.c_str());
-            exit(-3);
+            throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
         return reinterpret_cast<T>(storage->get(uuid)+sizeof(header_t));
     }
@@ -353,14 +361,14 @@ public:
     }
 
     /** Returns string of node under given path. Needs to have separate function */
-    std::string as_string(string path)
+    std::string as_string(const std::string& path)
     {
         DEBUG_STDOUT("as_string("+path+")\n");
         return get(path).as_string();
     }
 
     /** Returns pointer to data of node under given path. */
-    template<typename T> T as(string path)
+    template<typename T> T as(const std::string& path)
     {
         DEBUG_STDOUT("as<T>("+path+")\n");
         return get(path).as<T>();
@@ -372,7 +380,7 @@ public:
         return as<double*>()[0];
     }
     /** Returns double. */
-    double as_double(string path)
+    double as_double(const std::string& path)
     {
         return as<double*>(path)[0];
     }
@@ -398,9 +406,9 @@ public:
     /** Returns datashape desctiption string. */
     string get_datashape_str();
     /** Returns string representing data/node type. */
-    string get_type_str(string path);
+    string get_type_str(const std::string& path);
     /** Returns datashape desctiption string. */
-    string get_datashape_str(string path);
+    string get_datashape_str(const std::string& path);
     /** Returns void pointer to data */
     char* get_data_ptr();
     /** Returns vector of keys of a struct node and empty vector otherwise. */
@@ -413,38 +421,22 @@ public:
     bip::managed_external_buffer get_segment();
     map_t* get_children_ptr();
     void delete_data();
-#ifdef _USE_HDF5
+    static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
+    // "static contructor" from void* HDC
+    static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
+    // "static contructor" from hdc_t*
+    static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
+    // "deserialize from storage"
+    static HDC* deserialize_HDC_file(const std::string& filename);
+    // "deserialize from storage"
+    static HDC* deserialize_HDC_string(const std::string& filename);
+    static HDC from_json(const string& filename, const std::string& datapath = "");
+    static string map_to_json(map_t& children);
+    static char* buffer_grow(char* old_buffer, size_t extra_size);
+    static HDC json_to_HDC(const ::Json::Value& root);
     void to_hdf5(std::string filename, std::string dataset_name = "data");
-    void write_node(H5::H5File* file, std::string path);
-#endif
+    static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
+    static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
 };
-
-HDC* from_json(const string& filename); //todo: make constructor from this
-string map_to_json(map_t& children);
-
-char* buffer_grow(char* old_buffer, size_t extra_size);
-// HDC exception // TODO: convert to hdc::bad_alloc
-class hdc_bad_alloc: public exception
-{
-public:
-  virtual const char* what() const throw()
-  {
-    return "HDC Bad Alloc";
-  }
-};
-
-
-#ifdef _USE_HDF5
-#include "hdc_hdf5.h"
-#endif
-
-// "static contructor" from void* HDC
-HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
-// "static contructor" from hdc_t*
-HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
-// "deserialize from storage"
-HDC* deserialize_HDC_file(std::string filename);
-// "deserialize from storage"
-HDC* deserialize_HDC_string(std::string filename);
 
 #endif // HDC_HPP

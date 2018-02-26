@@ -1,9 +1,9 @@
 /**
- * This is not intended to be run directly, there are differences C and fortran string making this complicated. I have just tested the following code aftet wrapping the path string inside fortran hdc_add_child function using c_to_f_string. The better option would be to do that in C, but I don't see any reason for further investications of this. The gfortran prefixes are the same story.
+ * This is not intended to be run directly, there are differences C and fortran string making this complicated. I have just tested the following code after wrapping the path string inside fortran hdc_add_child function using c_to_f_string. The better option would be to do that in C, but I don't see any reason for further investications of this. The gfortran prefixes are the same story.
  */
 
 #include <stdio.h>
-#include "types.h"
+#include "hdc_types.h"
 #include <string.h>
 //#include "hdc_c.h"
 

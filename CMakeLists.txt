@@ -45,7 +45,7 @@ set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
-find_package(Boost 1.48.0 REQUIRED filesystem system program_options)
+find_package(Boost 1.48.0 REQUIRED filesystem system program_options regex)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
@@ -58,7 +58,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -79,6 +79,7 @@ option(BUILD_TESTS "Build and install Google tests" ON)
 option(BUILD_EXAMPLES "Build and install examples" ON)
 option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." ON)
 option(ENABLE_HDF5 "Enable HDF5 support" ON)
+option(ENABLE_UDA "Enable UDA support" OFF)
 option(BUILD_OWN_HDF5 "Build own HDF5" OFF)
 option(DEBUG "Turns some debug output on or off." OFF)
 option(GOPTION "adds -g to compiler flags" ON)
@@ -92,30 +93,14 @@ if (GOPTION)
 endif() # GOPTION
 
 if (BUILD_TESTS)
-    include(CTest)
-    set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
-    include(DownloadProject)
-    download_project(PROJ                googletest
-                    GIT_REPOSITORY      https://github.com/google/googletest.git
-                    GIT_TAG             release-1.8.0
-                    ${UPDATE_DISCONNECTED_IF_AVAILABLE}
-    )
     # Prevent GoogleTest from overriding our compiler/linker options
     # when building with Visual Studio
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+    add_subdirectory("thirdparty/googletest/")
 endif() # BUILD_TESTS
 
 if (BUILD_BENCHMARKS)
-    set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
-    include(DownloadProject)
-    download_project(PROJ                googlebenchmark
-                    GIT_REPOSITORY      https://github.com/google/benchmark.git
-                    GIT_TAG             v1.1.0
-                    ${UPDATE_DISCONNECTED_IF_AVAILABLE}
-    )
-    add_subdirectory(${googlebenchmark_SOURCE_DIR} ${googlebenchmark_BINARY_DIR})
-    include_directories("${googlebenchmark_SOURCE_DIR}/include")
+    add_subdirectory("thirdparty/googlebenchmark/")
 endif() # BUILD_BENCHMARKS
 
 if(ENABLE_HDF5)
@@ -156,6 +141,19 @@ if(ENABLE_HDF5)
     add_definitions(-D_USE_HDF5=1)
 endif() # ENABLE_HDF5
 
+if(ENABLE_UDA)
+    find_path(UDA_INCLUDE_DIR
+        NAMES uda.h
+        HINTS "/usr/include" "/usr/local/include" "/home/david/sw/uda/install/include/uda"
+    )
+    find_library(UDA_CPP_LIB
+        NAMES uda_cpp
+        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda/install/lib/"
+    )
+    list(APPEND UDA_LIBRARIES ${UDA_CPP_LIB})
+    add_definitions(-D_USE_UDA=1)
+endif() # ENABLE_UDA
+
 if(DEBUG)
     add_definitions(-DDEBUG)
 endif() # DEBUG
@@ -169,6 +167,12 @@ message("Source dir is: ${hdc_SOURCE_DIR}")
 
 add_subdirectory(thirdparty)
 include_directories(thirdparty/Pluma-1.1/include)
+
+# jsoncpp
+include_directories(thirdparty/jsoncpp)
+add_subdirectory(thirdparty/jsoncpp)
+
+include_directories(thirdparty)
 
 include_directories(include)
 add_subdirectory(src)
