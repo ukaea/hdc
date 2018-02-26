@@ -1,6 +1,6 @@
 #include "hdc_c.h"
 #include "hdc.hpp"
-#include "types.h"
+#include "hdc_types.h"
 struct hdc_t {
     void* obj;
 };
@@ -14,13 +14,19 @@ struct hdc_t* hdc_new_empty() {
     return h;
 }
 
+struct hdc_t* hdc_new_string(const char* str) {
+    HDC* node = new HDC(str);
+    struct hdc_t* h = new struct hdc_t;
+    h->obj = (void*)node;
+    return h;
+}
+
 struct hdc_t* hdc_new_size(size_t s) {
     HDC* node = new HDC(s);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
 }
-
 
 hdc_t* hdc_new_int8(int ndim, size_t* shape)
 {
@@ -673,7 +679,7 @@ const char* hdc_serialize(hdc_t* tree) {
 }
 
 struct hdc_t* hdc_deserialize(const char* str) {
-    HDC* node = deserialize_HDC_string((string) str);
+    HDC* node = HDC::deserialize_HDC_string((string) str);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;

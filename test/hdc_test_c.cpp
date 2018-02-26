@@ -19,35 +19,35 @@ TEST(CHDC,EmptyNode) {
 TEST(CHDC,EmptyArrayNode) {
     int ndim = 1;
     size_t shape[] = {4};
-    
+
     struct hdc_t* hi8 = hdc_new_dtype(ndim, shape, INT8_ID);
     EXPECT_EQ(1,hdc_get_ndim(hi8));
     EXPECT_EQ(4,hdc_get_shape(hi8)[0]);
     EXPECT_EQ(INT8_ID,hdc_get_type(hi8));
     EXPECT_STREQ("int8",hdc_get_type_str(hi8));
     hdc_delete(hi8);
-    
+
     struct hdc_t* hi32 = hdc_new_dtype(ndim, shape, INT32_ID);
     EXPECT_EQ(1,hdc_get_ndim(hi32));
     EXPECT_EQ(4,hdc_get_shape(hi32)[0]);
     EXPECT_EQ(INT32_ID,hdc_get_type(hi32));
     EXPECT_STREQ("int32",hdc_get_type_str(hi32));
     hdc_delete(hi32);
-    
+
     struct hdc_t* hi64 = hdc_new_dtype(ndim, shape, INT64_ID);
     EXPECT_EQ(1,hdc_get_ndim(hi64));
     EXPECT_EQ(4,hdc_get_shape(hi64)[0]);
     EXPECT_EQ(INT64_ID,hdc_get_type(hi64));
     EXPECT_STREQ("int64",hdc_get_type_str(hi64));
     hdc_delete(hi64);
-    
+
     struct hdc_t* hd = hdc_new_dtype(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hdc_get_ndim(hd));
     EXPECT_EQ(4,hdc_get_shape(hd)[0]);
     EXPECT_EQ(DOUBLE_ID,hdc_get_type(hd));
     EXPECT_STREQ("float64",hdc_get_type_str(hd));
     hdc_delete(hd);
-    
+
     hd = hdc_new_dtype(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hdc_get_ndim(hd));
     EXPECT_EQ(4,hdc_get_shape(hd)[0]);
@@ -169,6 +169,9 @@ TEST(CHDC,StringDataManipulation) {
     hdc_set_string(h,str);
     const char* str2 = hdc_as_string(h);
     EXPECT_STREQ(str, str2);
+    struct hdc_t* h2 = hdc_new_string(str);
+    const char* str22 = hdc_as_string(h2);
+    EXPECT_STREQ(str, str22);
 }
 
 TEST(CHDC,SliceManipulation) {
@@ -191,6 +194,7 @@ TEST(CHDC,SliceManipulation) {
     hdc_set_slice(h,1,sl4);
     EXPECT_STREQ(hdc_get_uuid(sl4),hdc_get_uuid(hdc_get_slice(h,1)));
 }
+
 
 //-----------------------------------------------------------------------------------------
 /*

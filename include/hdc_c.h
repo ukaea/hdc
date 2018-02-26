@@ -4,9 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "types.h"
+#include "hdc_types.h"
 
 struct hdc_t* hdc_new_empty(); /** Default constructor. Creates empty HDC  */
+struct hdc_t* hdc_new_string(const char* str); /** Creates HDC from string/uri */
 struct hdc_t* hdc_new_size(size_t size); /** Creates empty HDC of given size */
 struct hdc_t* hdc_new_int8(int ndim, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
 struct hdc_t* hdc_new_int32(int ndim, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */

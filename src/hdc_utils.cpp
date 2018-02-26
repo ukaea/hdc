@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "hdc_utils.h"
 #include <tuple>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -32,7 +32,7 @@ std::string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-std::vector <boost::variant<size_t,std::string>> split(std::string s) {
+std::vector <boost::variant<size_t,std::string>> split(const std::string& s) {
     std::vector<boost::variant<size_t,std::string>> parts;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     boost::char_separator<char> sep("/]", "[");
@@ -85,8 +85,7 @@ size_t hdc_sizeof (TypeID type) {
         case BOOL_ID:
             return sizeof(bool);
         default:
-            std::cerr << "hdc_sizeof(): Wrong type " << type << std::endl;
-            exit(-1);
+            throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
     }
 };
 
@@ -111,8 +110,7 @@ bool hdc_is_primitive_type(TypeID type) {
         case BOOL_ID:
             return true;
         default:
-            std::cerr << "hdc_is_primitive_type(): Wrong type " << type << std::endl;
-            exit(-1);
+            throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
     }
 }
 
@@ -156,7 +154,9 @@ std::string hdc_type_str(TypeID _type) {
 }
 
 template <typename T>
-TypeID to_typeid(T a) {printf("I don't know this type: %s\n",typeid(T).name()); exit(-1);};
+TypeID to_typeid(T a) {
+    throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(a)+"\n");
+};
 TypeID to_typeid(double a) {return DOUBLE_ID;};
 TypeID to_typeid(float a) {return FLOAT_ID;};
 TypeID to_typeid(int64_t a) {return INT64_ID;};
@@ -224,17 +224,3 @@ TypeID uda_str_to_typeid(std::string& str) {
     }
     return ERROR_ID;
 }
-
-/* -------------------------  Other stuff ----------------------------- */
-
-void hello__() {
-    std::cout << "Hello from c++" << std::endl;
-    return;
-}
-/*
-static bool deleteAll(HDC* elem)
-{
-    delete elem;
-    return true;
-}
-*/

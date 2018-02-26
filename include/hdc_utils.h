@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef HDC_UTILS_H
+#define HDC_UTILS_H
 #include <string>
 #include <vector>
 #include <iostream>
@@ -16,7 +16,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
-#include "types.h"
+#include "hdc_types.h"
+#include "hdc_errors.hpp"
 
 /* ------------------------- UUID generation ----------------------------- */
 
@@ -24,8 +25,7 @@ void print_uuid(std::vector<char> uuid);
 std::vector<char> generate_uuid();
 std::string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
-std::vector <boost::variant<size_t,std::string>> split(std::string s);
-
+std::vector <boost::variant<size_t,std::string>> split(const std::string& s);
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);
 bool hdc_is_primitive_type(TypeID type);

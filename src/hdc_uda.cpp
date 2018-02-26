@@ -29,8 +29,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank) {
                 result.append_slice(n);
             }
         } else {
-            std::cerr << "UDA string rank too high, not implemented yet\n";
-            exit(-1);
+            throw HDCException("UDA string rank too high, not implemented yet\n");
         }
     } else if (uda_data->type().name() == typeid(std::string).name()) {
         auto array = dynamic_cast<uda::Array*>(uda_data);
@@ -76,8 +75,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank) {
             std::cerr << "Unsupported rank\n";
         }*/
     } else {
-        std::cerr << "Type " << uda_data->type().name() << " not yet supported\n";
-        exit(0);
+        throw HDCException("udaData2HDC(): Unsupported type: "+std::string(type_name)+"\n");
     }
     return result;
 }
@@ -197,13 +195,6 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                     if (type_name == "int") result.set_data(ndim,myshape,&(value.as<int>())[0]);
                     if (type_name == "float") result.set_data(ndim,myshape,&(value.as<float>())[0]);
                     if (type_name == "double") result.set_data(ndim,myshape,&(value.as<double>())[0]);
-//                     if (type_name == "char") {
-//                         if (a_rank[i] > 1) {
-//                             std::cerr << "Unsupported rank for \"char\"\n";
-//                             exit(1);
-//                         }
-//                         result.set_string(name,&(value.as<char*>())[0]);
-//                     }
                 }
             } else {
                 if (a_rank[i] == 0) {
@@ -214,14 +205,12 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                     else if (type.name() == typeid(double).name()) result.set_data(value.as<double>());
                     else if (type.name() == typeid(float).name()) result.set_data(value.as<float>());
                     else {
-                        std::cerr << "Unsupported type: " << type.name() << "\n";
-                        exit(0);
+                        throw HDCException("udaTreeNode2HDC(): Unsupported type: "+std::string(type.name())+"\n");
                     }
                 } else {
                     uda::Array value = tree.atomicArray(name);
                     size_t myshape[HDC_MAX_DIMS];
                     int ndim = a_rank[i];
-                    std::cout << "ndim " << a_rank[i] << "\n";getchar();
                     std::vector<size_t> shape = value.shape();
                     for (int i=0;i<ndim;i++) myshape[i] = shape[i];
                     auto& type = value.type();
@@ -229,10 +218,8 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree) {
                     else if (type.name() == typeid(short).name()) result.set_data(ndim,myshape,&(value.as<short>()[0]));
                     else if (type.name() == typeid(double).name()) result.set_data(ndim,myshape,&(value.as<double>()[0]));
                     else if (type.name() == typeid(float).name()) result.set_data(ndim,myshape,&(value.as<float>()[0]));
-//                     else if ()
                     else {
-                        std::cerr << "Unsupported type: " << type.name() << "\n";
-                        exit(0);
+                        throw HDCException("udaTreeNode2HDC(): Unsupported type: "+std::string(type.name())+"\n");
                     }
                 }
             }
@@ -297,8 +284,7 @@ HDC HDC::from_uda(const std::string& signalName, const std::string& dataSource, 
 #else // _USE_UDA
 
 HDC HDC::from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata) {
-    std::cerr << "UDA backend has been disabled at compile time." << std::endl;
-    exit(-1);
+    throw HDCException("UDA backend has been disabled at compile time.\n");
 }
 
 #endif // _USE_UDA

@@ -16,7 +16,7 @@ if (BUILD_MDBM_PLUGIN)
 
         message("Found MDBM library: ${MDBM_LIBRARY}")
 
-        add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp ../src/jsoncpp.cpp)
+        add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp)
         target_link_libraries(hdc_plugin_mdbm ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})
         install(TARGETS hdc_plugin_mdbm DESTINATION lib/hdc)
     else ()
