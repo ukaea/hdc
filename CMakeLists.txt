@@ -167,6 +167,12 @@ message("Source dir is: ${hdc_SOURCE_DIR}")
 add_subdirectory(thirdparty)
 include_directories(thirdparty/Pluma-1.1/include)
 
+# jsoncpp
+include_directories(thirdparty/jsoncpp)
+add_subdirectory(thirdparty/jsoncpp)
+
+include_directories(thirdparty)
+
 include_directories(include)
 add_subdirectory(src)
 add_subdirectory(plugins)
