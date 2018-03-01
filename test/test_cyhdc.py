@@ -62,6 +62,15 @@ def test_str_type():
     assert value == str(h)
 
 
+def test_keys():
+    tree = HDC()
+    keys = ['a', 'b', 'cc', 'D']
+    for key in keys:
+        tree[key] = 'value'
+    res = list(tree.keys())
+    assert res == keys
+
+
 def test_1():
 
     empty = HDC()

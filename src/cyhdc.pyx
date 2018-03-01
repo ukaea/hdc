@@ -9,6 +9,7 @@ cimport numpy as cnp
 from cython cimport view
 from libc.stdint cimport uint32_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
+from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 
 import numbers
@@ -71,6 +72,8 @@ cdef extern from "hdc.hpp":
         # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
         T as[T]()
         string as_string()
+        vector[string] keys()
+        size_t childs_count()
 
 
 cdef class HDC:
@@ -249,3 +252,9 @@ cdef class HDC:
 
     def __releasebuffer__(self, Py_buffer *buffer):
         pass
+
+    def keys(self):
+        """Get access keys of containers' children
+        """
+        keys = deref(self._thisptr).keys()
+        return (k.decode() for k in keys)
