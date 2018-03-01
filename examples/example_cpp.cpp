@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, const char *argv[]) {
     HDC::parse_cmdline(argc,argv);
-    HDC::init("mdbm");
+    HDC::init();
     // Create new HDC tree
     HDC tree;
     // Add some children
@@ -70,5 +70,6 @@ int main(int argc, const char *argv[]) {
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
+
     return 0;
 }
