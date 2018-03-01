@@ -25,13 +25,14 @@ Building HDC
 ------------
 There are several cmake options:
 
+  - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
   - `-DBUILD_DOCUMENTATION=ON` Whether to build and install documentation.
   - `-DBUILD_EXAMPLES=ON` Whether to build and install examples.
-  - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
+  - `-DENABLE_HDF5=OFF` Switch off HDF5 serialization.
+  - Python, if not detected correctly:
+    - `-DPYTHON_LIBRARY=/path/to/libpython.so`
+    - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`
   - `-DDEBUG=ON` Whether to print debugging messages.
-  - `-DBUILD_PYBIND=ON` switch on pybind11 Python module generation (not necessary at the moment for pyhdc, which uses pure C-API via ctypes)
-  - `-DPYTHON_LIBRARY=/path/to/libpython.so` On abacus set this to `/sw/python2/anaconda3/lib/libpython3.4m.so`
-  - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`  On abacus set this to `/sw/python2/anaconda3/include/python3.4m/`
 
 Some of them can be edited using `ccmake .` in`build` directory. The example of build follows:
 
@@ -45,7 +46,7 @@ cd hdc
 mkdir build
 cd build
 
-cmake -DDEBUG=OFF ..
+cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
 make -j4
 
 # Optionally install
