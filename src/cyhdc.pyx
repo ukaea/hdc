@@ -188,6 +188,16 @@ cdef class HDC:
     def dumps(self):
         return deref(self._thisptr).to_json_string().decode()
 
+    def dump(self, fp):
+        """Save to json file
+
+        Parameters
+        ----------
+        fp : .write supporting object (open file)
+            target to write to
+        """
+        fp.write(self.dumps())
+
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
 
