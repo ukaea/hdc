@@ -201,8 +201,11 @@ cdef class HDC:
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
 
+    cdef get_type(self):
+        return deref(self._thisptr).get_type()
+
     cdef is_array(self):
-        type_id = deref(self._thisptr).get_type()
+        type_id = self.get_type()
         # check whether type id is not in non-array types
         return  type_id not in (HDC_EMPTY,
                                 HDC_STRUCT,
@@ -214,7 +217,7 @@ cdef class HDC:
     def __str__(self):
         # return string representation
         # TODO
-        if deref(self._thisptr).get_type() == HDC_STRING:
+        if self.get_type() == HDC_STRING:
             return deref(self._thisptr).as_string().decode()
 
         if self.is_array():
@@ -223,7 +226,6 @@ cdef class HDC:
         else:
             # fall back to repr
             return repr(self)
-            # raise NotImplementedError('HDC type {} not implemented'.format(self.get_type_str()))
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
 
