@@ -1,5 +1,8 @@
+from pyhdc import HDC
+import random
+import string
+import itertools
 import pytest
-from cyhdc import HDC
 import numpy as np
 import json
 
@@ -87,6 +90,50 @@ def test_1():
     assert 'A' not in tree
     assert 'SUB' not in tree
     # assert tree['sub']['sub'] == tree['sub/sub']
+
+
+def random_array(low=0, high=1e10, ndim=1, maxsize=20, dtype=np.float_):
+    # random size and data
+    size = np.random.random_integers(1, maxsize, ndim)
+    a, b = np.random.random_integers(low, high, size=(2, ))
+    data = ((high - low) * np.random.random(size=size) + low).astype(dtype)
+    return data
+
+
+def random_key(nchars=5):
+    key = "".join((random.choice(string.ascii_letters) for _ in range(nchars)))
+    return key
+
+
+def test_in_op():
+    tree = HDC()
+    keys1 = [random_key() for _ in range(3)]
+    keys2 = [random_key() for _ in range(3)]
+    # put random data
+    for key1 in keys1:
+        tree[key1] = HDC()
+    for key in itertools.chain(keys1, keys2):
+        if key in keys1:
+            assert key in tree
+        else:
+            assert key not in tree
+
+
+def test_in_op_nested():
+    tree = HDC()
+    keys1 = [random_key() for _ in range(3)]
+    keys2 = [random_key() for _ in range(4)]
+
+    # create nested tree
+    for key1 in keys1:
+        tree[key1] = HDC()
+        for key2 in keys2:
+            tree[key1][key2] = None
+
+    for key1 in keys1:
+        assert key1 in tree
+        for key2 in keys2:
+            assert key2 in tree[key1]
 
 
 if __name__ == '__main__':
