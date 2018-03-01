@@ -26,7 +26,7 @@ import numpy as np
 ctypedef double* doubleptr
 ctypedef void* voidptr
 
-cdef extern from "types.h":
+cdef extern from "hdc_types.h":
     cdef size_t HDC_EMPTY
     cdef size_t HDC_STRUCT
     cdef size_t HDC_LIST
