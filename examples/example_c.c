@@ -58,7 +58,7 @@ struct hdc_t* init_hdc_data() {
 
     // Add data to a single node
     struct hdc_t* data = hdc_new_empty();
-    hdc_set_int32(data,1,shape,(void*)array);
+    hdc_set_int32(data,1,shape,(void*)array,0);
 
     // Add data to a subtree
     hdc_set_int32_path(tree,"groupA/data/int_array",1,shape,(void*)array);

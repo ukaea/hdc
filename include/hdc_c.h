@@ -32,7 +32,7 @@ void hdc_set_int8_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, 
 
 void hdc_set_double(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
 void hdc_set_float(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
-void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data);  /**  */
+void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags);  /**  */
 void hdc_set_string_path(struct hdc_t* tree, char* path, char* str);  /**  */
 void hdc_set_string(struct hdc_t* tree, char* str);  /**  */
 const char* hdc_as_string_path(struct hdc_t* tree, char* path);

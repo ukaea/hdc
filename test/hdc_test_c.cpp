@@ -113,7 +113,7 @@ TEST(CHDC,Int32DataManipulation) {
     size_t shape[] = {4};
     int32_t data[] = {777,20202020,3333,555555};
     struct hdc_t* h = hdc_new_empty();
-    hdc_set_int32(h,ndim,shape,(void*)data);
+    hdc_set_int32(h,ndim,shape,(void*)data,0);
     EXPECT_EQ(INT32_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
@@ -121,7 +121,7 @@ TEST(CHDC,Int32DataManipulation) {
     int32_t* data2 = hdc_as_int32_1d(h);
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 666;
-    hdc_set_int32(h,ndim,shape,(void*)data);
+    hdc_set_int32(h,ndim,shape,(void*)data,0);
     data2 = hdc_as_int32_1d(h);
     EXPECT_EQ(666,data2[3]);
 }

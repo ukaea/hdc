@@ -8,6 +8,12 @@ module hdc_fortran
     integer, parameter :: dp=kind(1.0D0)
     integer, parameter :: sp=kind(1.0)
 
+    integer(kind=c_int64_t), parameter ::  HDCDefault             = 0_8
+    integer(kind=c_int64_t), parameter ::  HDCFortranOrder        = 1_8
+    integer(kind=c_int64_t), parameter ::  HDCReadOnly            = 2_8
+    integer(kind=c_int64_t), parameter ::  HDCExternal            = 4_8
+    integer(kind=c_int64_t), parameter ::  HDCChildrenInitialized = 8_8
+
     private
     interface
         subroutine hello() bind(c,name="hello")
@@ -198,12 +204,13 @@ module hdc_fortran
         end subroutine c_hdc_set_int8
 
         !> Sets array of int32. This is interface to C.
-        subroutine c_hdc_set_int32(obj, ndim, shape_, data) bind(c,name="hdc_set_int32")
+        subroutine c_hdc_set_int32(obj, ndim, shape_, data, flags) bind(c,name="hdc_set_int32")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_int32
 
         !> Sets array of int32. This is interface to C.
@@ -794,18 +801,24 @@ contains
         call c_hdc_set_int8(this, ndim, shape_ptr, data_ptr)
     end subroutine hdc_set_int8_1d
 
-    subroutine hdc_set_int32_1d(this, data)
+    subroutine hdc_set_int32_1d(this, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
-!        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_int32(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_int32(this, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_int32_1d
 
     subroutine hdc_set_int8_scalar(this, data)

@@ -172,9 +172,9 @@ void hdc_set_float(struct hdc_t* tree, int ndim, size_t* shape, void* data) {
     return;
 }
 
-void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data) {
+void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags) {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_c(ndim, shape, data, INT32_ID);
+    t->set_data_c(ndim, shape, data, INT32_ID, _flags);
     return;
 }
 

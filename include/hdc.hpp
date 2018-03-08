@@ -232,10 +232,10 @@ public:
         }
         get(path).set_string(str);
     }
-    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type);
-    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type);
+    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {

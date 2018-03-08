@@ -22,7 +22,7 @@ static void BM_C_HDC_SetData(benchmark::State& state) {
     int32_t* data = new int32_t[state.range(0)];
     memset(data,1,sizeof(int32_t)*state.range(0));
     while (state.KeepRunning()) {
-        hdc_set_int32(node,1,shape,data);
+        hdc_set_int32(node,1,shape,data,0);
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(int32_t)));
     hdc_delete(node);
@@ -38,7 +38,7 @@ static void BM_C_HDC_GetData(benchmark::State& state) {
     int32_t* data = new int32_t[state.range(0)];
     int32_t* data_copy = new int32_t[state.range(0)];
     memset(data,1,sizeof(int32_t)*state.range(0));
-    hdc_set_int32(node,1,shape,data);
+    hdc_set_int32(node,1,shape,data,0);
     while (state.KeepRunning()) {
         int32_t* data2 = hdc_as_int32_1d(node);
         memcpy(data_copy,data2,state.range(0)*sizeof(int32_t));

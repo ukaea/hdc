@@ -892,7 +892,7 @@ HDC* HDC::copy(int copy_arrays) {
     return new HDC(this);
 }
 
-void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
+void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags) {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_type_str(static_cast<TypeID>(_type)).c_str());)
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
@@ -921,7 +921,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type) {
     }
 }
 
-void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type) {
+void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags) {
     if(!has_child(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
@@ -929,7 +929,7 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _
     get(path).set_data_c(_ndim, _shape, _data, _type);
 }
 
-void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type) {
+void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags) {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0],hdc_type_str(static_cast<TypeID>(_type)).c_str());)
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(header_t));
@@ -958,7 +958,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type)
     }
 }
 
-void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type) {
+void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags) {
     if(!has_child(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
