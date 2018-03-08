@@ -27,6 +27,7 @@ void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n); /**  */
 void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n); /**  */
 void hdc_insert_slice(struct hdc_t* tree, size_t i, struct hdc_t* n); /**  */
 bool hdc_has_child(struct hdc_t* tree, char* path);  /**  */
+void hdc_print_info(struct hdc_t* tree);
 void hdc_set_int8     (struct hdc_t* tree,             int ndim, size_t* shape, void* data);  /**  */
 void hdc_set_int8_path(struct hdc_t* tree, char* path, int ndim, size_t* shape, void* data); /**  */
 

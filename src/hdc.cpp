@@ -378,7 +378,7 @@ bool HDC::is_readonly() {
 bool HDC::is_fortranorder() {
     return (header.flags & HDCFortranOrder) != 0;
 }
-void HDC::info() {
+void HDC::print_info() {
     printf("Size:\t\t%zu\n",header.buffer_size);
     printf("NDim:\t\t%d\n",get_ndim());
     printf("Shape:\t\t"); for (int i=0;i<HDC_MAX_DIMS;i++) printf("%zu,",get_shape()[i]);

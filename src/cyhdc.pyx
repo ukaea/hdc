@@ -20,6 +20,7 @@ cdef extern from "hdc.hpp":
         CppHDC* get_ptr(string path)
         bool has_child(string path)
         void set_string(string data)
+        void print_info()
 
 
 cdef class HDC:
@@ -65,9 +66,9 @@ cdef class HDC:
     def __setitem__(self, key, value):
         if isinstance(key, six.string_types):
             if key not in self:
-                # cdef CppHDC* new_hdc = new CppHDC() 
+                # cdef CppHDC* new_hdc = new CppHDC()
                 # deref(new_hdc).set_data(value)
-                new_hdc = HDC(value) 
+                new_hdc = HDC(value)
                 deref(self._thisptr).add_child(key.encode(), new_hdc._thisptr)
             else:
                 self[key].set_data(value)
@@ -99,3 +100,6 @@ cdef class HDC:
 
     def dumps(self):
         return deref(self._thisptr).to_json_string().decode()
+
+    def print_info(self):
+        return deref(self._thisptr).print_info()

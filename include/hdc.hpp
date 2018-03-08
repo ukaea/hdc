@@ -285,7 +285,7 @@ public:
     bool is_external();
     bool is_readonly();
     bool is_fortranorder();
-    void info();
+    void print_info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
     void add_child(const std::string& path, HDC* n);

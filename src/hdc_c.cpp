@@ -69,6 +69,12 @@ void hdc_delete(struct hdc_t* tree) {
     return;
 }
 
+void hdc_print_info(struct hdc_t* tree) {
+    HDC* t = (HDC*)tree->obj;
+    t->print_info();
+    return;
+}
+
 void hdc_delete_ptr(void* tree) {
     delete (HDC*)((struct hdc_t*)tree)->obj;
     return;

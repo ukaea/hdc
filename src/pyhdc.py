@@ -50,6 +50,7 @@ _hdc_get_type_str.restype = ctypes.c_char_p
 _hdc_as_string = libchdc.hdc_as_string
 _hdc_as_string.restype = ctypes.c_char_p
 _hdc_dumps = libchdc.hdc_dumps
+_hdc_print_info = libchdc.hdc_print_info
 _hdc_dumps.restype = ctypes.c_char_p
 _hdc_childs_count = libchdc.hdc_childs_count
 _hdc_childs_count.restype = ctypes.c_ulong
@@ -254,6 +255,12 @@ class HDC(object):
         """Dump the continer
         """
         return _hdc_dumps(self.c_ptr).decode()
+
+    def print_info(self):
+        """Dump the continer
+        """
+        return _hdc_print_info(self.c_ptr)
+
 
     def json_dump(self, filename, mode=0):
         """Save to json file
