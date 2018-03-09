@@ -95,7 +95,7 @@ TEST(CHDC,Int8DataManipulation) {
     size_t shape[] = {4};
     int8_t data[] = {7,20,3,5};
     struct hdc_t* h = hdc_new_empty();
-    hdc_set_int8(h,ndim,shape,(void*)data);
+    hdc_set_int8(h,ndim,shape,(void*)data,HDCDefault);
     EXPECT_EQ(INT8_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
@@ -103,7 +103,7 @@ TEST(CHDC,Int8DataManipulation) {
     int8_t* data2 = hdc_as_int8_1d(h);
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 120;
-    hdc_set_int8(h,ndim,shape,(void*)data);
+    hdc_set_int8(h,ndim,shape,(void*)data,HDCDefault);
     data2 = hdc_as_int8_1d(h);
     EXPECT_EQ(120,data2[3]);
 }
@@ -113,7 +113,7 @@ TEST(CHDC,Int32DataManipulation) {
     size_t shape[] = {4};
     int32_t data[] = {777,20202020,3333,555555};
     struct hdc_t* h = hdc_new_empty();
-    hdc_set_int32(h,ndim,shape,(void*)data,0);
+    hdc_set_int32(h,ndim,shape,(void*)data,HDCDefault);
     EXPECT_EQ(INT32_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
@@ -121,7 +121,7 @@ TEST(CHDC,Int32DataManipulation) {
     int32_t* data2 = hdc_as_int32_1d(h);
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 666;
-    hdc_set_int32(h,ndim,shape,(void*)data,0);
+    hdc_set_int32(h,ndim,shape,(void*)data,HDCDefault);
     data2 = hdc_as_int32_1d(h);
     EXPECT_EQ(666,data2[3]);
 }
@@ -131,7 +131,7 @@ TEST(CHDC,Int64DataManipulation) {
     size_t shape[] = {4};
     int64_t data[] = {777,20202020,3333,555555};
     struct hdc_t* h = hdc_new_empty();
-    hdc_set_int64(h,ndim,shape,(void*)data);
+    hdc_set_int64(h,ndim,shape,(void*)data,HDCDefault);
     EXPECT_EQ(INT64_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
@@ -139,7 +139,7 @@ TEST(CHDC,Int64DataManipulation) {
     int64_t* data2 = hdc_as_int64_1d(h);
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 666;
-    hdc_set_int64(h,ndim,shape,(void*)data);
+    hdc_set_int64(h,ndim,shape,(void*)data,HDCDefault);
     data2 = hdc_as_int64_1d(h);
     EXPECT_EQ(666,data2[3]);
 }
@@ -150,7 +150,7 @@ TEST(CHDC,DoubleDataManipulation) {
     size_t shape[] = {4};
     double data[] = {0.0,1000.0,1.0e-200,1.0e200};
     struct hdc_t* h = hdc_new_empty();
-    hdc_set_double(h,ndim,shape,data);
+    hdc_set_double(h,ndim,shape,data,HDCDefault);
     EXPECT_EQ(DOUBLE_ID,hdc_get_type(h));
     EXPECT_EQ(1,hdc_get_ndim(h));
     EXPECT_EQ(4,hdc_get_shape(h)[0]);
@@ -158,7 +158,7 @@ TEST(CHDC,DoubleDataManipulation) {
     double* data2 = hdc_as_double_1d(h);
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     data[3] = 666.666;
-    hdc_set_double(h,ndim,shape,data);
+    hdc_set_double(h,ndim,shape,data,HDCDefault);
     data2 = hdc_as_double_1d(h);
     EXPECT_EQ(666.666,data2[3]);
 }

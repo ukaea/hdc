@@ -913,6 +913,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags
     } else {
         header.buffer_size = buffer_size;
         header.data_size = data_size;
+        header.flags = _flags;
         memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
         for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
         header.type = static_cast<TypeID>(_type);
@@ -931,7 +932,7 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get(path).set_data_c(_ndim, _shape, _data, _type);
+    get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
 }
 
 void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags) {
@@ -950,6 +951,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type,
     } else {
         header.buffer_size = buffer_size;
         header.data_size = data_size;
+        header.flags = _flags;
         memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
         for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
         header.type = static_cast<TypeID>(_type);
@@ -968,7 +970,7 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const v
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get(path).set_data_c(_ndim, _shape, _data, _type);
+    get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
 }
 
 void HDC::insert_slice(size_t i, HDC* h) {

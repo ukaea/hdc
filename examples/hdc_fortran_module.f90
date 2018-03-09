@@ -2,6 +2,21 @@
 ! module hdc_fortran_module
 ! contains
 
+subroutine test_array_ordering_out(tree_out)
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    type(hdc_t), value :: tree_out
+    integer :: ix, iy
+    integer, parameter :: nx = 5, ny = 7
+    real(kind=DP) :: array(nx,ny)
+    ! init array first
+    array(:,:) = 2.22_dp
+    array(:,3) = 0.0_dp
+    array(2,:) = 3.14159_dp
+    call hdc_set(tree_out,array)
+end subroutine test_array_ordering_out
+
 
 subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
     use hdc_fortran
@@ -10,7 +25,7 @@ subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
     ! type(hdc_t), value :: equilibriumin
     type(hdc_t), value :: equilibriumin, tree_out
     type(hdc_t) :: distsourceout
-    
+
 
 
     write(*,*)'=== test_cpos_f2c START ==='
@@ -32,7 +47,7 @@ subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
 end subroutine
 
 
-subroutine test_cpos(equilibriumin, distsourceout) 
+subroutine test_cpos(equilibriumin, distsourceout)
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -40,7 +55,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
     integer :: i
 
 
-    !UAL ! Always describe cpo as array 
+    !UAL ! Always describe cpo as array
     !UAL ! In case of time slice, the size of the input cpo is 1
     !UAL type (type_equilibrium),pointer :: equilibriumin(:)
     !UAL type (type_distsource),pointer :: distsourceout(:)
@@ -96,7 +111,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
 
         !HDC this needs hdc_t write / format support -- HOW?
         ! write(0,*) 'Received input time from equilibrium: ', hdc_as_double(equilibrium_i, 'time')
-        
+
         ! call hdc_get(equilibrium_i, 'time', time)
         time = hdc_as_double(equilibrium_i, 'time')
         write(0,*) 'Received input time from equilibrium: ', time

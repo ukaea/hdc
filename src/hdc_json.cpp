@@ -205,11 +205,16 @@ HDC HDC::json_to_HDC(const ::Json::Value& root) {
 }
 
 template<typename T>
-Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
+Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape, bool fortranOrder = false) {
     // TODO: Add Fortran column order
 
     Json::Value root;
-    andres::View<T> view(shape, shape+ndim, (T*)buffer,andres::FirstMajorOrder);
+    andres::CoordinateOrder order;
+    if (fortranOrder)
+        order = andres::LastMajorOrder;
+    else
+        order = andres::FirstMajorOrder;
+    andres::View<T> view(shape, shape+ndim, (T*)buffer,order);
     //TODO add fortran - C order switch
     switch(ndim) {
         case(0):
@@ -309,52 +314,52 @@ Json::Value HDC::to_json(int mode) {
         switch(header.type) {
             case(INT8_ID):
             {
-                root = buffer_to_json<int8_t>(get_data_ptr(),get_ndim(),get_shape());
+                root = buffer_to_json<int8_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(INT16_ID):
             {
-                root =  buffer_to_json<int16_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<int16_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(INT32_ID):
             {
-                root =  buffer_to_json<int32_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<int32_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(INT64_ID):
             {
-            root =  buffer_to_json<int64_t>(get_data_ptr(),get_ndim(),get_shape());
+            root =  buffer_to_json<int64_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(UINT8_ID):
             {
-                root = buffer_to_json<uint8_t>(get_data_ptr(),get_ndim(),get_shape());
+                root = buffer_to_json<uint8_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(UINT16_ID):
             {
-                root =  buffer_to_json<uint16_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<uint16_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(UINT32_ID):
             {
-                root =  buffer_to_json<uint32_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<uint32_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             /*case(UINT64_ID):
              {  *
-             root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape());
+             root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
              break;
             }*/
             case(FLOAT_ID):
             {
-                root =  buffer_to_json<float>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<float>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(DOUBLE_ID):
             {
-                root =  buffer_to_json<double>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<double>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(STRUCT_ID):

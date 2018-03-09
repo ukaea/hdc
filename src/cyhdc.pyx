@@ -44,10 +44,10 @@ cdef extern from "hdc_types.h":
     cdef size_t HDC_STRING
     cdef size_t HDC_BOOL
     cdef size_t HDC_ERROR
-
+    cdef struct hdc_t:
+        pass
 
 cdef extern from "hdc.hpp":
-
     cdef cppclass CppHDC "HDC":
         CppHDC()
         string serialize()
@@ -75,6 +75,7 @@ cdef extern from "hdc.hpp":
         string as_string()
         vector[string] keys()
         size_t childs_count()
+        hdc_t* as_hdc_ptr()
 
 cdef class HDC:
     # data handle
@@ -190,6 +191,9 @@ cdef class HDC:
 
     def print_info(self):
         return deref(self._thisptr).print_info()
+
+    #def as_hdc_ptr(self):
+        #return <hdc_t*> deref(self._thisptr).as_hdc_ptr()
 
     def dump(self, fp):
         """Save to json file
