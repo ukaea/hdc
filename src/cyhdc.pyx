@@ -44,8 +44,8 @@ cdef extern from "hdc_types.h":
     cdef size_t HDC_STRING
     cdef size_t HDC_BOOL
     cdef size_t HDC_ERROR
-    cdef struct hdc_t:
-        pass
+cdef struct hdc_t:
+    voidptr obj
 
 cdef extern from "hdc.hpp":
     cdef cppclass CppHDC "HDC":
@@ -76,6 +76,9 @@ cdef extern from "hdc.hpp":
         vector[string] keys()
         size_t childs_count()
         hdc_t* as_hdc_ptr()
+        bool is_fortranorder()
+        @staticmethod
+        CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr)
 
 cdef class HDC:
     # data handle
@@ -192,8 +195,8 @@ cdef class HDC:
     def print_info(self):
         return deref(self._thisptr).print_info()
 
-    #def as_hdc_ptr(self):
-        #return <hdc_t*> deref(self._thisptr).as_hdc_ptr()
+    def as_hdc_ptr(self):
+        return <intptr_t>deref(self._thisptr).as_hdc_ptr()
 
     def dump(self, fp):
         """Save to json file
@@ -277,3 +280,15 @@ cdef class HDC:
         """
         keys = deref(self._thisptr).keys()
         return (k.decode() for k in keys)
+
+cdef HDC c_from_hdc_ptr(intptr_t h):
+    res = HDC()
+    hh = <hdc_t*> h
+    res._thisptr = <CppHDC*> hh.obj
+    return res
+
+def from_hdc_ptr(h):
+    return c_from_hdc_ptr(h)
+
+def hello():
+    print("Hello from Python..")

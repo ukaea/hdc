@@ -2,20 +2,50 @@
 ! module hdc_fortran_module
 ! contains
 
-subroutine test_array_ordering_out(tree_out)
+subroutine hello_f() bind(c, name="hello_f")
+    use iso_c_binding
+    print *, "--- Hello from FORTRAN"
+end subroutine hello_f
+
+subroutine test_array_ordering_out(tree_out) bind(c, name="test_array_ordering_out")
     use hdc_fortran
     use iso_c_binding
     implicit none
     type(hdc_t), value :: tree_out
     integer :: ix, iy
-    integer, parameter :: nx = 5, ny = 7
+    integer, parameter :: nx = 2, ny = 3
     real(kind=DP) :: array(nx,ny)
     ! init array first
     array(:,:) = 2.22_dp
-    array(:,3) = 0.0_dp
-    array(2,:) = 3.14159_dp
+    array(2,2) = 3.14159_dp
     call hdc_set(tree_out,array)
+    call hdc_print_info(tree_out)
+    call hdc_dump(tree_out)
 end subroutine test_array_ordering_out
+
+subroutine test_dump(tree_out) bind(c, name="test_dump")
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    type(hdc_t), value :: tree_out
+    call hdc_print_info(tree_out)
+    call hdc_dump(tree_out)
+end subroutine test_dump
+
+function test_create() bind(c, name="test_create") result(res)
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    type(hdc_t) :: res
+    integer, parameter :: nx = 2, ny = 3
+    real(kind=DP) :: array(nx,ny)
+    ! init array first
+    array(:,:) = 2.22_dp
+    array(2,2) = 3.14159_dp
+    res = hdc_new_empty()
+    call hdc_set(res,array)
+    print *, "Done"
+end function test_create
 
 
 subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")

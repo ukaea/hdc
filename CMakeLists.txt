@@ -12,7 +12,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
 # Extra cmake modules to find libraries
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
-include( FindPythonAnaconda )
+#include( FindPythonAnaconda )
 include( UseCython )
 include( CTest )
 include( FileCopyTargets )
