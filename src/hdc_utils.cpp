@@ -4,6 +4,7 @@
 #include <boost/variant.hpp>
 #include <typeinfo>
 
+
 /* ------------------------- UUID generation ----------------------------- */
 
 boost::mt19937 ran;
@@ -223,4 +224,136 @@ TypeID uda_str_to_typeid(std::string& str) {
         return DOUBLE_ID;
     }
     return ERROR_ID;
+}
+
+/* -------------------------  Buffer Manipulation  ------------------------- */
+
+char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, bool fortranOrder) {
+    //TODO: remove these ugly switch - cases and use something better (if possible)
+    auto item_size = hdc_sizeof(type_);
+    auto n_items = 1lu;
+    size_t new_shape[HDC_MAX_DIMS];
+    memset(new_shape, 0, sizeof(size_t)*HDC_MAX_DIMS);
+    for (int i=0; i<ndim;i++) {
+        n_items *= shape[i];
+        new_shape[i] = shape[ndim-i-1];
+    }
+    andres::CoordinateOrder order;
+    andres::CoordinateOrder new_order;
+    if (fortranOrder) {
+        order = andres::LastMajorOrder;
+        new_order = andres::FirstMajorOrder;
+    }
+    else {
+        order = andres::FirstMajorOrder;
+        new_order = andres::LastMajorOrder;
+    }
+    char* new_buffer = new char[item_size*n_items];
+
+    switch(type_) {
+        case(INT8_ID):
+        {
+            andres::View<int8_t> view(shape, shape+ndim, (int8_t*)buffer,order);
+            andres::View<int8_t> new_view((size_t*)new_shape, new_shape+ndim, (int8_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(INT16_ID):
+        {
+            andres::View<int16_t> view(shape, shape+ndim, (int16_t*)buffer,order);
+            andres::View<int16_t> new_view((size_t*)new_shape, new_shape+ndim, (int16_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(INT32_ID):
+        {
+            andres::View<int32_t> view(shape, shape+ndim, (int32_t*)buffer,order);
+            andres::View<int32_t> new_view((size_t*)new_shape, new_shape+ndim, (int32_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+//             std::cout << view.asString() << std::endl;
+//             andres::View<int32_t> transposed_view(shape, shape+ndim, (int32_t*)new_buffer,order);
+//             std::cout << transposed_view.asString() << std::endl;
+            break;
+        }
+        case(INT64_ID):
+        {
+            andres::View<int64_t> view(shape, shape+ndim, (int64_t*)buffer,order);
+            andres::View<int64_t> new_view((size_t*)new_shape, new_shape+ndim, (int64_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(UINT8_ID):
+        {
+            andres::View<uint8_t> view(shape, shape+ndim, (uint8_t*)buffer,order);
+            andres::View<uint8_t> new_view((size_t*)new_shape, new_shape+ndim, (uint8_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(UINT16_ID):
+        {
+            andres::View<uint16_t> view(shape, shape+ndim, (uint16_t*)buffer,order);
+            andres::View<uint16_t> new_view((size_t*)new_shape, new_shape+ndim, (uint16_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(UINT32_ID):
+        {
+            andres::View<uint32_t> view(shape, shape+ndim, (uint32_t*)buffer,order);
+            andres::View<uint32_t> new_view((size_t*)new_shape, new_shape+ndim, (uint32_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(UINT64_ID):
+        {
+            andres::View<uint64_t> view(shape, shape+ndim, (uint64_t*)buffer,order);
+            andres::View<uint64_t> new_view((size_t*)new_shape, new_shape+ndim, (uint64_t*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(FLOAT_ID):
+        {
+            andres::View<float> view(shape, shape+ndim, (float*)buffer,order);
+            andres::View<float> new_view((size_t*)new_shape, new_shape+ndim, (float*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(DOUBLE_ID):
+        {
+            andres::View<double> view(shape, shape+ndim, (double*)buffer,order);
+            andres::View<double> new_view((size_t*)new_shape, new_shape+ndim, (double*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(BOOL_ID):
+        {
+            andres::View<bool> view(shape, shape+ndim, (bool*)buffer,order);
+            andres::View<bool> new_view((size_t*)new_shape, new_shape+ndim, (bool*)new_buffer,new_order);
+            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            break;
+        }
+        case(STRUCT_ID):
+        case(LIST_ID):
+        case(EMPTY_ID):
+        case(STRING_ID):
+            throw HDCException("transpose_buffer(): TypeID = "+std::to_string((size_t)type_)+" cannot be transposed.");
+        default:
+        {
+            throw HDCException("transpose_buffer(): TypeID = "+std::to_string((size_t)type_)+" not supported yet.");
+        }
+    }
+
+    return new_buffer;
+}
+
+char* transpose_buffer(char* buffer) {
+    header_t header;
+    memcpy(&header,buffer,sizeof(header_t));
+    auto data = buffer+sizeof(header_t);
+    char* new_buffer = new char[header.buffer_size];
+    bool fortranOrder = (header.flags & HDCFortranOrder) == HDCFortranOrder;
+    std::cout << "fortranOrder" << (int)fortranOrder<< std::endl;
+    auto transposed_data = transpose_buffer(data, header.ndim, header.shape, (TypeID)header.type, fortranOrder);
+    memcpy(new_buffer,&header,sizeof(header_t));
+    memcpy(new_buffer,transposed_data,header.data_size);
+    return new_buffer;
 }

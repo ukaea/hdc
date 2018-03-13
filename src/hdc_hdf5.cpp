@@ -2,11 +2,17 @@
 
 #include "hdc_hdf5.h"
 #ifdef _USE_HDF5
+
 void write_node(HDC h, H5File* file, std::string path) {
     auto buffer = h.get_buffer();
     header_t header;
     memcpy(&header,buffer,sizeof(header_t));
     auto data = buffer + sizeof(header_t);
+    char* transposed_data = NULL;
+    if (h.is_fortranorder()) {
+        transposed_data = transpose_buffer(h.get_buffer(),h.get_ndim(),h.get_shape(),(TypeID)h.get_type(),h.is_fortranorder());
+        data = transposed_data;
+    }
     H5std_string DATASET_NAME(path);
     memcpy(&header,buffer,sizeof(header_t));
     try {
@@ -129,6 +135,7 @@ void write_node(HDC h, H5File* file, std::string path) {
                 throw HDCException("Unknown data type."+std::to_string(header.type)+"\n");
 
         }
+        if (transposed_data != NULL) delete[] transposed_data;
     }  // end of try block
     // catch failure caused by the H5File operations
     catch( FileIException error )

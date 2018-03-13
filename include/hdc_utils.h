@@ -18,6 +18,7 @@
 #include <boost/variant.hpp>
 #include "hdc_types.h"
 #include "hdc_errors.hpp"
+#include <andres/marray.hxx>
 
 /* ------------------------- UUID generation ----------------------------- */
 
@@ -54,5 +55,9 @@ TypeID uda_str_to_typeid(std::string& str);
 
 void hello__();
 
+/* -------------------------  Buffer Manipulation  ------------------------- */
+
+char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, bool fortranOrder = false);
+char* transpose_buffer(char* buffer);
 
 #endif

@@ -289,6 +289,3 @@ cdef HDC c_from_hdc_ptr(intptr_t h):
 
 def from_hdc_ptr(h):
     return c_from_hdc_ptr(h)
-
-def hello():
-    print("Hello from Python..")
