@@ -44,6 +44,8 @@ cdef extern from "hdc_types.h":
     cdef size_t HDC_STRING
     cdef size_t HDC_BOOL
     cdef size_t HDC_ERROR
+    cdef size_t HDCDefault
+    cdef size_t HDCFortranOrder
 cdef struct hdc_t:
     voidptr obj
 
@@ -136,7 +138,7 @@ cdef class HDC:
             raise ValueError("key must be either string or integer")
 
     cdef _set_data(self, cnp.ndarray data):
-
+        cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
         if data.ndim == 0:
@@ -145,22 +147,24 @@ cdef class HDC:
         else:
             # require contiguous C-array
             # TODO C-ordering vs Fortran
+            if (data.flags['F_CONTIGUOUS']):
+                flags |= HDCFortranOrder
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
 
         # TODO support other types
         if np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int32_t*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int32_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int64_t*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int64_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, 0)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, flags)
 
         else:
             NotImplementedError('Type not supported')
@@ -269,7 +273,19 @@ cdef class HDC:
         buffer.shape = shape
         # strides can be NULL if contiguity is not explicitely requested
         buffer.strides = NULL  # strides
+        #if HDCFortranOrder & flags:
+            #buffer.strides = NULL  # strides
+        #else:
+            #TODO: fill reasonable values here
         # for pointer arrays only
+
+        #In [31]: a = numpy.ndarray([2,3,4],order='F')
+        #In [32]: a.strides
+        #Out[32]: (8, 16, 48)
+        #In [33]: a = numpy.ndarray([2,3,4],order='C')
+        #In [34]: a.strides
+        #Out[34]: (96, 32, 8)
+
         buffer.suboffsets = NULL
 
     def __releasebuffer__(self, Py_buffer *buffer):
