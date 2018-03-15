@@ -15,8 +15,8 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 if(${CMAKE_VERSION} VERSION_LESS "3.7.0")
     message("cmake version < 3.7.0, anaconda autodetection will not work. Try this if needed:
 
-    cmake -DPYTHON_INCLUDE_DIR=/home/jurban/opt/anaconda3/include/python3.6m \
-          -DPYTHON_LIBRARY=/home/jurban/opt/anaconda3/lib/libpython3.6m.so.1.0
+    cmake -DPYTHON_INCLUDE_DIR=/opt/anaconda3/include/python3.6m \
+          -DPYTHON_LIBRARY=/opt/anaconda3/lib/libpython3.6m.so.1.0
     ")
 else()
     include( FindPythonAnaconda )
