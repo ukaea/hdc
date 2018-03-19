@@ -67,7 +67,7 @@ private:
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
-    void add_child_single(const std::__cxx11::string& path, HDC& n);
+    void add_child_single(const std::string& path, HDC& n);
 
 public:
     /** Creates empty HDC with specified buffer size */
