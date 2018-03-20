@@ -1174,19 +1174,26 @@ std::vector<size_t> HDC::get_strides() {
     std::vector<size_t> strides;
     size_t elem_size = hdc_sizeof(static_cast<TypeID>(header.type));
     size_t last_stride;
-    // TODO this is for C-arrays (row-major)
-    for (int i = 0; i < header.ndim; ++i)
-    {
-        if (i == 0)
-        {
-            last_stride = elem_size;
-        } else
-        {
-            last_stride = header.shape[header.ndim - i] * last_stride;
+    if (!is_fortranorder()) {
+        for (int i = 0; i < header.ndim; ++i) {
+            if (i == 0) {
+                last_stride = elem_size;
+            } else {
+                last_stride = header.shape[i-1] * last_stride;
+            }
+            strides.insert(strides.end(), last_stride);
         }
-        strides.insert(strides.begin(), last_stride);
+    } else {
+        for (int i = 0; i < header.ndim; ++i) {
+            if (i == 0) {
+                last_stride = elem_size;
+            } else
+            {
+                last_stride = header.shape[header.ndim - i] * last_stride;
+            }
+            strides.insert(strides.begin(), last_stride);
+        }
     }
-
     return strides;
 }
 

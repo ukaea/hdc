@@ -46,6 +46,7 @@ cdef extern from "hdc_types.h":
     cdef size_t HDC_ERROR
     cdef size_t HDCDefault
     cdef size_t HDCFortranOrder
+    cdef size_t HDC_MAX_DIMS
 cdef struct hdc_t:
     voidptr obj
 
@@ -79,6 +80,7 @@ cdef extern from "hdc.hpp":
         size_t childs_count()
         hdc_t* as_hdc_ptr()
         bool is_fortranorder()
+        vector[size_t] get_strides()
         @staticmethod
         CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr)
 
@@ -253,8 +255,11 @@ cdef class HDC:
         cdef Py_ssize_t itemsize = deref(self._thisptr).get_itemsize()
 
         cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
+        cdef vector[size_t] strides = deref(self._thisptr).get_strides()
         cdef int ndim = deref(self._thisptr).get_ndim()
-
+        cdef Py_ssize_t strides_buf[10]
+        for i in range(ndim):
+            strides_buf[i] = strides[i]
         buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
         buffer.format = deref(self._thisptr).get_pybuf_format()  # 'd'
@@ -273,18 +278,13 @@ cdef class HDC:
         buffer.shape = shape
         # strides can be NULL if contiguity is not explicitely requested
         buffer.strides = NULL  # strides
+        buffer.strides = strides_buf
         #if HDCFortranOrder & flags:
-            #buffer.strides = NULL  # strides
+            #buffer.strides = np.cumprod(np.hstack([np.array([1]),buffer.shape[:-1]]))*itemsize
         #else:
-            #TODO: fill reasonable values here
+            #buffer.strides = np.cumprod(np.hstack([buffer.shape[1:],np.array([1])])[::-1])[::-1]*itemsize
+        # wont work here: TODO: move this to C++
         # for pointer arrays only
-
-        #In [31]: a = numpy.ndarray([2,3,4],order='F')
-        #In [32]: a.strides
-        #Out[32]: (8, 16, 48)
-        #In [33]: a = numpy.ndarray([2,3,4],order='C')
-        #In [34]: a.strides
-        #Out[34]: (96, 32, 8)
 
         buffer.suboffsets = NULL
 

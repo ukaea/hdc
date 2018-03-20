@@ -195,6 +195,23 @@ TEST(HDC,StringDataManipulation) {
     delete h;
 }
 
+TEST(HDC,GetStrides) {
+    int32_t array3d[24] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+    size_t shape3d[3] = {2,3,4};
+    HDC threed_f;
+    threed_f.set_data<int32_t>(3,shape3d,array3d,HDCFortranOrder);
+    auto strides_f = threed_f.get_strides();
+    EXPECT_EQ(48,strides_f[0]);
+    EXPECT_EQ(16,strides_f[1]);
+    EXPECT_EQ(4,strides_f[2]);
+    HDC threed_c;
+    threed_c.set_data<int32_t>(3,shape3d,array3d);
+    auto strides_c = threed_c.get_strides();
+    EXPECT_EQ(4,strides_c[0]);
+    EXPECT_EQ(8,strides_c[1]);
+    EXPECT_EQ(24,strides_c[2]);
+}
+
 TEST(HDC,SliceManipulation) {
     HDC* h = new HDC();
     HDC* sl = new HDC();
