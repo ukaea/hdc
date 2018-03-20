@@ -1,9 +1,9 @@
 import ctypes
-from pyhdc import _HDC_T_P, HDC, libchdc
+from pyhdc import HDC, from_hdc_ptr
 import sys
 import numpy as np
 
-fmodule = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
+fm = ctypes.cdll.LoadLibrary('libhdc_fortran_module.so')
 
 
 def test_cpos(equilibriumin):
@@ -17,7 +17,7 @@ def test_cpos(equilibriumin):
     # in the Python / C wrapper, the output tree must be constructed
     tree = HDC()
     # the Fortran wrapper is called with output tree already allocated
-    fmodule.test_cpos_f2c(equilibriumin.c_ptr, tree.c_ptr)
+    fm.test_cpos_f2c(equilibriumin.as_hdc_ptr(), tree.as_hdc_ptr())
 
     return tree
 
@@ -35,22 +35,31 @@ if __name__ == '__main__':
     #     ctypes.byref(ctypes.c_int64(0)), ctypes.byref(ctypes.c_double(1.1)))
     equilibrium['time'] = np.array(2.34)
 
-    print("equilibrium['time'] -> {}".format(equilibrium['time'].as_array()))
-    print("equilibrium['profiles_1d/psi'] -> {}".format(equilibrium['profiles_1d/psi'].as_array()))
+    print("equilibrium['time'] -> {}".format(np.asarray(equilibrium['time'])))
+    print("equilibrium['profiles_1d/psi'] -> {}".format(np.asarray(equilibrium['profiles_1d/psi'])))
 
     # print('py call c_test_cpos')
-    # fmodule.c_test_cpos(equilibrium.c_ptr)
+    # fm.c_test_cpos(equilibrium.c_ptr)
     # print('-- py call c_test_cpos end --')
 
     tree = test_cpos(equilibrium)
 
     print("=== Python dump")
-    tree.dump()
+    tree.dumps()
 
     print('tree["distsourceout/source/profiles_1d/psi"] %s' %
-          tree["distsourceout/source/profiles_1d/psi"].as_array())
+          np.asarray(tree["distsourceout/source/profiles_1d/psi"]))
 
     print("tree['distsourceout/source/profiles_1d'].keys() = %s" % tree.keys())
     print("tree['distsourceout'].keys() = %s" % tree["distsourceout"].keys())
     print("tree.keys() = %s" % tree.keys())
     # distsource = test_cpos(equilibrium)
+
+
+    h = from_hdc_ptr(fm.test_hdc_create())
+    print(np.asarray(h))
+
+    fm.test_hdc_dump(h.as_hdc_ptr())
+
+    fm.test_hdc_modify(h.as_hdc_ptr())
+    print(np.asarray(h))

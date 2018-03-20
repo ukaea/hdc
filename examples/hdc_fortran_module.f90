@@ -7,7 +7,9 @@ subroutine hello_f() bind(c, name="hello_f")
     print *, "--- Hello from FORTRAN"
 end subroutine hello_f
 
-subroutine test_array_ordering_out(tree_out) bind(c, name="test_array_ordering_out")
+! TODO: make regular tests from this!
+
+subroutine test_hdc_modify(tree_out) bind(c, name="test_hdc_modify")
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -16,23 +18,23 @@ subroutine test_array_ordering_out(tree_out) bind(c, name="test_array_ordering_o
     integer, parameter :: nx = 2, ny = 3
     real(kind=DP) :: array(nx,ny)
     ! init array first
-    array(:,:) = 2.22_dp
-    array(2,2) = 3.14159_dp
+    array(:,:) = 9.99_dp
+    array(2,2) = 1.000001_dp
     call hdc_set(tree_out,array)
     call hdc_print_info(tree_out)
     call hdc_dump(tree_out)
-end subroutine test_array_ordering_out
+end subroutine test_hdc_modify
 
-subroutine test_dump(tree_out) bind(c, name="test_dump")
+subroutine test_hdc_dump(tree_in) bind(c, name="test_hdc_dump")
     use hdc_fortran
     use iso_c_binding
     implicit none
-    type(hdc_t), value :: tree_out
-    call hdc_print_info(tree_out)
-    call hdc_dump(tree_out)
-end subroutine test_dump
+    type(hdc_t), value :: tree_in
+    call hdc_print_info(tree_in)
+    call hdc_dump(tree_in)
+end subroutine test_hdc_dump
 
-function test_create() bind(c, name="test_create") result(res)
+function test_hdc_create() bind(c, name="test_hdc_create") result(res)
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -44,8 +46,7 @@ function test_create() bind(c, name="test_create") result(res)
     array(2,2) = 3.14159_dp
     res = hdc_new_empty()
     call hdc_set(res,array)
-    print *, "Done"
-end function test_create
+end function test_hdc_create
 
 
 subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
