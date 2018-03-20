@@ -201,7 +201,7 @@ cdef class HDC:
     def print_info(self):
         return deref(self._thisptr).print_info()
 
-    def as_hdc_ptr(self):
+    def c_ptr(self):
         return <intptr_t>deref(self._thisptr).as_hdc_ptr()
 
     def dump(self, fp):
@@ -297,11 +297,17 @@ cdef class HDC:
         keys = deref(self._thisptr).keys()
         return (k.decode() for k in keys)
 
-cdef HDC c_from_hdc_ptr(intptr_t h):
-    res = HDC()
-    hh = <hdc_t*> h
-    res._thisptr = <CppHDC*> hh.obj
-    return res
+    @staticmethod
+    cdef HDC _from_c_ptr(intptr_t h):
+        """Working horse for method below
+        """
+        res = HDC()
+        hh = <hdc_t*> h
+        res._thisptr = <CppHDC*> hh.obj
+        return res
 
-def from_hdc_ptr(h):
-    return c_from_hdc_ptr(h)
+    @staticmethod
+    def from_c_ptr(h):
+        """Unwraps hdc_t created by C or FORTRAN function called by ctypes.
+        """
+        return HDC._from_c_ptr(h)
