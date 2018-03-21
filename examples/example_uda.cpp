@@ -1,11 +1,19 @@
 #include <iostream>
 #include "hdc.hpp"
-
+#include <stdlib.h>
+#include <unistd.h>
+#include <limits.h>
 #include <vector>
 #include <string>
 using namespace std;
 
 int main(int argc, const char *argv[]) {
+    /*
+     Here we assume that UDA server is running locally, if not, please comment this and set UDA_HOST environment variable...
+     */
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
+    setenv("UDA_HOST", hostname, 1);
 
     /* TESTPLUGIN, no metadata */
     for (int i=0;i<=33;i++) {

@@ -160,6 +160,13 @@ if(ENABLE_UDA)
         HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda/install/lib/"
     )
     list(APPEND UDA_LIBRARIES ${UDA_CPP_LIB})
+    find_library(UDA_CLIENT_LIB
+        NAMES uda_client
+        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda/install/lib/"
+    )
+    list(APPEND UDA_LIBRARIES ${UDA_CLIENT_LIB})
+    find_package( OpenSSL REQUIRED )
+    set(UDA_LIBRARIES ${UDA_LIBRARIES} ${OPENSSL_LIBRARIES})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 

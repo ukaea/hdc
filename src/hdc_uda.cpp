@@ -2,7 +2,7 @@
 
 #ifdef _USE_UDA
 #include <vector>
-#include <uda/uda.h>
+#include <uda.h>
 #include <c++/UDA.hpp>
 
 HDC udaData2HDC(uda::Data* uda_data, int rank) {
