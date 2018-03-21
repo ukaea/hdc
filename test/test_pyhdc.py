@@ -37,6 +37,7 @@ def test_zerocopy(dtype, shape):
     x_out_2 = np.asarray(h)
     assert np.all(x_in * -1 == x_out)
     assert np.all(x_out_2 == x_out)
+    assert h.shape == shape
 
 
 def test_list_type():
@@ -49,6 +50,7 @@ def test_list_type():
     test_list = ["jedna", "dva"]
     h = HDC(test_list)
     assert test_list == json.loads(h.dumps())
+    assert h.shape == (len(test_list), )
 
 
 def test_map_type():
@@ -56,6 +58,7 @@ def test_map_type():
     test_map = {"jedna": "one", "dva": "two"}
     h = HDC(test_map)
     assert test_map == json.loads(h.dumps())
+    assert h.shape == (len(test_map), )
 
 
 def test_str_type():
@@ -63,6 +66,7 @@ def test_str_type():
     value = "test string"
     h = HDC(value)
     assert value == str(h)
+    assert h.shape == (len(value), )
 
 
 def test_keys():

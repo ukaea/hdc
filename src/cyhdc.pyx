@@ -288,6 +288,12 @@ cdef class HDC:
 
         buffer.suboffsets = NULL
 
+    @property
+    def shape(self):
+        cdef int ndim = deref(self._thisptr).get_ndim()
+        cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
+        return tuple((shape[i] for i in range(ndim)))
+
     def __releasebuffer__(self, Py_buffer *buffer):
         pass
 
