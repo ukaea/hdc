@@ -15,3 +15,5 @@ add_file_copy_target(test_pyhdc python test_pyhdc.py)
 install_file_copy_target(test_pyhdc DESTINATION python)
 
 add_test(NAME python_test COMMAND ${PYTHON_EXECUTABLE} "${hdc_BINARY_DIR}/src/test_pyhdc.py" WORKING_DIRECTORY "")
+# TODO: make this more portable
+# add_test(NAME python_test COMMAND ${PYTHON_EXECUTABLE} "-m pytest" WORKING_DIRECTORY "${hdc_BINARY_DIR}/src")
