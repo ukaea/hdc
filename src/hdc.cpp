@@ -270,7 +270,7 @@ HDC::HDC(const std::string str): HDC() {
     } else {
         // fill some data
         memset(&header,0,sizeof(header_t));
-        size_t _data_size = str.length()+1;
+        size_t _data_size = str.length();
         header.buffer_size = _data_size + sizeof(header_t);
         header.data_size = _data_size;
         header.ndim = 1;
@@ -554,7 +554,8 @@ void HDC::add_child_single(const std::string& path, HDC& n) {
                 throw HDCBadAllocException("add_child_single(): Could not allocate enough memory.\n");
             }
         }
-
+        header.shape[0] = children->size();
+        memcpy(buffer,&header,sizeof(header_t));
         if (header.buffer_size != old_size) {
             storage->set(uuid,buffer,header.buffer_size);
         }
@@ -604,6 +605,7 @@ void HDC::delete_child(vector<boost::variant<size_t,std::string>> vs) {
     auto first = vs[0];
     vs.erase(vs.begin());
     map_t* children = get_children_ptr();
+    auto buffer = get_buffer();
     if (vs.empty()) {
         //size_t index;
         if (first.type() == typeid(size_t)) {
@@ -617,6 +619,9 @@ void HDC::delete_child(vector<boost::variant<size_t,std::string>> vs) {
                 children->erase(it);
             }
         }
+        memcpy(&header,buffer,sizeof(header_t));
+        header.shape[0] = children->size();
+        memcpy(buffer,&header,sizeof(header_t));
     } else {
         get(boost::get<std::string>(first)).delete_child(vs);
     }

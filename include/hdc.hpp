@@ -215,7 +215,7 @@ public:
             storage->remove(uuid);
         }
         memset(&header,0,sizeof(header_t));
-        header.data_size = str.length()+1;
+        header.data_size = str.length();
         header.type = STRING_ID;
         header.ndim = 1;
         header.shape[0] = header.data_size;
