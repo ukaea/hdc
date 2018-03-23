@@ -8,7 +8,7 @@ TEST(HDC,EmptyNode) {
     EXPECT_EQ(0,h.get_shape()[0]);
     EXPECT_EQ(1,h.get_ndim());
     EXPECT_EQ(HDC_EMPTY,h.get_type());
-    EXPECT_STREQ("null",h.get_type_str().c_str());
+    EXPECT_STREQ("null",h.get_type_str());
     EXPECT_EQ(false,h.has_child("aaa"));
 }
 
@@ -17,11 +17,10 @@ TEST(HDC,EmptyNodePtr) {
     EXPECT_EQ(0,h->get_shape()[0]);
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(HDC_EMPTY,h->get_type());
-    EXPECT_STREQ("null",h->get_type_str().c_str());
+    EXPECT_STREQ("null",h->get_type_str());
     EXPECT_EQ(false,h->has_child("aaa"));
     delete h;
 }
-
 
 TEST(HDC,EmptyArrayNode) {
     int8_t ndim = 1;
@@ -30,21 +29,21 @@ TEST(HDC,EmptyArrayNode) {
     EXPECT_EQ(1,hi8->get_ndim());
     EXPECT_EQ(4,hi8->get_shape()[0]);
     EXPECT_EQ(INT8_ID,hi8->get_type());
-    EXPECT_STREQ("int8",hi8->get_type_str().c_str());
+    EXPECT_STREQ("int8",hi8->get_type_str());
     delete hi8;
 
     HDC* hi32 = new HDC(ndim, shape, INT32_ID);
     EXPECT_EQ(1,hi32->get_ndim());
     EXPECT_EQ(4,hi32->get_shape()[0]);
     EXPECT_EQ(INT32_ID,hi32->get_type());
-    EXPECT_STREQ("int32",hi32->get_type_str().c_str());
+    EXPECT_STREQ("int32",hi32->get_type_str());
     delete hi32;
 
     HDC* hd = new HDC(ndim, shape, DOUBLE_ID);
     EXPECT_EQ(1,hd->get_ndim());
     EXPECT_EQ(4,hd->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,hd->get_type());
-    EXPECT_STREQ("float64",hd->get_type_str().c_str());
+    EXPECT_STREQ("float64",hd->get_type_str());
     delete hd;
 }
 
@@ -60,7 +59,7 @@ TEST(HDC,NodeManipulation) {
     // Try add
     tree->add_child("aaa/bbb",n1);
     EXPECT_EQ(HDC_STRUCT,tree->get_type());
-    EXPECT_STREQ("struct",tree->get_type_str().c_str());
+    EXPECT_STREQ("struct",tree->get_type_str());
     EXPECT_EQ(true,tree->has_child("aaa/bbb"));
     EXPECT_EQ(true,tree->has_child("aaa"));
     EXPECT_STREQ(n1->get_uuid().c_str(),tree->get_ptr("aaa/bbb")->get_uuid().c_str());
@@ -113,7 +112,7 @@ TEST(HDC,Int8DataManipulation) {
     EXPECT_EQ(INT8_ID,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_STREQ("int8",h->get_type_str().c_str());
+    EXPECT_STREQ("int8",h->get_type_str());
     int8_t* data2 = h->as<int8_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     // This is no longer possible as for some storages data have to be copied (all for now, maybe we can enable specifically for umap storage in future)
@@ -134,7 +133,7 @@ TEST(HDC,Int16DataManipulation) {
     EXPECT_EQ(INT16_ID,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_STREQ("int16",h->get_type_str().c_str());
+    EXPECT_STREQ("int16",h->get_type_str());
     int16_t* data2 = h->as<int16_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     delete h;
@@ -149,7 +148,7 @@ TEST(HDC,Int32DataManipulation) {
     EXPECT_EQ(INT32_ID,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_STREQ("int32",h->get_type_str().c_str());
+    EXPECT_STREQ("int32",h->get_type_str());
     int32_t* data2 = h->as<int32_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     delete h;
@@ -164,7 +163,7 @@ TEST(HDC,Int64DataManipulation) {
     EXPECT_EQ(INT64_ID,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_STREQ("int64",h->get_type_str().c_str());
+    EXPECT_STREQ("int64",h->get_type_str());
     int64_t* data2 = h->as<int64_t*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     delete h;
@@ -180,7 +179,7 @@ TEST(HDC,DoubleDataManipulation) {
     EXPECT_EQ(DOUBLE_ID,h->get_type());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(4,h->get_shape()[0]);
-    EXPECT_STREQ("float64",h->get_type_str().c_str());
+    EXPECT_STREQ("float64",h->get_type_str());
     double* data2 = h->as<double*>();
     for (int i=0;i<3;i++) EXPECT_EQ(data[i],data2[i]);
     delete h;
@@ -222,7 +221,7 @@ TEST(HDC,SliceManipulation) {
     h->append_slice(sl);
     h->append_slice(sl2);
     EXPECT_EQ(HDC_LIST, h->get_type());
-    EXPECT_STREQ("list", h->get_type_str().c_str());
+    EXPECT_STREQ("list", h->get_type_str());
     EXPECT_EQ(1,h->get_ndim());
     EXPECT_EQ(2,h->get_shape()[0]);
     EXPECT_STREQ("1",h->get_slice_ptr(0)->as_string().c_str());
@@ -303,7 +302,7 @@ TEST(HDC,JsonComplete) {
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,s->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), s->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str(), s->get_type_str());
     double* data_double_in = s->as<double*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_double[i],data_double_in[i]);
 
@@ -312,7 +311,7 @@ TEST(HDC,JsonComplete) {
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(4,s->get_shape()[0]);
     EXPECT_EQ(INT32_ID,s->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/bbb/int")->get_type_str().c_str(), tree2.get_ptr("aaa/bbb/int")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/int")->get_type_str(), tree2.get_ptr("aaa/bbb/int")->get_type_str());
     int32_t* data_int_in = s->as<int32_t*>();
     for (int i=0;i < shape[0];i++) EXPECT_EQ(data_int[i],data_int_in[i]);
 
@@ -324,7 +323,7 @@ TEST(HDC,JsonComplete) {
     EXPECT_EQ(1,s->get_ndim());
     EXPECT_EQ(5,s->get_shape()[0]);
     EXPECT_EQ(HDC_LIST,s->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/list")->get_type_str().c_str(), tree2.get_ptr("aaa/list")->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/list")->get_type_str(), tree2.get_ptr("aaa/list")->get_type_str());
     for (int i=0;i<5;i++) EXPECT_EQ(HDC_EMPTY,s->get_slice_ptr(i)->get_type());
 
     // Test string
@@ -344,7 +343,7 @@ TEST(HDC,CopyConstructor) {
     EXPECT_EQ(1,d->get_ndim());
     EXPECT_EQ(4,d->get_shape()[0]);
     EXPECT_EQ(DOUBLE_ID,d->get_type());
-    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str().c_str(), d->get_type_str().c_str());
+    EXPECT_STREQ(tree->get_ptr("aaa/bbb/double")->get_type_str(), d->get_type_str());
     delete copy;
     delete d;
     CLEAN_TREE()

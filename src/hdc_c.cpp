@@ -573,7 +573,7 @@ void test_str(char* str) {
 const char* hdc_get_type_str(hdc_t* tree)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->get_type_str().c_str());
+    return (t->get_type_str());
 }
 
 void hdc_print_type_str(hdc_t* tree)

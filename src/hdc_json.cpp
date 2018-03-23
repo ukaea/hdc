@@ -108,8 +108,8 @@ HDC HDC::json_to_HDC(const ::Json::Value& root) {
         }
         case(Json::stringValue):
         {
-            DEBUG_STDOUT("root is string, value = "+string(root.asCString()));
-            tree.set_string(root.asCString());
+           DEBUG_STDOUT("root is string, value = "+string(root.asString()));
+            tree.set_string(root.asString());
             break;
         }
         case(Json::booleanValue):
@@ -398,7 +398,7 @@ Json::Value HDC::to_json(int mode) {
             }
             default:
             {
-                throw HDCException("to_json(): Type "+get_type_str()+" not supported yet.");
+                throw HDCException("to_json(): Type "+std::string(get_type_str())+" not supported yet.");
             }
         }
     }

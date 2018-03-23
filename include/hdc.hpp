@@ -210,15 +210,15 @@ public:
         return;
     };
 
-    void set_string(string str) {
+    void set_string(std::string str) {
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
         memset(&header,0,sizeof(header_t));
-        header.data_size = str.length();
+        header.data_size = str.length()+1;
         header.type = STRING_ID;
         header.ndim = 1;
-        header.shape[0] = header.data_size;
+        header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(header_t));
@@ -351,7 +351,7 @@ public:
     std::string as_string() {
         if (header.type == STRING_ID) {
             string str(storage->get(uuid)+sizeof(header_t));
-            return str;
+            return std::string(str);
         } else {
             cout << header.type << endl;
             std::ostringstream oss;
@@ -400,7 +400,7 @@ public:
     /** Returns void pointer to data. */
     intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
-    string get_type_str();
+    const char* get_type_str();
     /** Returns Python buffer format string (https://docs.python.org/3/c-api/arg.html#arg-parsing) */
     char * get_pybuf_format();
     /** Returns datashape desctiption string. */

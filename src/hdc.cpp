@@ -1073,7 +1073,7 @@ hdc_t* HDC::as_hdc_ptr() {
     return wrap;
 }
 
-string HDC::get_type_str() {
+const char* HDC::get_type_str() {
     switch(header.type) {
         case EMPTY_ID:
             return "null";
