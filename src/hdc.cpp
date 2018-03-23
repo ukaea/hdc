@@ -534,7 +534,12 @@ void HDC::add_child_single(const std::string& path, HDC& n) {
                     throw (HDCBadAllocException()); // There can be problem to store large strings
                 }
                 record rec(path.c_str(),n.get_uuid().c_str(),segment.get_segment_manager());
-                children->insert(rec);
+                try {
+                    children->insert(rec);
+                }
+                catch (boost::interprocess::bad_alloc e) {
+                    throw (HDCBadAllocException());
+                }
                 redo = 0;
             }
             catch (HDCBadAllocException e) {
