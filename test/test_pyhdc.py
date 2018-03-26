@@ -7,13 +7,16 @@ import numpy as np
 import json
 
 
-@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
 @pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
                                    (1, 3, 4), (7, 2, 3)])
 def test_ndarray(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
-    x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+    if dtype == np.bool_:
+        x_in = np.random.randint(0, 2, size=shape, dtype=dtype)
+    else:
+        x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
     h = HDC()
     h.set_data(x_in)
     x_out = np.asarray(h)
