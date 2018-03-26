@@ -139,6 +139,57 @@ cdef class HDC:
         else:
             raise ValueError("key must be either string or integer")
 
+    def to_python(self, deep=True):
+        """Convert to native Python type data if possible
+
+        Parameters
+        ----------
+        deep : bool
+            True for recursive conversion
+        """
+        type_id = self.get_type()
+        # check whether type id is not in non-array types
+
+        if type_id == HDC_STRING:
+            return str(self)
+        elif type_id == HDC_EMPTY:
+            return None
+        elif type_id == HDC_STRUCT:
+            if deep:
+                return {k: self[k].to_python() for k in self}
+            else:
+                return {k: self[k] for k in self}
+        elif type_id == HDC_LIST:
+            if deep:
+                return [x.to_python() for x in self]
+            else:
+                return [x for x in self]
+        elif self.is_array():
+            if len(self.shape) == 0:
+                return np.asscalar(np.asarray(self))
+            else:
+                return np.asarray(self)
+
+        else:
+            raise TypeError('Type {} not supported'.format(self.get_type_str()))
+
+    def __iter__(self):
+        # TODO implement iteration on C++ level
+        type_id = self.get_type()
+        if type_id == HDC_STRUCT:
+            return iter(self.keys())
+        elif type_id == HDC_LIST:
+            return (self[i] for i in range(len(self)))
+        else:
+            raise TypeError('HDC type {} is not iterable'.format(self.get_type_str()))
+
+    def __len__(self):
+        if self.shape:
+            return self.shape[0]
+        else:
+            # TODO is 0 always correct?
+            return 0
+
     cdef _set_data(self, cnp.ndarray data):
         cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
@@ -155,7 +206,9 @@ cdef class HDC:
         data_view.setflags(write=True)
 
         # TODO support other types
-        if np.issubdtype(data.dtype, np.int8):
+        if np.issubdtype(data.dtype, np.bool_):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <bool*> data_view.data, flags)
+        elif np.issubdtype(data.dtype, np.int8):
             deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
             deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
@@ -223,12 +276,9 @@ cdef class HDC:
     cdef is_array(self):
         type_id = self.get_type()
         # check whether type id is not in non-array types
-        return  type_id not in (HDC_EMPTY,
-                                HDC_STRUCT,
-                                HDC_LIST,
-                                HDC_STRING,
-                                HDC_BOOL,
-                                HDC_ERROR)
+        return type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8, 
+                           HDC_UINT16, HDC_UINT32, HDC_UINT64, HDC_FLOAT, HDC_DOUBLE, 
+                           HDC_BOOL, )
 
     def __str__(self):
         # return string representation

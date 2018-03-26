@@ -7,13 +7,16 @@ import numpy as np
 import json
 
 
-@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8])
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
 @pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
                                    (1, 3, 4), (7, 2, 3)])
 def test_ndarray(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
-    x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+    if dtype == np.bool_:
+        x_in = np.random.randint(0, 2, size=shape, dtype=dtype)
+    else:
+        x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
     h = HDC()
     h.set_data(x_in)
     x_out = np.asarray(h)
@@ -52,6 +55,11 @@ def test_list_type():
     assert test_list == json.loads(h.dumps())
     assert h.shape == (len(test_list), )
 
+    assert len(h) == len(test_list)
+
+    # test iteration
+    assert [x.to_python() for x in h] == test_list
+
 
 def test_map_type():
     h = HDC()
@@ -59,6 +67,10 @@ def test_map_type():
     h = HDC(test_map)
     assert test_map == json.loads(h.dumps())
     assert h.shape == (len(test_map), )
+
+    assert len(h) == len(test_map)
+
+    assert [k for k in h] == list(test_map.keys())
 
 
 def test_str_type():
@@ -121,6 +133,31 @@ def test_in_op():
             assert key in tree
         else:
             assert key not in tree
+
+
+def test_to_python():
+    tree = HDC()
+    tree['root/none'] = None
+    tree['root/str'] = 'string'
+    tree['root/int'] = 1
+    tree['root/float'] = 1.1
+    hdc_list = HDC()
+    hdc_list.append('one')
+    hdc_list.append(2)
+    tree['root/list'] = hdc_list
+    tree['root/numpy'] = np.arange(10)
+
+    pytree = tree.to_python()
+    pytree_test = {'root': {'float': 1.1,
+                            'int': 1,
+                            'list': ['one', 2],
+                            'str': 'string',
+                            'none': None,
+                            }}
+
+    assert all(pytree['root']['numpy'] == np.arange(10))
+    del pytree['root']['numpy']
+    assert pytree == pytree_test
 
 
 def test_in_op_nested():
