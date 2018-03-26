@@ -155,7 +155,9 @@ cdef class HDC:
         data_view.setflags(write=True)
 
         # TODO support other types
-        if np.issubdtype(data.dtype, np.int8):
+        if np.issubdtype(data.dtype, np.bool_):
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <bool*> data_view.data, flags)
+        elif np.issubdtype(data.dtype, np.int8):
             deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
             deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
