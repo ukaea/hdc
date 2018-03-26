@@ -173,6 +173,23 @@ cdef class HDC:
         else:
             raise TypeError('Type {} not supported'.format(self.get_type_str()))
 
+    def __iter__(self):
+        # TODO implement iteration on C++ level
+        type_id = self.get_type()
+        if type_id == HDC_STRUCT:
+            return iter(self.keys())
+        elif type_id == HDC_LIST:
+            return (self[i] for i in range(len(self)))
+        else:
+            raise TypeError('HDC type {} is not iterable'.format(self.get_type_str()))
+
+    def __len__(self):
+        if self.shape:
+            return self.shape[0]
+        else:
+            # TODO is 0 always correct?
+            return 0
+
     cdef _set_data(self, cnp.ndarray data):
         cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view

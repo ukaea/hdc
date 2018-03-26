@@ -55,6 +55,11 @@ def test_list_type():
     assert test_list == json.loads(h.dumps())
     assert h.shape == (len(test_list), )
 
+    assert len(h) == len(test_list)
+
+    # test iteration
+    assert [x.to_python() for x in h] == test_list
+
 
 def test_map_type():
     h = HDC()
@@ -62,6 +67,10 @@ def test_map_type():
     h = HDC(test_map)
     assert test_map == json.loads(h.dumps())
     assert h.shape == (len(test_map), )
+
+    assert len(h) == len(test_map)
+
+    assert [k for k in h] == list(test_map.keys())
 
 
 def test_str_type():
