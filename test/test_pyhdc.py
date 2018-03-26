@@ -126,7 +126,7 @@ def test_in_op():
             assert key not in tree
 
 
-def test_to_python(self):
+def test_to_python():
     tree = HDC()
     tree['root/none'] = None
     tree['root/str'] = 'string'
