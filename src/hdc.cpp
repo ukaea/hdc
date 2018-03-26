@@ -392,6 +392,7 @@ void HDC::print_info() {
     printf("External:\t\t%d\n",is_external());
     printf("ReadOnly:\t\t%d\n",is_readonly());
     printf("FortranOrder:\t%d\n",is_fortranorder());
+    std::cout << "Type:\t" << get_type_str() << "\n";
     return;
 }
 
