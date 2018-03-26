@@ -1176,7 +1176,9 @@ int HDC::get_ndim() {
 
 size_t* HDC::get_shape() {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
-    return header.shape;
+    size_t offset = reinterpret_cast<size_t>(header.shape) - reinterpret_cast<size_t>(&header);
+    //TODO: C++17 has offsetoff
+    return reinterpret_cast<size_t*>(get_buffer()+offset);
 }
 
 std::vector<size_t> HDC::get_strides() {
@@ -1216,6 +1218,7 @@ int HDC::get_ndim(const std::string& path) {
 size_t* HDC::get_shape(const std::string& path) {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
     return get(path).get_shape();
+
 }
 
 

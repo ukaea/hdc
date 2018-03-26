@@ -1751,7 +1751,7 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         integer(kind=c_int32_t) :: ndim
-        integer(kind=c_long), dimension(:), pointer :: shape_
+        integer(kind=c_size_t), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int32_t), dimension(:), pointer :: res
         ndim = c_hdc_get_ndim_path(this,trim(path)//c_null_char)

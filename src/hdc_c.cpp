@@ -226,7 +226,7 @@ size_t* hdc_get_shape(struct hdc_t* tree) {
 
 size_t* hdc_get_shape_path(struct hdc_t* tree, char* path) {
     HDC* t = (HDC*)tree->obj;
-    return t->get_shape((string)path);
+    return t->get_shape(path);
 }
 
 uint8_t hdc_get_type(struct hdc_t* tree) {
