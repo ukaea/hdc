@@ -126,6 +126,31 @@ def test_in_op():
             assert key not in tree
 
 
+def test_to_python(self):
+    tree = HDC()
+    tree['root/none'] = None
+    tree['root/str'] = 'string'
+    tree['root/int'] = 1
+    tree['root/float'] = 1.1
+    hdc_list = HDC()
+    hdc_list.append('one')
+    hdc_list.append(2)
+    tree['root/list'] = hdc_list
+    tree['root/numpy'] = np.arange(10)
+
+    pytree = tree.to_python()
+    pytree_test = {'root': {'float': 1.1,
+                            'int': 1,
+                            'list': ['one', 2],
+                            'str': 'string',
+                            'none': None,
+                            }}
+
+    assert all(pytree['root']['numpy'] == np.arange(10))
+    del pytree['root']['numpy']
+    assert pytree == pytree_test
+
+
 def test_in_op_nested():
     tree = HDC()
     keys1 = [random_key() for _ in range(3)]

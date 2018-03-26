@@ -139,6 +139,40 @@ cdef class HDC:
         else:
             raise ValueError("key must be either string or integer")
 
+    def to_python(self, deep=True):
+        """Convert to native Python type data if possible
+
+        Parameters
+        ----------
+        deep : bool
+            True for recursive conversion
+        """
+        type_id = self.get_type()
+        # check whether type id is not in non-array types
+
+        if type_id == HDC_STRING:
+            return str(self)
+        elif type_id == HDC_EMPTY:
+            return None
+        elif type_id == HDC_STRUCT:
+            if deep:
+                return {k: self[k].to_python() for k in self}
+            else:
+                return {k: self[k] for k in self}
+        elif type_id == HDC_LIST:
+            if deep:
+                return [x.to_python() for x in self]
+            else:
+                return [x for x in self]
+        elif type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8, HDC_UINT16, HDC_UINT32, HDC_UINT64, HDC_FLOAT, HDC_DOUBLE, HDC_BOOL, ):
+            if len(self.shape) == 0:
+                return np.asscalar(np.asarray(self))
+            else:
+                return np.asarray(self)
+
+        else:
+            raise TypeError('Type {} not supported'.format(self.get_type_str()))
+
     cdef _set_data(self, cnp.ndarray data):
         cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
