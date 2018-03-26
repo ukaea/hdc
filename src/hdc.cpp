@@ -1114,8 +1114,8 @@ const char* HDC::get_type_str() {
 }
 
 char * HDC::get_pybuf_format() {
-    // TODO
-    // Ref https://docs.python.org/3/c-api/arg.html#arg-parsing
+    // TODO raise exception for types with no native-C equivalent
+    // Ref https://docs.python.org/3/library/struct.html#struct-format-strings
     switch(header.type) {
         case EMPTY_ID:
             return "null";
@@ -1144,10 +1144,9 @@ char * HDC::get_pybuf_format() {
         case DOUBLE_ID:
             return "d";
         case STRING_ID:
-            // TODO There are multiple options
-            return "s*";
+            return "s";
         case BOOL_ID:
-            return "p";
+            return "?";
         case ERROR_ID:
             return "error";
         default:
