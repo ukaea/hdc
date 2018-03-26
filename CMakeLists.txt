@@ -151,22 +151,11 @@ if(ENABLE_HDF5)
 endif() # ENABLE_HDF5
 
 if(ENABLE_UDA)
-    find_path(UDA_INCLUDE_DIR
-        NAMES uda.h
-        HINTS "/usr/include" "/usr/local/include" "/home/david/sw/uda/install/include/uda"
-    )
-    find_library(UDA_CPP_LIB
-        NAMES uda_cpp
-        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda/install/lib/"
-    )
-    list(APPEND UDA_LIBRARIES ${UDA_CPP_LIB})
-    find_library(UDA_CLIENT_LIB
-        NAMES uda_client
-        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/home/david/sw/uda/install/lib/"
-    )
-    list(APPEND UDA_LIBRARIES ${UDA_CLIENT_LIB})
-    find_package( OpenSSL REQUIRED )
-    set(UDA_LIBRARIES ${UDA_LIBRARIES} ${OPENSSL_LIBRARIES})
+    find_package( PkgConfig QUIET)
+    pkg_check_modules( UDA QUIET uda-fat-cpp )
+    find_package( NetCDF )
+    set(UDA_LIBRARIES ${UDA_LIBRARIES} ${NETCDF_LIBRARIES})
+    link_directories(${UDA_LIBRARY_DIRS})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 

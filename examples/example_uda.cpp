@@ -11,9 +11,9 @@ int main(int argc, const char *argv[]) {
     /*
      Here we assume that UDA server is running locally, if not, please comment this and set UDA_HOST environment variable...
      */
-    char hostname[HOST_NAME_MAX];
-    gethostname(hostname, HOST_NAME_MAX);
-    setenv("UDA_HOST", hostname, 1);
+//     char hostname[HOST_NAME_MAX];
+//     gethostname(hostname, HOST_NAME_MAX);
+//     setenv("UDA_HOST", hostname, 1);
 
     HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='ids_properties/comment', type=string, rank=0, shot=84600, )","");
     h.dump();
