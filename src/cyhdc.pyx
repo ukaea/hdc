@@ -164,7 +164,7 @@ cdef class HDC:
                 return [x.to_python() for x in self]
             else:
                 return [x for x in self]
-        elif type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8, HDC_UINT16, HDC_UINT32, HDC_UINT64, HDC_FLOAT, HDC_DOUBLE, HDC_BOOL, ):
+        elif self.is_array():
             if len(self.shape) == 0:
                 return np.asscalar(np.asarray(self))
             else:
@@ -259,12 +259,9 @@ cdef class HDC:
     cdef is_array(self):
         type_id = self.get_type()
         # check whether type id is not in non-array types
-        return  type_id not in (HDC_EMPTY,
-                                HDC_STRUCT,
-                                HDC_LIST,
-                                HDC_STRING,
-                                HDC_BOOL,
-                                HDC_ERROR)
+        return type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8, 
+                           HDC_UINT16, HDC_UINT32, HDC_UINT64, HDC_FLOAT, HDC_DOUBLE, 
+                           HDC_BOOL, )
 
     def __str__(self):
         # return string representation
