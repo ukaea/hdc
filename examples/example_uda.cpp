@@ -15,6 +15,10 @@ int main(int argc, const char *argv[]) {
     gethostname(hostname, HOST_NAME_MAX);
     setenv("UDA_HOST", hostname, 1);
 
+    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='ids_properties/comment', type=string, rank=0, shot=84600, )","");
+    h.dump();
+    return 0;
+
     /* TESTPLUGIN, no metadata */
     for (int i=0;i<=33;i++) {
         if (i == 17) continue; // Not there
