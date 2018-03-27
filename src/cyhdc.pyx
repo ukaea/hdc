@@ -11,6 +11,7 @@ from libc.stdint cimport uint32_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
+import ctypes
 
 import numbers
 import collections
@@ -254,8 +255,9 @@ cdef class HDC:
     def print_info(self):
         return deref(self._thisptr).print_info()
 
+    @property
     def c_ptr(self):
-        return <intptr_t>deref(self._thisptr).as_hdc_ptr()
+        return ctypes.c_void_p(<intptr_t>deref(self._thisptr).as_hdc_ptr())
 
     def dump(self, fp):
         """Save to json file

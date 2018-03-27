@@ -17,7 +17,7 @@ def test_cpos(equilibriumin):
     # in the Python / C wrapper, the output tree must be constructed
     tree = HDC()
     # the Fortran wrapper is called with output tree already allocated
-    fm.test_cpos_f2c(equilibriumin.c_ptr(), tree.c_ptr())
+    fm.test_cpos_f2c(equilibriumin.c_ptr, tree.c_ptr)
 
     return tree
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     h = HDC.from_c_ptr(fm.test_hdc_create())
     print(np.asarray(h))
 
-    fm.test_hdc_dump(h.c_ptr())
+    fm.test_hdc_dump(h.c_ptr)
 
-    fm.test_hdc_modify(h.c_ptr())
+    fm.test_hdc_modify(h.c_ptr)
     print(np.asarray(h))
