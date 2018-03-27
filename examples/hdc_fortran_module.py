@@ -50,10 +50,9 @@ if __name__ == '__main__':
     print('tree["distsourceout/source/profiles_1d/psi"] %s' %
           np.asarray(tree["distsourceout/source/profiles_1d/psi"]))
 
-    print("tree['distsourceout/source/profiles_1d'].keys() = %s" % tree.keys())
-    print("tree['distsourceout'].keys() = %s" % tree["distsourceout"].keys())
-    print("tree.keys() = %s" % tree.keys())
-    # distsource = test_cpos(equilibrium)
+    print("tree.keys() = %s" % list(tree.keys()))
+    print("tree['distsourceout'].keys() = %s" % list(tree["distsourceout"].keys()))
+    print("tree['distsourceout/source/profiles_1d'].keys() = %s" % list(tree['distsourceout/source/profiles_1d'].keys()))     # distsource = test_cpos(equilibrium)
 
     fm.test_hdc_create.restype = ctypes.c_void_p
     h = HDC.from_c_ptr(fm.test_hdc_create())
