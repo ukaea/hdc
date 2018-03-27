@@ -55,6 +55,7 @@ if __name__ == '__main__':
     print("tree.keys() = %s" % tree.keys())
     # distsource = test_cpos(equilibrium)
 
+    fm.test_hdc_create.restype = ctypes.c_void_p
     h = HDC.from_c_ptr(fm.test_hdc_create())
     print(np.asarray(h))
 
