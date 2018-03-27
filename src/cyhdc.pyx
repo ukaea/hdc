@@ -53,6 +53,7 @@ cdef struct hdc_t:
 cdef extern from "hdc.hpp":
     cdef cppclass CppHDC "HDC":
         CppHDC()
+        CppHDC(string str)
         string serialize()
         size_t get_itemsize()
         size_t get_datasize()
@@ -96,6 +97,8 @@ cdef class HDC:
         elif isinstance(data, self.__class__):
             #  copy constructor
             self._thisptr = (<HDC> data)._thisptr
+        elif isinstance(data, six.string_types):
+            self._thisptr = new CppHDC(bytes(data, 'utf-8'))
         else:
             # assert NotImplementedError()
             self._thisptr = new CppHDC()
