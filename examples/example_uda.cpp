@@ -7,10 +7,8 @@
 #include <string>
 using namespace std;
 
-int main(int argc, const char *argv[]) {
-    /*
-     Here we assume that UDA server is running locally, if not, please comment this and set UDA_HOST environment variable...
-     */
+void imas_plugin() {
+/* Here we assume that UDA server is running locally, if not, please comment this and set UDA_HOST environment variable... */
 //     char hostname[HOST_NAME_MAX];
 //     gethostname(hostname, HOST_NAME_MAX);
 //     setenv("UDA_HOST", hostname, 1);
@@ -19,11 +17,12 @@ int main(int argc, const char *argv[]) {
 //    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )","");
 //    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=float, rank=1, shot=84600, )","");
     HDC h("uda://imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )");
-//    HDC h("uda://imas::get(expName='JET', idx=0, group='equilibrium', variable='time_slice/0/coordinate_system/r', type=double, rank=2, shot=84600, )");
     h.print_info();
     h.dump();
-    return 0;
+    return;
+}
 
+void test_plugin() {
     /* TESTPLUGIN, no metadata */
     for (int i=0;i<=33;i++) {
         if (i == 17) continue; // Not there
@@ -46,7 +45,9 @@ int main(int argc, const char *argv[]) {
         t.dump();
         std::getchar();
     }
+}
 
+void netcdf_plugin(int argc, const char *argv[]) {
     /* NEWCDF4, no metadata */
     if (argc == 2) {
         std::string dirname = argv[1];
@@ -132,5 +133,13 @@ int main(int argc, const char *argv[]) {
         t = HDC::from_uda("NEWCDF4::read(signal=/testGroup/simpleDouble, file = "+dirname+"/test_array_compound_scalars.nc)","");
         t.dump();
     }
+    return;
+}
+
+
+int main(int argc, const char *argv[]) {
+    imas_plugin();
+//     test_plugin();
+//     netcdf_plugin(argc, argv);
     return 0;
 }
