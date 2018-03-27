@@ -11,7 +11,7 @@ export BOOST_ROOT=$BOOST_HOME
 export HDF5_ROOT=$HDF5_HOME
 ```
 # set UDA stuff
-````bash
+```bash
 source ~g2jhollo/setup.env
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:~g2jhollo/uda/etc/
 
@@ -37,7 +37,11 @@ HDC will be installed into hdc/install
 ```bash
 mkdir build
 cd build
-cmake -DPYTHON_INCLUDE_DIR=/marconi_work/eufus_gw/work/g2jurban/miniconda3/include/python3.6m/ -DPYTHON_LIBRARY=/marconi_work/eufus_gw/work/g2jurban/miniconda3/lib/libpython3.6m.so.1.0 -DCYTHON_EXECUTABLE=/marconi_work/eufus_gw/work/g2jurban/miniconda3/bin/cython -DCMAKE_INSTALL_PREFIX=$PWD/../install -DMDBM_INCLUDE_DIR=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/include -DMDBM_LIBRARY=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/lib64/libmdbm.so -DENABLE_UDA=ON ..
+cmake -DPYTHON_INCLUDE_DIR=/marconi_work/eufus_gw/work/g2jurban/miniconda3/include/python3.6m/ \
+-DPYTHON_LIBRARY=/marconi_work/eufus_gw/work/g2jurban/miniconda3/lib/libpython3.6m.so.1.0 \
+-DCYTHON_EXECUTABLE=/marconi_work/eufus_gw/work/g2jurban/miniconda3/bin/cython \
+-DCMAKE_INSTALL_PREFIX=$PWD/../install -DMDBM_INCLUDE_DIR=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/include \
+-DMDBM_LIBRARY=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/lib64/libmdbm.so -DENABLE_UDA=ON ..
 
 make -j
 make install
