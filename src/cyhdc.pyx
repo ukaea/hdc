@@ -259,6 +259,11 @@ cdef class HDC:
     def c_ptr(self):
         return ctypes.c_void_p(<intptr_t>deref(self._thisptr).as_hdc_ptr())
 
+    @property
+    def _as_parameter_(self):
+        # used by ctypes automatic conversion
+        return self.c_ptr
+
     def dump(self, fp):
         """Save to json file
 
