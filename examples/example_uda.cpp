@@ -15,7 +15,12 @@ int main(int argc, const char *argv[]) {
 //     gethostname(hostname, HOST_NAME_MAX);
 //     setenv("UDA_HOST", hostname, 1);
 
-    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='ids_properties/comment', type=string, rank=0, shot=84600, )","");
+//    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='ids_properties/comment', type=string, rank=0, shot=84600, )","");
+//    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )","");
+//    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=float, rank=1, shot=84600, )","");
+    HDC h("uda://imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )");
+//    HDC h("uda://imas::get(expName='JET', idx=0, group='equilibrium', variable='time_slice/0/coordinate_system/r', type=double, rank=2, shot=84600, )");
+    h.print_info();
     h.dump();
     return 0;
 
