@@ -1115,8 +1115,8 @@ const char* HDC::get_type_str() {
 }
 
 char * HDC::get_pybuf_format() {
-    // TODO
-    // Ref https://docs.python.org/3/c-api/arg.html#arg-parsing
+    // TODO raise exception for types with no native-C equivalent
+    // Ref https://docs.python.org/3/library/struct.html#struct-format-strings
     switch(header.type) {
         case EMPTY_ID:
             return "null";
@@ -1145,10 +1145,9 @@ char * HDC::get_pybuf_format() {
         case DOUBLE_ID:
             return "d";
         case STRING_ID:
-            // TODO There are multiple options
-            return "s*";
+            return "s";
         case BOOL_ID:
-            return "p";
+            return "?";
         case ERROR_ID:
             return "error";
         default:
@@ -1177,7 +1176,9 @@ int HDC::get_ndim() {
 
 size_t* HDC::get_shape() {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
-    return header.shape;
+    size_t offset = reinterpret_cast<size_t>(header.shape) - reinterpret_cast<size_t>(&header);
+    //TODO: C++17 has offsetoff
+    return reinterpret_cast<size_t*>(get_buffer()+offset);
 }
 
 std::vector<size_t> HDC::get_strides() {
@@ -1217,6 +1218,7 @@ int HDC::get_ndim(const std::string& path) {
 size_t* HDC::get_shape(const std::string& path) {
     memcpy(&header,storage->get(uuid),sizeof(header_t));
     return get(path).get_shape();
+
 }
 
 
