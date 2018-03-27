@@ -9,6 +9,9 @@ module load zlib/1.2.8--gnu--6.1.0 szip/2.1--gnu--6.1.0 hdf5/1.8.17--gnu--6.1.0
 module load netcdf
 export BOOST_ROOT=$BOOST_HOME
 export HDF5_ROOT=$HDF5_HOME
+
+source /marconi_work/eufus_gw/work/g2jurban/miniconda3/etc/profile.d/conda.sh
+conda activate base
 ```
 # set UDA stuff
 ```bash
