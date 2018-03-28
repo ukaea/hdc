@@ -268,32 +268,7 @@ HDC::HDC(const std::string str): HDC() {
             throw HDCException("Protocol "+prefix+" not known\n");
         }
     } else {
-        // fill some data
-        memset(&header,0,sizeof(header_t));
-        size_t _data_size = str.length();
-        header.buffer_size = _data_size + sizeof(header_t);
-        header.data_size = _data_size;
-        header.ndim = 1;
-        header.type = STRING_ID;
-
-        if (global_storage == nullptr) {
-            HDC::init();
-            atexit(HDC::destroy);
-        }
-
-        // Start by creating segment
-        char* buffer = new char[header.buffer_size];
-
-        // copy header there -- we need that, hopefully it will be optimized out
-        memcpy(buffer,&header,sizeof(header_t));
-        // Copy char* data
-        memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
-        //Store to some storage
-        uuid = generate_uuid_str();
-        storage = global_storage;
-        storage->set(uuid,buffer,header.buffer_size);
-        // Now it is safe to
-        if (!storage->usesBuffersDirectly()) delete[] buffer;
+        this->set_string(str);
     }
 }
 
