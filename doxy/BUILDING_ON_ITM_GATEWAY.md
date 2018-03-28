@@ -27,6 +27,8 @@ export UDA_LOG_LEVEL=DEBUG
 export UDA_PLUGIN_DIR=$UDA_HOME/lib/plugins
 export UDA_EXP2IMAS_MAPPING_FILE_DIRECTORY=$UDA_HOME/source/plugins/exp2imas/mappings
 export UDA_PLUGIN_DEBUG_SINGLEFILE=1
+
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:~g2jhollo/uda/etc/
 ```
 # obtain the sources
 ```bash
