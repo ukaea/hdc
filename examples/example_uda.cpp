@@ -7,6 +7,14 @@
 #include <string>
 using namespace std;
 
+void imasdd_plugin() {
+    HDC h = HDC::uda2HDC("imasdd::get(path='/magnetics')", "");
+    h.print_info();
+    h.dump();
+    return;
+}
+
+
 void imas_plugin() {
 /* Here we assume that UDA server is running locally, if not, please comment this and set UDA_HOST environment variable... */
 //     char hostname[HOST_NAME_MAX];
@@ -138,7 +146,8 @@ void netcdf_plugin(int argc, const char *argv[]) {
 
 
 int main(int argc, const char *argv[]) {
-    imas_plugin();
+    imasdd_plugin();
+//     imas_plugin();
 //     test_plugin();
 //     netcdf_plugin(argc, argv);
     return 0;

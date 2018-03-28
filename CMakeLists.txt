@@ -152,10 +152,13 @@ endif() # ENABLE_HDF5
 
 if(ENABLE_UDA)
     find_package( PkgConfig QUIET)
-    pkg_check_modules( UDA QUIET uda-fat-cpp )
+    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
     find_package( NetCDF )
     set(UDA_LIBRARIES ${UDA_LIBRARIES} ${NETCDF_LIBRARIES})
     link_directories(${UDA_LIBRARY_DIRS})
+    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
+    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 

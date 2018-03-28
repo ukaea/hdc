@@ -234,10 +234,18 @@ public:
         }
         get(path).set_string(str);
     }
+    void set_string(std::vector <boost::variant<size_t,std::string>> path, string str) {
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h); // TODO: add constructor for this!!
+        }
+        get(path).set_string(str);
+    }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
     void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
     void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
     void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -437,6 +445,7 @@ public:
     void to_hdf5(std::string filename, std::string dataset_name = "data");
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
+    static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
 };
 
 #endif // HDC_HPP

@@ -5,6 +5,111 @@
 #include <uda.h>
 #include <c++/UDA.hpp>
 
+size_t UdaType2HDCType(int data_type) {
+    switch (data_type) {
+        case UDA_TYPE_UNKNOWN:
+            return HDC_EMPTY;
+        case UDA_TYPE_CHAR:
+            return HDC_INT8;
+        case UDA_TYPE_SHORT:
+            return HDC_INT16;
+        case UDA_TYPE_INT:
+            return HDC_INT32;
+        case UDA_TYPE_UNSIGNED_INT:
+            return HDC_UINT32;
+        case UDA_TYPE_LONG:
+            return HDC_INT64;
+        case UDA_TYPE_FLOAT:
+            return HDC_FLOAT;
+        case UDA_TYPE_DOUBLE:
+            return HDC_DOUBLE;
+        case UDA_TYPE_UNSIGNED_CHAR:
+            return HDC_UINT8;
+        case UDA_TYPE_UNSIGNED_SHORT:
+            return HDC_UINT16;
+        case UDA_TYPE_UNSIGNED_LONG:
+            return HDC_UINT64;
+        case UDA_TYPE_LONG64:
+            return HDC_INT64;
+        case UDA_TYPE_UNSIGNED_LONG64:
+            return HDC_UINT64;
+        case UDA_TYPE_STRING:
+            return HDC_STRING;
+        default:
+            throw HDCException("Unkown UDA data type: "+std::to_string(data_type));
+    }
+}
+
+
+HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source) {
+    std::cout << "HDC::uda2HDC()\n";
+
+    int handle = idamGetAPI(data_object.c_str(), data_source.c_str());
+    std::cout << "handle = " << handle << std::endl;
+    if (handle < 0) throw HDCException("idamGetAPI() Failed to obtain handle. handle = "+std::to_string(handle));
+    DATA_BLOCK* result = (DATA_BLOCK*)getIdamDataBlock(handle);
+    DATA_BLOCK* list = (DATA_BLOCK*)result->data;
+    std::vector<DATA_BLOCK> items(list, list+result->data_n);
+    std::cout << "num items: " << items.size() << std::endl;
+
+    HDC tree;
+
+    for (const auto& item : items) {
+        std::cout << "desc: " << item.data_desc << std::endl;
+        std::cout << "type: " << item.data_type << std::endl;
+        std::cout << "size: " << item.data_n << std::endl;
+        std::cout << "rank: " << item.rank << std::endl;
+//         std::cout << "shape: ";
+//         for (int i=0;i<item.rank;i++) std::cout << item.dims->sams[i] << ", ";
+//         std::cout << std::endl;
+        std::string path = item.data_desc;
+        auto split_path = split_no_brackets(path);
+
+        if (item.rank > 1) throw HDCException("uda2HDC(): Rank > 1 is not supported yet");
+
+        //TODO: more types, rank > 1, integer keys -> list (not struct)
+
+        switch (item.data_type) {
+            case UDA_TYPE_UNKNOWN:
+                tree.add_child(split_path,new HDC());
+                break;
+            case UDA_TYPE_STRING:
+            {
+                std::string str = (item.data);
+                tree.set_string(split_path,str);
+                break;
+            }
+            case UDA_TYPE_CHAR:
+            case UDA_TYPE_SHORT:
+            case UDA_TYPE_INT:
+            case UDA_TYPE_UNSIGNED_INT:
+            case UDA_TYPE_LONG:
+            case UDA_TYPE_FLOAT:
+            case UDA_TYPE_DOUBLE:
+            case UDA_TYPE_UNSIGNED_CHAR:
+            case UDA_TYPE_UNSIGNED_SHORT:
+            case UDA_TYPE_UNSIGNED_LONG:
+            case UDA_TYPE_LONG64:
+            case UDA_TYPE_UNSIGNED_LONG64:
+            {
+                auto type_ = UdaType2HDCType(item.data_type);
+                size_t shp[item.rank];
+                shp[0] = item.data_n;
+                tree.set_data_c(split_path,item.rank,(size_t*)shp,item.data,type_);
+                break;
+            }
+            default:
+                throw HDCException("Unkown UDA data type: "+std::to_string(item.data_type));
+        }
+
+        /*tree.dump();
+        std::getchar();*/
+    }
+        tree.dump();
+        std::getchar();
+        return tree;
+}
+
 HDC udaData2HDC(uda::Data* uda_data, int rank) {
 /*
     std::cout << "--- udaData2HDC(Data*)\n";
@@ -282,6 +387,10 @@ HDC HDC::from_uda(const std::string& signalName, const std::string& dataSource, 
 
 
 #else // _USE_UDA
+
+HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source) {
+    throw HDCException("UDA backend has been disabled at compile time.\n");
+}
 
 HDC HDC::from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata) {
     throw HDCException("UDA backend has been disabled at compile time.\n");

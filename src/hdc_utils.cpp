@@ -55,6 +55,23 @@ std::vector <boost::variant<size_t,std::string>> split(const std::string& s) {
     return parts;
 }
 
+std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::string& s) {
+    std::vector<boost::variant<size_t,std::string>> parts;
+    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    boost::char_separator<char> sep("/", "");
+    tokenizer tok{s, sep};
+    boost::variant<size_t,std::string> var;
+    for (const auto &t : tok) {
+        try {
+            var = boost::lexical_cast<size_t>(t);
+        } catch(boost::bad_lexical_cast) {
+            var = t;
+        }
+        parts.push_back(var);
+    }
+    return parts;
+}
+
 /* -------------------------  Types Definitions  ------------------------- */
 
 

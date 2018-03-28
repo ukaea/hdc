@@ -984,6 +984,14 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const v
     get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
 }
 
+void HDC::set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags) {
+    if(!has_child(path)) {
+        HDC h;
+        add_child(path, h); // TODO: add constructor for this!!
+    }
+    get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
+}
+
 void HDC::insert_slice(size_t i, HDC* h) {
     insert_slice(i,*h);
     return;

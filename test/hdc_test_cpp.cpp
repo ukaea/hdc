@@ -2,6 +2,26 @@
 #include "gtest/gtest.h"
 #include <string>
 #include <cstdio>
+#include<vector>
+
+TEST(HDCUtils,StringParsing) {
+    std::vector<bool> expected_is_num = {false,true,false,true,true,false,false};
+    auto vs = split_no_brackets("flux/3444/lalala/5/4/l///l");
+    ASSERT_EQ(vs.size(),7);
+    int i=0;
+    for (auto item : vs) {
+        EXPECT_EQ((item.type() == typeid(size_t)), expected_is_num[i]);
+        i++;
+    }
+    auto vs2 = split("flux[3444]/lalala[5][4]l///l");
+    ASSERT_EQ(vs2.size(),7);
+    i=0;
+    for (auto item : vs2) {
+        EXPECT_EQ((item.type() == typeid(size_t)), expected_is_num[i]);
+        i++;
+    }
+    //TODO: add protocols???
+}
 
 TEST(HDC,EmptyNode) {
     HDC h = HDC();
