@@ -85,6 +85,9 @@ cdef extern from "hdc.hpp":
         vector[size_t] get_strides() except +
         @staticmethod
         CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr) except +
+        void to_hdf5(string filename, string dataset_name) except +
+        CppHDC* from_hdf5_ptr(const string& filename, const string& dataset_name) except +
+
 
 cdef class HDC:
     # data handle
@@ -375,3 +378,6 @@ cdef class HDC:
         """Unwraps hdc_t created by C or FORTRAN function called by ctypes.
         """
         return HDC._from_c_ptr(h)
+
+    def to_hdf5(self, filename, dataset_name="data"):
+        deref(self._thisptr).to_hdf5(filename.encode(), dataset_name.encode())
