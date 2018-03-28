@@ -53,37 +53,38 @@ cdef struct hdc_t:
 
 cdef extern from "hdc.hpp":
     cdef cppclass CppHDC "HDC":
-        CppHDC()
-        string serialize()
-        size_t get_itemsize()
-        size_t get_datasize()
-        const char * get_pybuf_format()
-        string to_json_string(int mode = 0)
-        void set_child(string path, CppHDC* n)
-        void append_slice(CppHDC* h)
-        void add_child(string path, CppHDC* n)
-        CppHDC* get_slice_ptr(size_t i)
-        CppHDC* get_ptr(string path)
-        bool has_child(string path)
-        void set_string(string data)
-        void print_info()
-        size_t get_type()
-        string get_type_str()
-        intptr_t as_void_ptr()
-        int8_t get_ndim()
-        size_t* get_shape()
+        CppHDC() except +
+        string serialize() except +
+        size_t get_itemsize() except +
+        size_t get_datasize() except +
+        char * get_pybuf_format() except +
+        string to_json_string(int mode = 0) except +
+        void set_child(string path, CppHDC* n) except +
+        void append_slice(CppHDC* h) except +
+        void add_child(string path, CppHDC* n) except +
+        CppHDC* get_slice_ptr(size_t i) except +
+        CppHDC* get_ptr(string path) except +
+        bool has_child(string path) except +
+        void set_string(string data) except +
+        void print_info() except +
+        size_t get_type() except +
+        string get_type_str() except +
+        intptr_t as_void_ptr() except +
+        int8_t get_ndim() except +
+        size_t* get_shape() except +
         # typedef unsigned long Flags;
-        void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags)
+        void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
         # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
-        T as[T]()
-        string as_string()
-        vector[string] keys()
-        size_t childs_count()
-        hdc_t* as_hdc_ptr()
-        bool is_fortranorder()
-        vector[size_t] get_strides()
+        T as[T]() except +
+        string as_string() except +
+        vector[string] keys() except +
+        size_t childs_count() except +
+        # hdc_t* caused casting errors with except +
+        void* as_hdc_ptr()  except +
+        bool is_fortranorder() except +
+        vector[size_t] get_strides() except +
         @staticmethod
-        CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr)
+        CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr) except +
 
 cdef class HDC:
     # data handle
