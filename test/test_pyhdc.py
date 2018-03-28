@@ -72,6 +72,9 @@ def test_map_type():
 
     assert [k for k in h] == list(test_map.keys())
 
+    with pytest.raises(KeyError):
+        h['doesnotexist']
+
 
 def test_str_type():
     h = HDC()
