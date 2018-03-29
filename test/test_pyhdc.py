@@ -5,6 +5,7 @@ import itertools
 import pytest
 import numpy as np
 import json
+import tempfile
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
@@ -178,6 +179,54 @@ def test_in_op_nested():
         assert key1 in tree
         for key2 in keys2:
             assert key2 in tree[key1]
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
+@pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
+                                   (1, 3, 4), (7, 2, 3)])
+def test_ndarray_to_hdf5(dtype, shape):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    import h5py
+    if dtype == np.bool_:
+        x_in = np.random.randint(0, 2, size=shape, dtype=dtype)
+    else:
+        x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+    h = HDC()
+    h.set_data(x_in)
+    with tempfile.NamedTemporaryFile(suffix='.h5') as tmppfile:
+        h.to_hdf5(tmppfile.name, dataset_name="data")
+        with h5py.File(tmppfile.name, mode='r') as h5file:
+            x_out = np.asarray(h5file['data'])
+            assert x_in.shape == x_out.shape
+            assert x_in.size == x_out.size
+            # assert x_in.dtype == x_out.dtype
+            assert x_in.strides == x_out.strides
+            assert np.all(x_in == x_out)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
+@pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
+                                   (1, 3, 4), (7, 2, 3)])
+def test_ndarray_from_hdf5(dtype, shape):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    import h5py
+    if dtype == np.bool_:
+        x_in = np.random.randint(0, 2, size=shape, dtype=dtype)
+    else:
+        x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+    with tempfile.NamedTemporaryFile(suffix='.h5') as tmppfile:
+        with h5py.File(tmppfile.name, mode='w') as h5file:
+            h5file.create_dataset('data', data=x_in)
+            h = HDC.from_hdf5(tmppfile.name, dataset_name="data")
+
+            x_out = np.asarray(h)
+            assert x_in.shape == x_out.shape
+            assert x_in.size == x_out.size
+            # assert x_in.dtype == x_out.dtype
+            assert x_in.strides == x_out.strides
+            assert np.all(x_in == x_out)
 
 
 if __name__ == '__main__':
