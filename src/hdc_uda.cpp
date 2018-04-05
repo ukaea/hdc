@@ -4,6 +4,10 @@
 #include <vector>
 #include <uda.h>
 #include <c++/UDA.hpp>
+#include <tuple>
+#include <boost/tokenizer.hpp>
+#include <boost/variant.hpp>
+#include <typeinfo>
 
 size_t UdaType2HDCType(int data_type) {
     switch (data_type) {
@@ -41,29 +45,44 @@ size_t UdaType2HDCType(int data_type) {
 }
 
 
+std::vector <boost::variant<size_t,std::string>> split_uda(const std::string& s) {
+    std::vector<boost::variant<size_t,std::string>> parts;
+    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    boost::char_separator<char> sep("/", "");
+    tokenizer tok{s, sep};
+    boost::variant<size_t,std::string> var;
+    for (const auto &t : tok) {
+        try {
+            var = boost::lexical_cast<size_t>(t)-1;
+        } catch(boost::bad_lexical_cast) {
+            var = t;
+        }
+        parts.push_back(var);
+    }
+    return parts;
+}
+
 HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source) {
-    std::cout << "HDC::uda2HDC()\n";
+    D(std::cout << "HDC::uda2HDC()" << data_object << "\n";)
 
     int handle = idamGetAPI(data_object.c_str(), data_source.c_str());
-    std::cout << "handle = " << handle << std::endl;
     if (handle < 0) throw HDCException("idamGetAPI() Failed to obtain handle. handle = "+std::to_string(handle));
     DATA_BLOCK* result = (DATA_BLOCK*)getIdamDataBlock(handle);
     DATA_BLOCK* list = (DATA_BLOCK*)result->data;
     std::vector<DATA_BLOCK> items(list, list+result->data_n);
-    std::cout << "num items: " << items.size() << std::endl;
 
     HDC tree;
 
     for (const auto& item : items) {
+        std::string path = item.data_desc;
+        D(
         std::cout << "desc: " << item.data_desc << std::endl;
         std::cout << "type: " << item.data_type << std::endl;
         std::cout << "size: " << item.data_n << std::endl;
         std::cout << "rank: " << item.rank << std::endl;
-//         std::cout << "shape: ";
-//         for (int i=0;i<item.rank;i++) std::cout << item.dims->sams[i] << ", ";
-//         std::cout << std::endl;
-        std::string path = item.data_desc;
-        auto split_path = split_no_brackets(path);
+        std::cout << " ----- " << path << "\n";
+        )
+        auto split_path = split_uda(path);
 
         if (item.rank > 1) throw HDCException("uda2HDC(): Rank > 1 is not supported yet");
 
@@ -71,11 +90,12 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
 
         switch (item.data_type) {
             case UDA_TYPE_UNKNOWN:
+                std::cerr << "Warning: UDA has returned UDA_TYPE_UNKNOWN at node " << path << " size = "<<item.data_n << std::endl;
                 tree.add_child(split_path,new HDC());
                 break;
             case UDA_TYPE_STRING:
             {
-                std::string str = (item.data);
+                std::string str = item.data;
                 tree.set_string(split_path,str);
                 break;
             }
@@ -102,11 +122,7 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
                 throw HDCException("Unkown UDA data type: "+std::to_string(item.data_type));
         }
 
-        /*tree.dump();
-        std::getchar();*/
     }
-        tree.dump();
-        std::getchar();
         return tree;
 }
 

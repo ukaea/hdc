@@ -64,11 +64,13 @@ private:
     void delete_child(vector<boost::variant<size_t,std::string>> vs);
     HDC* get_ptr(vector<boost::variant<size_t,std::string>> vs);
     HDC get(vector<boost::variant<size_t,std::string>> vs);
+//     HDC get_single(boost::variant<size_t,std::string> key);
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
-    void add_child_single(const std::__cxx11::string& path, HDC& n);
-
+    bool has_child_single(boost::variant<size_t,std::string> index);
+    void add_child_single(const std::string& path, HDC& n);
+//     void add_child_single(const boost::variant<size_t,std::string>& path, HDC& n);
 public:
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
@@ -239,6 +241,7 @@ public:
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
         }
+        auto h = get(path);
         get(path).set_string(str);
     }
     void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
