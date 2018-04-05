@@ -54,7 +54,6 @@ cmake -DPYTHON_INCLUDE_DIR=/marconi_work/eufus_gw/work/g2jurban/miniconda3/inclu
 -DCMAKE_INSTALL_PREFIX=$PWD/../install -DMDBM_INCLUDE_DIR=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/include \
 -DMDBM_LIBRARY=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/lib64/libmdbm.so -DENABLE_UDA=ON ..
 
-make -j
-make install
+make -j install
 ```
 
