@@ -265,6 +265,11 @@ HDC::HDC(const std::string str): HDC() {
             memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
             uuid = h.get_uuid();
             storage = global_storage;
+        } else if (prefix == "uda_new") {
+            HDC h = uda2HDC(split_res[0],split_res[1]);
+            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
+            uuid = h.get_uuid();
+            storage = global_storage;
         } else {
             throw HDCException("Protocol "+prefix+" not known\n");
         }

@@ -29,7 +29,7 @@ find_package(Cython REQUIRED)
 
 add_cython_target(cyhdc "CXX")
 add_library(cyhdc MODULE ${cyhdc})
-target_link_libraries(cyhdc hdc)
+target_link_libraries(cyhdc hdc ${HDC_LINK_LIBRARIES})
 python_extension_module(cyhdc)
 
 install(TARGETS hdc chdc fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib)

@@ -8,7 +8,8 @@
 using namespace std;
 
 void imasdd_plugin() {
-    HDC h = HDC::uda2HDC("imasdd::get(path='/magnetics')", "");
+//     HDC h = HDC::uda2HDC("imasdd::get(path='/magnetics')", "");
+    HDC h("uda_new://imasdd::get(path='/magnetics')");
     h.print_info();
     h.dump();
     return;
