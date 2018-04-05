@@ -54,6 +54,7 @@ cdef struct hdc_t:
 cdef extern from "hdc.hpp":
     cdef cppclass CppHDC "HDC":
         CppHDC() except +
+        CppHDC(string str) except +
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
@@ -72,6 +73,7 @@ cdef extern from "hdc.hpp":
         intptr_t as_void_ptr() except +
         int8_t get_ndim() except +
         size_t* get_shape() except +
+
         # typedef unsigned long Flags;
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
         # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
@@ -101,6 +103,8 @@ cdef class HDC:
         elif isinstance(data, self.__class__):
             #  copy constructor
             self._thisptr = (<HDC> data)._thisptr
+        elif isinstance(data, six.string_types):
+            self._thisptr = new CppHDC(bytes(data, 'utf-8'))
         else:
             # assert NotImplementedError()
             self._thisptr = new CppHDC()
@@ -287,8 +291,8 @@ cdef class HDC:
     cdef is_array(self):
         type_id = self.get_type()
         # check whether type id is not in non-array types
-        return type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8, 
-                           HDC_UINT16, HDC_UINT32, HDC_UINT64, HDC_FLOAT, HDC_DOUBLE, 
+        return type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8,
+                           HDC_UINT16, HDC_UINT32, HDC_UINT64, HDC_FLOAT, HDC_DOUBLE,
                            HDC_BOOL, )
 
     def __str__(self):

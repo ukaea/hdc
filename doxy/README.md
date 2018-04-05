@@ -15,14 +15,17 @@ To build HDC, you will need:
 - c++11 compliant compiler
 - gfortran>=4.9
 - Boost >= 1.48 (does not work with 1.41, versions 1.41-1.48 untested)
-- Yahoo MDBM 
-- Python 2.7 or any Python 3 (tested only with 3.4 and 3.5)
+- Yahoo MDBM (optional, but recommended)
+- Python 2.7 or any Python 3 (tested only with 3.4, 3.5 and 3.6)
 - CMake >= 3.3
 - Doxygen for documentation building
-- git for building gtest and benchmark dependencies
+- Cathon > 0.23 (there is some parsing error in 0.23)
+- HDF5 devel libraries (optional, tested with 1.8 and 1.10)
 
 Building HDC
 ------------
+For building on ITM gateway, please, follow [these instructions](doxy/BUILDING_ON_ITM_GATEWAY.md).
+
 There are several cmake options:
 
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
@@ -47,7 +50,7 @@ mkdir build
 cd build
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
-make -j4
+make -j
 
 # Optionally install
 make install
@@ -59,7 +62,7 @@ Basic ideas
 - Subtrees (Nodes) can be accessed by path similarily to file system paths like "aaa/bbb"
 - Each node can be one of several types:
   + Empty node - this is the initial state of node. Empty node does not store any data and does not have any children. By adding subnode, slice or data it's type is automaticaly changed to another type.
-  + Structure node - the node has at least one children indexed by string path. It can only store subtrees indexed by path.
+  + Structure/list node - the node has at least one children indexed by string path. It can only store subtrees indexed by path/integer index.
   + Array node - the node has at least one children indexed by integer. It can only store subtrees indexed by integer.
   + Data node - it only can be terminal node, it stores some data, currently in DyND array object.
 
