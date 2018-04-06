@@ -1,5 +1,11 @@
 This shows how to build HDC with Anaconda3 based Python, MDBM and UDA support on ITM gateway.
 
+# Source my env
+Sourcing this script replaces loading of modules and setting UDA
+```bash
+. ~g2dfrid/hdc.env
+```
+
 # load modules, set paths
 ```bash
 module load gnu/6.1.0 cmake/3.5.2
@@ -48,7 +54,6 @@ cmake -DPYTHON_INCLUDE_DIR=/marconi_work/eufus_gw/work/g2jurban/miniconda3/inclu
 -DCMAKE_INSTALL_PREFIX=$PWD/../install -DMDBM_INCLUDE_DIR=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/include \
 -DMDBM_LIBRARY=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/lib64/libmdbm.so -DENABLE_UDA=ON ..
 
-make -j
-make install
+make -j install
 ```
 
