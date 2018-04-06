@@ -7,10 +7,11 @@ extensions = [
     Extension(
         name="cyhdc",
         sources=["cyhdc.pyx"],
+        extra_compile_args=['-O2', '-std=c++11', '-lgfortran', '-lstdc++', '-lrt', '-fPIC', '-static'],
         language='c++',
         # TODO fix paths after headers are installed
         include_dirs=[
-            os.path.join('..', '..', 'include'),
+            os.path.join('..', 'include'),
             os.path.join('..', '..', 'thirdparty'),
             os.path.join('..', '..', 'thirdparty', 'jsoncpp'),
             os.path.join('..', '..', 'thirdparty', 'Pluma-1.1', 'include'),
