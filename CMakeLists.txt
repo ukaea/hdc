@@ -183,6 +183,7 @@ add_subdirectory(thirdparty/jsoncpp)
 include_directories(thirdparty)
 
 include_directories(include)
+add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(plugins)
 
