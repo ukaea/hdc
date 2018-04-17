@@ -18,6 +18,7 @@ module load imas/3.17.0/ual/3.7.3
 
 export BOOST_ROOT=$BOOST_HOME
 export HDF5_ROOT=$HDF5_HOME
+export NETCDF_DIR=$NETCDF_HOME
 
 source /marconi_work/eufus_gw/work/g2jurban/miniconda3/etc/profile.d/conda.sh
 conda activate base
