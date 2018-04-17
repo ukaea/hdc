@@ -12,7 +12,10 @@ module load gnu/6.1.0 cmake/3.5.2
 module load profile/advanced
 module load boost/1.61.0--gnu--6.1.0
 module load zlib/1.2.8--gnu--6.1.0 szip/2.1--gnu--6.1.0 hdf5/1.8.17--gnu--6.1.0
-module load netcdf
+module load netcdf/4.4.1--gnu--6.1.0
+module use /afs/eufus.eu/user/g/g2jhollo/imas/etc/modulefiles
+module load imas/3.17.0/ual/3.7.3
+
 export BOOST_ROOT=$BOOST_HOME
 export HDF5_ROOT=$HDF5_HOME
 
@@ -21,7 +24,6 @@ conda activate base
 ```
 # set UDA stuff
 ```bash
-source ~g2jhollo/setup.env
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:~g2jhollo/uda/etc/
 
 export UDA_LOG=$HOME
