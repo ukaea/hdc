@@ -22,27 +22,4 @@ target_link_libraries(chdc hdc stdc++)
 add_library(fhdc SHARED hdc_fortran.f90)
 target_link_libraries(fhdc chdc)
 
-# SET(Python_ADDITIONAL_VERSIONS 3 3.6 3.5 3.4 3.3 3.2 3.1 3.0 )
-# find_package(PythonInterp 3 REQUIRED)
-# find_package(PythonLibs 3 REQUIRED)
-# find_package(PythonExtensions 3 REQUIRED)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
-find_package(PythonExtensions REQUIRED)
-find_package(Cython REQUIRED)
-
-add_cython_target(cyhdc "CXX")
-add_library(cyhdc MODULE ${cyhdc})
-target_link_libraries(cyhdc hdc ${HDC_LINK_LIBRARIES})
-python_extension_module(cyhdc)
-
 install(TARGETS hdc chdc fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
-# TODO temporary Python install
-# create Python install package in dist in the future
-install(TARGETS cyhdc RUNTIME DESTINATION bin LIBRARY DESTINATION python)
-add_file_copy_target(pyhdc python pyhdc.py)
-install_file_copy_target(pyhdc DESTINATION python)
-add_file_copy_target(setup_py python setup.py)
-install_file_copy_target(setup_py DESTINATION python)
-add_file_copy_target(cyhdc_pyx python cyhdc.pyx)
-install_file_copy_target(cyhdc_pyx DESTINATION python)

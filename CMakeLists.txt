@@ -14,8 +14,9 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 # Extra cmake modules to find libraries
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 if(${CMAKE_VERSION} VERSION_LESS "3.7.0")
-    message("cmake version < 3.7.0, anaconda autodetection will not work. Try this if needed:
-
+    message(
+    "
+    cmake version < 3.7.0, anaconda autodetection will not work. Try this if needed:
     cmake -DPYTHON_INCLUDE_DIR=/opt/anaconda3/include/python3.6m \
           -DPYTHON_LIBRARY=/opt/anaconda3/lib/libpython3.6m.so.1.0
     ")
@@ -186,6 +187,7 @@ include_directories(include)
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(plugins)
+add_subdirectory(python)
 
 if (BUILD_DOC)
     # add_subdirectory(docs)
