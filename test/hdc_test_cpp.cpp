@@ -220,15 +220,15 @@ TEST(HDC,GetStrides) {
     HDC threed_f;
     threed_f.set_data<int32_t>(3,shape3d,array3d,HDCFortranOrder);
     auto strides_f = threed_f.get_strides();
-    EXPECT_EQ(48,strides_f[0]);
-    EXPECT_EQ(16,strides_f[1]);
-    EXPECT_EQ(4,strides_f[2]);
+    EXPECT_EQ(4,strides_f[0]);
+    EXPECT_EQ(8,strides_f[1]);
+    EXPECT_EQ(24,strides_f[2]);
     HDC threed_c;
     threed_c.set_data<int32_t>(3,shape3d,array3d);
     auto strides_c = threed_c.get_strides();
-    EXPECT_EQ(4,strides_c[0]);
-    EXPECT_EQ(8,strides_c[1]);
-    EXPECT_EQ(24,strides_c[2]);
+    EXPECT_EQ(48,strides_c[0]);
+    EXPECT_EQ(16,strides_c[1]);
+    EXPECT_EQ(4,strides_c[2]);
 }
 
 TEST(HDC,SliceManipulation) {

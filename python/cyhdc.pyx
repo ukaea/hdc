@@ -88,6 +88,7 @@ cdef extern from "hdc.hpp":
         @staticmethod
         CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr) except +
         void to_hdf5(string filename, string dataset_name) except +
+        @staticmethod
         CppHDC* from_hdf5_ptr(const string& filename, const string& dataset_name) except +
 
 
@@ -200,7 +201,8 @@ cdef class HDC:
             return 0
 
     cdef _set_data(self, cnp.ndarray data):
-        cdef size_t flags  = HDCFortranOrder
+        cdef size_t flags  = HDCDefault
+        #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
         if data.ndim == 0:
@@ -209,7 +211,7 @@ cdef class HDC:
         else:
             # require contiguous C-array
             # TODO C-ordering vs Fortran
-            if (data.flags['F_CONTIGUOUS']):
+            if data.flags['F_CONTIGUOUS'] and not data.flags['C_CONTIGUOUS']:
                 flags |= HDCFortranOrder
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
@@ -385,3 +387,8 @@ cdef class HDC:
 
     def to_hdf5(self, filename, dataset_name="data"):
         deref(self._thisptr).to_hdf5(filename.encode(), dataset_name.encode())
+    @staticmethod
+    def from_hdf5(filename, dataset_name="data"):
+        res = HDC()
+        res._thisptr = CppHDC.from_hdf5_ptr(filename.encode(), dataset_name.encode())
+        return res

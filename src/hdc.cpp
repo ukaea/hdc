@@ -1200,7 +1200,7 @@ std::vector<size_t> HDC::get_strides() {
     std::vector<size_t> strides;
     size_t elem_size = hdc_sizeof(static_cast<TypeID>(header.type));
     size_t last_stride;
-    if (!is_fortranorder()) {
+    if (is_fortranorder()) {
         for (int i = 0; i < header.ndim; ++i) {
             if (i == 0) {
                 last_stride = elem_size;
