@@ -69,5 +69,6 @@ int main(int argc, const char *argv[]) {
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
+
     return 0;
 }

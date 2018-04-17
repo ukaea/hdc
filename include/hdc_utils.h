@@ -27,6 +27,7 @@ std::vector<char> generate_uuid();
 std::string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
 std::vector <boost::variant<size_t,std::string>> split(const std::string& s);
+std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::string& s);
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);
 bool hdc_is_primitive_type(TypeID type);
