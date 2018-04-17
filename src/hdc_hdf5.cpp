@@ -167,9 +167,8 @@ void write_node(HDC h, H5File* file, std::string path) {
 void HDC::to_hdf5(std::string filename, std::string dataset_name) {
     try {
         H5std_string FILE_NAME( filename );
-        H5File* file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
-        write_node(HDC(this->storage,this->uuid),file,"data");
-        delete file;
+        H5File file(FILE_NAME, H5F_ACC_TRUNC);
+        write_node(HDC(this->storage,this->uuid),&file,"data");
     }  // end of try block
     catch( FileIException error )
     {
@@ -226,9 +225,14 @@ TypeID hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path) {
     {
         res = STRING_ID;
     }
+    else if(H5Tequal(hdf5_dtype_id,H5T_ENUM))
+    {
+        //TODO: Here it can be probably more things.
+        res = BOOL_ID;
+    }
     else
     {
-       throw HDCException("Error with HDF5 DataType to conduit::DataType Leaf Conversion");
+        throw HDCException("Error with HDF5 DataType to DataType Leaf Conversion");
     }
     return res;
 };
@@ -267,7 +271,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
         H5Sget_simple_extent_dims(h5_dspace_id, hshape, NULL);
         size_t shape[ndim];
         for (int i=0;i<ndim;i++) shape[i] = hshape[i];
-        dest.set_data_c(ndim,shape,buffer,dt);
+        dest.set_data_c(ndim,shape,buffer,dt); //TODO: do something more inteligent here
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                                ref_path,
                                                "Error reading HDF5 Dataset: "

@@ -201,7 +201,8 @@ cdef class HDC:
             return 0
 
     cdef _set_data(self, cnp.ndarray data):
-        cdef size_t flags  = HDCFortranOrder
+        cdef size_t flags  = HDCDefault
+        #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
         if data.ndim == 0:
@@ -210,7 +211,7 @@ cdef class HDC:
         else:
             # require contiguous C-array
             # TODO C-ordering vs Fortran
-            if (data.flags['F_CONTIGUOUS']):
+            if data.flags['F_CONTIGUOUS'] and not data.flags['C_CONTIGUOUS']:
                 flags |= HDCFortranOrder
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
