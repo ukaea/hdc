@@ -6,6 +6,61 @@ import pytest
 import numpy as np
 import json
 import tempfile
+import collections
+import future.builtins
+
+
+@pytest.fixture
+def test_trees():
+    pytree = {
+        'root': {
+            'scalars': {
+                'integer': 1,
+                'float': 1.0,
+            },
+            'arrays': {
+                'integer': np.arange(6, dtype=np.int32).reshape((2, -1)),
+                'float': np.arange(6, dtype=np.float32).reshape((2, -1)),
+            },
+            'text': '\tspam & ham\n',
+            'list': ['zero', 1, 2, 'three'],
+        }
+    }
+    hdctree = HDC()
+    hdctree['root/scalars/integer'] = HDC(1)
+    hdctree['root/scalars/float'] = HDC(1.0)
+    hdctree['root/arrays/integer'] = HDC(np.arange(6, dtype=np.int32).reshape((2, -1)))
+    hdctree['root/arrays/float'] = HDC(np.arange(6, dtype=np.float32).reshape((2, -1)))
+    hdctree['root/text'] = HDC('\tspam & ham\n')
+    hdctree['root/list'] = HDC(['zero', 1, 2.0, 'three'])
+
+    return pytree, hdctree
+
+
+def tree_equal(py_obj, hdc_obj, exception=False):
+    if isinstance(py_obj, collections.Mapping):
+        try:
+            res = ((len(py_obj) == len(hdc_obj)) and all((tree_equal(py_obj[k1], hdc_obj[k1], exception=exception)
+                                                          if k1 in hdc_obj else False
+                                                          for k1 in py_obj)))
+        except KeyError:
+            res = False
+        if exception and not res:
+            raise ValueError("{} != {}".format(py_obj, hdc_obj))
+    elif isinstance(py_obj, future.builtins.str):
+        res = py_obj == future.builtins.str(hdc_obj)
+        if exception and not res:
+            raise ValueError("{} != {}".format(py_obj, future.builtins.str(hdc_obj)))
+    elif isinstance(py_obj, collections.Sequence):
+        res = (len(py_obj) == len(hdc_obj) and all((tree_equal(v1, v2, exception=exception)
+                                                    for v1, v2 in zip(py_obj, hdc_obj))))
+        if exception and not res:
+            raise ValueError("{} != {}".format(py_obj, hdc_obj))
+    else:
+        res = np.all(np.asanyarray(py_obj) == np.asanyarray(hdc_obj))
+        if exception and not res:
+            raise ValueError("{} != {}".format(py_obj, hdc_obj))
+    return res
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
@@ -227,6 +282,15 @@ def test_ndarray_from_hdf5(dtype, shape):
             # assert x_in.dtype == x_out.dtype
             assert x_in.strides == x_out.strides
             assert np.all(x_in == x_out)
+
+
+def test_tree_hdf5(test_trees):
+    pytree, hdctree = test_trees
+    with tempfile.NamedTemporaryFile(suffix='.h5') as tmppfile:
+        hdctree.to_hdf5(tmppfile.name)
+        hdctree_test = HDC.from_hdf5(tmppfile.name)
+
+    assert tree_equal(pytree, hdctree_test, exception=False)
 
 
 if __name__ == '__main__':
