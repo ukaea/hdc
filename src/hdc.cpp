@@ -571,6 +571,7 @@ vector<string> HDC::keys() {
 void HDC::add_child(const std::string& path, HDC* n)
 {
     DEBUG_STDOUT("add_child("+path+")\n");
+    if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
     add_child(split(path),n);
     return;
 }
@@ -578,6 +579,7 @@ void HDC::add_child(const std::string& path, HDC* n)
 void HDC::add_child(const std::string& path, HDC& n)
 {
     DEBUG_STDOUT("add_child("+path+")\n");
+    if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
     add_child(split(path),n);
     return;
 }
