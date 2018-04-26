@@ -75,6 +75,11 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
 
     for (const auto& item : items) {
         std::string path = item.data_desc;
+        // Check for empty path and skip the node in such case:
+        if (path.empty()) {
+            std::cerr << "Warning: UDA has returned empty node. Skipping...\n";
+            continue;
+        }
         D(
         std::cout << "desc: " << item.data_desc << std::endl;
         std::cout << "type: " << item.data_type << std::endl;
@@ -84,10 +89,10 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
         )
         auto split_path = split_uda(path);
 
+
         if (item.rank > 1) throw HDCException("uda2HDC(): Rank > 1 is not supported yet");
 
         //TODO: more types, rank > 1, integer keys -> list (not struct)
-
         switch (item.data_type) {
             case UDA_TYPE_UNKNOWN:
                 std::cerr << "Warning: UDA has returned UDA_TYPE_UNKNOWN at node " << path << " size = "<<item.data_n << std::endl;
