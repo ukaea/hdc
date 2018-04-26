@@ -1,6 +1,5 @@
 #include <iostream>
 #include "hdc.hpp"
-
 #include <vector>
 #include <string>
 using namespace std;

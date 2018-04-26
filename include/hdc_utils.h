@@ -18,6 +18,7 @@
 #include <boost/variant.hpp>
 #include "hdc_types.h"
 #include "hdc_errors.hpp"
+#include <andres/marray.hxx>
 
 /* ------------------------- UUID generation ----------------------------- */
 
@@ -26,6 +27,7 @@ std::vector<char> generate_uuid();
 std::string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
 std::vector <boost::variant<size_t,std::string>> split(const std::string& s);
+std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::string& s);
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (TypeID type);
 bool hdc_is_primitive_type(TypeID type);
@@ -54,5 +56,9 @@ TypeID uda_str_to_typeid(std::string& str);
 
 void hello__();
 
+/* -------------------------  Buffer Manipulation  ------------------------- */
+
+char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, bool fortranOrder = false);
+char* transpose_buffer(char* buffer);
 
 #endif

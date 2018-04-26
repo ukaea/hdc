@@ -10,7 +10,7 @@
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include <hdc_helpers.h>
-#include "hdc_errors.hpp"
+#include <exception>
 
 using namespace std;
 
@@ -75,7 +75,7 @@ public:
         // Remove db file if the data persistence is not required
         if (!this->persistent) {
             if (::remove(filename.c_str()) != 0) {
-                throw HDCException("MDBMStorage::cleanup(): Error deleting file\n");
+                throw std::runtime_error("MDBMStorage::cleanup(): Error deleting file\n");
             };
         }
         initialized = false;

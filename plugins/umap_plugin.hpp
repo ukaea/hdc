@@ -6,7 +6,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include "storage_interface.hpp"
 #include <hdc_helpers.h>
-#include "hdc_errors.hpp"
+#include <exception>
 
 // Stolen from MDBM:
 struct datum {
@@ -49,13 +49,13 @@ public:
     };
     char* get(string key) {
         if (_map.find(key) == _map.end()) {
-            throw HDCException("UnorderedMapStorage::get("+key+"): not found\n");
+            throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
         return (char*)_map[key].dptr;
     };
     size_t get_size(string key) {
         if (_map.find(key) == _map.end()) {
-            throw HDCException("UnorderedMapStorage::get("+key+"): not found\n");
+            throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
         return _map[key].dsize;
     };

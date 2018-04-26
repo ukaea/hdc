@@ -8,6 +8,12 @@ module hdc_fortran
     integer, parameter :: dp=kind(1.0D0)
     integer, parameter :: sp=kind(1.0)
 
+    integer(kind=c_int64_t), parameter ::  HDCDefault             = 0_8
+    integer(kind=c_int64_t), parameter ::  HDCFortranOrder        = 1_8
+    integer(kind=c_int64_t), parameter ::  HDCReadOnly            = 2_8
+    integer(kind=c_int64_t), parameter ::  HDCExternal            = 4_8
+    integer(kind=c_int64_t), parameter ::  HDCChildrenInitialized = 8_8
+
     private
     interface
         subroutine hello() bind(c,name="hello")
@@ -189,59 +195,65 @@ module hdc_fortran
         end function c_hdc_has_child
 
         !> Sets array of int8. This is interface to C.
-        subroutine c_hdc_set_int8(obj, ndim, shape_, data) bind(c,name="hdc_set_int8")
+        subroutine c_hdc_set_int8(obj, ndim, shape_, data, flags) bind(c,name="hdc_set_int8")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_int8
 
         !> Sets array of int32. This is interface to C.
-        subroutine c_hdc_set_int32(obj, ndim, shape_, data) bind(c,name="hdc_set_int32")
+        subroutine c_hdc_set_int32(obj, ndim, shape_, data, flags) bind(c,name="hdc_set_int32")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_int32
 
         !> Sets array of int32. This is interface to C.
-        subroutine c_hdc_set_int32_path(obj, path, ndim, shape_, data) bind(c,name="hdc_set_int32_path")
+        subroutine c_hdc_set_int32_path(obj, path, ndim, shape_, data, flags) bind(c,name="hdc_set_int32_path")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             character(kind=c_char), intent(in) :: path(*)
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_int32_path
 
         !> Sets array of int8. This is interface to C.
-        subroutine c_hdc_set_int8_path(obj, path, ndim, shape_, data) bind(c,name="hdc_set_int8_path")
+        subroutine c_hdc_set_int8_path(obj, path, ndim, shape_, data, flags) bind(c,name="hdc_set_int8_path")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             character(kind=c_char), intent(in) :: path(*)
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_int8_path
 
 
         !> Sets array of double. This is interface to C.
-        subroutine c_hdc_set_double(obj, ndim, shape_, data) bind(c,name="hdc_set_double")
+        subroutine c_hdc_set_double(obj, ndim, shape_, data, flags) bind(c,name="hdc_set_double")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_double
         !> Sets array of double. This is interface to C.
-        subroutine c_hdc_set_float(obj, ndim, shape_, data) bind(c,name="hdc_set_float")
+        subroutine c_hdc_set_float(obj, ndim, shape_, data, flags) bind(c,name="hdc_set_float")
             import
             type(hdc_t), value:: obj
             integer(kind=c_int8_t),value :: ndim
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
+            integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_float
         !> Stes scalar double.This is interface to C.
         subroutine c_hdc_set_double_scalar(obj, data) bind(c,name="hdc_set_double_scalar")
@@ -424,6 +436,11 @@ module hdc_fortran
             import
             type(hdc_t), value:: obj
         end subroutine hdc_dump
+
+        subroutine hdc_print_info(obj) bind(c,name="hdc_print_info")
+            import
+            type(hdc_t), value:: obj
+        end subroutine hdc_print_info
 
         function hdc_get_type(obj) bind(c,name="hdc_get_type") result(res)
             import
@@ -693,7 +710,7 @@ module hdc_fortran
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
     hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_, hdc_as_string_sub, &
     hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32, hdc_as_string, hdc_as_int64_1d_, hdc_as_int64_2d_, hdc_as_int64_path_sub, &
-    hdc_as_int64_sub, hdc_as_int64_2d_path, hdc_as_int64_1d_path, hdc_as_int64, hdc_new_string
+    hdc_as_int64_sub, hdc_as_int64_2d_path, hdc_as_int64_1d_path, hdc_as_int64, hdc_new_string, hdc_print_info
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -780,7 +797,7 @@ contains
         call c_hdc_set_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_set_child
 
-    subroutine hdc_set_int8_1d(this, data)
+    subroutine hdc_set_int8_1d(this, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t), dimension(:), target :: data
@@ -788,24 +805,37 @@ contains
 !        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_int8(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_int8(this, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_int8_1d
 
-    subroutine hdc_set_int32_1d(this, data)
+    subroutine hdc_set_int32_1d(this, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
-!        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_int32(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_int32(this, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_int32_1d
 
     subroutine hdc_set_int8_scalar(this, data)
@@ -844,30 +874,44 @@ contains
         call c_hdc_set_int32_scalar_path(this, trim(path)//c_null_char, data)
     end subroutine hdc_set_int32_scalar_path
 
-    subroutine hdc_set_double_1d(this, data)
+    subroutine hdc_set_double_1d(this, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         real(kind=dp), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_double(this, ndim, shape_ptr, data_ptr, flags_)
     end subroutine hdc_set_double_1d
 
-    subroutine hdc_set_float_1d(this, data)
+    subroutine hdc_set_float_1d(this, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         real(kind=sp), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_float(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_float(this, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_float_1d
 
     subroutine hdc_set_double_1d_path(this, path, data)
@@ -949,7 +993,7 @@ contains
         call c_hdc_set_string(this, trim(str)//c_null_char)
     end subroutine hdc_set_string
 
-    subroutine hdc_set_int8_1d_path(this, path, data)
+    subroutine hdc_set_int8_1d_path(this, path, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t), dimension(:), target :: data
@@ -957,13 +1001,20 @@ contains
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
         character(len=*), intent(in) :: path
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_int8_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_int8_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_int8_1d_path
 
-    subroutine hdc_set_int32_1d_path(this, path, data)
+    subroutine hdc_set_int32_1d_path(this, path, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:), target :: data
@@ -971,27 +1022,41 @@ contains
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 1
         character(len=*), intent(in) :: path
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_int32_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_int32_path(this, trim(path)//c_null_char, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_int32_1d_path
 
 
-    subroutine hdc_set_double_2d(this, data)
+    subroutine hdc_set_double_2d(this, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         real(kind=dp), dimension(:,:), target :: data
         integer(kind=c_long), dimension(1:2), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         integer(1) :: ndim = 2
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_double(this, ndim, shape_ptr, data_ptr,flags)
     end subroutine hdc_set_double_2d
 
-    subroutine hdc_set_double_ad(this, data, shape_)
+    subroutine hdc_set_double_ad(this, data, shape_, flags_)
     !Arbitrary dimension array as argument - shape has to be provided
         use iso_c_binding
         type(hdc_t) :: this
@@ -1002,11 +1067,18 @@ contains
 !         integer(kind=c_long)
         integer(1) :: ndim
 !         shape_ = shape(data)
+        integer(kind=c_int64_t), intent(in), optional :: flags_
+        integer(kind=c_int64_t) :: flags
+        if (.not. present(flags_)) then
+            flags = HDCFortranOrder;
+        else
+            flags = flags_
+        end if
         s = shape(shape_)
         ndim = int(s(1),1)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
-        call c_hdc_set_double(this, ndim, shape_ptr, data_ptr)
+        call c_hdc_set_double(this, ndim, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_double_ad
 
     function hdc_get_child(this, path) result(res)
@@ -1679,7 +1751,7 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         integer(kind=c_int32_t) :: ndim
-        integer(kind=c_long), dimension(:), pointer :: shape_
+        integer(kind=c_size_t), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int32_t), dimension(:), pointer :: res
         ndim = c_hdc_get_ndim_path(this,trim(path)//c_null_char)

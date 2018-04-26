@@ -1,92 +1,20 @@
 ! gfortran  -fPIC -g -O0 -ffree-line-length-none -pedantic -fbacktrace -std=f2008 -shared -o hdc_fortran_module.so hdc_fortran_module.f90 -I$PWD/build -L$PWD/build -lfhdc
-! module hdc_fortran_module
-! contains
-
-subroutine hello_f() bind(c, name="hello_f")
-    use iso_c_binding
-    print *, "--- Hello from FORTRAN"
-end subroutine hello_f
-
-! TODO: make regular tests from this!
-
-subroutine test_hdc_modify(tree_out) bind(c, name="test_hdc_modify")
-    use hdc_fortran
-    use iso_c_binding
-    implicit none
-    type(hdc_t), value :: tree_out
-    integer :: ix, iy
-    integer, parameter :: nx = 2, ny = 3
-    real(kind=DP) :: array(nx,ny)
-    ! init array first
-    array(:,:) = 9.99_dp
-    array(2,2) = 1.000001_dp
-    call hdc_set(tree_out,array)
-    call hdc_print_info(tree_out)
-    call hdc_dump(tree_out)
-end subroutine test_hdc_modify
-
-subroutine test_hdc_dump(tree_in) bind(c, name="test_hdc_dump")
-    use hdc_fortran
-    use iso_c_binding
-    implicit none
-    type(hdc_t), value :: tree_in
-    call hdc_print_info(tree_in)
-    call hdc_dump(tree_in)
-end subroutine test_hdc_dump
-
-function test_hdc_create() bind(c, name="test_hdc_create") result(res)
-    use hdc_fortran
-    use iso_c_binding
-    implicit none
-    type(hdc_t) :: res
-    integer, parameter :: nx = 2, ny = 3
-    real(kind=DP) :: array(nx,ny)
-    ! init array first
-    array(:,:) = 2.22_dp
-    array(2,2) = 3.14159_dp
-    res = hdc_new_empty()
-    call hdc_set(res,array)
-end function test_hdc_create
+module hdc_fortran_test_module
+contains
 
 
-subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
-    use hdc_fortran
-    use iso_c_binding
-    implicit none
-    ! type(hdc_t), value :: equilibriumin
-    type(hdc_t), value :: equilibriumin, tree_out
-    type(hdc_t) :: distsourceout
-
-
-
-    write(*,*)'=== test_cpos_f2c START ==='
-    write(*,*)'equilibriumin'
-    call hdc_dump(equilibriumin)
-
-    write(*,*)'--- call test_cpos ---'
-    call test_cpos(equilibriumin, distsourceout)
-
-    write(*,*)'--- set output ---'
-    ! call hdc_set(tree,_out 'distsourceout', distsourceout)
-    call hdc_add_child(tree_out, 'distsourceout', distsourceout)
-
-    write(*,*)'output tree:'
-    call hdc_dump(tree_out)
-    call hdc_to_json(tree_out, "./tree_out.json", 0)
-
-    write(*,*)'=== END test_cpos_f2c ==='
-end subroutine
-
-
-subroutine test_cpos(equilibriumin, distsourceout)
+subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out) 
     use hdc_fortran
     use iso_c_binding
     implicit none
 
+    integer, intent(in) :: int_in
+    real(8), intent(out) :: float_out
     integer :: i
 
 
-    !UAL ! Always describe cpo as array
+
+    !UAL ! Always describe cpo as array 
     !UAL ! In case of time slice, the size of the input cpo is 1
     !UAL type (type_equilibrium),pointer :: equilibriumin(:)
     !UAL type (type_distsource),pointer :: distsourceout(:)
@@ -101,6 +29,10 @@ subroutine test_cpos(equilibriumin, distsourceout)
     ! real(kind=DP), dimension(:):: psi
     real(kind=DP), dimension(4) :: psi_test
     real(kind=DP) :: time
+
+    
+    write(*,*)'float_out = int_in * 0.1'
+    float_out = int_in * 0.1
 
     !UAL write(0,*) 'size of input CPO = ',size(equilibriumin)
     write(*,*)' == test_cpos starts =='
@@ -142,7 +74,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
 
         !HDC this needs hdc_t write / format support -- HOW?
         ! write(0,*) 'Received input time from equilibrium: ', hdc_as_double(equilibrium_i, 'time')
-
+        
         ! call hdc_get(equilibrium_i, 'time', time)
         time = hdc_as_double(equilibrium_i, 'time')
         write(0,*) 'Received input time from equilibrium: ', time
@@ -211,4 +143,4 @@ subroutine test_cpos(equilibriumin, distsourceout)
 end subroutine test_cpos
 
 
-! end module
+end module

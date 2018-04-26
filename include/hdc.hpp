@@ -64,11 +64,13 @@ private:
     void delete_child(vector<boost::variant<size_t,std::string>> vs);
     HDC* get_ptr(vector<boost::variant<size_t,std::string>> vs);
     HDC get(vector<boost::variant<size_t,std::string>> vs);
+//     HDC get_single(boost::variant<size_t,std::string> key);
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
+    bool has_child_single(boost::variant<size_t,std::string> index);
     void add_child_single(const std::string& path, HDC& n);
-
+//     void add_child_single(const boost::variant<size_t,std::string>& path, HDC& n);
 public:
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
@@ -210,7 +212,7 @@ public:
         return;
     };
 
-    void set_string(string str) {
+    void set_string(std::string str) {
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
@@ -218,7 +220,7 @@ public:
         header.data_size = str.length()+1;
         header.type = STRING_ID;
         header.ndim = 1;
-        header.shape[0] = header.data_size;
+        header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(header_t));
@@ -234,10 +236,19 @@ public:
         }
         get(path).set_string(str);
     }
-    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type);
-    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type);
+    void set_string(std::vector <boost::variant<size_t,std::string>> path, string str) {
+        if(!has_child(path)) {
+            HDC h;
+            add_child(path, h); // TODO: add constructor for this!!
+        }
+        auto h = get(path);
+        get(path).set_string(str);
+    }
+    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -287,7 +298,7 @@ public:
     bool is_external();
     bool is_readonly();
     bool is_fortranorder();
-    void info();
+    void print_info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
     void add_child(const std::string& path, HDC* n);
@@ -351,7 +362,7 @@ public:
     std::string as_string() {
         if (header.type == STRING_ID) {
             string str(storage->get(uuid)+sizeof(header_t));
-            return str;
+            return std::string(str);
         } else {
             cout << header.type << endl;
             std::ostringstream oss;
@@ -400,7 +411,7 @@ public:
     /** Returns void pointer to data. */
     intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
-    string get_type_str();
+    const char* get_type_str();
     /** Returns Python buffer format string (https://docs.python.org/3/c-api/arg.html#arg-parsing) */
     char * get_pybuf_format();
     /** Returns datashape desctiption string. */
@@ -437,6 +448,7 @@ public:
     void to_hdf5(std::string filename, std::string dataset_name = "data");
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
+    static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
 };
 
 #endif // HDC_HPP
