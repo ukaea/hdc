@@ -115,6 +115,10 @@ TEST(HDC,NodeManipulation) {
     tree->add_child("aaa/bbb",n1);
     tree->delete_child("aaa");
     EXPECT_EQ(false,tree->has_child("aaa"));
+    // Try add to empty path
+    HDC t;
+    HDC d;
+    ASSERT_THROW(t.add_child("",d),HDCException);
     delete tree;
     delete n1;
     delete n2;

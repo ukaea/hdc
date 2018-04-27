@@ -19,7 +19,7 @@ To build HDC, you will need:
 - Python 2.7 or any Python 3 (tested only with 3.4, 3.5 and 3.6)
 - CMake >= 3.3
 - Doxygen for documentation building
-- Cathon > 0.23 (there is some parsing error in 0.23)
+- Cython > 0.23 (there is some parsing error in 0.23)
 - HDF5 devel libraries (optional, tested with 1.8 and 1.10)
 
 Building HDC
@@ -50,10 +50,12 @@ mkdir build
 cd build
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
-make -j
+make -j install
 
-# Optionally install
-make install
+# Optionally build & install python module
+cd  python
+python setup.py build
+python setup.py install
 ```
 
 Basic ideas
