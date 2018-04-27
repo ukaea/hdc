@@ -287,7 +287,14 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
             h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref_out);
             dest.set_type(HDC_LIST);
             for (int i=0;i<nelems;i++) {
+                // C function H5Rdereference renamed to H5Rdereference1 and deprecated in this release.
+                // https://support.hdfgroup.org/HDF5/doc/RM/RM_H5R.html#Reference-Dereference1
+#if ((H5_VERS_MAJOR==1) && (H5_VERS_MINOR<10))
                 auto dsetv_id = H5Rdereference(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
+#else
+                // TODO Use the new H5Rdereference API
+                auto dsetv_id = H5Rdereference1(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
+#endif
                 HDC h;
                 hdf5_tree_to_hdc(dsetv_id,"",h);
                 dest.append_slice(h);
