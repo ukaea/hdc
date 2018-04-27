@@ -10,10 +10,15 @@ pipelines:
     - step:
         script:
           - apt-get update -y
-          - apt-get upgrade -y
-          - apt-get install -y libboost-all-dev gfortran libhdf5-dev cython
+          - apt-get install -y libboost-all-dev gfortran libhdf5-dev 
+          - apt-get install -y python3-numpy python3-pytest python3-pip python3-h5py
+          - pip3 install cython
           - mkdir build
           - cd build
           - cmake ..
-          - make
+          - make -j
           - make test
+          - make install
+          - cd python
+          - python3 setup.py build
+          - python3 setup.py test
