@@ -71,7 +71,7 @@ void HDC::load_config(std::string configPath) {
         options->put("storage",settings_read.get<std::string>("storage","umap"));
         boost::optional<pt::ptree&> s = settings_read.get_child_optional("storage_options");
         if (s.is_initialized())
-            options->add_child("storage_options",s.value());
+            options->add_child("storage_options",*s);
 //         else
 //             options->add_child("storage_options",pt::ptree());
     }
@@ -132,7 +132,7 @@ void HDC::set_storage(std::string storage) {
     boost::optional<std::string> storage_cmd =  options->get_optional<std::string>("storage_cmdline");
     if (storage_cmd) {
         while (options->count("storage") > 0) options->erase("storage");
-        options->put("storage",storage_cmd.value());
+        options->put("storage",*rm storage_cmd);
         while (options->count("storage_cmdline") > 0) options->erase("storage_cmdline");
     }
     string selected_store_name = options->get<std::string>("storage",storage);
