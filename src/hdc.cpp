@@ -132,7 +132,7 @@ void HDC::set_storage(std::string storage) {
     boost::optional<std::string> storage_cmd =  options->get_optional<std::string>("storage_cmdline");
     if (storage_cmd) {
         while (options->count("storage") > 0) options->erase("storage");
-        options->put("storage",*rm storage_cmd);
+        options->put("storage",*storage_cmd);
         while (options->count("storage_cmdline") > 0) options->erase("storage_cmdline");
     }
     string selected_store_name = options->get<std::string>("storage",storage);
