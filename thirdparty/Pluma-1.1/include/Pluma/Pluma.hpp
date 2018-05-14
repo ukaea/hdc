@@ -55,7 +55,7 @@ private:\
     friend class pluma::Pluma;\
     static const unsigned int PLUMA_INTERFACE_VERSION;\
     static const unsigned int PLUMA_INTERFACE_LOWEST_VERSION;\
-    static const std::string PLUMA_PROVIDER_TYPE;\
+    static const char* PLUMA_PROVIDER_TYPE;\
     std::string plumaGetType() const{ return PLUMA_PROVIDER_TYPE; }\
 public:\
     unsigned int getVersion() const{ return PLUMA_INTERFACE_VERSION; }
@@ -69,7 +69,7 @@ public:\
 // Macro that generate the provider declaration
 ////////////////////////////////////////////////////////////
 #define PLUMA_PROVIDER_SOURCE(TYPE, Version, LowestVersion)\
-const std::string TYPE##Provider::PLUMA_PROVIDER_TYPE = PLUMA_2STRING( TYPE );\
+const char* TYPE##Provider::PLUMA_PROVIDER_TYPE = PLUMA_2STRING( TYPE );\
 const unsigned int TYPE##Provider::PLUMA_INTERFACE_VERSION = Version;\
 const unsigned int TYPE##Provider::PLUMA_INTERFACE_LOWEST_VERSION = LowestVersion;
 
