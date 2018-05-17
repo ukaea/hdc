@@ -1,6 +1,6 @@
 test-xenial:
   image: matrim/cmake-examples:3.5.1
-  before-script:
+  before_script:
     - wget 'https://pki.cesnet.cz/certs/chain_TERENA_SSL_CA_3.pem' -O /tmp/chain_TERENA_SSL_CA_3.pem
     - openssl x509 -in /tmp/chain_TERENA_SSL_CA_3.pem -inform PEM -out /tmp/chain_TERENA_SSL_CA_3.crt
     - sudo cp /tmp/chain_TERENA_SSL_CA_3.crt /usr/local/share/ca-certificates/
