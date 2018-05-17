@@ -3,16 +3,22 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: gcc:6.1
+image: matrim/cmake-examples:3.5.1
 
 pipelines:
   default:
     - step:
         script:
-          - apt-get update
-          - apt-get install -y cmake libboost-all-dev build-essential
+          - apt-get update -y
+          - apt-get install -y libboost-all-dev gfortran libhdf5-dev 
+          - apt-get install -y python3-numpy python3-pytest python3-pip python3-h5py
+          - pip3 install cython
           - mkdir build
           - cd build
           - cmake ..
-          - make
+          - make -j
           - make test
+          - make install
+          - cd python
+          - python3 setup.py build
+          - python3 setup.py test
