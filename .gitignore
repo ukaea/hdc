@@ -8,3 +8,5 @@ src/__pycache__
 *.kdev4
 
 \.cache/
+*.mexa64
+
