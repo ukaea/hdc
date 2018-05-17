@@ -4,6 +4,10 @@ test-xenial:
     - sudo apt-get update -y
     - sudo apt-get install -y libboost-all-dev gfortran libhdf5-dev
     - sudo apt-get install -y python3-numpy python3-pytest python3-pip python3-h5py
+    - wget 'https://pki.cesnet.cz/certs/chain_TERENA_SSL_CA_3.pem' -O /tmp/chain_TERENA_SSL_CA_3.pem
+    - openssl x509 -in /tmp/chain_TERENA_SSL_CA_3.pem -inform PEM -out /tmp/chain_TERENA_SSL_CA_3.crt
+    - sudo cp /tmp/chain_TERENA_SSL_CA_3.crt /usr/local/share/ca-certificates/
+    - sudo update-ca-certificates
     - sudo pip3 install cython
     - mkdir build
     - cd build
