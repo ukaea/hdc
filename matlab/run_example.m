@@ -1,10 +1,11 @@
-function run_example()
-
 obj = HDC();
 
 obj.set_data(1.23);
 obj.dump()
 
-clear obj % Clear calls the delete method
+obj.set_data([1, 2, 3; 4, 5, 6]);
+obj.dump()
 
-end
+y = obj.get_data()
+
+% clear obj
