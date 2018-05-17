@@ -23,7 +23,6 @@ if(${CMAKE_VERSION} VERSION_LESS "3.7.0")
 else()
     include( FindPythonAnaconda )
 endif()
-include( UseCython )
 include( CTest )
 include( FileCopyTargets )
 
