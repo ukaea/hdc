@@ -82,9 +82,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           n = shape[1];
         }
 
+        // create output matlab matrix and copy data
         result = mxCreateDoubleMatrix(m, n, mxREAL);
-        double* data = mxGetPr(result);
-        memcpy(data, hdc_instance->as<void*>(), m * n * sizeof(double));
+        memcpy(mxGetPr(result), hdc_instance->as<void*>(), m * n * sizeof(double));
+
+        // zero-copy -- so far results into segfaults
+        // most likely because matlab deallocates the memory
+        // result = mxCreateUninitNumericArray(ndim, shape, mxDOUBLE_CLASS, mxREAL);
+        // mxSetDoubles(result, (mxDouble*) hdc_instance->as<void*>());
 
         plhs[0] = result;
         return;
