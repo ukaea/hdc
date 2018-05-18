@@ -13,16 +13,6 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
 # Extra cmake modules to find libraries
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
-if(${CMAKE_VERSION} VERSION_LESS "3.7.0")
-    message(
-    "
-    cmake version < 3.7.0, anaconda autodetection will not work. Try this if needed:
-    cmake -DPYTHON_INCLUDE_DIR=/opt/anaconda3/include/python3.6m \
-          -DPYTHON_LIBRARY=/opt/anaconda3/lib/libpython3.6m.so.1.0
-    ")
-else()
-    include( FindPythonAnaconda )
-endif()
 include( CTest )
 include( FileCopyTargets )
 
@@ -153,12 +143,11 @@ endif() # ENABLE_HDF5
 if(ENABLE_UDA)
     find_package( PkgConfig QUIET)
     pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
-    find_package( NetCDF )
-    set(UDA_LIBRARIES ${UDA_LIBRARIES} ${NETCDF_LIBRARIES})
-    link_directories(${UDA_LIBRARY_DIRS})
+    string(REPLACE ";" " " UDA_CFLAGS_OTHER "${UDA_CFLAGS_OTHER}")
     set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
+    link_directories(${UDA_LIBRARY_DIRS})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 
