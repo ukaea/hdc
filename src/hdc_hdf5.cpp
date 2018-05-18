@@ -1,10 +1,19 @@
 // TODO: add license
 
 #include "hdc_hdf5.h"
+#ifdef _USE_HDF5
+void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string  &ref_path, HDC& dest);
 
-void HDC::write_node(H5File* file, std::string path) {
-    auto buffer = storage->get(uuid);
+void write_node(HDC h, H5File* file, std::string path) {
+    auto buffer = h.get_buffer();
+    header_t header;
+    memcpy(&header,buffer,sizeof(header_t));
     auto data = buffer + sizeof(header_t);
+    char* transposed_data = NULL;
+    if (h.is_fortranorder()) {
+        transposed_data = transpose_buffer(h.get_buffer(),h.get_ndim(),h.get_shape(),(TypeID)h.get_type(),h.is_fortranorder());
+        data = transposed_data;
+    }
     H5std_string DATASET_NAME(path);
     memcpy(&header,buffer,sizeof(header_t));
     try {
@@ -45,32 +54,47 @@ void HDC::write_node(H5File* file, std::string path) {
 
         switch(header.type) {
             case STRUCT_ID:
-                children = get_children_ptr();
+                children = h.get_children_ptr();
                 if (children != nullptr) {
                     Group* group = new Group(file->createGroup(path));
                     map_t::nth_index<1>::type& ri=children->get<1>();
                     for (auto it = ri.begin(); it != ri.end(); ++it) {
                         auto key = it->key.c_str();
                         auto uuid = it->address.c_str();
-                        HDC h(storage,uuid);
-                        h.write_node(file,path+"/"+key);
+                        write_node(HDC(global_storage,uuid),file,path+"/"+key);
                     }
                     delete group;
                 }
                 return;
             case LIST_ID:
-                children = get_children_ptr();
+                children = h.get_children_ptr();
                 if (children != nullptr) {
-                    Group* group = new Group(file->createGroup(path));
+                    Group ref_group(file->createGroup("__hdc"));
+//                     Group* group = new Group(file->createGroup(path));
                     map_t::nth_index<1>::type& ri=children->get<1>();
+                    size_t n_child = children->size();
+                    hobj_ref_t* wbuf = new hobj_ref_t[n_child];
                     size_t i = 0;
                     for (auto it = ri.begin(); it != ri.end(); ++it) {
                         auto key = it->key.c_str();
                         auto uuid = it->address.c_str();
-                        HDC h(storage,uuid);
-                        h.write_node(file,path+"/"+to_string(i++));
+                        HDC h(global_storage,uuid);
+                        auto _uuid = h.get_uuid();
+//                         write_node(h,file,path+"/"+to_string(i++));
+                        std::string full_path = "__hdc/"+_uuid;
+                        write_node(h,file,full_path.c_str());
+                        auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
+                        i++;
                     }
-                    delete group;
+
+                    hsize_t ref_dims[1];
+                    ref_dims[0] = n_child;
+                    DataSpace ref_dataspace(1, ref_dims);
+                    DataSet ref_dataset = file->createDataSet( DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace );
+                    ref_dataset.write(wbuf, PredType::STD_REF_OBJ);
+
+//                     delete group;
+                    delete wbuf;
                 }
                 return;
             case BOOL_ID:
@@ -126,9 +150,10 @@ void HDC::write_node(H5File* file, std::string path) {
                 dataset.write( edata, PredType::NATIVE_DOUBLE );
                 return;
             default:
-                cout << "Unknown data type."<<header.type<<"\n";
-                exit(-5);
+                throw HDCException("Unknown data type."+std::to_string(header.type)+"\n");
+
         }
+        if (transposed_data != NULL) delete[] transposed_data;
     }  // end of try block
     // catch failure caused by the H5File operations
     catch( FileIException error )
@@ -160,9 +185,8 @@ void HDC::write_node(H5File* file, std::string path) {
 void HDC::to_hdf5(std::string filename, std::string dataset_name) {
     try {
         H5std_string FILE_NAME( filename );
-        H5File* file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
-        write_node(file,"data");
-        delete file;
+        H5File file(FILE_NAME, H5F_ACC_TRUNC);
+        write_node(HDC(this->storage,this->uuid),&file,"data");
     }  // end of try block
     catch( FileIException error )
     {
@@ -219,23 +243,28 @@ TypeID hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path) {
     {
         res = STRING_ID;
     }
+    else if(H5Tequal(hdf5_dtype_id,H5T_ENUM))
+    {
+        //TODO: Here it can be probably more things.
+        res = BOOL_ID;
+    }
     else
     {
-        HDC_HDF5_ERROR(ref_path,
-                           "Error with HDF5 DataType to conduit::DataType "
-                           << "Leaf Conversion");
+        throw HDCException("Error with HDF5 DataType to DataType Leaf Conversion");
     }
     return res;
 };
+
+
+
 
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& dest) {
     DEBUG_STDOUT("hdf5_dataset_to_hdc("+to_string(hdf5_dset_id)+","+ref_path+",...)");
     hid_t h5_dspace_id = H5Dget_space(hdf5_dset_id);
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_dspace_id,
                                            ref_path,
-                                           "Error reading HDF5 Dataspace: " 
+                                           "Error reading HDF5 Dataspace: "
                                            << hdf5_dset_id);
-
     // check for empty case
     if(H5Sget_simple_extent_type(h5_dspace_id) == H5S_NULL)
     {
@@ -244,8 +273,34 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
     }
     else
     {
-        hid_t h5_dtype_id  = H5Dget_type(hdf5_dset_id); 
-    
+
+        hid_t h5_dtype_id  = H5Dget_type(hdf5_dset_id);
+
+        if (H5Tget_class(h5_dtype_id) == H5T_REFERENCE) {
+            // Inspired by this: https://www.physics.ohio-state.edu/~wilkins/computing/HDF/hdf5tutorial/reftoobj.html
+            size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
+            size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
+            if (ndim > 1) throw HDCException("Cannot handle array of refferences of ndim > 1");
+            hid_t h5_status    = 0;
+            hobj_ref_t ref[nelems];
+            hobj_ref_t ref_out[nelems];
+            h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref_out);
+            dest.set_type(HDC_LIST);
+            for (int i=0;i<nelems;i++) {
+                // C function H5Rdereference renamed to H5Rdereference1 and deprecated in this release.
+                // https://support.hdfgroup.org/HDF5/doc/RM/RM_H5R.html#Reference-Dereference1
+#if ((H5_VERS_MAJOR==1) && (H5_VERS_MINOR<10))
+                auto dsetv_id = H5Rdereference(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
+#else
+                // TODO Use the new H5Rdereference API
+                auto dsetv_id = H5Rdereference1(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
+#endif
+                HDC h;
+                hdf5_tree_to_hdc(dsetv_id,"",h);
+                dest.append_slice(h);
+            }
+            return;
+        }
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_dtype_id,
                                                ref_path,
                                                "Error reading HDF5 Datatype: "
@@ -255,19 +310,23 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& d
         size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
         size_t dims[ndim];
         TypeID dt = hdf5_type_to_hdc_type(h5_dtype_id,ref_path);
+        if (dt == HDC_STRING) nelems++;
         hid_t h5_status    = 0;
         char buffer[nelems*hdc_sizeof(dt)];
+        memset(&buffer,0,nelems*hdc_sizeof(dt));
         h5_status = H5Dread(hdf5_dset_id,h5_dtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&buffer);
         hsize_t hshape[ndim];
         H5Sget_simple_extent_dims(h5_dspace_id, hshape, NULL);
         size_t shape[ndim];
         for (int i=0;i<ndim;i++) shape[i] = hshape[i];
-        dest.set_data_c(ndim,shape,buffer,dt);
+        if (dt == HDC_STRING) {
+            dest.set_string(buffer);
+        } else dest.set_data_c(ndim,shape,buffer,dt); //TODO: do something more inteligent here
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                                ref_path,
                                                "Error reading HDF5 Dataset: "
                                                 << hdf5_dset_id);
-    
+
         HDC_CHECK_HDF5_ERROR_WITH_REF(H5Tclose(h5_dtype_id),
                                                ref_path,
                                                "Error closing HDF5 Datatype: "
@@ -327,11 +386,11 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                            h5_od->ref_path,
                                            "Error fetching HDF5 Object info: "
-                                           << " parent: " << hdf5_id 
+                                           << " parent: " << hdf5_id
                                            << " path:"    << hdf5_path) ;
 
-    std::string chld_ref_path = h5_od->ref_path  + 
-                                std::string("/") + 
+    std::string chld_ref_path = h5_od->ref_path  +
+                                std::string("/") +
                                 std::string(hdf5_path);
     switch (h5_info_buf.type)
     {
@@ -360,9 +419,9 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
                 HDC_CHECK_HDF5_ERROR_WITH_REF(h5_group_id,
                                                        h5_od->ref_path,
                                                        "Error opening HDF5 "
-                                                       << "Group: " 
+                                                       << "Group: "
                                                        << " parent: "
-                                                       << hdf5_id 
+                                                       << hdf5_id
                                                        << " path:"
                                                        << hdf5_path);
 
@@ -394,9 +453,9 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
             HDC_CHECK_HDF5_ERROR_WITH_REF(h5_dset_id,
                                                    h5_od->ref_path,
                                                    "Error opening HDF5 "
-                                                   << " Dataset: " 
+                                                   << " Dataset: "
                                                    << " parent: "
-                                                   << hdf5_id 
+                                                   << hdf5_id
                                                    << " path:"
                                                    << hdf5_path);
 
@@ -408,13 +467,13 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
             HDC_CHECK_HDF5_ERROR_WITH_REF(H5Dclose(h5_dset_id),
                                                    h5_od->ref_path,
                                                    "Error closing HDF5 "
-                                                   << " Dataset: " 
+                                                   << " Dataset: "
                                                    << h5_dset_id);
             break;
         }
         default:
         {
-            // unsupported
+            throw HDCException("h5_literate_traverse_op_func(): Unsupported H5O_TYPE\n");
         }
     }
 
@@ -424,7 +483,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5
 void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& dest) {
     DEBUG_STDOUT("void hdf5_group_to_hdc("+to_string(hdf5_group_id)+","+ref_path+","+")");
     //dest.set_type(EMPTY_ID);
-    
+
     // get info, we need to get the obj addr for cycle tracking
     H5O_info_t h5_info_buf;
     herr_t h5_status = H5Oget_info(hdf5_group_id,
@@ -442,7 +501,7 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& d
     h5_od.ref_path = ref_path;
 
     H5_index_t h5_grp_index_type = H5_INDEX_NAME;
-    
+
     // check for creation order index using propertylist
 
     hid_t h5_gc_plist = H5Gget_create_plist(hdf5_group_id);
@@ -463,15 +522,15 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& d
                 h5_grp_index_type = H5_INDEX_CRT_ORDER;
             }
         }
-    
+
         HDC_CHECK_HDF5_ERROR_WITH_REF(H5Pclose(h5_gc_plist),
                                                ref_path,
                                                "Failed to close HDF5 "
                                                << "H5P_GROUP_CREATE "
-                                               << "property list: " 
+                                               << "property list: "
                                                << h5_gc_plist);
     }
-    
+
     // use H5Literate to traverse
     h5_status = H5Literate(hdf5_group_id,
                            h5_grp_index_type,
@@ -559,23 +618,33 @@ HDC from_hdf5(hid_t file, const std::string& dataset_name) {
     return h;
 };
 
-HDC from_hdf5(const std::string& filename, const std::string& dataset_name) {
+HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name) {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
     HDC h;
-    hdf5_read(filename, dataset_name, h);
+    if (dataset_name != "")
+        hdf5_read(filename, dataset_name, h);
+    else
+        hdf5_read(filename, "/data", h);
     return h;
 };
 
-HDC from_hdf5(const std::string& filename) {
-    DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
-    HDC h;
-    hdf5_read(filename, "/data", h);
-    return h;
-};
-
-HDC* from_hdf5_ptr(const std::string& filename) {
+HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name) {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
     HDC* h = new HDC();
-    hdf5_read(filename, "/data", *h);
+    if (dataset_name != "")
+        hdf5_read(filename, dataset_name, *h);
+    else
+        hdf5_read(filename, "/data", *h);
     return h;
 };
+#else // _USE_HDF5
+void to_hdf5(std::string filename, std::string dataset_name) {
+    throw HDCException("HDC has not been compiled with HDF5 support!\n");
+}
+HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name) {
+    throw HDCException("HDC has not been compiled with HDF5 support!\n");
+}
+HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name) {
+    throw HDCException("HDC has not been compiled with HDF5 support!\n");
+}
+#endif // _USE_HDF5

@@ -1,11 +1,12 @@
-#ifndef KVSTDMAP
-#define KVSTDMAP
+#ifndef UMAP_PLUGIN_HPP
+#define UMAP_PLUGIN_HPP
 #include <unordered_map>
 #include <string>
 #include <cstdio>
 #include <boost/property_tree/ptree.hpp>
 #include "storage_interface.hpp"
 #include <hdc_helpers.h>
+#include <exception>
 
 // Stolen from MDBM:
 struct datum {
@@ -48,15 +49,13 @@ public:
     };
     char* get(string key) {
         if (_map.find(key) == _map.end()) {
-            fprintf(stderr,"UnorderedMapStorage::get(%s): not found\n",key.c_str());
-            exit(-3);
+            throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
         return (char*)_map[key].dptr;
     };
     size_t get_size(string key) {
         if (_map.find(key) == _map.end()) {
-            fprintf(stderr,"UnorderedMapStorage::get_size(%s): not found\n",key.c_str());
-            exit(-3);
+            throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
         return _map[key].dsize;
     };
@@ -89,5 +88,5 @@ public:
 
 PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage);
 
-#endif //KVSTDMAP
+#endif //UMAP_PLUGIN_HPP
 

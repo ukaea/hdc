@@ -79,61 +79,60 @@ int get_ndim(const Json::Value& root) {
     return dim;
 }
 
-HDC* json_to_hdc(const Json::Value& root) {
-    HDC* tree = new HDC();
+HDC HDC::json_to_HDC(const ::Json::Value& root) {
+    HDC tree;
     switch(root.type()) {
         {
         case(Json::nullValue):
             DEBUG_STDOUT("root is null");
-            tree->set_type(EMPTY_ID);
+            tree.set_type(EMPTY_ID);
             break;
         }
         case(Json::intValue):
         {
             DEBUG_STDOUT("root is int, value = "+to_string(root.asInt()));
-            tree->set_data<int32_t>(root.asInt());
+            tree.set_data<int32_t>(root.asInt());
             break;
         }
         case(Json::uintValue):
         {
             DEBUG_STDOUT("root is uint, value = "+to_string(root.asUInt()));
-            tree->set_data<uint32_t>(root.asUInt());
+            tree.set_data<uint32_t>(root.asUInt());
             break;
         }
         case(Json::realValue):
         {
             DEBUG_STDOUT("root is double, value = "+to_string(root.asDouble()));
-            tree->set_data(root.asDouble());
+            tree.set_data(root.asDouble());
             break;
         }
         case(Json::stringValue):
         {
-            DEBUG_STDOUT("root is string, value = "+string(root.asCString()));
-            tree->set_string(root.asCString());
+           DEBUG_STDOUT("root is string, value = "+string(root.asString()));
+            tree.set_string(root.asString());
             break;
         }
         case(Json::booleanValue):
         {
             DEBUG_STDOUT("root is bool, value = "+to_string(root.asBool()));
-            tree->set_data<bool>(root.asBool());
+            tree.set_data<bool>(root.asBool());
             break;
         }
         case(Json::arrayValue):
         {
             DEBUG_STDOUT("root is array, size = "+to_string(root.size()));
             if (is_all_numeric(root)) {
-                int8_t ndim = get_ndim(root);
+                int8_t ndim = ::get_ndim(root);
                 if (ndim > HDC_MAX_DIMS) {
-                    cerr << "Unsupported number of dimensions: " << ndim << endl;
-                    exit(-5);
+                    throw HDCException("json_to_hdc(): Unsupported number of dimensions: "+std::to_string(ndim)+"\n");
                 }
-                size_t* shape = get_shape(root);
+                size_t* shape = ::get_shape(root);
                 TypeID dt;
                 if (is_double(root)) dt = DOUBLE_ID;
                 else dt = INT32_ID;
-                delete tree;
-                tree = new HDC(ndim,shape,dt);
-                void* data_ptr = tree->as<void*>();
+                HDC d(ndim,shape,dt);
+                tree = d;
+                void* data_ptr = tree.as<void*>();
                 if (dt == DOUBLE_ID) {
                     switch(ndim) {
                         case 1:
@@ -154,8 +153,7 @@ HDC* json_to_hdc(const Json::Value& root) {
                         }
                         default:
                         {
-                            cerr << "Unsupported number of dimensions: " << ndim << endl;
-                            exit(-5);
+                            throw HDCException("json_to_hdc(): Requested number of dimensions: "+std::to_string(ndim)+" not implemented yet\n");
                         }
                     }
                 }
@@ -177,17 +175,17 @@ HDC* json_to_hdc(const Json::Value& root) {
                         }
                         default:
                         {
-                            cerr << "Unsupported number of dimensions: " << ndim << endl;
-                            exit(-5);
+                            throw HDCException("json_to_hdc(): Requested number of dimensions: "+std::to_string(ndim)+" not implemented yet\n");
                         }
                     }
                 }
                 delete[] shape;
             } else {
                 // call recursively -- save list
-                tree->set_type(LIST_ID);
+                tree.set_type(LIST_ID);
                 for (unsigned int i = 0;i<root.size();i++) {
-                    tree->append_slice(json_to_hdc(root[i]));
+                    HDC h = HDC::json_to_HDC(root[i]);
+                    tree.append_slice(h);
                 }
             }
             break;
@@ -195,9 +193,10 @@ HDC* json_to_hdc(const Json::Value& root) {
         case(Json::objectValue):
         {
             DEBUG_STDOUT("root is object, children:\n");
-            for (Json::ValueConstIterator it = root.begin(); it != root.end(); it++) {
+            for (Json::ValueConstIterator it = root.begin(); it != root.end(); ++it) {
                 DEBUG_STDOUT("KEY: "+it.key().asString());
-                tree->add_child(it.key().asCString(),json_to_hdc(*it));
+                HDC h = json_to_HDC(*it);
+                tree.add_child(it.key().asCString(),h);
             }
             break;
         }
@@ -206,11 +205,17 @@ HDC* json_to_hdc(const Json::Value& root) {
 }
 
 template<typename T>
-Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
+Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape, bool fortranOrder = false) {
     // TODO: Add Fortran column order
-    
+
     Json::Value root;
-    andres::View<T> view(shape, shape+ndim, (T*)buffer);
+    andres::CoordinateOrder order;
+    if (fortranOrder)
+        order = andres::LastMajorOrder;
+    else
+        order = andres::FirstMajorOrder;
+    andres::View<T> view(shape, shape+ndim, (T*)buffer,order);
+    //TODO add fortran - C order switch
     switch(ndim) {
         case(0):
         {
@@ -296,8 +301,7 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape) {
         }*/
         default:
         {
-            cerr << "buffer_to_json(): unsupported number of dimensions: " << ndim << endl;
-            exit(-5);
+            throw HDCException("buffer_to_json(): unsupported number of dimensions: "+std::to_string(ndim)+"\n");
         }
     }
     return root;
@@ -310,52 +314,52 @@ Json::Value HDC::to_json(int mode) {
         switch(header.type) {
             case(INT8_ID):
             {
-                root = buffer_to_json<int8_t>(get_data_ptr(),get_ndim(),get_shape());
+                root = buffer_to_json<int8_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(INT16_ID):
             {
-                root =  buffer_to_json<int16_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<int16_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(INT32_ID):
             {
-                root =  buffer_to_json<int32_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<int32_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(INT64_ID):
             {
-            root =  buffer_to_json<int64_t>(get_data_ptr(),get_ndim(),get_shape());
+            root =  buffer_to_json<int64_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(UINT8_ID):
             {
-                root = buffer_to_json<uint8_t>(get_data_ptr(),get_ndim(),get_shape());
+                root = buffer_to_json<uint8_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(UINT16_ID):
             {
-                root =  buffer_to_json<uint16_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<uint16_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(UINT32_ID):
             {
-                root =  buffer_to_json<uint32_t>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<uint32_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             /*case(UINT64_ID):
              {  *
-             root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape());
+             root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
              break;
             }*/
             case(FLOAT_ID):
             {
-                root =  buffer_to_json<float>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<float>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(DOUBLE_ID):
             {
-                root =  buffer_to_json<double>(get_data_ptr(),get_ndim(),get_shape());
+                root =  buffer_to_json<double>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                 break;
             }
             case(STRUCT_ID):
@@ -369,12 +373,11 @@ Json::Value HDC::to_json(int mode) {
             }
             case(LIST_ID):
             {
-                Json::Value elements;
+                root = Json::arrayValue;
                 auto children = get_children_ptr();
                 int i=0;
-                for (auto it = children->begin(); it != children->end(); ++it) {
-                    HDC node(storage,it->address.c_str());
-                    root[i++] = node.to_json(mode);
+                for (int i=0;i<this->childs_count();i++) {
+                    root[i] = this->get_slice(i).to_json(mode);
                 }
                 break;
             }
@@ -395,14 +398,12 @@ Json::Value HDC::to_json(int mode) {
             }
             default:
             {
-                cerr << "to_json(): Type " << get_type_str() << " not supported yet.";
-                exit(-1);
+                throw HDCException("to_json(): Type "+std::string(get_type_str())+" not supported yet.");
             }
         }
     }
     else {
-        cerr << "to_json(): Mode " << mode << " not supported yet.";
-        exit(-1);
+        throw HDCException("to_json(): Mode "+std::to_string(mode)+" not supported yet.\n");
     }
     return root;
 }
@@ -425,7 +426,7 @@ string HDC::to_json_string(int mode)
 }
 
 /* Saves children to JSON strin in order to store tree hierarchy in KV stores*/
-string map_to_json(map_t& children) {
+string HDC::map_to_json(map_t& children) {
         Json::Value root;
     //root["size"] = Json::UInt64(children.size());
     for (size_t i=0;i<children.size();i++) {
@@ -438,16 +439,25 @@ string map_to_json(map_t& children) {
     return ss.str();
 }
 
-HDC* from_json(const string& filename)
+HDC HDC::from_json(const string& filename, const string& datapath)
 {
-    HDC* tree;
+    HDC tree;
     ifstream file;
     file.exceptions(ifstream::failbit | ifstream::badbit);
     try {
         file.open(filename);
         Json::Value root;
         file >> root;
-        tree = json_to_hdc(root);
+        if (datapath != "") {
+            auto split_path = split(datapath);
+            for (auto& k : split_path) {
+                if (k.type() == typeid(size_t))
+                    root = root[static_cast<int>(boost::get<size_t>(k))];
+                else
+                    root = root[boost::get<std::string>(k)];
+            }
+        }
+        tree = HDC::json_to_HDC(root);
     }
     catch (ifstream::failure e) {
         cout << "Error reading / opening file." << endl;

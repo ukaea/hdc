@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
             shm_remove() { shared_memory_object::remove("MySharedMemory"); }
             ~shm_remove(){ shared_memory_object::remove("MySharedMemory"); }
         } remover;
-        HDC_init("mdbm","{\"filename\": \"/tmp/db.mdbm\", \"persistent\": true}");
+        HDC::init("mdbm","{\"filename\": \"/tmp/db.mdbm\", \"persistent\": true}");
         //HDC_init("mdbm","{\"filename\": \"/tmp/db.mdbm\"}");
         // Create new HDC tree
         HDC tree;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
         std::string str(mem);
-        HDC* tree = deserialize_HDC_string(str);
+        HDC* tree = HDC::deserialize_HDC_string(str);
         tree->dump();
     }
     return 0;

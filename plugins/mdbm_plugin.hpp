@@ -1,5 +1,5 @@
-#ifndef KVMDBM
-#define KVMDBM
+#ifndef MDBM_PLUGIN_HPP
+#define MDBM_PLUGIN_HPP
 #include <string>
 #include "storage_interface.hpp"
 #include <mdbm.h>
@@ -10,6 +10,7 @@
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include <hdc_helpers.h>
+#include <exception>
 
 using namespace std;
 
@@ -74,8 +75,7 @@ public:
         // Remove db file if the data persistence is not required
         if (!this->persistent) {
             if (::remove(filename.c_str()) != 0) {
-                perror("Error deleting file");
-                exit(1);
+                throw std::runtime_error("MDBMStorage::cleanup(): Error deleting file\n");
             };
         }
         initialized = false;
@@ -114,4 +114,4 @@ public:
 
 PLUMA_INHERIT_PROVIDER(MDBMStorage, Storage);
 
-#endif //KVMDBM
+#endif //MDBM_PLUGIN_HPP

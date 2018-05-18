@@ -1,4 +1,5 @@
 build*
+install*
 
 .project
 hdc_new.kdev4
@@ -6,3 +7,6 @@ src/__pycache__
 *.pyc
 *.kdev4
 apidoc/_build
+
+\.cache/
+\.ipynb_checkpoints/

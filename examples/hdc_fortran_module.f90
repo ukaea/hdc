@@ -2,6 +2,52 @@
 ! module hdc_fortran_module
 ! contains
 
+subroutine hello_f() bind(c, name="hello_f")
+    use iso_c_binding
+    print *, "--- Hello from FORTRAN"
+end subroutine hello_f
+
+! TODO: make regular tests from this!
+
+subroutine test_hdc_modify(tree_out) bind(c, name="test_hdc_modify")
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    type(hdc_t), value :: tree_out
+    integer :: ix, iy
+    integer, parameter :: nx = 2, ny = 3
+    real(kind=DP) :: array(nx,ny)
+    ! init array first
+    array(:,:) = 9.99_dp
+    array(2,2) = 1.000001_dp
+    call hdc_set(tree_out,array)
+    call hdc_print_info(tree_out)
+    call hdc_dump(tree_out)
+end subroutine test_hdc_modify
+
+subroutine test_hdc_dump(tree_in) bind(c, name="test_hdc_dump")
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    type(hdc_t), value :: tree_in
+    call hdc_print_info(tree_in)
+    call hdc_dump(tree_in)
+end subroutine test_hdc_dump
+
+function test_hdc_create() bind(c, name="test_hdc_create") result(res)
+    use hdc_fortran
+    use iso_c_binding
+    implicit none
+    type(hdc_t) :: res
+    integer, parameter :: nx = 2, ny = 3
+    real(kind=DP) :: array(nx,ny)
+    ! init array first
+    array(:,:) = 2.22_dp
+    array(2,2) = 3.14159_dp
+    res = hdc_new_empty()
+    call hdc_set(res,array)
+end function test_hdc_create
+
 
 subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
     use hdc_fortran
@@ -10,7 +56,7 @@ subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
     ! type(hdc_t), value :: equilibriumin
     type(hdc_t), value :: equilibriumin, tree_out
     type(hdc_t) :: distsourceout
-    
+
 
 
     write(*,*)'=== test_cpos_f2c START ==='
@@ -32,7 +78,7 @@ subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
 end subroutine
 
 
-subroutine test_cpos(equilibriumin, distsourceout) 
+subroutine test_cpos(equilibriumin, distsourceout)
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -40,7 +86,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
     integer :: i
 
 
-    !UAL ! Always describe cpo as array 
+    !UAL ! Always describe cpo as array
     !UAL ! In case of time slice, the size of the input cpo is 1
     !UAL type (type_equilibrium),pointer :: equilibriumin(:)
     !UAL type (type_distsource),pointer :: distsourceout(:)
@@ -96,7 +142,7 @@ subroutine test_cpos(equilibriumin, distsourceout)
 
         !HDC this needs hdc_t write / format support -- HOW?
         ! write(0,*) 'Received input time from equilibrium: ', hdc_as_double(equilibrium_i, 'time')
-        
+
         ! call hdc_get(equilibrium_i, 'time', time)
         time = hdc_as_double(equilibrium_i, 'time')
         write(0,*) 'Received input time from equilibrium: ', time

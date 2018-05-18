@@ -1,4 +1,5 @@
 #include "hdc_benchmark_common.hpp"
+
 // Plain memcpy test to show over overhead of HDC
 static void BM_memcpy(benchmark::State& state) {
     size_t n = state.range(0);
@@ -93,3 +94,4 @@ static void BM_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     StorageReset();
 }
 BENCHMARK(BM_HDC_ZeroCopyDataWrite)->RangeMultiplier(2)->Range(2<<20,2<<25);
+
