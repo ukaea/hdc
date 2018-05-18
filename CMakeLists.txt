@@ -176,6 +176,7 @@ add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(plugins)
 add_subdirectory(python)
+add_subdirectory(misc)
 
 if (BUILD_DOC)
     # add_subdirectory(docs)
