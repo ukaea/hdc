@@ -74,9 +74,9 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 
 ########################################################################################################################
 # Build options
-option(BUILD_TESTS "Build and install Google tests" ON)
+option(BUILD_TESTS "Build and install tests" ON)
 option(BUILD_EXAMPLES "Build and install examples" ON)
-option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." ON)
+option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF)
 option(ENABLE_HDF5 "Enable HDF5 support" ON)
 option(ENABLE_UDA "Enable UDA support" OFF)
 option(BUILD_OWN_HDF5 "Build own HDF5" OFF)
@@ -91,15 +91,29 @@ if (GOPTION)
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g" )
 endif() # GOPTION
 
-if (BUILD_TESTS)
-    # Prevent GoogleTest from overriding our compiler/linker options
-    # when building with Visual Studio
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory("thirdparty/googletest/")
-endif() # BUILD_TESTS
-
 if (BUILD_BENCHMARKS)
-    add_subdirectory("thirdparty/googlebenchmark/")
+    include(ExternalProject)
+    ExternalProject_Add(
+        googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG v1.4.0
+        TIMEOUT 10
+        LOG_DOWNLOAD ON
+        PREFIX "${hdc_BINARY_DIR}/gbench"
+        BINARY_DIR "${hdc_BINARY_DIR}/gbench_build"
+        SOURCE_DIR "${hdc_BINARY_DIR}/gbench_src"
+        CMAKE_CACHE_ARGS
+            -DBENCHMARK_BUILD_32_BITS:BOOL=OFF
+            -DBENCHMARK_DOWNLOAD_DEPENDENCIES:BOOL=OFF
+            -DBENCHMARK_ENABLE_ASSEMBLY_TESTS:BOOL=OFF
+            -DBENCHMARK_ENABLE_EXCEPTIONS:BOOL=OFF
+            -DBENCHMARK_ENABLE_GTEST_TESTS:BOOL=OFF
+            -DBENCHMARK_ENABLE_INSTALL:BOOL=OFF
+            -DBENCHMARK_ENABLE_LTO:BOOL=OFF
+            -DBENCHMARK_ENABLE_TESTING:BOOL=OFF
+            -DBENCHMARK_USE_LIBCXX:BOOL=OFF
+       INSTALL_COMMAND ""
+    )
 endif() # BUILD_BENCHMARKS
 
 if(ENABLE_HDF5)
