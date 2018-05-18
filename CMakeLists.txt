@@ -91,13 +91,6 @@ if (GOPTION)
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g" )
 endif() # GOPTION
 
-if (BUILD_TESTS)
-    # Prevent GoogleTest from overriding our compiler/linker options
-    # when building with Visual Studio
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory("thirdparty/googletest/")
-endif() # BUILD_TESTS
-
 if (BUILD_BENCHMARKS)
     add_subdirectory("thirdparty/googlebenchmark/")
 endif() # BUILD_BENCHMARKS

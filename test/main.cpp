@@ -1,3 +1,6 @@
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+/*
 #include "gtest/gtest.h"
 
 int main(int argc, char **argv)
@@ -6,4 +9,5 @@ int main(int argc, char **argv)
     int ret = RUN_ALL_TESTS();
     return ret;
 }
+*/
 
