@@ -1,0 +1,11 @@
+ prefix=@DEST_DIR@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/hdc
+
+Name: HDC
+Description: Hierarchical Dynamic Containers library
+Version: 0.4
+
+Libs: -L${libdir} @PRIVATE_LIBS@
+Cflags: -I${includedir}

@@ -8,3 +8,4 @@ src/__pycache__
 *.kdev4
 
 \.cache/
+\.ipynb_checkpoints/

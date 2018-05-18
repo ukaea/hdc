@@ -387,7 +387,13 @@ TEST(HDC,HDF5) {
 
 #ifdef _USE_UDA
 TEST(HDC,StringConstructor) {
-    HDC h = HDC("uda://TESTPLUGIN::test0()");
-    EXPECT_STREQ(h.as_string().c_str(),"Hello World!");
+    HDC h = HDC("uda://HELP::help()");
+    std::string expected =
+            "\nHelp\tList of HELP plugin functions:\n"
+            "\n"
+            "services()\tReturns a list of available services with descriptions\n"
+            "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
+            "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
+    EXPECT_STREQ(h.as_string().c_str(),expected.c_str());
 }
 #endif

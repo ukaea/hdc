@@ -15,6 +15,15 @@ void imasdd_plugin() {
     return;
 }
 
+void mdsplus_plugin() {
+//     HDC h("uda://_a=1+41|MDSPLUS::localhost");
+    HDC h("uda://\\magnetics::iplasma:trapeze|MDSPLUS::localhost:8001/tcv_shot/50000");
+    //HDC h("uda://HELP::help()");
+    h.print_info();
+    h.dump();
+    return;
+}
+
 
 void imas_plugin() {
 /* Here we assume that UDA server is running locally, if not, please comment this and set UDA_HOST environment variable... */
@@ -147,7 +156,8 @@ void netcdf_plugin(int argc, const char *argv[]) {
 
 
 int main(int argc, const char *argv[]) {
-    imasdd_plugin();
+    mdsplus_plugin();
+//     imasdd_plugin();
 //     imas_plugin();
 //     test_plugin();
 //     netcdf_plugin(argc, argv);
