@@ -1,0 +1,16 @@
+test-xenial:
+  image: matrim/cmake-examples:3.5.1
+  script:
+    - sudo apt-get update -y
+    - sudo apt-get install -y libboost-all-dev gfortran libhdf5-dev
+    - sudo apt-get install -y python3-numpy python3-pytest python3-pip python3-h5py
+    - sudo pip3 install cython
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 setup.py build
+    - python3 setup.py test
