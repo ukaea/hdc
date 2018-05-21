@@ -186,9 +186,9 @@ add_subdirectory(thirdparty/jsoncpp)
 include_directories(thirdparty)
 
 include_directories(include)
+include_directories(include/plugins)
 add_subdirectory(include)
 add_subdirectory(src)
-add_subdirectory(plugins)
 add_subdirectory(python)
 add_subdirectory(misc)
 

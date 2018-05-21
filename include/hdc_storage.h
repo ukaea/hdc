@@ -2,8 +2,8 @@
 #define HDC_STORAGE_H
 
 #include <Pluma/Pluma.hpp>
-#include "storage_interface.hpp"
-#include "../plugins/umap_plugin.hpp" // Add this as fallback
+#include "plugins/storage_interface.hpp"
+#include "plugins/umap_plugin.hpp" // Add this as fallback
 #include <iostream>
 #include <cstdio>
 #include <hdc_helpers.h>

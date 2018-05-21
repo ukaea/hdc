@@ -16,7 +16,7 @@ if (BUILD_MDBM_PLUGIN)
 
         message("Found MDBM library: ${MDBM_LIBRARY}")
 
-        add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp  ../src/storage_interface.cpp)
+        add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp storage_interface.cpp)
         target_link_libraries(hdc_plugin_mdbm ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})
         install(TARGETS hdc_plugin_mdbm DESTINATION lib/hdc)
     else ()
@@ -25,6 +25,8 @@ if (BUILD_MDBM_PLUGIN)
     endif()
 endif()
 # Create Unordered map storage
-add_library(hdc_plugin_umap SHARED umap_plugin.cpp ../src/storage_interface.cpp)
+include_directories()
+add_library(hdc_plugin_umap SHARED umap_plugin.cpp storage_interface.cpp)
 target_link_libraries(hdc_plugin_umap Pluma dl)
 install(TARGETS hdc_plugin_umap DESTINATION lib/hdc)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/hdc/plugins FILES_MATCHING PATTERN "*.h*")

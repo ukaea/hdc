@@ -1,6 +1,6 @@
 set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
-foreach(LIB "hdc")
-  set(PRIVATE_LIBS "${PRIVATE_LIBS} -l${LIB}")
-endforeach()
-configure_file("hdc.pc.in" "hdc.pc" @ONLY)
-install(DIRECTORY ./ DESTINATION lib/pkgconfig FILES_MATCHING PATTERN "*.pc")
+configure_file("hdc.pc.in" "${CMAKE_BINARY_DIR}/lib/pkgconfig/hdc.pc" @ONLY)
+configure_file("chdc.pc.in" "${CMAKE_BINARY_DIR}/lib/pkgconfig/chdc.pc" @ONLY)
+configure_file("fhdc.pc.in" "${CMAKE_BINARY_DIR}/lib/pkgconfig/fhdc.pc" @ONLY)
+
+install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/pkgconfig DESTINATION lib)
