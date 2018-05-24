@@ -22,7 +22,6 @@ add_library(fhdc SHARED hdc_fortran.f90)
 target_link_libraries(fhdc chdc)
 
 install(TARGETS hdc chdc fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
-file(GLOB hdc_FORTRAN_MODULES "${CMAKE_Fortran_MODULE_DIRECTORY}/*.mod")
-install(FILES ${hdc_FORTRAN_MODULES} DESTINATION include/hdc)
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include/hdc)
 
 add_subdirectory(plugins)
