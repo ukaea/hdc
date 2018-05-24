@@ -1,0 +1,13 @@
+This is a simple example project using HDC + UDA,
+which fetches TCV data and processes them in Fortran.
+
+Build
+-----
+See instructions in the Makefile.
+
+make all
+
+Run
+---
+
+python process_tcv_data.py
