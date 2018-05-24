@@ -6,7 +6,7 @@ list(APPEND HDC_SOURCES hdc.cpp plugins/storage_interface.cpp hdc_utils.cpp hdc_
 set(HDC_LINK_LIBRARIES)
 list(APPEND HDC_LINK_LIBRARIES ${Boost_LIBRARIES} Pluma dl jsoncpp)
 if(HDF5_FOUND)
-    list(APPEND HDC_LINK_LIBRARIES ${HDF5_LIBRARIES})
+    list(APPEND HDC_LINK_LIBRARIES ${HDF5_HL_LIBRARIES} ${HDF5_LIBRARIES}) 
 endif(HDF5_FOUND)
 add_library(hdc SHARED ${HDC_SOURCES})
 if(ENABLE_UDA)
