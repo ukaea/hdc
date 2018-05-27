@@ -20,9 +20,9 @@ mkdir build
 # netcdf seems broken, somehow remove the library, e.g. by brute force:
 sudo mv /usr/lib/x86_64-linux-gnu/libnetcdf.so /usr/lib/x86_64-linux-gnu/_libnetcdf.so
 # configure with cmake
-cmake -Bbuild -H. -DTARGET_TYPE:STRING=OTHER -DSWIG_EXECUTABLE=$(which swig3.0) -DCMAKE_INSTALL_PREFIX=./
+cmake -Bbuild -H. -DTARGET_TYPE:STRING=OTHER -DSWIG_EXECUTABLE=$(which swig3.0) -DCMAKE_INSTALL_PREFIX=./install
 # For Ubuntu 18.04, Postgres is not detected without some hints
-cmake -Bbuild -H. -DTARGET_TYPE:STRING=OTHER -DSWIG_EXECUTABLE=$(which swig) -DCMAKE_INSTALL_PREFIX=./install -DPostgreSQL_ADDITIONAL_VERSIONS=10.3 -DPostgreSQL_TYPE_ADDITIONAL_SEARCH_SUFFIXES=postgresql/10/server
+cmake -Bbuild -H. -DTARGET_TYPE:STRING=OTHER -DSWIG_EXECUTABLE=$(which swig3.0) -DCMAKE_INSTALL_PREFIX=./install -DPostgreSQL_ADDITIONAL_VERSIONS=10.3 -DPostgreSQL_TYPE_ADDITIONAL_SEARCH_SUFFIXES=postgresql/10/server
 # compile and install
 make -C build
 make -C build/ install
@@ -36,7 +36,7 @@ Libs: -L${libdir} -lfatuda_cpp -ldl -lxml2 -lcrypto -lpq -L/usr/local/mdsplus/li
 # finally, configure the environment for UDA
 export UDA_PLUGIN_CONFIG=$UDA_HOME/etc/plugins/udaPlugins.conf
 export UDA_SARRAY_CONFIG=$UDA_HOME/etc/udagenstruct.conf
-export UDA_LOG_LEVEL=DEBUG
+export UDA_LOG_LEVEL=WARNING
 export UDA_PLUGIN_DIR=$UDA_HOME/lib/plugins
 export UDA_EXP2IMAS_MAPPING_FILE_DIRECTORY=$UDA_HOME/source/plugins/exp2imas/mappings
 export UDA_PLUGIN_DEBUG_SINGLEFILE=1
