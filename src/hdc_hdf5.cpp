@@ -2,6 +2,10 @@
 
 #include "hdc_hdf5.h"
 #ifdef _USE_HDF5
+
+const char* ref_group_name = "__hdc";
+
+
 void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string  &ref_path, HDC& dest);
 
 void write_node(HDC h, H5File* file, std::string path) {
@@ -69,8 +73,13 @@ void write_node(HDC h, H5File* file, std::string path) {
             case LIST_ID:
                 children = h.get_children_ptr();
                 if (children != nullptr) {
-                    Group ref_group(file->createGroup("__hdc"));
-//                     Group* group = new Group(file->createGroup(path));
+                    Group ref_group;
+                    try {
+                        Exception::dontPrint(); //TODO: Do this just temporarily???
+                        ref_group = file->openGroup(ref_group_name);
+                    } catch (FileIException) {
+                        ref_group = file->createGroup(ref_group_name);
+                    }
                     map_t::nth_index<1>::type& ri=children->get<1>();
                     size_t n_child = children->size();
                     hobj_ref_t* wbuf = new hobj_ref_t[n_child];
@@ -81,7 +90,7 @@ void write_node(HDC h, H5File* file, std::string path) {
                         HDC h(global_storage,uuid);
                         auto _uuid = h.get_uuid();
 //                         write_node(h,file,path+"/"+to_string(i++));
-                        std::string full_path = "__hdc/"+_uuid;
+                        std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                         write_node(h,file,full_path.c_str());
                         auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
                         i++;
