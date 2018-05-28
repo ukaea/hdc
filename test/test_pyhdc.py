@@ -302,5 +302,13 @@ def test_tree_json(test_trees):
     assert tree_equal(pytree, hdctree_test, exception=False)
 
 
+def test_tree_json_string(test_trees):
+    pytree, hdctree = test_trees
+    json_str = hdctree.dumps()
+    hdctree_test = HDC.loads(json_str)
+
+    assert tree_equal(pytree, hdctree_test, exception=False)
+
+
 if __name__ == '__main__':
     pytest.main()

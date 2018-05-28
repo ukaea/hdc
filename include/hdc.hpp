@@ -445,6 +445,7 @@ public:
     static string map_to_json(map_t& children);
     static char* buffer_grow(char* old_buffer, size_t extra_size);
     static HDC json_to_HDC(const ::Json::Value& root);
+    static HDC from_json_string(const std::string& json_string);
     void to_hdf5(std::string filename, std::string dataset_name = "data");
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");

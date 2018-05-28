@@ -62,7 +62,7 @@ cdef extern from "hdc.hpp":
         size_t get_itemsize() except +
         size_t get_datasize() except +
         char * get_pybuf_format() except +
-        string to_json_string(int mode = 0) except +
+        string to_json_string(int mode) except +
         void set_child(string path, CppHDC* n) except +
         void append_slice(CppHDC* h) except +
         void add_child(string path, CppHDC* n) except +
@@ -97,7 +97,9 @@ cdef extern from "hdc.hpp":
         CppHDC* from_hdf5_ptr(const string& filename, const string& dataset_name) except +
         @staticmethod
         CppHDC from_json(const string& filename, const string& datapath) except +
-        void to_json(string filename, int mode)
+        void to_json(string filename, int mode) except +
+        @staticmethod
+        CppHDC from_json_string(const string& json_string) except +
 
 
 cdef class HDC:
@@ -267,8 +269,29 @@ cdef class HDC:
         new_hdc = HDC(data)
         deref(self._thisptr).append_slice(new_hdc._thisptr)
 
-    def dumps(self):
-        return deref(self._thisptr).to_json_string().decode()
+    def dumps(self, mode=0):
+        """Dump to JSON string"""
+        return deref(self._thisptr).to_json_string(mode).decode()
+
+    @staticmethod
+    def loads(s):
+        """Load from JSON string"""
+        res = HDC()
+        cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
+        res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        return res
+
+    def dump(self, filename, mode=0):
+        """Save to json file
+
+        Parameters
+        ----------
+        fp : .write supporting object (open file)
+            target to write to
+        """
+        deref(self._thisptr).to_json(filename.encode(), mode)
+        # with open(filename, 'w') as fp:
+        #     fp.write(self.dumps())
 
     @staticmethod
     def load(filename, datapath=''):
@@ -288,27 +311,6 @@ cdef class HDC:
     def _as_parameter_(self):
         # used by ctypes automatic conversion
         return self.c_ptr
-
-    def dump(self, filename, mode=0):
-        """Save to json file
-
-        Parameters
-        ----------
-        fp : .write supporting object (open file)
-            target to write to
-        """
-        deref(self._thisptr).to_json(filename.encode(), mode)
-        # fp.write(str(self.dumps()))
-
-    # def load(self, fp):
-    #     """Load from JSON file
-    #
-    #     Parameters
-    #     ----------
-    #     fp : .write supporting object (open file)
-    #     target to write to
-    #     """
-    #     fp.write(self.dumps())
 
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
