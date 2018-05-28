@@ -52,9 +52,12 @@ cdef struct hdc_t:
     voidptr obj
 
 cdef extern from "hdc.hpp":
+    cdef cppclass HDCStorage:
+        pass
     cdef cppclass CppHDC "HDC":
         CppHDC() except +
         CppHDC(string str) except +
+        CppHDC(HDCStorage* _storage, const string& _uuid) except +
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
@@ -73,6 +76,8 @@ cdef extern from "hdc.hpp":
         intptr_t as_void_ptr() except +
         int8_t get_ndim() except +
         size_t* get_shape() except +
+        HDCStorage* get_storage() except +
+        string get_uuid() except +
 
         # typedef unsigned long Flags;
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
@@ -90,6 +95,9 @@ cdef extern from "hdc.hpp":
         void to_hdf5(string filename, string dataset_name) except +
         @staticmethod
         CppHDC* from_hdf5_ptr(const string& filename, const string& dataset_name) except +
+        @staticmethod
+        CppHDC from_json(const string& filename, const string& datapath) except +
+        void to_json(string filename, int mode)
 
 
 cdef class HDC:
@@ -262,6 +270,13 @@ cdef class HDC:
     def dumps(self):
         return deref(self._thisptr).to_json_string().decode()
 
+    @staticmethod
+    def load(filename, datapath=''):
+        res = HDC()
+        cdef CppHDC new_hdc = CppHDC.from_json(filename.encode(), datapath.encode())
+        res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        return res
+
     def print_info(self):
         return deref(self._thisptr).print_info()
 
@@ -274,7 +289,7 @@ cdef class HDC:
         # used by ctypes automatic conversion
         return self.c_ptr
 
-    def dump(self, fp):
+    def dump(self, filename, mode=0):
         """Save to json file
 
         Parameters
@@ -282,7 +297,18 @@ cdef class HDC:
         fp : .write supporting object (open file)
             target to write to
         """
-        fp.write(self.dumps())
+        deref(self._thisptr).to_json(filename.encode(), mode)
+        # fp.write(str(self.dumps()))
+
+    # def load(self, fp):
+    #     """Load from JSON file
+    #
+    #     Parameters
+    #     ----------
+    #     fp : .write supporting object (open file)
+    #     target to write to
+    #     """
+    #     fp.write(self.dumps())
 
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
@@ -387,6 +413,7 @@ cdef class HDC:
 
     def to_hdf5(self, filename, dataset_name="data"):
         deref(self._thisptr).to_hdf5(filename.encode(), dataset_name.encode())
+
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
         res = HDC()

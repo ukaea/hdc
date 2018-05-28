@@ -293,5 +293,14 @@ def test_tree_hdf5(test_trees):
     assert tree_equal(pytree, hdctree_test, exception=False)
 
 
+def test_tree_json(test_trees):
+    pytree, hdctree = test_trees
+    with tempfile.NamedTemporaryFile(suffix='.json') as tmpfile:
+        hdctree.dump(tmpfile.name)
+        hdctree_test = HDC.load(tmpfile.name)
+
+    assert tree_equal(pytree, hdctree_test, exception=False)
+
+
 if __name__ == '__main__':
     pytest.main()

@@ -449,6 +449,8 @@ public:
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
+
+    HDCStorage* get_storage() {return this->storage; }
 };
 
 #endif // HDC_HPP
