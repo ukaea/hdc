@@ -284,6 +284,29 @@ def test_ndarray_from_hdf5(dtype, shape):
             assert np.all(x_in == x_out)
 
 
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
+@pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
+                                   (1, 3, 4), (7, 2, 3)])
+def test_ndarray_json_string(dtype, shape):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    if dtype == np.bool_:
+        x_in = np.random.randint(0, 2, size=shape, dtype=dtype)
+    else:
+        x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+
+    hdc = HDC(x_in)
+    json_string = hdc.dumps()
+    h = HDC.loads(json_string)
+
+    x_out = np.asarray(h)
+    assert x_in.shape == x_out.shape
+    assert x_in.size == x_out.size
+    # JSON currently does not save dtypes
+    np.issubdtype(x_in.dtype, x_out.dtype)
+    assert np.all(x_in == x_out)
+
+
 def test_tree_hdf5(test_trees):
     pytree, hdctree = test_trees
     with tempfile.NamedTemporaryFile(suffix='.h5') as tmppfile:
