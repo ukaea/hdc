@@ -124,6 +124,29 @@ TEST_CASE("NodeManipulation","[HDC]") {
     delete sub;
 }
 
+TEST_CASE("ListManipulation","[HDC]") {
+    HDC h;
+    HDC k;
+    for (size_t i=0; i<5; i++) {
+        HDC ch("data" + std::to_string(i));
+        k.append_slice(ch);
+    }
+    h.add_child("k",k);
+
+    HDC l;
+    for (size_t i=0; i<5; i++) {
+        HDC ch("data" + std::to_string(i*10));
+        l.append_slice(ch);
+    }
+    h.add_child("l",l);
+
+    CHECK(h.get("k[1]").as_string() == "data1" );
+    CHECK(h.get("l[1]").as_string() == "data10" );
+    #ifdef _USE_HDF5
+    h.to_hdf5("aaa.hdf5","data");
+    #endif // _USE_HDF5
+}
+
 
 TEST_CASE("Int8DataManipulation","[HDC]") {
     int ndim = 1;
