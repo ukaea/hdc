@@ -65,7 +65,8 @@ def tree_equal(py_obj, hdc_obj, exception=False):
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
 @pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
-                                   (1, 3, 4), (7, 2, 3)])
+                                   (1, 3, 4), (7, 2, 3), (1, 2, 3, 4),(7, 2, 3, 4),
+                                   (1, 2, 3, 4, 5),(7, 2, 3, 4, 5)])
 def test_ndarray(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
@@ -238,7 +239,8 @@ def test_in_op_nested():
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
 @pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
-                                   (1, 3, 4), (7, 2, 3)])
+                                   (1, 3, 4), (7, 2, 3), (1, 2, 3, 4), (7, 2, 3, 4),
+                                   (1, 2, 3, 4, 5), (7, 2, 3, 4, 5)])
 def test_ndarray_to_hdf5(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
@@ -262,7 +264,8 @@ def test_ndarray_to_hdf5(dtype, shape):
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
 @pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
-                                   (1, 3, 4), (7, 2, 3)])
+                                   (1, 3, 4), (7, 2, 3), (1, 2, 3, 4), (7, 2, 3, 4),
+                                   (1, 2, 3, 4, 5), (7, 2, 3, 4, 5)])
 def test_ndarray_from_hdf5(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
@@ -273,7 +276,8 @@ def test_ndarray_from_hdf5(dtype, shape):
         x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
     with tempfile.NamedTemporaryFile(suffix='.h5') as tmppfile:
         with h5py.File(tmppfile.name, mode='w') as h5file:
-            h5file.create_dataset('data', data=x_in)
+            h5file['data'] = x_in
+            h5file.close()
             h = HDC.from_hdf5(tmppfile.name, dataset_name="data")
 
             x_out = np.asarray(h)
@@ -284,11 +288,55 @@ def test_ndarray_from_hdf5(dtype, shape):
             assert np.all(x_in == x_out)
 
 
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
+@pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
+                                   (1, 3, 4), (7, 2, 3), (1, 2, 3, 4), (7, 2, 3, 4),
+                                   (1, 2, 3, 4, 5), (7, 2, 3, 4, 5)])
+def test_ndarray_json_string(dtype, shape):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    if dtype == np.bool_:
+        x_in = np.random.randint(0, 2, size=shape, dtype=dtype)
+    else:
+        x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+
+    hdc = HDC(x_in)
+    hdc.dump("save.json")
+    json_string = hdc.dumps()
+    h = HDC.loads(json_string)
+    h.dump("load.json")
+    x_out = np.asarray(h)
+    assert x_in.shape == x_out.shape
+    assert x_in.size == x_out.size
+    # JSON currently does not save dtypes
+    np.issubdtype(x_in.dtype, x_out.dtype)
+    assert np.all(x_in == x_out)
+
+
 def test_tree_hdf5(test_trees):
     pytree, hdctree = test_trees
     with tempfile.NamedTemporaryFile(suffix='.h5') as tmppfile:
         hdctree.to_hdf5(tmppfile.name)
         hdctree_test = HDC.from_hdf5(tmppfile.name)
+
+    assert tree_equal(pytree, hdctree_test, exception=False)
+
+
+def test_tree_json(test_trees):
+    pytree, hdctree = test_trees
+    with tempfile.NamedTemporaryFile(suffix='.json') as tmpfile:
+        hdctree.dump(tmpfile.name)
+        hdctree.dump("aaa.json")
+        hdctree_test = HDC.load(tmpfile.name)
+        print(pytree)
+        print(hdctree_test.dumps())
+        assert tree_equal(pytree, hdctree_test, exception=False)
+
+
+def test_tree_json_string(test_trees):
+    pytree, hdctree = test_trees
+    json_str = hdctree.dumps()
+    hdctree_test = HDC.loads(json_str)
 
     assert tree_equal(pytree, hdctree_test, exception=False)
 
