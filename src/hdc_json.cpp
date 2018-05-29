@@ -18,10 +18,52 @@ bool is_all_numeric(const Json::Value& root)
     return ok;
 }
 
+bool is_all_bool(const Json::Value& root)
+{
+    bool ok = true;
+    for (unsigned int i=0;i<root.size();i++) {
+        if (!root[i].isBool() && !root[i].isArray()) {
+            ok = false;
+            break;
+        }
+        if (root.isArray()) {
+            if (!is_all_bool(&(root[i]))) {
+                ok = false;
+                break;
+            }
+        }
+    }
+    return ok;
+}
+
 bool is_double(const Json::Value& root)
 {
     if(!is_all_numeric(root)) return false;
-    if (root.isDouble() && !(root.isInt64() || root.isInt())) return true;
+    if (root.isDouble() && !root.isInt64() && !root.isInt() && !root.isUInt64() && !root.isUInt() && !root.isBool()) return true;
+    else if (root.isArray()) {
+        for (unsigned int i=0;i<root.size();i++) {
+            if (is_double(root[i])) return true;
+        }
+    } else return false;
+    return false;
+}
+
+bool is_int(const Json::Value& root)
+{
+    if(!is_all_numeric(root)) return false;
+    if ((root.isInt64() || root.isInt() || root.isUInt() || root.isUInt64())) return true;
+    else if (root.isArray()) {
+        for (unsigned int i=0;i<root.size();i++) {
+            if (is_int(root[i])) return true;
+        }
+    } else return false;
+    return false;
+}
+
+bool is_bool(const Json::Value& root)
+{
+    if(!is_all_numeric(root)) return false;
+    if (root.isBool() && !root.isInt64() && !root.isInt() && !root.isUInt() && !root.isUInt64() && !root.isDouble()) return true;
     else if (root.isArray()) {
         for (unsigned int i=0;i<root.size();i++) {
             if (is_double(root[i])) return true;
@@ -56,10 +98,10 @@ size_t* get_shape(const Json::Value& root) {
         dim++;
     }
     D(
-    cout << "Dimension: " << dim << endl;
-    cout << "Shape: (" << shape[0];
-    for (unsigned int i=1; i<dim; i++) cout << ", " << shape[i];
-    cout << ")" << endl;
+    std::cout << "Dimension: " << dim << std::endl;
+    std::cout << "Shape: (" << shape[0];
+    for (unsigned int i=1; i<dim; i++) std::cout << ", " << shape[i];
+    std::cout << ")" << std::endl;
     )
     size_t* res = new size_t[dim];
     for (unsigned int i=0;i<dim;i++) res[i] = shape[i];
@@ -121,7 +163,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root) {
         case(Json::arrayValue):
         {
             DEBUG_STDOUT("root is array, size = "+to_string(root.size()));
-            if (is_all_numeric(root)) {
+            if (is_all_numeric(root) || is_all_bool(root)) {
                 int8_t ndim = ::get_ndim(root);
                 if (ndim > HDC_MAX_DIMS) {
                     throw HDCException("json_to_hdc(): Unsupported number of dimensions: "+std::to_string(ndim)+"\n");
@@ -129,7 +171,8 @@ HDC HDC::json_to_HDC(const ::Json::Value& root) {
                 size_t* shape = ::get_shape(root);
                 TypeID dt;
                 if (is_double(root)) dt = DOUBLE_ID;
-                else dt = INT32_ID;
+                else if (is_int(root)) dt = INT32_ID;
+                else dt = BOOL_ID;
                 HDC d(ndim,shape,dt);
                 tree = d;
                 void* data_ptr = tree.as<void*>();
@@ -145,10 +188,94 @@ HDC HDC::json_to_HDC(const ::Json::Value& root) {
                         }
                         case 2:
                         {
-                            andres::View<double> view(shape, shape+2, (double*)data_ptr);
+                            andres::View<double> view(shape, shape+2, (double*)data_ptr,andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i,j) = root[i][j].asDouble();
+                            break;
+                        }
+                        case 3:
+                        {
+                            andres::View<double> view(shape, shape+3, (double*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        view(i,j,k) = root[i][j][k].asDouble();
+                            break;
+                        }
+                        case 4:
+                        {
+                            andres::View<double> view(shape, shape+4, (double*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        for (unsigned int l = 0; l < shape[3]; l++)
+                                            view(i,j,k,l) = root[i][j][k][l].asDouble();
+                            break;
+                        }
+                        case 5:
+                        {
+                            andres::View<double> view(shape, shape+5, (double*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        for (unsigned int l = 0; l < shape[3]; l++)
+                                            for (unsigned int m = 0; m < shape[4]; m++)
+                                                view(i,j,k,l,m) = root[i][j][k][l][m].asDouble();
+                            break;
+                        }
+                        default:
+                        {
+                            throw HDCException("json_to_hdc(): Requested number of dimensions: "+std::to_string(ndim)+" not implemented yet\n");
+                        }
+                    }
+                }
+                else if (dt == BOOL_ID) {
+                    switch(ndim) {
+                        case 1:
+                        {
+                            andres::View<bool> view(shape, shape+1, (bool*)data_ptr);
+                            for (unsigned int i = 0; i < shape[0]; i++) {
+                                view(i) = root[i].asBool();
+                            }
+                            break;
+                        }
+                        case 2:
+                        {
+                            andres::View<bool> view(shape, shape+2, (bool*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    view(i,j) = root[i][j].asBool();
+                            break;
+                        }
+                        case 3:
+                        {
+                            andres::View<bool> view(shape, shape+3, (bool*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        view(i,j,k) = root[i][j][k].asBool();
+                            break;
+                        }
+                        case 4:
+                        {
+                            andres::View<bool> view(shape, shape+4, (bool*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        for (unsigned int l = 0; l < shape[3]; l++)
+                                            view(i,j,k,l) = root[i][j][k][l].asBool();
+                            break;
+                        }
+                        case 5:
+                        {
+                            andres::View<bool> view(shape, shape+5, (bool*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        for (unsigned int l = 0; l < shape[3]; l++)
+                                            for (unsigned int m = 0; m < shape[4]; m++)
+                                                view(i,j,k,l,m) = root[i][j][k][l][m].asBool();
                             break;
                         }
                         default:
@@ -167,10 +294,40 @@ HDC HDC::json_to_HDC(const ::Json::Value& root) {
                         }
                         case 2:
                         {
-                            andres::View<int32_t> view(shape, shape+2, (int32_t*)data_ptr);
+                            andres::View<int32_t> view(shape, shape+2, (int32_t*)data_ptr,andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i,j) = root[i][j].asInt();
+                            break;
+                        }
+                        case 3:
+                        {
+                            andres::View<int32_t> view(shape, shape+3, (int32_t*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        view(i,j,k) = root[i][j][k].asInt();
+                            break;
+                        }
+                        case 4:
+                        {
+                            andres::View<int32_t> view(shape, shape+4, (int32_t*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        for (unsigned int l = 0; l < shape[3]; l++)
+                                            view(i,j,k,l) = root[i][j][k][l].asInt();
+                            break;
+                        }
+                        case 5:
+                        {
+                            andres::View<int32_t> view(shape, shape+5, (int32_t*)data_ptr,andres::FirstMajorOrder);
+                            for (unsigned int i = 0; i < shape[0]; i++)
+                                for (unsigned int j = 0; j < shape[1]; j++)
+                                    for (unsigned int k = 0; k < shape[2]; k++)
+                                        for (unsigned int l = 0; l < shape[3]; l++)
+                                            for (unsigned int m = 0; m < shape[4]; m++)
+                                                view(i,j,k,l,m) = root[i][j][k][l][m].asInt();
                             break;
                         }
                         default:
