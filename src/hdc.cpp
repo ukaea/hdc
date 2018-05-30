@@ -241,41 +241,7 @@ HDC::HDC(int _ndim, size_t* _shape, TypeID _type,long _flags) {
 
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
 HDC::HDC(const std::string str): HDC() {
-    // start by parsing the string
-    std::vector<std::string> result;
-    boost::algorithm::split_regex( result, str, boost::regex( "://" ) ) ;
-    int i = 0;
-    if (result.size() > 1) {
-        std::vector<std::string> split_res;
-        boost::split( split_res, result[1], boost::is_any_of("|"), boost::token_compress_on );
-        if (split_res.size() == 1) split_res.push_back("");
-        auto prefix = result[0];
-        if (prefix == "hdf5") {
-            HDC h = from_hdf5(split_res[0],split_res[1]);
-            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
-            uuid = h.get_uuid();
-            storage = global_storage;
-        } else if (prefix == "json") {
-            HDC h = from_json(split_res[0],split_res[1]);
-            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
-            uuid = h.get_uuid();
-            storage = global_storage;
-        } else if (prefix == "uda") {
-            HDC h = from_uda(split_res[0],split_res[1]);
-            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
-            uuid = h.get_uuid();
-            storage = global_storage;
-        } else if (prefix == "uda_new") {
-            HDC h = uda2HDC(split_res[0],split_res[1]);
-            memcpy(&(this->header),h.get_buffer(),sizeof(header_t));
-            uuid = h.get_uuid();
-            storage = global_storage;
-        } else {
-            throw HDCException("Protocol "+prefix+" not known\n");
-        }
-    } else {
-        this->set_string(str);
-    }
+    this->set_string(str);
 }
 
 HDC::HDC(void* src_buffer) {
@@ -1389,4 +1355,36 @@ HDC* HDC::deserialize_HDC_string(const std::string& str) {
 
     tree = new HDC(global_storage,uuid);
     return tree;
+}
+
+
+/** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
+HDC HDC::load(const std::string& uri, const std::string& datapath) {
+    HDC h;
+    // start by parsing the string
+    std::vector<std::string> result;
+    boost::algorithm::split_regex( result, uri, boost::regex( "://" ) ) ;
+    int i = 0;
+    if (result.size() > 1) {
+        std::vector<std::string> split_res;
+        boost::split( split_res, result[1], boost::is_any_of("|"), boost::token_compress_on );
+        if (split_res.size() > 1 && datapath != "") throw HDCException("Both second argument and | in path specified. Use just one of them.");
+        if (split_res.size() == 1) split_res.push_back("");
+        if (!datapath.empty()) split_res[1] = datapath;
+        auto prefix = result[0];
+        if (prefix == "hdf5") {
+            return from_hdf5(split_res[0],split_res[1]);
+        } else if (prefix == "json") {
+            return from_json(split_res[0],split_res[1]);
+        } else if (prefix == "uda") {
+            return from_uda(split_res[0],split_res[1]);
+        } else if (prefix == "uda_new") {
+            return uda2HDC(split_res[0],split_res[1]);
+        } else {
+            throw HDCException("Protocol "+prefix+" not known\n");
+        }
+    } else {
+        throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
+    }
+    return h;
 }

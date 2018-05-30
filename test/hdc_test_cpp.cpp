@@ -373,7 +373,7 @@ TEST_CASE("JsonComplete","[HDC]") {
     CHECK(strcmp(tree->get_ptr("aaa/string")->as_string().c_str(), tree2.get_ptr("aaa/string")->as_string().c_str()) == 0);
 
     delete s;
-    HDC j = HDC("json://tree2.txt|aaa/string");
+    HDC j = HDC::load("json://tree2.txt|aaa/string");
     CHECK(strcmp(j.as_string().c_str(),"Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
     CLEAN_TREE()
 }
@@ -392,6 +392,11 @@ TEST_CASE("CopyConstructor","[HDC]") {
     CLEAN_TREE()
 }
 
+TEST_CASE("load", "[HDC]") {
+    CHECK_THROWS_AS(HDC::load("json://aaa|aaa","aaa"),HDCException);
+}
+
+
 #ifdef _USE_HDF5
 TEST_CASE("HDF5","[HDC]") {
     PREPARE_TREE()
@@ -399,7 +404,7 @@ TEST_CASE("HDF5","[HDC]") {
     HDC tree2 = HDC::from_hdf5("tree.h5");
     double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
     CHECK(data == 333.333);
-    HDC h5 = HDC("hdf5://tree.h5|/data/aaa/bbb/_scalar");
+    HDC h5 = HDC::load("hdf5://tree.h5|/data/aaa/bbb/_scalar");
     data = h5.as<double*>()[0];
     CHECK(data == 333.333);
     CLEAN_TREE()
@@ -408,7 +413,7 @@ TEST_CASE("HDF5","[HDC]") {
 
 #ifdef _USE_UDA
 TEST_CASE("StringConstructor","[HDC]") {
-    HDC h = HDC("uda://HELP::help()");
+    HDC h = HDC::load("uda://HELP::help()");
     std::string expected =
             "\nHelp\tList of HELP plugin functions:\n"
             "\n"

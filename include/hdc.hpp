@@ -450,7 +450,7 @@ public:
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
-
+    static HDC load(const std::string& str, const std::string& datapath="");
     HDCStorage* get_storage() {return this->storage; }
 };
 

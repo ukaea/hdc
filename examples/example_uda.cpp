@@ -10,14 +10,14 @@ using namespace std;
 
 void imasdd_plugin() {
 //     HDC h = HDC::uda2HDC("imasdd::get(path='/magnetics')", "");
-    HDC h("uda_new://imasdd::get(path='/magnetics')");
+    HDC h = HDC::load("uda_new://imasdd::get(path='/magnetics')");
     h.print_info();
     h.dump();
     return;
 }
 
 void mdsplus_plugin() {
-//     HDC h("uda://_a=1+41|MDSPLUS::localhost");
+//     HDC h = HDC::load ("uda://_a=1+41|MDSPLUS::localhost");
 
     std::vector<std::string> paths = {
         "uda://\\magnetics::vloop[*,\"001\"]|MDSPLUS::localhost:8001/tcv_shot/60950",
@@ -52,7 +52,7 @@ void mdsplus_plugin() {
         "uda://dim_of(\\results::bolo:prad:total)|MDSPLUS::localhost:8001/tcv_shot/60950"
     };
     for (auto& path : paths) {
-        HDC h(path);
+        HDC h = load(path);
         if (strcmp(h.get_type_str(),"null") == 0) {
             std::cout << "EE: ";
             std::cout << path << std::endl;
@@ -75,7 +75,7 @@ void imas_plugin() {
 //    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='ids_properties/comment', type=string, rank=0, shot=84600, )","");
 //    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )","");
 //    HDC h = HDC::from_uda("imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=float, rank=1, shot=84600, )","");
-    HDC h("uda://imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )");
+    HDC h = HDC::load("uda://imas::get(expName='JET', idx=0, group='magnetics', variable='flux_loop/3/flux/data', type=double, rank=1, shot=84600, )");
     h.print_info();
     h.dump();
     return;

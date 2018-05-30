@@ -100,6 +100,8 @@ cdef extern from "hdc.hpp":
         void to_json(string filename, int mode) except +
         @staticmethod
         CppHDC from_json_string(const string& json_string) except +
+        @staticmethod
+        CppHDC load(const string& uri, const string& datapath) except +
 
 
 cdef class HDC:
@@ -294,9 +296,9 @@ cdef class HDC:
         #     fp.write(self.dumps())
 
     @staticmethod
-    def load(filename, datapath=''):
+    def load(uri, datapath=''):
         res = HDC()
-        cdef CppHDC new_hdc = CppHDC.from_json(filename.encode(), datapath.encode())
+        cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
         res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
         return res
 

@@ -327,7 +327,7 @@ def test_tree_json(test_trees):
     with tempfile.NamedTemporaryFile(suffix='.json') as tmpfile:
         hdctree.dump(tmpfile.name)
         hdctree.dump("aaa.json")
-        hdctree_test = HDC.load(tmpfile.name)
+        hdctree_test = HDC.load("json://"+tmpfile.name)
         print(pytree)
         print(hdctree_test.dumps())
         assert tree_equal(pytree, hdctree_test, exception=False)
