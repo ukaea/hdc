@@ -52,7 +52,7 @@ void mdsplus_plugin() {
         "uda://dim_of(\\results::bolo:prad:total)|MDSPLUS::localhost:8001/tcv_shot/60950"
     };
     for (auto& path : paths) {
-        HDC h = load(path);
+        HDC h = HDC::load(path);
         if (strcmp(h.get_type_str(),"null") == 0) {
             std::cout << "EE: ";
             std::cout << path << std::endl;
