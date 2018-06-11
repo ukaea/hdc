@@ -305,7 +305,6 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 /** Destructor */
 HDC::~HDC()
 {
-    //cout << "destructor called\n";
     /*map_t* children;
     try {
         children = get_children_ptr();
@@ -512,7 +511,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
 
     bip::managed_external_buffer segment(bip::open_only, buffer + sizeof(header_t), 0);
     auto children = segment.find<map_t>("d").first;
-
+    if (children == nullptr) throw HDCException("add_child_single(): Could not get the children.\n");
     if (children->count(path.c_str()) == 0) {
         // Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
         int redo = 1;
@@ -892,6 +891,8 @@ void HDC::set_type(size_t _type)
             new_buffer = old_buffer;
         }
         bip::managed_external_buffer segment(bip::create_only, new_buffer + sizeof(header_t), header.data_size);
+        auto children = segment.construct<map_t>("d")(map_t::ctor_args_list(),map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
+        if (children == nullptr) throw HDCException("HDC::set_type(size_t _type): Could not create the children");
     }
     // else there is nothing to do...
     storage->set(uuid, new_buffer, header.buffer_size);
