@@ -20,11 +20,11 @@ add_executable(hdc_example_lukas example_lukas.f90)
 target_link_libraries(hdc_example_lukas fhdc)
 
 add_executable(hdc_example_interprocess example_interprocess.cpp)
-target_link_libraries(hdc_example_interprocess hdc rt)
+target_link_libraries(hdc_example_interprocess hdc)
 
 if(ENABLE_UDA)
     add_executable(hdc_example_uda example_uda.cpp)
-    target_link_libraries(hdc_example_uda hdc rt)
+    target_link_libraries(hdc_example_uda hdc)
     install(TARGETS hdc_example_uda
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)

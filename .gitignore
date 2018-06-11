@@ -1,5 +1,7 @@
 build*
 install*
+cmake-build*
+.idea
 
 .project
 hdc_new.kdev4

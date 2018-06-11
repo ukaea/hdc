@@ -1235,7 +1235,8 @@ contains
         character(len=:), allocatable :: f_string
         character(kind=c_char), dimension(:), pointer :: char_array_pointer => null()
         character(len=255) :: aux_string
-        integer :: i,length
+        integer :: i, length
+        length = 0
         call c_f_pointer(c_string_pointer,char_array_pointer,[255])
         if (.not.associated(char_array_pointer)) then
         allocate(character(len=4)::f_string); f_string="NULL"; return

@@ -14,7 +14,6 @@ subroutine test_hdc_modify(tree_out) bind(c, name="test_hdc_modify")
     use iso_c_binding
     implicit none
     type(hdc_t), value :: tree_out
-    integer :: ix, iy
     integer, parameter :: nx = 2, ny = 3
     real(kind=DP) :: array(nx,ny)
     ! init array first

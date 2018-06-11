@@ -196,7 +196,7 @@ void netcdf_plugin(int argc, const char *argv[]) {
 }
 
 
-int main(int argc, const char *argv[]) {
+int main(int argc UNUSED, const char *argv[] UNUSED) {
     mdsplus_plugin();
 //     imasdd_plugin();
 //     imas_plugin();

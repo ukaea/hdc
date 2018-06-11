@@ -33,7 +33,6 @@ public:
         }
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);
-        std::vector<StorageProvider*>::iterator it = providers.begin();
         if (!settings_str.empty()) {
             try {
                 stringstream ss(settings_str);
@@ -64,7 +63,6 @@ public:
         }
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);
-        std::vector<StorageProvider*>::iterator it = providers.begin();
         _store = providers.front()->create();
         this->settings = _settings;
         this->pluginPath = name;
