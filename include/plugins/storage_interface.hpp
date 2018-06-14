@@ -8,6 +8,7 @@ using namespace std;
 
 class Storage{
 public:
+    virtual ~Storage() {}
     virtual void lock(string path) = 0;
     virtual void unlock(string path) = 0;
     virtual bool locked() = 0;

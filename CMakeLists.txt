@@ -38,14 +38,14 @@ endif()
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fmax-errors=1 -fPIC -lc")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -lrt -fPIC -fmax-errors=1")
-set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008 -fmax-errors=1 -fPIC -lc")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fmax-errors=1 -fPIC")
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system program_options regex)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 ########################################################################################################################
@@ -155,13 +155,13 @@ if(ENABLE_HDF5)
 endif() # ENABLE_HDF5
 
 if(ENABLE_UDA)
-    find_package( PkgConfig QUIET)
-    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
-    string(REPLACE ";" " " UDA_CFLAGS_OTHER "${UDA_CFLAGS_OTHER}")
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
-    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
-    link_directories(${UDA_LIBRARY_DIRS})
+#    find_package( PkgConfig QUIET)
+#    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
+#    string(REPLACE ";" " " UDA_CFLAGS_OTHER "${UDA_CFLAGS_OTHER}")
+#    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    link_directories(${UDA_LIBRARY_DIRS})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 

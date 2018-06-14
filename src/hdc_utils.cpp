@@ -1,8 +1,11 @@
 #include "hdc_utils.h"
-#include <tuple>
+
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
+#include <tuple>
 #include <typeinfo>
+
+#include "hdc_helpers.h"
 
 
 /* ------------------------- UUID generation ----------------------------- */
@@ -175,22 +178,22 @@ template <typename T>
 TypeID to_typeid(T a) {
     throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(a)+"\n");
 };
-TypeID to_typeid(double a) {return DOUBLE_ID;};
-TypeID to_typeid(float a) {return FLOAT_ID;};
-TypeID to_typeid(int64_t a) {return INT64_ID;};
-TypeID to_typeid(int32_t a) {return INT32_ID;};
-TypeID to_typeid(int16_t a) {return INT16_ID;};
-TypeID to_typeid(int8_t a) {return INT8_ID;};
-TypeID to_typeid(char a) {return INT8_ID;};
-TypeID to_typeid(uint64_t a) {return UINT64_ID;};
-TypeID to_typeid(uint32_t a) {return UINT32_ID;};
-TypeID to_typeid(uint16_t a) {return UINT16_ID;};
-TypeID to_typeid(uint8_t a) {return UINT8_ID;};
-TypeID to_typeid(std::string a) {return STRING_ID;};
-TypeID to_typeid(char* a) {return STRING_ID;};
-TypeID to_typeid(char const* a) {return STRING_ID;};
-TypeID to_typeid(bool a) {return BOOL_ID;};
-TypeID numpy_format_to_typeid(std::string format, size_t itemsize) {
+TypeID to_typeid(double a UNUSED) {return DOUBLE_ID;};
+TypeID to_typeid(float a UNUSED) {return FLOAT_ID;};
+TypeID to_typeid(int64_t a UNUSED) {return INT64_ID;};
+TypeID to_typeid(int32_t a UNUSED) {return INT32_ID;};
+TypeID to_typeid(int16_t a UNUSED) {return INT16_ID;};
+TypeID to_typeid(int8_t a UNUSED) {return INT8_ID;};
+TypeID to_typeid(char a UNUSED) {return INT8_ID;};
+TypeID to_typeid(uint64_t a UNUSED) {return UINT64_ID;};
+TypeID to_typeid(uint32_t a UNUSED) {return UINT32_ID;};
+TypeID to_typeid(uint16_t a UNUSED) {return UINT16_ID;};
+TypeID to_typeid(uint8_t a UNUSED) {return UINT8_ID;};
+TypeID to_typeid(std::string a UNUSED) {return STRING_ID;};
+TypeID to_typeid(char* a UNUSED) {return STRING_ID;};
+TypeID to_typeid(char const* a UNUSED) {return STRING_ID;};
+TypeID to_typeid(bool a UNUSED) {return BOOL_ID;};
+TypeID numpy_format_to_typeid(std::string format, size_t itemsize UNUSED) {
     if (format == "i") {
         return INT32_ID;
     } else if (format == "d") {

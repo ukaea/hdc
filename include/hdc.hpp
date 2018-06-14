@@ -50,6 +50,8 @@ extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
 
+using byte = unsigned char;
+
 class HDC
 {
 private:
@@ -85,7 +87,7 @@ public:
     /** Deserializing constructor */
     HDC(HDCStorage* _storage, const std::string& _uuid);
     /** constructor from object buffer -- this should be void* as we want cha* to be used for strings */
-    HDC(void* src_buffer);
+    HDC(byte* src_buffer);
     /** Destructor */
     ~HDC();
     /** Parses command line arguments */
@@ -413,7 +415,7 @@ public:
     /** Returns string representing data/node type. */
     const char* get_type_str();
     /** Returns Python buffer format string (https://docs.python.org/3/c-api/arg.html#arg-parsing) */
-    char * get_pybuf_format();
+    char* get_pybuf_format();
     /** Returns datashape desctiption string. */
     string get_datashape_str();
     /** Returns string representing data/node type. */

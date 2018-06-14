@@ -61,8 +61,7 @@ contains
 
         integer    :: i 
         
-        integer, pointer :: ii 
-        integer, dimension(5)  :: arr
+        integer, dimension(5) :: arr
         integer, dimension(:), pointer  :: arr_p
         !  integer, dimension(:), pointer  :: arr3
 

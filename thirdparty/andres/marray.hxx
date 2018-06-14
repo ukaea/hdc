@@ -277,16 +277,16 @@ public:
     #endif
         
     // query
-    const std::size_t dimension() const;
-    const std::size_t size() const;
-    const std::size_t shape(const std::size_t) const;
+    std::size_t dimension() const;
+    std::size_t size() const;
+    std::size_t shape(const std::size_t) const;
     const std::size_t* shapeBegin() const;
     const std::size_t* shapeEnd() const;
-    const std::size_t strides(const std::size_t) const;
+    std::size_t strides(const std::size_t) const;
     const std::size_t* stridesBegin() const;
     const std::size_t* stridesEnd() const;
     const CoordinateOrder& coordinateOrder() const;
-    const bool isSimple() const; 
+    bool isSimple() const;
     template<class TLocal, bool isConstLocal, class ALocal> 
         bool overlaps(const View<TLocal, isConstLocal, ALocal>&) const;
 
@@ -1574,7 +1574,7 @@ View<T, isConst, A>::operator()
 /// \return Size.
 ///
 template<class T, bool isConst, class A> 
-inline const std::size_t
+inline std::size_t
 View<T, isConst, A>::size() const
 {
     return geometry_.size();
@@ -1587,7 +1587,7 @@ View<T, isConst, A>::size() const
 /// \return Dimension.
 ///
 template<class T, bool isConst, class A> 
-inline const std::size_t
+inline  std::size_t
 View<T, isConst, A>::dimension() const
 {
     marray_detail::Assert(MARRAY_NO_DEBUG || this->data_ != 0);
@@ -1600,10 +1600,10 @@ View<T, isConst, A>::dimension() const
 /// \return Shape in that dimension.
 ///
 template<class T, bool isConst, class A> 
-inline const std::size_t
+inline std::size_t
 View<T, isConst, A>::shape
 (
-    const std::size_t dimension
+    std::size_t dimension
 ) const
 {
     testInvariant();
@@ -1646,10 +1646,10 @@ View<T, isConst, A>::shapeEnd() const
 /// \return Stride in that dimension.
 ///
 template<class T, bool isConst, class A> 
-inline const std::size_t
+inline std::size_t
 View<T, isConst, A>::strides
 (
-    const std::size_t dimension
+    std::size_t dimension
 ) const
 {
     testInvariant();
@@ -1703,7 +1703,7 @@ View<T, isConst, A>::coordinateOrder() const
 /// \return bool.
 ///
 template<class T, bool isConst, class A> 
-inline const bool
+inline bool
 View<T, isConst, A>::isSimple() const
 {
     testInvariant();
@@ -2253,7 +2253,7 @@ template<class T, bool isConst, class A>
 View<T, isConst, A>
 View<T, isConst, A>::boundView
 (
-    const std::size_t dimension,
+    std::size_t dimension,
     const std::size_t value
 ) const
 {
@@ -2973,7 +2973,7 @@ inline Marray<T, A>
 operator++
 (
     Marray<T, A>& in,
-    int dummy
+    int dummy __attribute__((unused))
 ) 
 {
     Marray<T, A> out = in; 
@@ -3011,7 +3011,7 @@ inline Marray<T, A>
 operator--
 (
     Marray<T, A>& in,
-    int dummy
+    int dummy __attribute__((unused))
 ) 
 {
     Marray<T, A> out = in; 
@@ -3441,7 +3441,7 @@ template<class ShapeIterator>
 inline
 Marray<T, A>::Marray
 (
-    const InitializationSkipping& is,
+    const InitializationSkipping& is __attribute__((unused)),
     ShapeIterator begin,
     ShapeIterator end,
     const CoordinateOrder& coordinateOrder,
@@ -3784,7 +3784,7 @@ template<class ShapeIterator>
 void
 Marray<T, A>::resize
 (
-    const InitializationSkipping& is,
+    const InitializationSkipping& is __attribute__((unused)),
     ShapeIterator begin,
     ShapeIterator end
 )
@@ -4502,11 +4502,11 @@ public:
     typedef E expression_type;
     typedef T value_type;
 
-    const std::size_t dimension() const 
+    std::size_t dimension() const
         { return static_cast<const E&>(*this).dimension(); }
-    const std::size_t size() const 
+    std::size_t size() const
         { return static_cast<const E&>(*this).size(); }
-    const std::size_t shape(const std::size_t j) const 
+    std::size_t shape(const std::size_t j) const
         { return static_cast<const E&>(*this).shape(j); }
     const std::size_t* shapeBegin() const 
         { return static_cast<const E&>(*this).shapeBegin(); }
@@ -4517,7 +4517,7 @@ public:
             { return static_cast<const E&>(*this).overlaps(v); }
     const CoordinateOrder& coordinateOrder() const 
         { return static_cast<const E&>(*this).coordinateOrder(); }
-    const bool isSimple() const
+    bool isSimple() const
         { return static_cast<const E&>(*this).isSimple(); }
     template<class Accessor>
         const T& operator()(Accessor it) const
@@ -4578,11 +4578,11 @@ public:
         : e_(e), // cast!
           unaryFunctor_(UnaryFunctor()) 
         {}
-    const std::size_t dimension() const 
+    std::size_t dimension() const
         { return e_.dimension(); }
-    const std::size_t size() const 
+    std::size_t size() const
         { return e_.size(); }
-    const std::size_t shape(const std::size_t j) const 
+    std::size_t shape(const std::size_t j) const
         { return e_.shape(j); }
     const std::size_t* shapeBegin() const 
         { return e_.shapeBegin(); }
@@ -4593,7 +4593,7 @@ public:
             { return e_.overlaps(v); }
     const CoordinateOrder& coordinateOrder() const 
         { return e_.coordinateOrder(); }
-    const bool isSimple() const
+    bool isSimple() const
         { return e_.isSimple(); }
     template<class Accessor>
         const T operator()(Accessor it) const
@@ -4659,11 +4659,11 @@ public:
                 }
             }
         }
-    const std::size_t dimension() const 
+    std::size_t dimension() const
         { return e1_.dimension() < e2_.dimension() ? e2_.dimension() : e1_.dimension(); }
-    const std::size_t size() const 
+    std::size_t size() const
         { return e1_.size() < e2_.size() ? e2_.size() : e1_.size(); }
-    const std::size_t shape(const std::size_t j) const 
+    std::size_t shape(const std::size_t j) const
         { return e1_.dimension() < e2_.dimension() ? e2_.shape(j) : e1_.shape(j); }
     const std::size_t* shapeBegin() const 
         { return e1_.dimension() < e2_.dimension() ? e2_.shapeBegin() : e1_.shapeBegin(); }
@@ -4674,7 +4674,7 @@ public:
             { return e1_.overlaps(v) || e2_.overlaps(v); }
     const CoordinateOrder& coordinateOrder() const 
         { return e1_.coordinateOrder(); }
-    const bool isSimple() const
+    bool isSimple() const
         { return e1_.isSimple() && e2_.isSimple() 
                  && e1_.coordinateOrder() == e2_.coordinateOrder(); }
     template<class Accessor>
@@ -4736,11 +4736,11 @@ public:
         : e_(e), // cast!
           scalar_(scalar), binaryFunctor_(BinaryFunctor()) 
         { }
-    const std::size_t dimension() const 
+    std::size_t dimension() const 
         { return e_.dimension(); }
-    const std::size_t size() const 
+    std::size_t size() const 
         { return e_.size(); }
-    const std::size_t shape(const std::size_t j) const 
+    std::size_t shape(const std::size_t j) const 
         { return e_.shape(j); }
     const std::size_t* shapeBegin() const 
         { return e_.shapeBegin(); }
@@ -4751,7 +4751,7 @@ public:
             { return e_.overlaps(v); }
     const CoordinateOrder& coordinateOrder() const 
         { return e_.coordinateOrder(); }
-    const bool isSimple() const
+    bool isSimple() const
         { return e_.isSimple(); }
     template<class Accessor>
         const value_type operator()(Accessor it) const
@@ -4810,11 +4810,11 @@ public:
         : e_(e), // cast!
           scalar_(scalar), binaryFunctor_(BinaryFunctor())
         { }
-    const std::size_t dimension() const 
+    std::size_t dimension() const 
         { return e_.dimension(); }
-    const std::size_t size() const 
+    std::size_t size() const 
         { return e_.size(); }
-    const std::size_t shape(const std::size_t j) const 
+    std::size_t shape(const std::size_t j) const 
         { return e_.shape(j); }
     const std::size_t* shapeBegin() const 
         { return e_.shapeBegin(); }
@@ -4825,7 +4825,7 @@ public:
             { return e_.overlaps(v); }
     const CoordinateOrder& coordinateOrder() const 
         { return e_.coordinateOrder(); }
-    const bool isSimple() const
+    bool isSimple() const
         { return e_.isSimple(); }
     template<class Accessor>
         const value_type operator()(Accessor it) const
@@ -4896,13 +4896,13 @@ public:
 
     Geometry<A>& operator=(const Geometry<A>&);
 
-    void resize(const std::size_t dimension);
-    const std::size_t dimension() const;
-    const std::size_t shape(const std::size_t) const;
+    void resize(std::size_t dimension);
+    std::size_t dimension() const;
+    std::size_t shape(const std::size_t) const;
     std::size_t& shape(const std::size_t);
-    const std::size_t shapeStrides(const std::size_t) const;
+    std::size_t shapeStrides(const std::size_t) const;
     std::size_t& shapeStrides(const std::size_t);
-    const std::size_t strides(const std::size_t) const;
+    std::size_t strides(const std::size_t) const;
     std::size_t& strides(const std::size_t);
     const std::size_t* shapeBegin() const;
     std::size_t* shapeBegin();
@@ -4916,11 +4916,11 @@ public:
     std::size_t* stridesBegin();
     const std::size_t* stridesEnd() const;
     std::size_t* stridesEnd();
-    const std::size_t size() const;
+    std::size_t size() const;
     std::size_t& size();
     const CoordinateOrder& coordinateOrder() const;
     CoordinateOrder& coordinateOrder();
-    const bool isSimple() const;
+    bool isSimple() const;
     void updateSimplicity();
     bool& isSimple();
 
@@ -4987,7 +4987,7 @@ template<class A>
 inline 
 Geometry<A>::Geometry
 (
-    const std::size_t dimension,
+    std::size_t dimension,
     const CoordinateOrder& order,
     const std::size_t size,
     const bool isSimple,
@@ -5113,7 +5113,7 @@ template<class A>
 inline void 
 Geometry<A>::resize
 (
-    const std::size_t dimension
+    std::size_t dimension
 )
 {
     if(dimension != dimension_) {
@@ -5135,14 +5135,14 @@ Geometry<A>::resize
 }
 
 template<class A>
-inline const std::size_t 
+inline std::size_t
 Geometry<A>::dimension() const
 {
     return dimension_; 
 }
 
 template<class A>
-inline const std::size_t 
+inline std::size_t
 Geometry<A>::shape(const std::size_t j) const
 { 
     Assert(MARRAY_NO_DEBUG || j<dimension_); 
@@ -5158,7 +5158,7 @@ Geometry<A>::shape(const std::size_t j)
 }
 
 template<class A>
-inline const std::size_t 
+inline std::size_t
 Geometry<A>::shapeStrides
 (
     const std::size_t j
@@ -5180,7 +5180,7 @@ Geometry<A>::shapeStrides
 }
 
 template<class A>
-inline const std::size_t 
+inline std::size_t
 Geometry<A>::strides
 (
     const std::size_t j
@@ -5286,7 +5286,7 @@ Geometry<A>::stridesEnd()
 }
 
 template<class A>
-inline const std::size_t 
+inline std::size_t
 Geometry<A>::size() const
 { 
     return size_; 
@@ -5314,7 +5314,7 @@ Geometry<A>::coordinateOrder()
 }
 
 template<class A>
-inline const bool 
+inline bool
 Geometry<A>::isSimple() const 
 { 
     return isSimple_; 
@@ -5403,7 +5403,7 @@ struct OperateHelperUnary<0, Functor, T, A>
 {
     static inline void operate
     (
-        View<T, false, A>& v, 
+        View<T, false, A>& v __attribute__((unused)),
         Functor f, 
         T* data
     )
@@ -5437,7 +5437,7 @@ struct OperateHelperBinaryScalar<0, Functor, T1, T2, A>
 {
     static inline void operate
     (
-        View<T1, false, A>& v, 
+        View<T1, false, A>& v __attribute__((unused)),
         const T2& x, 
         Functor f, 
         T1* data
@@ -5476,8 +5476,8 @@ struct OperateHelperBinary<0, Functor, T1, T2, isConst, A1, A2>
 {
     static inline void operate
     (
-        View<T1, false, A1>& v, 
-        const View<T2, isConst, A2>& w, 
+        View<T1, false, A1>& v __attribute__((unused)),
+        const View<T2, isConst, A2>& w __attribute__((unused)),
         Functor f, 
         T1* data1,
         const T2* data2

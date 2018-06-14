@@ -29,8 +29,8 @@ public:
     bool usesBuffersDirectly() {
         return true;
     };
-    void lock(string path) {};
-    void unlock(string path) {};
+    void lock(string path UNUSED) {};
+    void unlock(string path UNUSED) {};
     bool locked() {
         return false;
     };
@@ -73,11 +73,11 @@ public:
         }
         return;
     };
-    void init(string settings) {
+    void init(string settings UNUSED) {
         // Nothing to set here ...
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
-    void init(boost::property_tree::ptree& settings) {
+    void init(boost::property_tree::ptree& settings UNUSED) {
         // Nothing to set here ...
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
