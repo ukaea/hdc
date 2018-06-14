@@ -61,7 +61,6 @@ cdef extern from "hdc.hpp":
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
-        char * get_pybuf_format() except +
         string to_json_string(int mode) except +
         void set_child(string path, CppHDC* n) except +
         void append_slice(CppHDC* h) except +
@@ -359,7 +358,44 @@ cdef class HDC:
             strides_buf[i] = strides[i]
         buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
-        buffer.format = deref(self._thisptr).get_pybuf_format()  # 'd'
+
+        # Set buffer format here:
+        type_id = self.get_type()
+        if (type_id == HDC_EMPTY):
+            buffer.format = 'null'
+        elif (type_id == HDC_STRUCT):
+            buffer.format = 'struct'
+        elif (type_id == HDC_LIST):
+            buffer.format = 'list'
+        elif (type_id == HDC_INT8):
+            buffer.format = 'b'
+        elif (type_id == HDC_INT16):
+            buffer.format = 'h'
+        elif (type_id == HDC_INT32):
+            buffer.format = 'i'
+        elif (type_id == HDC_INT64):
+            buffer.format = 'l'
+        elif (type_id == HDC_UINT8):
+            buffer.format = 'B'
+        elif (type_id == HDC_UINT16):
+            buffer.format = 'H'
+        elif (type_id == HDC_UINT32):
+            buffer.format = 'I'
+        elif (type_id == HDC_UINT64):
+            buffer.format = 'L'
+        elif (type_id == HDC_FLOAT):
+            buffer.format = 'f'
+        elif (type_id == HDC_DOUBLE):
+            buffer.format =  'd'
+        elif (type_id == HDC_STRING):
+            buffer.format =  's'
+        elif (type_id == HDC_BOOL):
+            buffer.format =  '?'
+        elif (type_id == HDC_ERROR):
+            buffer.format =  'error'
+        else:
+            buffer.format = 'unknown'
+
         # This is for use internally by the exporting object
         buffer.internal = NULL
         # Item size in bytes of a single element

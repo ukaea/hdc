@@ -260,9 +260,12 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
             size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
             size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
             if (ndim > 1) throw HDCException("Cannot handle array of refferences of ndim > 1");
-            hid_t h5_status = 0;
             hobj_ref_t ref_out[nelems];
-            h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out);
+            hid_t h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out);
+            HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
+                                      ref_path,
+                                      "Error reading HDF5 Dataset: "
+                                              << hdf5_dset_id);
             dest.set_type(HDC_LIST);
             for (size_t i = 0; i < nelems; i++) {
                 // C function H5Rdereference renamed to H5Rdereference1 and deprecated in this release.

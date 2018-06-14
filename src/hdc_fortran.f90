@@ -587,6 +587,21 @@ module hdc_fortran
         module procedure hdc_as_double_2d_path
      end interface hdc_as_double_2d
 
+     interface hdc_as_float
+        module procedure hdc_as_float_
+        module procedure hdc_as_float_path
+     end interface hdc_as_float
+
+     interface hdc_as_float_1d
+        module procedure hdc_as_float_1d_
+        module procedure hdc_as_float_1d_path
+     end interface hdc_as_float_1d
+
+     interface hdc_as_float_2d
+        module procedure hdc_as_float_2d_
+        module procedure hdc_as_float_2d_path
+     end interface hdc_as_float_2d
+
      interface hdc_as_string
         module procedure hdc_as_string_
         module procedure hdc_as_string_path
@@ -710,7 +725,8 @@ module hdc_fortran
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_as_int32_2d_path, hdc_as_int32_1d_path, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
     hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_, hdc_as_string_sub, &
     hdc_as_string_, hdc_as_string_path_sub, hdc_as_string_path, hdc_as_int32, hdc_as_string, hdc_as_int64_1d_, hdc_as_int64_2d_, hdc_as_int64_path_sub, &
-    hdc_as_int64_sub, hdc_as_int64_2d_path, hdc_as_int64_1d_path, hdc_as_int64, hdc_new_string, hdc_print_info
+    hdc_as_int64_sub, hdc_as_int64_2d_path, hdc_as_int64_1d_path, hdc_as_int64, hdc_new_string, hdc_print_info, hdc_as_float_1d_path, &
+    hdc_as_float_2d_path, hdc_as_float_2d_, hdc_as_float_1d_
 contains
 
     subroutine hdc_add_child(this, path, node)
