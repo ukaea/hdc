@@ -1,5 +1,7 @@
 build*
 install*
+cmake-build*
+.idea
 
 .project
 hdc_new.kdev4
@@ -9,4 +11,4 @@ src/__pycache__
 
 \.cache/
 *.mexa64
-
+\.ipynb_checkpoints/

@@ -50,6 +50,8 @@ extern HDCStorage* global_storage;
 //list of found plugins
 extern unordered_map<string,string> avail_stores;
 
+using byte = unsigned char;
+
 class HDC
 {
 private:
@@ -85,7 +87,7 @@ public:
     /** Deserializing constructor */
     HDC(HDCStorage* _storage, const std::string& _uuid);
     /** constructor from object buffer -- this should be void* as we want cha* to be used for strings */
-    HDC(void* src_buffer);
+    HDC(byte* src_buffer);
     /** Destructor */
     ~HDC();
     /** Parses command line arguments */
@@ -412,8 +414,6 @@ public:
     intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
     const char* get_type_str();
-    /** Returns Python buffer format string (https://docs.python.org/3/c-api/arg.html#arg-parsing) */
-    char * get_pybuf_format();
     /** Returns datashape desctiption string. */
     string get_datashape_str();
     /** Returns string representing data/node type. */
@@ -445,10 +445,13 @@ public:
     static string map_to_json(map_t& children);
     static char* buffer_grow(char* old_buffer, size_t extra_size);
     static HDC json_to_HDC(const ::Json::Value& root);
+    static HDC from_json_string(const std::string& json_string);
     void to_hdf5(std::string filename, std::string dataset_name = "data");
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
+    static HDC load(const std::string& str, const std::string& datapath="");
+    HDCStorage* get_storage() {return this->storage; }
 };
 
 #endif // HDC_HPP

@@ -52,14 +52,16 @@ cdef struct hdc_t:
     voidptr obj
 
 cdef extern from "hdc.hpp":
+    cdef cppclass HDCStorage:
+        pass
     cdef cppclass CppHDC "HDC":
         CppHDC() except +
         CppHDC(string str) except +
+        CppHDC(HDCStorage* _storage, const string& _uuid) except +
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
-        char * get_pybuf_format() except +
-        string to_json_string(int mode = 0) except +
+        string to_json_string(int mode) except +
         void set_child(string path, CppHDC* n) except +
         void append_slice(CppHDC* h) except +
         void add_child(string path, CppHDC* n) except +
@@ -73,6 +75,8 @@ cdef extern from "hdc.hpp":
         intptr_t as_void_ptr() except +
         int8_t get_ndim() except +
         size_t* get_shape() except +
+        HDCStorage* get_storage() except +
+        string get_uuid() except +
 
         # typedef unsigned long Flags;
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
@@ -90,6 +94,13 @@ cdef extern from "hdc.hpp":
         void to_hdf5(string filename, string dataset_name) except +
         @staticmethod
         CppHDC* from_hdf5_ptr(const string& filename, const string& dataset_name) except +
+        @staticmethod
+        CppHDC from_json(const string& filename, const string& datapath) except +
+        void to_json(string filename, int mode) except +
+        @staticmethod
+        CppHDC from_json_string(const string& json_string) except +
+        @staticmethod
+        CppHDC load(const string& uri, const string& datapath) except +
 
 
 cdef class HDC:
@@ -259,8 +270,36 @@ cdef class HDC:
         new_hdc = HDC(data)
         deref(self._thisptr).append_slice(new_hdc._thisptr)
 
-    def dumps(self):
-        return deref(self._thisptr).to_json_string().decode()
+    def dumps(self, mode=0):
+        """Dump to JSON string"""
+        return deref(self._thisptr).to_json_string(mode).decode()
+
+    @staticmethod
+    def loads(s):
+        """Load from JSON string"""
+        res = HDC()
+        cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
+        res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        return res
+
+    def dump(self, filename, mode=0):
+        """Save to json file
+
+        Parameters
+        ----------
+        fp : .write supporting object (open file)
+            target to write to
+        """
+        deref(self._thisptr).to_json(filename.encode(), mode)
+        # with open(filename, 'w') as fp:
+        #     fp.write(self.dumps())
+
+    @staticmethod
+    def load(uri, datapath=''):
+        res = HDC()
+        cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
+        res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        return res
 
     def print_info(self):
         return deref(self._thisptr).print_info()
@@ -273,16 +312,6 @@ cdef class HDC:
     def _as_parameter_(self):
         # used by ctypes automatic conversion
         return self.c_ptr
-
-    def dump(self, fp):
-        """Save to json file
-
-        Parameters
-        ----------
-        fp : .write supporting object (open file)
-            target to write to
-        """
-        fp.write(self.dumps())
 
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
@@ -329,7 +358,44 @@ cdef class HDC:
             strides_buf[i] = strides[i]
         buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
-        buffer.format = deref(self._thisptr).get_pybuf_format()  # 'd'
+
+        # Set buffer format here:
+        type_id = self.get_type()
+        if (type_id == HDC_EMPTY):
+            buffer.format = 'null'
+        elif (type_id == HDC_STRUCT):
+            buffer.format = 'struct'
+        elif (type_id == HDC_LIST):
+            buffer.format = 'list'
+        elif (type_id == HDC_INT8):
+            buffer.format = 'b'
+        elif (type_id == HDC_INT16):
+            buffer.format = 'h'
+        elif (type_id == HDC_INT32):
+            buffer.format = 'i'
+        elif (type_id == HDC_INT64):
+            buffer.format = 'l'
+        elif (type_id == HDC_UINT8):
+            buffer.format = 'B'
+        elif (type_id == HDC_UINT16):
+            buffer.format = 'H'
+        elif (type_id == HDC_UINT32):
+            buffer.format = 'I'
+        elif (type_id == HDC_UINT64):
+            buffer.format = 'L'
+        elif (type_id == HDC_FLOAT):
+            buffer.format = 'f'
+        elif (type_id == HDC_DOUBLE):
+            buffer.format =  'd'
+        elif (type_id == HDC_STRING):
+            buffer.format =  's'
+        elif (type_id == HDC_BOOL):
+            buffer.format =  '?'
+        elif (type_id == HDC_ERROR):
+            buffer.format =  'error'
+        else:
+            buffer.format = 'unknown'
+
         # This is for use internally by the exporting object
         buffer.internal = NULL
         # Item size in bytes of a single element
@@ -387,6 +453,7 @@ cdef class HDC:
 
     def to_hdf5(self, filename, dataset_name="data"):
         deref(self._thisptr).to_hdf5(filename.encode(), dataset_name.encode())
+
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
         res = HDC()

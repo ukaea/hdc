@@ -4,6 +4,11 @@ from Cython.Build import cythonize
 import os
 import sys
 from setuptools.command.test import test as TestCommand
+try:
+    import numpy
+except ImportError:
+    # should be installed by setuptools
+    pass
 
 
 class PyTest(TestCommand):
@@ -33,6 +38,7 @@ extensions = [
             os.path.join("${CMAKE_SOURCE_DIR}", 'thirdparty'),
             os.path.join("${CMAKE_SOURCE_DIR}", 'thirdparty', 'jsoncpp'),
             os.path.join("${CMAKE_SOURCE_DIR}", 'thirdparty', 'Pluma-1.1', 'include'),
+            numpy.get_include(),
         ],
         libraries=['hdc'],
         library_dirs=[os.path.join("${CMAKE_INSTALL_PREFIX}", 'lib')],
@@ -54,8 +60,8 @@ options = dict(
         'pytest',
         'future',
     ],
-    tests_require=['pytest'],
-    cmdclass = {'test': PyTest},
+    tests_require=['pytest','h5py'],
+    cmdclass={'test': PyTest},
     version='${PACKAGE_VERSION}',
 )
 

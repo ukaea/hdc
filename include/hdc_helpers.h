@@ -13,5 +13,6 @@
 
 #define REGISTER_PO() ()
 
+#define UNUSED __attribute__((unused))
 
 #endif

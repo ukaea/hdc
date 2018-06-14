@@ -2,8 +2,8 @@
 #define HDC_STORAGE_H
 
 #include <Pluma/Pluma.hpp>
-#include "storage_interface.hpp"
-#include "../plugins/umap_plugin.hpp" // Add this as fallback
+#include "plugins/storage_interface.hpp"
+#include "plugins/umap_plugin.hpp" // Add this as fallback
 #include <iostream>
 #include <cstdio>
 #include <hdc_helpers.h>
@@ -33,7 +33,6 @@ public:
         }
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);
-        std::vector<StorageProvider*>::iterator it = providers.begin();
         if (!settings_str.empty()) {
             try {
                 stringstream ss(settings_str);
@@ -64,7 +63,6 @@ public:
         }
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);
-        std::vector<StorageProvider*>::iterator it = providers.begin();
         _store = providers.front()->create();
         this->settings = _settings;
         this->pluginPath = name;

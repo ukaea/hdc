@@ -13,16 +13,6 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
 
 # Extra cmake modules to find libraries
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
-if(${CMAKE_VERSION} VERSION_LESS "3.7.0")
-    message(
-    "
-    cmake version < 3.7.0, anaconda autodetection will not work. Try this if needed:
-    cmake -DPYTHON_INCLUDE_DIR=/opt/anaconda3/include/python3.6m \
-          -DPYTHON_LIBRARY=/opt/anaconda3/lib/libpython3.6m.so.1.0
-    ")
-else()
-    include( FindPythonAnaconda )
-endif()
 include( CTest )
 include( FileCopyTargets )
 
@@ -48,14 +38,14 @@ endif()
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -fmax-errors=1 -fPIC -lc")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -lgfortran -lstdc++ -lrt -fPIC -fmax-errors=1")
-set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -lstdc++ -std=f2008 -fmax-errors=1 -fPIC -lc")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fmax-errors=1 -fPIC")
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system program_options regex)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 ########################################################################################################################
@@ -84,9 +74,9 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 
 ########################################################################################################################
 # Build options
-option(BUILD_TESTS "Build and install Google tests" ON)
+option(BUILD_TESTS "Build and install tests" ON)
 option(BUILD_EXAMPLES "Build and install examples" ON)
-option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." ON)
+option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF)
 option(ENABLE_HDF5 "Enable HDF5 support" ON)
 option(ENABLE_UDA "Enable UDA support" OFF)
 option(BUILD_OWN_HDF5 "Build own HDF5" OFF)
@@ -101,15 +91,29 @@ if (GOPTION)
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g" )
 endif() # GOPTION
 
-if (BUILD_TESTS)
-    # Prevent GoogleTest from overriding our compiler/linker options
-    # when building with Visual Studio
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory("thirdparty/googletest/")
-endif() # BUILD_TESTS
-
 if (BUILD_BENCHMARKS)
-    add_subdirectory("thirdparty/googlebenchmark/")
+    include(ExternalProject)
+    ExternalProject_Add(
+        googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG v1.4.0
+        TIMEOUT 10
+        LOG_DOWNLOAD ON
+        PREFIX "${hdc_BINARY_DIR}/gbench"
+        BINARY_DIR "${hdc_BINARY_DIR}/gbench_build"
+        SOURCE_DIR "${hdc_BINARY_DIR}/gbench_src"
+        CMAKE_CACHE_ARGS
+            -DBENCHMARK_BUILD_32_BITS:BOOL=OFF
+            -DBENCHMARK_DOWNLOAD_DEPENDENCIES:BOOL=OFF
+            -DBENCHMARK_ENABLE_ASSEMBLY_TESTS:BOOL=OFF
+            -DBENCHMARK_ENABLE_EXCEPTIONS:BOOL=OFF
+            -DBENCHMARK_ENABLE_GTEST_TESTS:BOOL=OFF
+            -DBENCHMARK_ENABLE_INSTALL:BOOL=OFF
+            -DBENCHMARK_ENABLE_LTO:BOOL=OFF
+            -DBENCHMARK_ENABLE_TESTING:BOOL=OFF
+            -DBENCHMARK_USE_LIBCXX:BOOL=OFF
+       INSTALL_COMMAND ""
+    )
 endif() # BUILD_BENCHMARKS
 
 if(ENABLE_HDF5)
@@ -151,14 +155,13 @@ if(ENABLE_HDF5)
 endif() # ENABLE_HDF5
 
 if(ENABLE_UDA)
-    find_package( PkgConfig QUIET)
-    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
-    find_package( NetCDF )
-    set(UDA_LIBRARIES ${UDA_LIBRARIES} ${NETCDF_LIBRARIES})
-    link_directories(${UDA_LIBRARY_DIRS})
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
-    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    find_package( PkgConfig QUIET)
+#    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
+#    string(REPLACE ";" " " UDA_CFLAGS_OTHER "${UDA_CFLAGS_OTHER}")
+#    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    link_directories(${UDA_LIBRARY_DIRS})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 
@@ -183,10 +186,11 @@ add_subdirectory(thirdparty/jsoncpp)
 include_directories(thirdparty)
 
 include_directories(include)
+include_directories(include/plugins)
 add_subdirectory(include)
 add_subdirectory(src)
-add_subdirectory(plugins)
 add_subdirectory(python)
+add_subdirectory(misc)
 
 if (BUILD_DOC)
     # add_subdirectory(docs)
