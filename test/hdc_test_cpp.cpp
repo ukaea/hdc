@@ -338,6 +338,7 @@ TEST_CASE("GetKeys", "[HDC]")
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
+    HDC lch;                                                                                        \
     for (int i=0;i<5;i++) {                                                                         \
         HDC lch;                                                                                    \
         list.append_slice(lch);                                                                     \
@@ -415,11 +416,11 @@ TEST_CASE("HDF5", "[HDC]")
     PREPARE_TREE()
     tree.to_hdf5("tree.h5");
     HDC tree2 = HDC::from_hdf5("tree.h5");
-//     double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
-//     CHECK(data == 333.333);
-//     HDC h5 = HDC::load("hdf5://tree.h5|/data/aaa/bbb/_scalar");
-//     data = h5.as<double*>()[0];
-//     CHECK(data == 333.333);
+    double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
+    CHECK(data == 333.333);
+    HDC h5 = HDC::load("hdf5://tree.h5|/data/aaa/bbb/_scalar");
+    data = h5.as<double*>()[0];
+    CHECK(data == 333.333);
 }
 
 #endif

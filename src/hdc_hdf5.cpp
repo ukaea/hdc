@@ -94,7 +94,8 @@ void write_node(HDC h, H5File* file, std::string path)
 //                         write_node(h,file,path+"/"+to_string(i++));
                         std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                         write_node(h, file, full_path.c_str());
-//                        auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
+                        auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
+                        if (ret < 0) throw HDCException("Could not create refference to " + full_path);
                         i++;
                     }
 

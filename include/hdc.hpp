@@ -415,7 +415,7 @@ public:
     /** Returns string representing data/node type. */
     const char* get_type_str();
     /** Returns Python buffer format string (https://docs.python.org/3/c-api/arg.html#arg-parsing) */
-    const char* get_pybuf_format();
+    char* get_pybuf_format();
     /** Returns datashape desctiption string. */
     string get_datashape_str();
     /** Returns string representing data/node type. */

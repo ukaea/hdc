@@ -1172,8 +1172,8 @@ const char* HDC::get_type_str()
     };
     return "unknown";
 }
-
-const char* HDC::get_pybuf_format()
+//TODO this cannot be const char* due to cython
+char* HDC::get_pybuf_format()
 {
     // TODO raise exception for types with no native-C equivalent
     // Ref https://docs.python.org/3/library/struct.html#struct-format-strings
