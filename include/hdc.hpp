@@ -7,8 +7,8 @@
 #include "andres/marray.hxx"
 
 // Boost
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
+// #include <boost/filesystem.hpp>
+// #include <boost/program_options.hpp>
 
 // some other stuff -- to be reduced later
 #include <cstdint>
@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <json/json.h>
+#include "json/json.h"
 #include <exception>
 
 // our stuff

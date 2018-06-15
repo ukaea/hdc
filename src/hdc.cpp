@@ -6,6 +6,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string_regex.hpp>
 #include <boost/type.hpp>
+#include <sys/stat.h>
 
 //#define DEBUG
 struct hdc_t {
@@ -20,8 +21,20 @@ unordered_map<string, string> avail_stores;
 
 pt::ptree* options;
 
+
+/**
+ * Check if a file exists
+ * @return true if and only if the file exists, false else
+ */
+bool fileExists(const std::string& file) {
+    struct stat buf;
+    return (stat(file.c_str(), &buf) == 0);
+}
+
+// TODO: replace this by macro and headeronly library
 void HDC::parse_cmdline(int argc, const char* argv[])
 {
+    /*
     namespace po = boost::program_options;
     po::options_description desc("Allowed options:");
     desc.add_options()
@@ -47,6 +60,7 @@ void HDC::parse_cmdline(int argc, const char* argv[])
         string plugin_name = vm["storage"].as<std::string>();
         options->put("storage_cmdline", plugin_name);
     }
+    */
 }
 
 void HDC::load_config(std::string configPath)
@@ -58,7 +72,8 @@ void HDC::load_config(std::string configPath)
     pt::ptree settings_read;
     bool config_found = false;
     for (auto path : parts) {
-        if (boost::filesystem::exists(path)) {
+//         if (boost::filesystem::exists(path)) {
+        if (fileExists(path)) {
             try {
                 pt::read_json(path, settings_read);
                 config_found = true;
@@ -168,8 +183,11 @@ std::string HDC::get_library_dir(void)
 {
     Dl_info dl_info;
     dladdr((void*)HDC::get_library_dir, &dl_info);
-    boost::filesystem::path p(dl_info.dli_fname);
-    return boost::filesystem::canonical(p.parent_path()).string();
+    std::string path = dl_info.dli_fname;
+    size_t found=path.find_last_of("/\\");
+    return path.substr(0,found);
+//     boost::filesystem::path p(dl_info.dli_fname);
+//     return boost::filesystem::canonical(p.parent_path()).string();
 }
 
 void HDC::init(std::string storage_str, std::string storage_options)

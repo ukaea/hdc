@@ -17,8 +17,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     // Get the command string
     char cmd[64];
-	if (nrhs < 1 || mxGetString(prhs[0], cmd, sizeof(cmd)))
-		mexErrMsgTxt("First input should be a command string less than 64 characters long.");
+        if (nrhs < 1 || mxGetString(prhs[0], cmd, sizeof(cmd)))
+                mexErrMsgTxt("First input should be a command string less than 64 characters long.");
 
     // New
     if (!strcmp("new", cmd)) {
@@ -33,7 +33,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     // Check there is a second input, which should be the class instance handle
     if (nrhs < 2)
-		mexErrMsgTxt("Second input should be a class instance handle.");
+                mexErrMsgTxt("Second input should be a class instance handle.");
 
     // Delete
     if (!strcmp("delete", cmd)) {
@@ -69,7 +69,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     if (!strcmp("get_data", cmd)) {
 
-        mxArray *result;
+        mxArray *result = nullptr;
         // matlab::data::TypedArray<double> in = std::move(inputs[1]);
         int ndim = hdc_instance->get_ndim();
         size_t *shape = hdc_instance->get_shape();
@@ -83,13 +83,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
 
         // create output matlab matrix and copy data
-        result = mxCreateDoubleMatrix(m, n, mxREAL);
-        memcpy(mxGetPr(result), hdc_instance->as<void*>(), m * n * sizeof(double));
+        //result = mxCreateDoubleMatrix(m, n, mxREAL);
+        //memcpy(mxGetPr(result), hdc_instance->as<void*>(), m * n * sizeof(double));
 
         // zero-copy -- so far results into segfaults
         // most likely because matlab deallocates the memory
-        // result = mxCreateUninitNumericArray(ndim, shape, mxDOUBLE_CLASS, mxREAL);
-        // mxSetDoubles(result, (mxDouble*) hdc_instance->as<void*>());
+        result = mxCreateUninitNumericArray(ndim, shape, mxDOUBLE_CLASS, mxREAL);
+        mxSetData(result, hdc_instance->as<void*>());
 
         plhs[0] = result;
         return;
