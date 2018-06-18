@@ -19,6 +19,7 @@
 #include "hdc_types.h"
 #include "hdc_errors.hpp"
 #include <andres/marray.hxx>
+#include <sys/stat.h>
 
 /* ------------------------- UUID generation ----------------------------- */
 
@@ -60,5 +61,7 @@ void hello__();
 
 char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, bool fortranOrder = false);
 char* transpose_buffer(char* buffer);
+
+bool fileExists(const std::string& file);
 
 #endif

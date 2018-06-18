@@ -377,3 +377,13 @@ char* transpose_buffer(char* buffer) {
     memcpy(new_buffer,transposed_data,header.data_size);
     return new_buffer;
 }
+
+
+/**
+ * Check if a file exists
+ * @return true if and only if the file exists, false else
+ */
+bool fileExists(const std::string& file) {
+    struct stat buf;
+    return (stat(file.c_str(), &buf) == 0);
+}
