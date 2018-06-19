@@ -20,6 +20,9 @@
 #include "hdc_errors.hpp"
 #include <andres/marray.hxx>
 
+//typedef std::vector<char,mexAllocator<char>> buffer_t;
+typedef std::vector<char,std::allocator<char>> buffer_t;
+
 /* ------------------------- UUID generation ----------------------------- */
 
 void print_uuid(std::vector<char> uuid);

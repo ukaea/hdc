@@ -38,7 +38,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Delete
     if (!strcmp("delete", cmd)) {
         // Destroy the C++ object
-        destroyObject<HDC>(prhs[1]);
+// //         destroyObject<HDC>(prhs[1]);
         // Warn if other commands were ignored
         if (nlhs != 0 || nrhs != 2)
             mexWarnMsgTxt("Delete: Unexpected arguments ignored.");
@@ -81,16 +81,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         } else {
           n = shape[1];
         }
-
+std::cout <<"here1\n";
+        mwSize my_ndim = ndim;
+        void *my_shape = mxMalloc(ndim*sizeof(mwSize));
+        for (int i = 0; i < ndim; i++) ((mwSize*)my_shape)[i] = shape[i];
+std::cout <<"here2\n";
         // create output matlab matrix and copy data
         //result = mxCreateDoubleMatrix(m, n, mxREAL);
         //memcpy(mxGetPr(result), hdc_instance->as<void*>(), m * n * sizeof(double));
 
         // zero-copy -- so far results into segfaults
         // most likely because matlab deallocates the memory
-        result = mxCreateUninitNumericArray(ndim, shape, mxDOUBLE_CLASS, mxREAL);
-        mxSetData(result, hdc_instance->as<void*>());
-
+//         result = mxCreateUninitNumericArray(ndim, shape, mxDOUBLE_CLASS, mxREAL);
+//         mxSetData(result, hdc_instance->as<void*>());
+        result = mxCreateDoubleMatrix(0,0,mxREAL);
+std::cout <<"here3\n";
+        double *dset_data = (double *)malloc(sizeof(double) * shape[0] * shape[1]);
+std::cout <<"here4\n";
+        mxSetData(result, dset_data);
+        mxSetDimensions(result, shape, ndim);
+std::cout <<"here5\n";
         plhs[0] = result;
         return;
     }

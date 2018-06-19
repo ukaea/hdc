@@ -40,6 +40,8 @@
 #include "hdc_helpers.h"
 #include <unordered_map>
 
+#include "mexAllocator.h"
+
 using namespace std;
 namespace pt = boost::property_tree;
 

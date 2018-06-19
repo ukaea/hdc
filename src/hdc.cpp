@@ -3,8 +3,8 @@
 #include <memory>
 #include <glob.h>
 #include <dlfcn.h>
-#include <boost/regex.hpp>
-#include <boost/algorithm/string_regex.hpp>
+// #include <boost/regex.hpp>
+// #include <boost/algorithm/string_regex.hpp>
 #include <boost/type.hpp>
 #include <sys/stat.h>
 
@@ -151,7 +151,7 @@ void HDC::list_plugins()
 
 void HDC::set_storage(std::string storage)
 {
-    boost::optional<std::string> storage_cmd = options->get_optional<std::string>("storage_cmdline");
+    /*boost::optional<std::string> storage_cmd = options->get_optional<std::string>("storage_cmdline");
     if (storage_cmd) {
         while (options->count("storage") > 0) options->erase("storage");
         options->put("storage", *storage_cmd);
@@ -161,11 +161,11 @@ void HDC::set_storage(std::string storage)
     //cout << "Selected storage: " << selected_store_name <<endl;
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
         //cout << avail_stores[selected_store_name] << endl;
-        if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());
-        global_storage = new HDCStorage(avail_stores[selected_store_name], options->get_child("storage_options"));
-    } else {
-        throw HDCException("Unable to select the store.\n");
-    }
+        if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());*/
+        global_storage = new HDCStorage("","");
+//     } else {
+//         throw HDCException("Unable to select the store.\n");
+//     }
 }
 
 void HDC::set_default_storage_options(std::string storage, std::string storage_options)
@@ -193,10 +193,10 @@ std::string HDC::get_library_dir(void)
 void HDC::init(std::string storage_str, std::string storage_options)
 {
     options = new pt::ptree();
-    HDC::set_default_storage_options(storage_str, storage_options);
-    HDC::search_plugins();
+//     HDC::set_default_storage_options(storage_str, storage_options);
+//     HDC::search_plugins();
     //HDC::load_config();
-    HDC::set_storage(storage_str);
+    HDC::set_storage("umap");
 }
 
 
@@ -229,17 +229,17 @@ HDC::HDC(size_t _data_size)
     }
 
     // Start by creating segment
-    char* buffer = new char[header.buffer_size];
+    auto buffer = new buffer_t(header.buffer_size);
 
     // copy header there -- we need that, hopefully it will be optimized out
-    memcpy(buffer, &header, sizeof(header_t));
+    memcpy(buffer->data(), &header, sizeof(header_t));
 
     //Store to some storage
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer, header.buffer_size);
+    storage->set(uuid, buffer->data(), header.buffer_size);
     // Now it is safe to
-    if (!storage->usesBuffersDirectly()) delete[] buffer;
+    if (!storage->usesBuffersDirectly()) delete buffer;
 }
 
 /** Default constructor. Creates empty HDC */
@@ -263,11 +263,11 @@ HDC::HDC(int _ndim, size_t* _shape, TypeID _type, long _flags)
     header.ndim = _ndim;
     header.data_size = elem_size * hdc_sizeof(_type);
     header.buffer_size = header.data_size + sizeof(header_t);
-    char* buffer = new char[header.buffer_size];
-    memcpy(buffer, &header, sizeof(header_t));
+    auto buffer = new buffer_t(header.buffer_size);
+    memcpy(buffer->data(), &header, sizeof(header_t));
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer, header.buffer_size);
+    storage->set(uuid, buffer->data(), header.buffer_size);
     if (!storage->usesBuffersDirectly()) delete[] buffer;
 }
 
@@ -282,7 +282,7 @@ HDC::HDC(byte* src_buffer)
     storage = global_storage;
     uuid = generate_uuid_str();
     memcpy(&header, src_buffer, sizeof(header_t));
-    auto buffer = new char[header.buffer_size];
+    auto buffer = new buffer_t(header.buffer_size);
 
     if (header.type == STRUCT_ID || header.type == LIST_ID) {
         bip::managed_external_buffer src_segment(bip::open_only, src_buffer + sizeof(header_t),
@@ -300,12 +300,12 @@ HDC::HDC(byte* src_buffer)
             record rec(it->key.c_str(), n.get_uuid().c_str(), segment.get_segment_manager());
             children->insert(rec);
         }
-        memcpy(buffer, &header, sizeof(header_t));
+        memcpy(buffer->data(), &header, sizeof(header_t));
     } else {
-        memcpy(buffer, src_buffer, header.buffer_size);
+        memcpy(buffer->data(), src_buffer, header.buffer_size);
     }
 
-    storage->set(uuid, buffer, header.buffer_size);
+    storage->set(uuid, buffer->data(), header.buffer_size);
 }
 
 /** Copy contructor */
@@ -897,25 +897,25 @@ void HDC::set_type(size_t _type)
     memcpy(&header, old_buffer, sizeof(header_t)); //sync header
     if (header.type == _type) return; // Nothing to do
     header.type = _type;
-    char* new_buffer = nullptr;
+    buffer_t* new_buffer;
     memcpy(old_buffer, &header, sizeof(header_t)); //sync header back
     if (header.type == STRUCT_ID || header.type == LIST_ID) {
         if (header.data_size < HDC_NODE_SIZE_DEFAULT) {
-            new_buffer = new char[HDC_NODE_SIZE_DEFAULT];
+            new_buffer = new buffer_t(HDC_NODE_SIZE_DEFAULT);
             header.data_size = HDC_NODE_SIZE_DEFAULT - sizeof(header_t);
             header.buffer_size = HDC_NODE_SIZE_DEFAULT;
-            memcpy(new_buffer, &header, sizeof(header_t));
+            memcpy(new_buffer->data(), &header, sizeof(header_t));
         } else {
-            new_buffer = old_buffer;
+            new_buffer = new buffer_t(old_buffer,old_buffer+header.buffer_size);
         }
-        bip::managed_external_buffer segment(bip::create_only, new_buffer + sizeof(header_t), header.data_size);
+        bip::managed_external_buffer segment(bip::create_only, new_buffer->data() + sizeof(header_t), header.data_size);
         auto children = segment.construct<map_t>("d")(map_t::ctor_args_list(),map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
         if (children == nullptr) throw HDCException("HDC::set_type(size_t _type): Could not create the children");
     }
     // else there is nothing to do...
-    storage->set(uuid, new_buffer, header.buffer_size);
-    if (new_buffer != old_buffer) {
-        if (!storage->usesBuffersDirectly()) delete[] new_buffer;
+    storage->set(uuid, new_buffer->data(), header.buffer_size);
+    if (new_buffer->data() != old_buffer) {
+        if (!storage->usesBuffersDirectly()) delete new_buffer;
     }
     return;
 }
@@ -980,10 +980,10 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags
         for (int i = 0; i < _ndim; i++) header.shape[i] = _shape[i];
         header.type = static_cast<TypeID>(_type);
         header.ndim = _ndim;
-        char* buffer = new char[header.buffer_size];
-        memcpy(buffer, &header, sizeof(header_t));
-        memcpy(buffer + sizeof(header_t), _data, header.data_size);
-        storage->set(uuid, buffer, header.buffer_size);
+        auto buffer = new buffer_t(header.buffer_size);
+        memcpy(buffer->data(), &header, sizeof(header_t));
+        memcpy(buffer->data() + sizeof(header_t), _data, header.data_size);
+        storage->set(uuid, buffer->data(), header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
         return;
     }
@@ -1021,10 +1021,10 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type,
         for (int i = 0; i < _ndim; i++) header.shape[i] = _shape[i];
         header.type = static_cast<TypeID>(_type);
         header.ndim = _ndim;
-        char* buffer = new char[header.buffer_size];
-        memcpy(buffer, &header, sizeof(header_t));
-        memcpy(buffer + sizeof(header_t), _data, header.data_size);
-        storage->set(uuid, buffer, header.buffer_size);
+        auto buffer = new buffer_t(header.buffer_size);
+        memcpy(buffer->data(), &header, sizeof(header_t));
+        memcpy(buffer->data() + sizeof(header_t), _data, header.data_size);
+        storage->set(uuid, buffer->data(), header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
         return;
     }
@@ -1302,12 +1302,12 @@ void HDC::grow(size_t extra_size)
     cout << "Growing  " << extra_size << endl;
     if (extra_size <= 0) return;
     char* old_buffer = storage->get(uuid);
-    memcpy(&header, old_buffer, sizeof(header_t));
+    memcpy(&header,old_buffer,sizeof(header_t));
     auto new_size = header.data_size + extra_size;
-    D(printf("Growing %luB->%luB\n", header.data_size, new_size);)
+    D(printf("Growing %luB->%luB\n",header.data_size,new_size);)
     char* new_buffer = buffer_grow(old_buffer, extra_size);
-    memcpy(&header, new_buffer, sizeof(header_t));
-    storage->set(uuid, new_buffer, new_size);
+    memcpy(&header,new_buffer,sizeof(header_t));
+    storage->set(uuid,new_buffer,new_size);
     if (!storage->usesBuffersDirectly()) delete[] old_buffer;
     if (!storage->usesBuffersDirectly()) delete[] new_buffer;
     return;
@@ -1340,28 +1340,26 @@ void HDC::delete_data()
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 char* HDC::buffer_grow(char* old_buffer, size_t extra_size)
 {
-    DEBUG_STDOUT("buffer_grow(extra_size = " + to_string(extra_size) + ")\n");
+    DEBUG_STDOUT("buffer_grow(extra_size = "+to_string(extra_size)+")\n");
     if (extra_size <= 0 || old_buffer == nullptr) return old_buffer;
     //load header
     header_t header;
-    memcpy(&header, old_buffer, sizeof(header_t));
+    memcpy(&header,old_buffer,sizeof(header_t));
     auto new_data_size = header.data_size + extra_size;
     auto new_buffer_size = new_data_size + sizeof(header_t);
-    char* new_buffer = new char[new_buffer_size];
+    auto new_buffer = new buffer_t(new_buffer_size);
     // if there were children, resize the segment
     if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
         // try to open old children
-        auto old_segment = bip::managed_external_buffer(bip::open_only, old_buffer + sizeof(header_t), 0);
+        auto old_segment = bip::managed_external_buffer(bip::open_only,old_buffer+sizeof(header_t),0);
         map_t* old_children = old_segment.find<map_t>("d").first;
         // if there are some, copy them
         if (old_children != nullptr) {
-            auto new_segment = bip::managed_external_buffer(bip::create_only, new_buffer + sizeof(header_t),
-                                                            new_data_size);
-            map_t* new_children = new_segment.construct<map_t>("d")(map_t::ctor_args_list(),
-                                                                    new_segment.get_segment_manager());
-            map_t::nth_index<1>::type& ri = old_children->get<1>();
+            auto new_segment = bip::managed_external_buffer(bip::create_only,new_buffer->data()+sizeof(header_t),new_data_size);
+            map_t* new_children = new_segment.construct<map_t>("d")(map_t::ctor_args_list(),new_segment.get_segment_manager());
+            map_t::nth_index<1>::type& ri=old_children->get<1>();
             for (auto it = ri.begin(); it != ri.end(); ++it) {
-                record rec(it->key.c_str(), it->address.c_str(), new_segment.get_segment_manager());
+                record rec(it->key.c_str(),it->address.c_str(),new_segment.get_segment_manager());
                 new_children->insert(rec);
             }
         } else {
@@ -1374,8 +1372,8 @@ char* HDC::buffer_grow(char* old_buffer, size_t extra_size)
     // finalize header and copy it to the new buffer
     header.data_size = new_data_size;
     header.buffer_size = new_buffer_size;
-    memcpy(new_buffer, &header, sizeof(header_t));
-    return new_buffer;
+    memcpy(new_buffer->data(),&header,sizeof(header_t));
+    return new_buffer->data();
 }
 
 // "static contructor" from void* HDC
@@ -1440,10 +1438,14 @@ HDC* HDC::deserialize_HDC_string(const std::string& str)
 HDC HDC::load(const std::string& uri, const std::string& datapath)
 {
     HDC h;
+    /*
     // start by parsing the string
     std::vector<std::string> result;
-    boost::algorithm::split_regex(result, uri, boost::regex("://"));
-    if (result.size() > 1) {
+    //boost::algorithm::split_regex(result, uri, boost::regex("://"));
+    std::string delimiter = "://";
+    auto pos = s.find(delimiter);
+    TODO: do this
+    if (pos != std::string::npos) {
         std::vector<std::string> split_res;
         boost::split(split_res, result[1], boost::is_any_of("|"), boost::token_compress_on);
         if (split_res.size() > 1 && datapath != "") {
@@ -1466,5 +1468,6 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
     } else {
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
     }
+    */
     return h;
 }

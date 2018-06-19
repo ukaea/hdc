@@ -44,9 +44,12 @@ set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
-find_package(Boost 1.48.0 REQUIRED system regex)
+find_package(Boost 1.48.0 REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
+
+find_package(Matlab)
+include_directories(${Matlab_INCLUDE_DIRS})
 
 ########################################################################################################################
 # RPATH options

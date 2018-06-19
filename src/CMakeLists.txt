@@ -23,7 +23,7 @@ if(ENABLE_UDA)
   target_link_libraries(hdc PRIVATE ${UDA_FAT_CPP_LIBRARIES} MdsLib netcdf)
 endif(ENABLE_UDA)
 
-target_link_libraries(hdc PUBLIC ${HDC_LINK_LIBRARIES})
+target_link_libraries(hdc PUBLIC ${HDC_LINK_LIBRARIES} ${Matlab_LIBRARIES})
 
 add_library(chdc SHARED hdc_c.cpp)
 target_link_libraries(chdc hdc stdc++)

@@ -7,10 +7,17 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
+    std::vector<double, mexAllocator<double>> vec;
+    vec.push_back(7.0);
+    vec.push_back(9.0);
+    vec.push_back(21.0);
+    for (auto a : vec) {std::cout << a << std::endl;}
+
     HDC::parse_cmdline(argc, argv);
     HDC::init();
     // Create new HDC tree
-    HDC tree;
+/*    HDC tree;
+
     // Add some children
     HDC dummy1;
     tree.add_child("aaa/bbb/ccc", dummy1);
@@ -71,6 +78,6 @@ int main(int argc, const char* argv[])
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
-
+*/
     return 0;
 }
