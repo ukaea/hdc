@@ -57,7 +57,7 @@ class HDC
 private:
     string uuid;
     HDCStorage* storage;
-    header_t header;
+    hdc_header_t header;
 
 /* ------------------------------- methods ----------------------------------------- */
     void add_child(vector<boost::variant<size_t,std::string>> vs, HDC* n);
@@ -126,14 +126,14 @@ public:
     template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(header_t));
+        memcpy(&header,buffer,sizeof(hdc_header_t));
         // Start with determining of the buffer size
         size_t data_size = sizeof(T);
         for (int i=0;i<_ndim;i++) data_size *= _shape[i];
-        size_t buffer_size = data_size + sizeof(header_t);
+        size_t buffer_size = data_size + sizeof(hdc_header_t);
         if (header.buffer_size == buffer_size) {
             storage->lock(uuid);
-            memcpy(buffer+sizeof(header_t),_data,data_size);
+            memcpy(buffer+sizeof(hdc_header_t),_data,data_size);
             storage->unlock(uuid);
             return;
         } else {
@@ -145,8 +145,8 @@ public:
             header.type = to_typeid(_data[0]);
             header.ndim = _ndim;
             char* buffer = new char[header.buffer_size];
-            memcpy(buffer,&header,sizeof(header_t));
-            memcpy(buffer+sizeof(header_t),_data,header.data_size);
+            memcpy(buffer,&header,sizeof(hdc_header_t));
+            memcpy(buffer+sizeof(hdc_header_t),_data,header.data_size);
             storage->set(uuid,buffer,header.buffer_size);
             if (!storage->usesBuffersDirectly()) delete[] buffer;
             return;
@@ -217,15 +217,15 @@ public:
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
-        memset(&header,0,sizeof(header_t));
+        memset(&header,0,sizeof(hdc_header_t));
         header.data_size = str.length()+1;
         header.type = HDC_STRING;
         header.ndim = 1;
         header.shape[0] = str.length();
-        header.buffer_size = header.data_size + sizeof(header_t);
+        header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
-        memcpy(buffer,&header,sizeof(header_t));
-        memcpy(buffer+sizeof(header_t),str.c_str(),header.data_size);
+        memcpy(buffer,&header,sizeof(hdc_header_t));
+        memcpy(buffer+sizeof(hdc_header_t),str.c_str(),header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
@@ -253,25 +253,25 @@ public:
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
-        memset(&header,0,sizeof(header_t));
+        memset(&header,0,sizeof(hdc_header_t));
         header.type = to_typeid(data);
         header.data_size = sizeof(T);
-        header.buffer_size = header.data_size + sizeof(header_t);
+        header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
-        memcpy(buffer,&header,sizeof(header_t));
-        memcpy(buffer+sizeof(header_t),&data,header.data_size);
+        memcpy(buffer,&header,sizeof(hdc_header_t));
+        memcpy(buffer+sizeof(hdc_header_t),&data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /** Sets scalar data to given node - UDA version. */
     void set_data(const unsigned char* data, hdc_type_t _type) {
-        memset(&header,0,sizeof(header_t));
+        memset(&header,0,sizeof(hdc_header_t));
         header.type = _type;
         header.data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
-        header.buffer_size = header.data_size + sizeof(header_t);
+        header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
-        memcpy(buffer,&header,sizeof(header_t));
-        memcpy(buffer+sizeof(header_t),&data,header.data_size);
+        memcpy(buffer,&header,sizeof(hdc_header_t));
+        memcpy(buffer+sizeof(hdc_header_t),&data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
@@ -357,12 +357,12 @@ public:
         if (!storage->has(uuid)) {
             throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
-        return reinterpret_cast<T>(storage->get(uuid)+sizeof(header_t));
+        return reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
         if (header.type == HDC_STRING) {
-            string str(storage->get(uuid)+sizeof(header_t));
+            string str(storage->get(uuid)+sizeof(hdc_header_t));
             return std::string(str);
         } else {
             cout << header.type << endl;

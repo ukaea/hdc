@@ -12,9 +12,9 @@ void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest);
 void write_node(HDC h, H5File* file, std::string path)
 {
     auto buffer = h.get_buffer();
-    header_t header;
-    memcpy(&header, buffer, sizeof(header_t));
-    auto data = buffer + sizeof(header_t);
+    hdc_header_t header;
+    memcpy(&header, buffer, sizeof(hdc_header_t));
+    auto data = buffer + sizeof(hdc_header_t);
     char* transposed_data = NULL;
     if (h.is_fortranorder()) {
         transposed_data = transpose_buffer(h.get_buffer(), h.get_ndim(), h.get_shape(), (hdc_type_t)h.get_type(),
@@ -22,7 +22,7 @@ void write_node(HDC h, H5File* file, std::string path)
         data = transposed_data;
     }
     H5std_string DATASET_NAME(path);
-    memcpy(&header, buffer, sizeof(header_t));
+    memcpy(&header, buffer, sizeof(hdc_header_t));
     try {
         hsize_t rank = header.ndim;
         hsize_t dimsf[10];

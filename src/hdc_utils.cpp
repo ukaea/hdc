@@ -366,14 +366,14 @@ char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, hdc_type_t type
 }
 
 char* transpose_buffer(char* buffer) {
-    header_t header;
-    memcpy(&header,buffer,sizeof(header_t));
-    auto data = buffer+sizeof(header_t);
+    hdc_header_t header;
+    memcpy(&header,buffer,sizeof(hdc_header_t));
+    auto data = buffer+sizeof(hdc_header_t);
     char* new_buffer = new char[header.buffer_size];
     bool fortranOrder = (header.flags & HDCFortranOrder) == HDCFortranOrder;
     std::cout << "fortranOrder" << (int)fortranOrder<< std::endl;
     auto transposed_data = transpose_buffer(data, header.ndim, header.shape, (hdc_type_t)header.type, fortranOrder);
-    memcpy(new_buffer,&header,sizeof(header_t));
+    memcpy(new_buffer,&header,sizeof(hdc_header_t));
     memcpy(new_buffer,transposed_data,header.data_size);
     return new_buffer;
 }

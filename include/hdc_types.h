@@ -39,7 +39,7 @@ typedef enum {
 
 typedef size_t hdc_flags_t;
 
-struct header_t {
+struct hdc_header_t {
     size_t      buffer_size;
     size_t      data_size;
     hdc_type_t  type;
