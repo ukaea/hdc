@@ -79,7 +79,7 @@ public:
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(int _ndim, size_t* _shape, TypeID _type,long _flags = HDCDefault);
+    HDC(int _ndim, size_t* _shape, hdc_type_t _type,long _flags = HDCDefault);
     /** Constructor from string */
     HDC(const std::string str);
     /** Copy contructor */
@@ -220,7 +220,7 @@ public:
         }
         memset(&header,0,sizeof(header_t));
         header.data_size = str.length()+1;
-        header.type = STRING_ID;
+        header.type = HDC_STRING;
         header.ndim = 1;
         header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(header_t);
@@ -246,11 +246,11 @@ public:
         auto h = get(path);
         get(path).set_string(str);
     }
-    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -265,10 +265,10 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /** Sets scalar data to given node - UDA version. */
-    void set_data(const unsigned char* data, size_t _type) {
+    void set_data(const unsigned char* data, hdc_type_t _type) {
         memset(&header,0,sizeof(header_t));
         header.type = _type;
-        header.data_size = hdc_sizeof(static_cast<TypeID>(_type));
+        header.data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
         header.buffer_size = header.data_size + sizeof(header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(header_t));
@@ -285,7 +285,7 @@ public:
         get(path).set_data(data);
     }
 
-    void set_data(const std::string& path, const unsigned char* data, size_t _type) {
+    void set_data(const std::string& path, const unsigned char* data, hdc_type_t _type) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -341,7 +341,7 @@ public:
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
     void append_slice(HDC& h);
     /** Sets HDC type of current node. */
-    void set_type(size_t _type);
+    void set_type(hdc_type_t _type);
     /** Returns true if node is empty. */
     bool is_empty();
     /** Returns number of dimensions of node under path. */
@@ -351,7 +351,7 @@ public:
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
-        if (header.type == STRUCT_ID || header.type == LIST_ID) {
+        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
@@ -362,7 +362,7 @@ public:
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
-        if (header.type == STRING_ID) {
+        if (header.type == HDC_STRING) {
             string str(storage->get(uuid)+sizeof(header_t));
             return std::string(str);
         } else {

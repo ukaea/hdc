@@ -47,24 +47,24 @@ TEST_CASE("EmptyArrayNode", "[HDC]")
 {
     int8_t ndim = 1;
     size_t shape[] = { 4 };
-    HDC* hi8 = new HDC(ndim, shape, INT8_ID);
+    HDC* hi8 = new HDC(ndim, shape, HDC_INT8);
     CHECK(1 == hi8->get_ndim());
     CHECK(4 == hi8->get_shape()[0]);
-    CHECK(INT8_ID == hi8->get_type());
+    CHECK(HDC_INT8 == hi8->get_type());
     CHECK(strcmp("int8", hi8->get_type_str()) == 0);
     delete hi8;
 
-    HDC* hi32 = new HDC(ndim, shape, INT32_ID);
+    HDC* hi32 = new HDC(ndim, shape, HDC_INT32);
     CHECK(1 == hi32->get_ndim());
     CHECK(4 == hi32->get_shape()[0]);
-    CHECK(INT32_ID == hi32->get_type());
+    CHECK(HDC_INT32 == hi32->get_type());
     CHECK(strcmp("int32", hi32->get_type_str()) == 0);
     delete hi32;
 
-    HDC* hd = new HDC(ndim, shape, DOUBLE_ID);
+    HDC* hd = new HDC(ndim, shape, HDC_DOUBLE);
     CHECK(1 == hd->get_ndim());
     CHECK(4 == hd->get_shape()[0]);
-    CHECK(DOUBLE_ID == hd->get_type());
+    CHECK(HDC_DOUBLE == hd->get_type());
     CHECK(strcmp("float64", hd->get_type_str()) == 0);
     delete hd;
 }
@@ -94,7 +94,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     tree->add_child("aaa/list[1]", new HDC());
     tree->add_child("aaa/list[0]/eee", new HDC());
     HDC* list = tree->get_ptr("aaa/list");
-    CHECK(LIST_ID == list->get_type());
+    CHECK(HDC_LIST == list->get_type());
     HDC h = tree->get("aaa/list[0]/ddd");
     CHECK(true == tree->has_child("aaa/list[0]/ddd"));
     CHECK(true == tree->has_child("aaa/list[0]/eee"));
@@ -161,7 +161,7 @@ TEST_CASE("Int8DataManipulation", "[HDC]")
     int8_t data[] = { 7, 20, 3, 5 };
     HDC* h = new HDC();
     h->set_data(ndim, (size_t*)shape, data);
-    CHECK(INT8_ID == h->get_type());
+    CHECK(HDC_INT8 == h->get_type());
     CHECK(1 == h->get_ndim());
     CHECK(4 == h->get_shape()[0]);
     CHECK(strcmp("int8", h->get_type_str()) == 0);
@@ -183,7 +183,7 @@ TEST_CASE("Int16DataManipulation", "[HDC]")
     int16_t data[] = { 777, 30000, 3333, 22222 };
     HDC* h = new HDC();
     h->set_data<int16_t>(ndim, (size_t*)shape, data);
-    CHECK(INT16_ID == h->get_type());
+    CHECK(HDC_INT16 == h->get_type());
     CHECK(1 == h->get_ndim());
     CHECK(4 == h->get_shape()[0]);
     CHECK(strcmp("int16", h->get_type_str()) == 0);
@@ -199,7 +199,7 @@ TEST_CASE("Int32DataManipulation", "[HDC]")
     int32_t data[] = { 777, 20202020, 3333, 555555 };
     HDC* h = new HDC();
     h->set_data<int32_t>(ndim, (size_t*)shape, data);
-    CHECK(INT32_ID == h->get_type());
+    CHECK(HDC_INT32 == h->get_type());
     CHECK(1 == h->get_ndim());
     CHECK(4 == h->get_shape()[0]);
     CHECK(strcmp("int32", h->get_type_str()) == 0);
@@ -215,7 +215,7 @@ TEST_CASE("Int64DataManipulation", "[HDC]")
     int64_t data[] = { 777, 20202020, 3333, 2000000000 };
     HDC* h = new HDC();
     h->set_data<int64_t>(ndim, (size_t*)shape, data);
-    CHECK(INT64_ID == h->get_type());
+    CHECK(HDC_INT64 == h->get_type());
     CHECK(1 == h->get_ndim());
     CHECK(4 == h->get_shape()[0]);
     CHECK(strcmp("int64", h->get_type_str()) == 0);
@@ -232,7 +232,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     double data[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
     HDC* h = new HDC();
     h->set_data<double>(ndim, (size_t*)shape, data);
-    CHECK(DOUBLE_ID == h->get_type());
+    CHECK(HDC_DOUBLE == h->get_type());
     CHECK(1 == h->get_ndim());
     CHECK(4 == h->get_shape()[0]);
     CHECK(strcmp("float64", h->get_type_str()) == 0);
@@ -307,7 +307,7 @@ TEST_CASE("SliceManipulation", "[HDC]")
 TEST_CASE("GetKeys", "[HDC]")
 {
     HDC list;
-    list.set_type(LIST_ID);
+    list.set_type(HDC_LIST);
     CHECK(true == list.keys().empty());
     HDC val;
     CHECK(true == val.keys().empty());
@@ -360,7 +360,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     // Test double
     CHECK(1 == s.get_ndim());
     CHECK(4 == s.get_shape()[0]);
-    CHECK(DOUBLE_ID == s.get_type());
+    CHECK(HDC_DOUBLE == s.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
     double* data_double_in = s.as<double*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
@@ -369,7 +369,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     s = tree2.get("aaa/bbb/int");
     CHECK(1 == s.get_ndim());
     CHECK(4 == s.get_shape()[0]);
-    CHECK(INT32_ID == s.get_type());
+    CHECK(HDC_INT32 == s.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str(), tree2.get("aaa/bbb/int").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
@@ -401,7 +401,7 @@ TEST_CASE("CopyConstructor", "[HDC]")
     HDC d = copy.get("aaa/bbb/double");
     CHECK(1 == d.get_ndim());
     CHECK(4 == d.get_shape()[0]);
-    CHECK(DOUBLE_ID == d.get_type());
+    CHECK(HDC_DOUBLE == d.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), d.get_type_str()) == 0);
 }
 

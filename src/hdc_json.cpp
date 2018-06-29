@@ -135,7 +135,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
         {
             case (Json::nullValue):
                 DEBUG_STDOUT("root is null");
-            tree.set_type(EMPTY_ID);
+            tree.set_type(HDC_EMPTY);
             break;
         }
         case (Json::intValue): {
@@ -172,14 +172,14 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             "json_to_hdc(): Unsupported number of dimensions: " + std::to_string(ndim) + "\n");
                 }
                 size_t* shape = ::get_shape(root);
-                TypeID dt;
-                if (is_double(root)) { dt = DOUBLE_ID; }
-                else if (is_int(root)) { dt = INT32_ID; }
-                else { dt = BOOL_ID; }
+                hdc_type_t dt;
+                if (is_double(root)) { dt = HDC_DOUBLE; }
+                else if (is_int(root)) { dt = HDC_INT32; }
+                else { dt = HDC_BOOL; }
                 HDC d(ndim, shape, dt);
                 tree = d;
                 void* data_ptr = tree.as<void*>();
-                if (dt == DOUBLE_ID) {
+                if (dt == HDC_DOUBLE) {
                     switch (ndim) {
                         case 1: {
                             andres::View<double> view(shape, shape + 1, (double*)data_ptr);
@@ -228,7 +228,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                                     " not implemented yet\n");
                         }
                     }
-                } else if (dt == BOOL_ID) {
+                } else if (dt == HDC_BOOL) {
                     switch (ndim) {
                         case 1: {
                             andres::View<bool> view(shape, shape + 1, (bool*)data_ptr);
@@ -328,7 +328,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 delete[] shape;
             } else {
                 // call recursively -- save list
-                tree.set_type(LIST_ID);
+                tree.set_type(HDC_LIST);
                 for (unsigned int i = 0; i < root.size(); i++) {
                     HDC h = HDC::json_to_HDC(root[i]);
                     tree.append_slice(h);
@@ -453,48 +453,48 @@ Json::Value HDC::to_json(int mode)
     Json::Value root;
     if (mode == 0) {
         switch (header.type) {
-            case (INT8_ID): {
+            case (HDC_INT8): {
                 root = buffer_to_json<int8_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (INT16_ID): {
+            case (HDC_INT16): {
                 root = buffer_to_json<int16_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (INT32_ID): {
+            case (HDC_INT32): {
                 root = buffer_to_json<int32_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (INT64_ID): {
+            case (HDC_INT64): {
                 root = buffer_to_json<int64_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (UINT8_ID): {
+            case (HDC_UINT8): {
                 root = buffer_to_json<uint8_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (UINT16_ID): {
+            case (HDC_UINT16): {
                 root = buffer_to_json<uint16_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (UINT32_ID): {
+            case (HDC_UINT32): {
                 root = buffer_to_json<uint32_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-                /*case(UINT64_ID):
+                /*case(HDC_UINT64):
                  {  *
                  root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
                  break;
                 }*/
-            case (FLOAT_ID): {
+            case (HDC_FLOAT): {
                 root = buffer_to_json<float>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (DOUBLE_ID): {
+            case (HDC_DOUBLE): {
                 root = buffer_to_json<double>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
                 break;
             }
-            case (STRUCT_ID): {
+            case (HDC_STRUCT): {
                 auto children = get_children_ptr();
                 for (auto it = children->begin(); it != children->end(); ++it) {
                     HDC node(storage, it->address.c_str());
@@ -502,22 +502,22 @@ Json::Value HDC::to_json(int mode)
                 }
                 break;
             }
-            case (LIST_ID): {
+            case (HDC_LIST): {
                 root = Json::arrayValue;
                 for (size_t i = 0; i < this->childs_count(); i++) {
                     root[static_cast<int>(i)] = this->get_slice(i).to_json(mode);
                 }
                 break;
             }
-            case (EMPTY_ID): {
+            case (HDC_EMPTY): {
                 root = Json::nullValue;
                 break;
             }
-            case (STRING_ID): {
+            case (HDC_STRING): {
                 root = as_string();
                 break;
             }
-            case (BOOL_ID): {
+            case (HDC_BOOL): {
                 root = buffer_to_json<bool>(get_data_ptr(), get_ndim(), get_shape());
                 break;
             }

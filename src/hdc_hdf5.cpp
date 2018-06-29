@@ -17,7 +17,7 @@ void write_node(HDC h, H5File* file, std::string path)
     auto data = buffer + sizeof(header_t);
     char* transposed_data = NULL;
     if (h.is_fortranorder()) {
-        transposed_data = transpose_buffer(h.get_buffer(), h.get_ndim(), h.get_shape(), (TypeID)h.get_type(),
+        transposed_data = transpose_buffer(h.get_buffer(), h.get_ndim(), h.get_shape(), (hdc_type_t)h.get_type(),
                                            h.is_fortranorder());
         data = transposed_data;
     }
@@ -60,7 +60,7 @@ void write_node(HDC h, H5File* file, std::string path)
         map_t* children;
 
         switch (header.type) {
-            case STRUCT_ID:
+            case HDC_STRUCT:
                 children = h.get_children_ptr();
                 if (children != nullptr) {
                     Group* group = new Group(file->createGroup(path));
@@ -73,7 +73,7 @@ void write_node(HDC h, H5File* file, std::string path)
                     delete group;
                 }
                 return;
-            case LIST_ID:
+            case HDC_LIST:
                 children = h.get_children_ptr();
                 if (children != nullptr) {
                     Group ref_group;
@@ -109,55 +109,55 @@ void write_node(HDC h, H5File* file, std::string path)
                     delete[] wbuf;
                 }
                 return;
-            case BOOL_ID:
+            case HDC_BOOL:
                 dataset = file->createDataSet(DATASET_NAME, u8datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_UINT_LEAST8);
                 return;
-            case INT8_ID:
+            case HDC_INT8:
                 dataset = file->createDataSet(DATASET_NAME, i8datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_INT_LEAST8);
                 return;
-            case INT16_ID:
+            case HDC_INT16:
                 dataset = file->createDataSet(DATASET_NAME, i16datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_INT_LEAST16);
                 return;
-            case INT32_ID:
+            case HDC_INT32:
                 dataset = file->createDataSet(DATASET_NAME, i32datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_INT_LEAST32);
                 return;
-            case INT64_ID:
+            case HDC_INT64:
                 dataset = file->createDataSet(DATASET_NAME, i64datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_INT_LEAST64);
                 return;
-            case UINT8_ID:
+            case HDC_UINT8:
                 dataset = file->createDataSet(DATASET_NAME, u8datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_UINT_LEAST8);
                 return;
-            case UINT16_ID:
+            case HDC_UINT16:
                 dataset = file->createDataSet(DATASET_NAME, u16datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_UINT_LEAST16);
                 return;
-            case UINT32_ID:
+            case HDC_UINT32:
                 dataset = file->createDataSet(DATASET_NAME, u32datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_UINT_LEAST32);
                 return;
-            case UINT64_ID:
+            case HDC_UINT64:
                 dataset = file->createDataSet(DATASET_NAME, u64datatype, dataspace);
                 dataset.write(data, PredType::NATIVE_UINT_LEAST64);
                 return;
-            case FLOAT_ID:
+            case HDC_FLOAT:
                 dataset = file->createDataSet(DATASET_NAME, fdatatype, dataspace);
                 dataset.write(data, PredType::NATIVE_FLOAT);
                 return;
-            case DOUBLE_ID:
+            case HDC_DOUBLE:
                 dataset = file->createDataSet(DATASET_NAME, ddatatype, dataspace);
                 dataset.write(data, PredType::NATIVE_DOUBLE);
                 return;
-            case STRING_ID:
+            case HDC_STRING:
                 dataset = file->createDataSet(DATASET_NAME, sdatatype, dataspace);
                 dataset.write(data, PredType::C_S1);
                 return;
-            case EMPTY_ID:
+            case HDC_EMPTY:
                 dataset = file->createDataSet(DATASET_NAME, ddatatype, edataspace);
                 dataset.write(edata, PredType::NATIVE_DOUBLE);
                 return;
@@ -204,35 +204,35 @@ void HDC::to_hdf5(std::string filename, std::string dataset_name UNUSED)
     return;
 }
 
-TypeID hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path UNUSED)
+hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path UNUSED)
 {
     DEBUG_STDOUT("hdf5_type_to_hdc_type(" + to_string(hdf5_dtype_id) + "," + ref_path + ")");
-    TypeID res;
+    hdc_type_t res;
     if (H5Tequal(hdf5_dtype_id, H5T_STD_I8LE)) {
-        res = INT8_ID;
+        res = HDC_INT8;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_I16LE)) {
-        res = INT16_ID;
+        res = HDC_INT16;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_I32LE)) {
-        res = INT32_ID;
+        res = HDC_INT32;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_I64LE)) {
-        res = INT64_ID;
+        res = HDC_INT64;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_U8LE)) {
-        res = UINT8_ID;
+        res = HDC_UINT8;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_U16LE)) {
-        res = UINT16_ID;
+        res = HDC_UINT16;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_U32LE)) {
-        res = UINT32_ID;
+        res = HDC_UINT32;
     } else if (H5Tequal(hdf5_dtype_id, H5T_STD_U64LE)) {
-        res = UINT64_ID;
+        res = HDC_UINT64;
     } else if (H5Tequal(hdf5_dtype_id, H5T_IEEE_F32LE)) {
-        res = FLOAT_ID;
+        res = HDC_FLOAT;
     } else if (H5Tequal(hdf5_dtype_id, H5T_IEEE_F64LE)) {
-        res = DOUBLE_ID;
+        res = HDC_DOUBLE;
     } else if (H5Tequal(hdf5_dtype_id, H5T_C_S1)) {
-        res = STRING_ID;
+        res = HDC_STRING;
     } else if (H5Tequal(hdf5_dtype_id, H5T_ENUM)) {
         //TODO: Here it can be probably more things.
-        res = BOOL_ID;
+        res = HDC_BOOL;
     } else {
         throw HDCException("Error with HDF5 DataType to DataType Leaf Conversion");
     }
@@ -250,7 +250,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
     // check for empty case
     if (H5Sget_simple_extent_type(h5_dspace_id) == H5S_NULL) {
         // change to empty
-        dest.set_type(EMPTY_ID);
+        dest.set_type(HDC_EMPTY);
     } else {
 
         hid_t h5_dtype_id = H5Dget_type(hdf5_dset_id);
@@ -289,7 +289,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
 
         size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
         size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
-        TypeID dt = hdf5_type_to_hdc_type(h5_dtype_id, ref_path);
+        hdc_type_t dt = hdf5_type_to_hdc_type(h5_dtype_id, ref_path);
         if (dt == HDC_STRING) nelems++;
         hid_t h5_status = 0;
         char buffer[nelems * hdc_sizeof(dt)];
@@ -452,7 +452,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const 
 void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string& ref_path, HDC& dest)
 {
     DEBUG_STDOUT("void hdf5_group_to_hdc(" + to_string(hdf5_group_id) + "," + ref_path + "," + ")");
-    //dest.set_type(EMPTY_ID);
+    //dest.set_type(HDC_EMPTY);
 
     // get info, we need to get the obj addr for cycle tracking
     H5O_info_t h5_info_buf;

@@ -148,7 +148,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
         if (rank <= 1) {
             result.set_string(std::string(reinterpret_cast<const char*>(uda_data->byte_data())));
         } else if (rank == 2) {
-            result.set_type(LIST_ID);
+            result.set_type(HDC_LIST);
             auto array = dynamic_cast<uda::Array*>(uda_data);
             auto dims = array->dims();
             std::vector<char> vec = array->as<char>();

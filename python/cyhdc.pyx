@@ -80,7 +80,7 @@ cdef extern from "hdc.hpp":
 
         # typedef unsigned long hdc_flags_t;
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
-        # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
+        # void set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type)
         T as[T]() except +
         string as_string() except +
         vector[string] keys() except +
