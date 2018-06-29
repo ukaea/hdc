@@ -1450,3 +1450,42 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
     }
     return h;
 }
+
+hdc_data_t HDC::get_data()
+{
+    auto buffer = this->get_buffer();
+    hdc_data_t obj;
+    obj.type = this->header.type;
+    obj.flags = this->header.flags;
+    obj.ndim = this->header.ndim;
+    for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = this->header.shape[i];
+    obj.data = buffer+sizeof(hdc_header_t);
+    return obj;
+}
+
+hdc_data_t HDC::get_data(const std::string& path)
+{
+    return this->get(path).get_data();
+}
+
+void HDC::set_data(hdc_data_t obj)
+{
+    this->header.type = obj.type;
+    this->header.flags = obj.flags;
+    this->header.ndim = obj.ndim;
+    memset(this->header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+    this->header.data_size = hdc_sizeof(obj.type);
+    for (size_t i=0;i<this->header.ndim;i++) {
+        this->header.shape[i] = obj.shape[i];
+        this->header.data_size *= obj.shape[i];
+    }
+    this->header.buffer_size = this->header.data_size + sizeof(hdc_header_t);
+    char* buffer = new char[this->header.buffer_size];
+    memcpy(buffer,&(this->header),sizeof(hdc_header_t));
+    memcpy(buffer+sizeof(hdc_header_t),obj.data,this->header.data_size);
+};
+
+void HDC::set_data(const std::string& path, hdc_data_t obj)
+{
+    return this->get(path).set_data(obj);
+}

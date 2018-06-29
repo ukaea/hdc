@@ -56,6 +56,14 @@ struct hdc_header_t {
 //TODO Specify offsets in header, possibly make header of dynamic length.
 //TODO support external data
 
+struct hdc_data_t {
+    hdc_type_t  type;
+    hdc_flags_t flags;
+    size_t      ndim;
+    size_t*     shape;
+    char*       data;
+};
+
 struct hdc_t;
 
 #endif
