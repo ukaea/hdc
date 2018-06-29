@@ -54,7 +54,7 @@ typedef enum {
 #define HDCExternal       4lu
 #define HDCChildrenInitialized 8lu
 
-typedef unsigned long Flags;
+typedef unsigned long hdc_flags_t;
 
 struct header_t {
     size_t buffer_size;

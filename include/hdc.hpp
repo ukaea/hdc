@@ -124,7 +124,7 @@ public:
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data();
     /** Stores data in node's buffer */
-    template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
         memcpy(&header,buffer,sizeof(header_t));
@@ -154,11 +154,11 @@ public:
         }
     }
 
-    template<typename T> void set_data(int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(int _ndim, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         set_data(_ndim,_shape,_data,_flags);
     };
 
-    template<typename T> void set_data(const std::string& path, int _ndim, size_t* _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _ndim, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
@@ -166,13 +166,13 @@ public:
         get(path).set_data(_ndim, _shape, _data, _flags);
     }
 
-    template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault) {
-        DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> _data, Flags _flags = HDCDefault)"+to_string(_data[0]));
+    template<typename T> void set_data(initializer_list<T> _data, hdc_flags_t _flags = HDCDefault) {
+        DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> _data, hdc_flags_t _flags = HDCDefault)"+to_string(_data[0]));
         vector<T> vec = _data;
         set_data(1,{vec.size()},&vec[0],_flags);
     };
 
-    template<typename T> void set_data(const std::string& path, initializer_list<T> _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, initializer_list<T> _data, hdc_flags_t _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -181,7 +181,7 @@ public:
     }
 
 
-    template<typename T> void set_data(const std::string& path, int _ndim, initializer_list<size_t> _shape, T* _data, Flags _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _ndim, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         if(!has_child(path)) {
             HDC h;
             add_child(path, h);
@@ -246,11 +246,11 @@ public:
         auto h = get(path);
         get(path).set_string(str);
     }
-    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags = HDCDefault);
-    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
-    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags = HDCDefault);
+    void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {

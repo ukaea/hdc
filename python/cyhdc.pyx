@@ -78,7 +78,7 @@ cdef extern from "hdc.hpp":
         HDCStorage* get_storage() except +
         string get_uuid() except +
 
-        # typedef unsigned long Flags;
+        # typedef unsigned long hdc_flags_t;
         void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
         # void set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type)
         T as[T]() except +

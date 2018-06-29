@@ -177,59 +177,59 @@ bool hdc_has_child(struct hdc_t* tree, const char* path)
     return t->has_child((string)path);
 }
 
-void hdc_set_int8(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_int8(struct hdc_t* tree, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c(ndim, shape, data, INT8_ID, _flags);
     return;
 }
-//void set_data(int _ndim, size_t* _shape, void* _data, TypeID _type, Flags _flags = HDCDefault)
+//void set_data(int _ndim, size_t* _shape, void* _data, TypeID _type, hdc_flags_t _flags = HDCDefault)
 
 
 
-void hdc_set_double(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_double(struct hdc_t* tree, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c(ndim, shape, data, DOUBLE_ID, _flags);
     return;
 }
 
-void hdc_set_float(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_float(struct hdc_t* tree, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c(ndim, shape, data, FLOAT_ID, _flags);
     return;
 }
 
-void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_int32(struct hdc_t* tree, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c(ndim, shape, data, INT32_ID, _flags);
     return;
 }
 
-void hdc_set_int32_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_int32_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c((string)path, ndim, shape, data, INT32_ID, _flags);
     return;
 }
 
-void hdc_set_int64(struct hdc_t* tree, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_int64(struct hdc_t* tree, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c(ndim, shape, data, INT64_ID, _flags);
     return;
 }
 
-void hdc_set_int64_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_int64_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c((string)path, ndim, shape, data, INT64_ID, _flags);
     return;
 }
 
-void hdc_set_int8_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_int8_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c((string)path, ndim, shape, data, INT8_ID, _flags);
@@ -458,7 +458,7 @@ void hello()
     return;
 }
 
-void hdc_set_double_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, Flags _flags)
+void hdc_set_double_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c((string)path, ndim, shape, data, DOUBLE_ID, _flags);
@@ -488,7 +488,7 @@ void hdc_set_double_scalar(hdc_t* tree, double data)
 
 
 void hdc_set_float_path(struct hdc_t* tree, const char* path, int ndim, size_t* shape, void* data,
-                        Flags _flags UNUSED)
+                        hdc_flags_t _flags UNUSED)
 {
     HDC* t = (HDC*)tree->obj;
     t->set_data_c((string)path, ndim, shape, data, FLOAT_ID);

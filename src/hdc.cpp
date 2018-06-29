@@ -939,7 +939,7 @@ HDC* HDC::copy(int copy_arrays UNUSED)
     return new HDC(this);
 }
 
-void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags)
+void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, hdc_flags_t _flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _ndim, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
              hdc_type_str(static_cast<TypeID>(_type)).c_str());)
@@ -971,7 +971,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, size_t _type, Flags
     }
 }
 
-void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, Flags _flags)
+void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, size_t _type, hdc_flags_t _flags)
 {
     if (!has_child(path)) {
         HDC h;
@@ -980,7 +980,7 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _
     get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
 }
 
-void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags)
+void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _ndim, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
              hdc_type_str(static_cast<TypeID>(_type)).c_str());)
@@ -1012,7 +1012,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, size_t _type,
     }
 }
 
-void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, Flags _flags)
+void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, size_t _type, hdc_flags_t _flags)
 {
     if (!has_child(path)) {
         HDC h;
@@ -1022,7 +1022,7 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const v
 }
 
 void HDC::set_data_c(vector<boost::variant<size_t, std::string>> path, int _ndim, size_t* _shape, const void* _data,
-                     size_t _type, Flags _flags)
+                     size_t _type, hdc_flags_t _flags)
 {
     if (!has_child(path)) {
         HDC h;
