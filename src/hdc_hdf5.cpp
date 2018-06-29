@@ -57,14 +57,14 @@ void write_node(HDC h, H5File* file, std::string path)
         DataSpace edataspace(1, dims1);
         double edata[] = { NAN };
 
-        map_t* children;
+        hdc_map_t* children;
 
         switch (header.type) {
             case HDC_STRUCT:
                 children = h.get_children_ptr();
                 if (children != nullptr) {
                     Group* group = new Group(file->createGroup(path));
-                    map_t::nth_index<1>::type& ri = children->get<1>();
+                    hdc_map_t::nth_index<1>::type& ri = children->get<1>();
                     for (auto it = ri.begin(); it != ri.end(); ++it) {
                         auto key = it->key.c_str();
                         auto uuid = it->address.c_str();
@@ -83,7 +83,7 @@ void write_node(HDC h, H5File* file, std::string path)
                     } catch (FileIException) {
                         ref_group = file->createGroup(ref_group_name);
                     }
-                    map_t::nth_index<1>::type& ri = children->get<1>();
+                    hdc_map_t::nth_index<1>::type& ri = children->get<1>();
                     size_t n_child = children->size();
                     hobj_ref_t* wbuf = new hobj_ref_t[n_child];
                     size_t i = 0;

@@ -66,7 +66,6 @@ private:
     void delete_child(vector<boost::variant<size_t,std::string>> vs);
     HDC* get_ptr(vector<boost::variant<size_t,std::string>> vs);
     HDC get(vector<boost::variant<size_t,std::string>> vs);
-//     HDC get_single(boost::variant<size_t,std::string> key);
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool has_child(vector<boost::variant<size_t,std::string>> vs);
@@ -430,7 +429,7 @@ public:
     void grow(size_t extra_size);
     // allocator stuff
     bip::managed_external_buffer get_segment();
-    map_t* get_children_ptr();
+    hdc_map_t* get_children_ptr();
     void delete_data();
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
     // "static contructor" from void* HDC
@@ -442,7 +441,7 @@ public:
     // "deserialize from storage"
     static HDC* deserialize_HDC_string(const std::string& filename);
     static HDC from_json(const string& filename, const std::string& datapath = "");
-    static string map_to_json(map_t& children);
+    static string hdc_map_to_json(hdc_map_t& children);
     static char* buffer_grow(char* old_buffer, size_t extra_size);
     static HDC json_to_HDC(const ::Json::Value& root);
     static HDC from_json_string(const std::string& json_string);

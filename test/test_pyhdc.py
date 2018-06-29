@@ -118,7 +118,7 @@ def test_list_type():
     assert [x.to_python() for x in h] == test_list
 
 
-def test_map_type():
+def test_hdc_map_type():
     h = HDC()
     test_map = {"jedna": "one", "dva": "two"}
     h = HDC(test_map)

@@ -566,7 +566,7 @@ HDC HDC::from_json_string(const std::string& json_string)
 }
 
 /* Saves children to JSON strin in order to store tree hierarchy in KV stores*/
-string HDC::map_to_json(map_t& children)
+string HDC::hdc_map_to_json(hdc_map_t& children)
 {
     Json::Value root;
     //root["size"] = Json::UInt64(children.size());
