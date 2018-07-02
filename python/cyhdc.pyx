@@ -216,7 +216,7 @@ cdef class HDC:
         #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
-        if data.rank == 0:
+        if data.ndim == 0:
             # ascontiguousarray forces rank >0= 1
             data_view = data
         else:
@@ -229,19 +229,19 @@ cdef class HDC:
 
         # TODO support other types
         if np.issubdtype(data.dtype, np.bool_):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <bool*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <bool*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int32_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int32_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int64_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int64_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float32):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <float*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float64):
-            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <double*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, flags)
 
         else:
             NotImplementedError('Type not supported')
@@ -402,7 +402,7 @@ cdef class HDC:
         buffer.itemsize = itemsize
         # product(shape) * itemsize
         buffer.len = deref(self._thisptr).get_datasize()
-        buffer.rank = rank
+        buffer.ndim = rank
         # A new reference to the exporting object - for reference counting
         buffer.obj = self
         # An indicator of whether the buffer is read-only
