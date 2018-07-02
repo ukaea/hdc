@@ -121,6 +121,11 @@ void HDC_destroy_c();
 char** HDC_get_available_plugins_c();
 const char* hdc_serialize(struct hdc_t* tree);
 struct hdc_t* hdc_deserialize(const char* str);
+
+struct hdc_data_t hdc_get_data(struct hdc_t* tree, const char* path);
+void hdc_set_data(struct hdc_t* tree, const char* path, struct hdc_data_t data);
+
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

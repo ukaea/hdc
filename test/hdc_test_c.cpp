@@ -205,6 +205,27 @@ TEST_CASE("C_SliceManipulation", "[CHDC]")
     CHECK(strcmp(hdc_get_uuid(sl4), hdc_get_uuid(hdc_get_slice(h, 1))) == 0);
 }
 
+
+TEST_CASE("C_get_data", "[CHDC]")
+{
+    struct hdc_t* h = hdc_new_empty();
+    double array_in[4] = {1.1,2.2,3.3,4.4};
+    hdc_data_t data_in;
+    memset(&data_in, 0, sizeof(hdc_data_t));
+    data_in.ndim = 1;
+    data_in.shape[0] = 4;
+    data_in.type = HDC_DOUBLE;
+    data_in.flags = HDCDefault;
+    data_in.data = (char*)(&array_in);
+    hdc_set_data(h, "", data_in);
+    hdc_data_t data_out = hdc_get_data(h, "");
+    CHECK(data_in.ndim == data_out.ndim);
+    CHECK(data_in.type == data_out.type);
+    CHECK(data_in.flags == data_out.flags);
+    for (size_t i=0; i<HDC_MAX_DIMS; i++) CHECK(data_in.shape[i] == data_out.shape[i]);
+    hdc_delete(h);
+}
+
 //-----------------------------------------------------------------------------------------
 /*
 TEST_CASE("C_GetKeys","[CHDC]") {

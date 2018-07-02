@@ -909,7 +909,7 @@ intptr_t HDC::as_void_ptr()
 
 void HDC::dump()
 {
-    cout << to_json(0) << endl;
+    std::cout << to_json(0) << std::endl;
 }
 
 /** Serializes HDC to special json file*/
@@ -1465,7 +1465,12 @@ hdc_data_t HDC::get_data()
 
 hdc_data_t HDC::get_data(const std::string& path)
 {
-    return this->get(path).get_data();
+    if (path.empty())
+    {
+        return this->get_data();
+    } else {
+        return this->get(path).get_data();
+    }
 }
 
 void HDC::set_data(hdc_data_t obj)
@@ -1483,9 +1488,17 @@ void HDC::set_data(hdc_data_t obj)
     char* buffer = new char[this->header.buffer_size];
     memcpy(buffer,&(this->header),sizeof(hdc_header_t));
     memcpy(buffer+sizeof(hdc_header_t),obj.data,this->header.data_size);
+    storage->set(uuid, buffer, header.buffer_size);
+    // Now it is safe to
+    if (!storage->usesBuffersDirectly()) delete[] buffer;
 };
 
 void HDC::set_data(const std::string& path, hdc_data_t obj)
 {
-    return this->get(path).set_data(obj);
+    if (path.empty())
+    {
+        return this->set_data(obj);
+    } else {
+        return this->get(path).set_data(obj);
+    }
 }

@@ -19,6 +19,29 @@ int main() {
     // Dump to screen
     printf("Final dump:\n");
     hdc_dump(tree);
+
+// // // //     struct hdc_t* h = hdc_new_empty();
+// // // //
+// // // //     double array_in[4] = {1.1,2.2,3.3,4.4};
+// // // //
+// // // //     hdc_data_t data_in;
+// // // //     memset(&data_in, 0, sizeof(hdc_data_t));
+// // // //     data_in.ndim = 1;
+// // // //     data_in.shape[0] = 4;
+// // // //     data_in.type = HDC_DOUBLE;
+// // // //     data_in.flags = HDCDefault;
+// // // //     data_in.data = (char*)(&array_in);
+// // // //     hdc_set_data(h, "", data_in);
+// // // //     hdc_dump(h);
+// // // //     hdc_data_t data_out = hdc_get_data(h, "");
+// // // //     for (size_t i=0; i<HDC_MAX_DIMS; i++) printf("%d == %d\n",data_in.shape[i] == data_out.shape[i]);
+// // // //
+// // // //     double* array_out = (double*)(data_out.data);
+// // // //     for (size_t i=0; i<4; i++) CHECK(array_in[i] == array_out[i]);
+// // // //
+// // // //
+// // // //
+
     return 0;
 }
 

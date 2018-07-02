@@ -451,10 +451,12 @@ public:
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
     static HDC load(const std::string& str, const std::string& datapath="");
     HDCStorage* get_storage() {return this->storage; };
+
     hdc_data_t get_data();
     hdc_data_t get_data(const std::string& path);
     void set_data(hdc_data_t obj);
     void set_data(const std::string& path,hdc_data_t obj);
+
 };
 
 #endif // HDC_HPP

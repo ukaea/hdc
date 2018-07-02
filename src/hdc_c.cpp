@@ -769,6 +769,17 @@ struct hdc_t* hdc_deserialize(const char* str)
     return h;
 }
 
+hdc_data_t hdc_get_data(hdc_t* tree, const char* path)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->get_data(path);
+}
+
+void hdc_set_data(hdc_t* tree, const char* path, hdc_data_t data)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->set_data(path,data);
+}
 
 // end extern C
 }
