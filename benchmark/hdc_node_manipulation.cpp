@@ -118,7 +118,7 @@ static void BM_HDC_AppendSlicePreallocated(benchmark::State& state) {
 }
 BENCHMARK(BM_HDC_AppendSlicePreallocated)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-// Test has_child()
+// Test exists()
 static void BM_HDC_HasChildMultipleItems(benchmark::State& state) {
     int n = state.range(0);
     HDC* tree = new HDC();
@@ -126,7 +126,7 @@ static void BM_HDC_HasChildMultipleItems(benchmark::State& state) {
     while (state.KeepRunning()) {
         // measure
         for (int i=0;i<100;i++) {
-            bool has_child = tree->has_child(std::to_string(i*n/100));
+            bool exists = tree->exists(std::to_string(i*n/100));
         }
     }
     state.SetItemsProcessed(100 * state.iterations());

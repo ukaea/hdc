@@ -66,8 +66,8 @@ struct hdc_t* init_hdc_data() {
     struct hdc_t* node = hdc_get(subtree,"int_array");
 
     // Ask whether child exists
-    printf("has_child: %d (should be true)\n", hdc_has_child(tree, "groupA/data/int_array"));
-    printf("has_child: %d (should be false)\n", hdc_has_child(tree, "groupA/data/this_does_not_exist"));
+    printf("exists: %d (should be true)\n", hdc_exists(tree, "groupA/data/int_array"));
+    printf("exists: %d (should be false)\n", hdc_exists(tree, "groupA/data/this_does_not_exist"));
 
     // Delete node
     hdc_delete_child(tree,"GroupA/data/junk");

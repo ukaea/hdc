@@ -383,12 +383,12 @@ void HDC::print_info()
 
 //---------------------------- Tree manipulation -----------------------------------
 
-bool HDC::has_child(const std::string& path)
+bool HDC::exists(const std::string& path)
 {
-    return has_child(split(path));
+    return exists(split(path));
 }
 
-bool HDC::has_child_single(boost::variant<size_t, std::string> index)
+bool HDC::exists_single(boost::variant<size_t, std::string> index)
 {
     auto children = get_children_ptr();
     if (children == nullptr) return false;
@@ -399,10 +399,10 @@ bool HDC::has_child_single(boost::variant<size_t, std::string> index)
     }
 }
 
-bool HDC::has_child(vector<boost::variant<size_t, std::string>> vs)
+bool HDC::exists(vector<boost::variant<size_t, std::string>> vs)
 {
     D(
-            printf("has_child(");
+            printf("exists(");
             for (size_t i = 0; i < vs.size() - 1; i++) {
                 cout << vs[i] << "/";
             }
@@ -424,7 +424,7 @@ bool HDC::has_child(vector<boost::variant<size_t, std::string>> vs)
         if (children->count(boost::get<std::string>(first).c_str()) == 0) return false;
     }
     if (vs.empty()) {
-        return has_child_single(first);
+        return exists_single(first);
     } else {
         if (first.type() == typeid(size_t)) {
             try {
@@ -432,9 +432,9 @@ bool HDC::has_child(vector<boost::variant<size_t, std::string>> vs)
                 if (children->size() <= index) return false;
                 auto it = children->get<by_index>()[index];
                 HDC child(storage, it.address.c_str());
-                return child.has_child(vs);
+                return child.exists(vs);
             } catch (std::exception e) {
-                std::cerr << "has_child(): Caught exception: index" << "\n";
+                std::cerr << "exists(): Caught exception: index" << "\n";
                 std::cerr << e.what() << std::endl;
                 return false;
             }
@@ -443,10 +443,10 @@ bool HDC::has_child(vector<boost::variant<size_t, std::string>> vs)
                 auto it = children->find(boost::get<std::string>(first).c_str());
                 if (it != children->end()) {
                     HDC ch(storage, it->address.c_str());
-                    return ch.has_child(vs);
+                    return ch.exists(vs);
                 } else { return false; } // TODO Create error HDC obj here???
             } catch (...) {
-                std::cerr << "has_child(): Caught exception: string" << "\n";
+                std::cerr << "exists(): Caught exception: string" << "\n";
                 return false;
             }
         }
@@ -470,7 +470,7 @@ void HDC::add_child(vector<boost::variant<size_t, std::string>> vs, HDC& n)
         HDC h;
         if (first.type() == typeid(size_t)) {
             auto index = boost::get<size_t>(first);
-            if (!has_child_single(index)) insert_slice(index, h);
+            if (!exists_single(index)) insert_slice(index, h);
             get_slice(boost::get<size_t>(first)).add_child(vs, n);
         } else {
             add_child_single(boost::get<std::string>(first), h);
@@ -479,7 +479,7 @@ void HDC::add_child(vector<boost::variant<size_t, std::string>> vs, HDC& n)
     } else {
         if (first.type() == typeid(size_t)) {
             auto index = boost::get<size_t>(first);
-            if (!has_child_single(index)) insert_slice(index, n);
+            if (!exists_single(index)) insert_slice(index, n);
         } else {
             add_child_single(boost::get<std::string>(first), n);
         }
@@ -603,7 +603,7 @@ void HDC::delete_child(vector<boost::variant<size_t, std::string>> vs)
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
-    if (!has_child(vs) || vs.empty()) {
+    if (!exists(vs) || vs.empty()) {
         return;
     }
     auto first = vs[0];
@@ -834,7 +834,7 @@ void HDC::set_child(vector<boost::variant<size_t, std::string>> vs, HDC* n)
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
-    if (!has_child(vs)) { // Nothing to set
+    if (!exists(vs)) { // Nothing to set
         cout << "Nothing to set, maybe you want to add..." << endl;
         return;
     }
@@ -973,7 +973,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type, h
 
 void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
-    if (!has_child(path)) {
+    if (!exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
@@ -1014,7 +1014,7 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, hdc_type_t _t
 
 void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
-    if (!has_child(path)) {
+    if (!exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
@@ -1024,7 +1024,7 @@ void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const v
 void HDC::set_data_c(vector<boost::variant<size_t, std::string>> path, int _ndim, size_t* _shape, const void* _data,
                      hdc_type_t _type, hdc_flags_t _flags)
 {
-    if (!has_child(path)) {
+    if (!exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }

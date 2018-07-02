@@ -187,12 +187,12 @@ module hdc_fortran
             character(kind=c_char), intent(in) :: path(*)
         end subroutine c_hdc_delete_child
         !> Returns true if subtree with given path exists. This is interface to C.
-        function c_hdc_has_child(obj, path) result(res) bind(c,name="hdc_has_child")
+        function c_hdc_exists(obj, path) result(res) bind(c,name="hdc_exists")
             import
             type(hdc_t), value :: obj
             character(kind=c_char), intent(in) :: path(*)
             logical(kind=c_bool) :: res ! change this to c_bool later
-        end function c_hdc_has_child
+        end function c_hdc_exists
 
         !> Sets array of int8. This is interface to C.
         subroutine c_hdc_set_int8(obj, ndim, shape_, data, flags) bind(c,name="hdc_set_int8")
@@ -717,7 +717,7 @@ module hdc_fortran
 !         module procedure hdc_new_size
 !     end interface hdc_new
 !
-    public :: hello, hdc_new_empty, hdc_new_size, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_has_child, hdc_set_double_ad, &
+    public :: hello, hdc_new_empty, hdc_new_size, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_exists, hdc_set_double_ad, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_pokus, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
     hdc_set_double_1d, hdc_set_double_1d_path, hdc_get_ndim, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
@@ -745,13 +745,13 @@ contains
         call c_hdc_delete_child(this, trim(path)//c_null_char)
     end subroutine hdc_delete_child
 
-    function hdc_has_child(this, path) result(res)
+    function hdc_exists(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         logical(kind=c_bool) :: res
-        res = c_hdc_has_child(this, trim(path)//c_null_char)
-    end function hdc_has_child
+        res = c_hdc_exists(this, trim(path)//c_null_char)
+    end function hdc_exists
 
     function hdc_get_ndim(this) result(res)
         use iso_c_binding

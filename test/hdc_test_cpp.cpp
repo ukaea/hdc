@@ -29,7 +29,7 @@ TEST_CASE("EmptyNode", "[HDC]")
     CHECK(1 == h.get_ndim());
     CHECK(HDC_EMPTY == h.get_type());
     CHECK(strcmp("null", h.get_type_str()) == 0);
-    CHECK(false == h.has_child("aaa"));
+    CHECK(false == h.exists("aaa"));
 }
 
 TEST_CASE("EmptyNodePtr", "[HDC]")
@@ -39,7 +39,7 @@ TEST_CASE("EmptyNodePtr", "[HDC]")
     CHECK(1 == h->get_ndim());
     CHECK(HDC_EMPTY == h->get_type());
     CHECK(strcmp("null", h->get_type_str()) == 0);
-    CHECK(false == h->has_child("aaa"));
+    CHECK(false == h->exists("aaa"));
     delete h;
 }
 
@@ -83,41 +83,41 @@ TEST_CASE("NodeManipulation", "[HDC]")
     tree->add_child("aaa/bbb", n1);
     CHECK(HDC_STRUCT == tree->get_type());
     CHECK(strcmp("struct", tree->get_type_str()) == 0);
-    CHECK(true == tree->has_child("aaa/bbb"));
-    CHECK(true == tree->has_child("aaa"));
+    CHECK(true == tree->exists("aaa/bbb"));
+    CHECK(true == tree->exists("aaa"));
     CHECK(strcmp(n1->get_uuid().c_str(), tree->get_ptr("aaa/bbb")->get_uuid().c_str()) == 0);
     CHECK(strcmp(n2->get_uuid().c_str(), tree->get_ptr("aaa/bbb")->get_uuid().c_str()) != 0);
     // Try add and get index
     HDC* n3 = new HDC();
     tree->add_child("aaa/list[0]/ddd", n3);
-    CHECK(tree->has_child("aaa/list[0]/ddd") == true);
+    CHECK(tree->exists("aaa/list[0]/ddd") == true);
     tree->add_child("aaa/list[1]", new HDC());
     tree->add_child("aaa/list[0]/eee", new HDC());
     HDC* list = tree->get_ptr("aaa/list");
     CHECK(HDC_LIST == list->get_type());
     HDC h = tree->get("aaa/list[0]/ddd");
-    CHECK(true == tree->has_child("aaa/list[0]/ddd"));
-    CHECK(true == tree->has_child("aaa/list[0]/eee"));
+    CHECK(true == tree->exists("aaa/list[0]/ddd"));
+    CHECK(true == tree->exists("aaa/list[0]/eee"));
     tree->get_ptr("aaa/list")->get_slice_ptr(0)->add_child("kkk", new HDC());
     CHECK(2LU == tree->get_ptr("aaa/list")->get_shape()[0]);
-    CHECK(true == tree->get_ptr("aaa/list")->get_slice_ptr(0)->has_child("ddd"));
-    CHECK(true == tree->get_ptr("aaa/list")->get_slice_ptr(0)->has_child("eee"));
+    CHECK(true == tree->get_ptr("aaa/list")->get_slice_ptr(0)->exists("ddd"));
+    CHECK(true == tree->get_ptr("aaa/list")->get_slice_ptr(0)->exists("eee"));
     // Try subtree
     HDC* sub = tree->get_ptr("aaa");
-    CHECK(true == sub->has_child("bbb"));
+    CHECK(true == sub->exists("bbb"));
     CHECK(strcmp(n1->get_uuid().c_str(), sub->get_ptr("bbb")->get_uuid().c_str()) == 0);
     // Test set
     tree->set_child("aaa/bbb", n2);
-    CHECK(true == sub->has_child("bbb"));
+    CHECK(true == sub->exists("bbb"));
     CHECK(strcmp(n2->get_uuid().c_str(), sub->get_ptr("bbb")->get_uuid().c_str()) == 0);
     CHECK(strcmp(n1->get_uuid().c_str(), tree->get_ptr("aaa/bbb")->get_uuid().c_str()) != 0);
     // Test delete
     tree->delete_child("aaa/bbb");
-    CHECK(false == tree->has_child("aaa/bbb"));
-    CHECK(true == tree->has_child("aaa"));
+    CHECK(false == tree->exists("aaa/bbb"));
+    CHECK(true == tree->exists("aaa"));
     tree->add_child("aaa/bbb", n1);
     tree->delete_child("aaa");
-    CHECK(false == tree->has_child("aaa"));
+    CHECK(false == tree->exists("aaa"));
     // Try add to empty path
     HDC t;
     HDC d;
@@ -320,7 +320,7 @@ TEST_CASE("GetKeys", "[HDC]")
     tree.add_child("ccc/sss", h3);
     CHECK(3u == tree.keys().size());
     vector<string> keys = tree.keys();
-    for (size_t i = 0; i < keys.size(); i++) CHECK(true == tree.has_child(keys[i]));
+    for (size_t i = 0; i < keys.size(); i++) CHECK(true == tree.exists(keys[i]));
 }
 
 #define PREPARE_TREE()                                                                              \

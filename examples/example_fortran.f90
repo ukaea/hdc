@@ -39,7 +39,7 @@ contains
         node = hdc_get_child(subtree,"ccc")
 
         ! Ask whether child exists
-        print *,"has_child: ", hdc_has_child(tree,"aaa/bbb/ccc")
+        print *,"exists: ", hdc_exists(tree,"aaa/bbb/ccc")
 
         ! Delete subtree
         call hdc_delete_child(tree,"aaa/eee")

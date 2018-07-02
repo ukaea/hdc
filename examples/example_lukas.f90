@@ -74,14 +74,14 @@ contains
 
         i = -1
         !  ii = -1
-        if (hdc_has_child(hdc_test, "in/param_i")) then
+        if (hdc_exists(hdc_test, "in/param_i")) then
             call hdc_get(hdc_test, "in/param_i", i) ! doesn't work for some reason
             ! call hdc_as_int32_path_sub(hdc_test, "in/param_i", i) ! does work
             i = hdc_as_int32(hdc_test, "in/param_i") ! NO
 !             print *, hdc_as_double(hdc_test, "in/param_d")
         end if
 
-        if (hdc_has_child(hdc_test, "in/arrays/A1")) then
+        if (hdc_exists(hdc_test, "in/arrays/A1")) then
             call hdc_get(hdc_test, "in/arrays/A1", arr_p)
             ! arr_p = hdc_as_int32_1d(hdc_test, "in/arrays/A1") ! doesn't work ether, even for pointer... 
             ! call hdc_as_double_1d

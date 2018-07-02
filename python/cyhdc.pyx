@@ -67,7 +67,7 @@ cdef extern from "hdc.hpp":
         void add_child(string path, CppHDC* n) except +
         CppHDC* get_slice_ptr(size_t i) except +
         CppHDC* get_ptr(string path) except +
-        bool has_child(string path) except +
+        bool exists(string path) except +
         void set_string(string data) except +
         void print_info() except +
         size_t get_type() except +
@@ -124,7 +124,7 @@ cdef class HDC:
 
     def __contains__(self, key):
         if isinstance(key, six.string_types):
-            return deref(self._thisptr).has_child(key.encode())
+            return deref(self._thisptr).exists(key.encode())
         else:
             raise ValueError('key must be a string')
 
@@ -145,7 +145,7 @@ cdef class HDC:
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
             ckey = key.encode()
-            if not deref(self._thisptr).has_child(ckey):
+            if not deref(self._thisptr).exists(ckey):
                 raise KeyError('{} key not found'.format(key))
             res = <HDC> self.__class__()
             # TODO move to constructor

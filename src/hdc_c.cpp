@@ -171,10 +171,10 @@ void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n)
     return;
 }
 
-bool hdc_has_child(struct hdc_t* tree, const char* path)
+bool hdc_exists(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->has_child((string)path);
+    return t->exists((string)path);
 }
 
 void hdc_set_int8(struct hdc_t* tree, int ndim, size_t* shape, void* data, hdc_flags_t _flags)

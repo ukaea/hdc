@@ -14,7 +14,7 @@ TEST_CASE("C_EmptyNode", "[CHDC]")
     CHECK(1 == hdc_get_ndim(h));
     CHECK(HDC_EMPTY == hdc_get_type(h));
     CHECK(strcmp("null", hdc_get_type_str(h)) == 0);
-    CHECK(false == hdc_has_child(h, "aaa"));
+    CHECK(false == hdc_exists(h, "aaa"));
     hdc_delete(h);
 }
 
@@ -68,27 +68,27 @@ TEST_CASE("C_NodeManipulation", "[CHDC]")
     hdc_add_child(tree, "aaa/bbb", n1);
     CHECK(HDC_STRUCT == hdc_get_type(tree));
     CHECK(strcmp("struct", hdc_get_type_str(tree)) == 0);
-    CHECK(true == hdc_has_child(tree, "aaa/bbb"));
-    CHECK(true == hdc_has_child(tree, "aaa"));
+    CHECK(true == hdc_exists(tree, "aaa/bbb"));
+    CHECK(true == hdc_exists(tree, "aaa"));
     struct hdc_t* tmp = hdc_get(tree, "aaa/bbb");
     CHECK(strcmp(hdc_get_uuid(n1), hdc_get_uuid(tmp)) == 0);
     CHECK(strcmp(hdc_get_uuid(n2), hdc_get_uuid(hdc_get(tree, "aaa/bbb"))) != 0);
     // Try subtree
     struct hdc_t* sub = hdc_get(tree, "aaa");
-    CHECK(true == hdc_has_child(sub, "bbb"));
+    CHECK(true == hdc_exists(sub, "bbb"));
     CHECK(strcmp(hdc_get_uuid(n1), hdc_get_uuid(hdc_get(sub, "bbb"))) == 0);
     // Test set
     hdc_set_child(tree, "aaa/bbb", n2);
-    CHECK(true == hdc_has_child(sub, "bbb"));
+    CHECK(true == hdc_exists(sub, "bbb"));
     CHECK(strcmp(hdc_get_uuid(n2), hdc_get_uuid(hdc_get(sub, "bbb"))) == 0);
     CHECK(strcmp(hdc_get_uuid(n1), hdc_get_uuid(hdc_get(tree, "aaa/bbb"))) != 0);
     // Test delete
     hdc_delete_child(tree, "aaa/bbb");
-    CHECK(false == hdc_has_child(tree, "aaa/bbb"));
-    CHECK(true == hdc_has_child(tree, "aaa"));
+    CHECK(false == hdc_exists(tree, "aaa/bbb"));
+    CHECK(true == hdc_exists(tree, "aaa"));
     hdc_add_child(tree, "aaa/bbb", n1);
     hdc_delete_child(tree, "aaa");
-    CHECK(false == hdc_has_child(tree, "aaa"));
+    CHECK(false == hdc_exists(tree, "aaa"));
     hdc_delete(tree);
     hdc_delete(n1);
     hdc_delete(sub);
@@ -242,6 +242,6 @@ TEST_CASE("C_GetKeys","[CHDC]") {
     tree->add_child("ccc/sss",new HDC());
     CHECK(3u == tree->keys().size());
     vector<string> keys = tree->keys();
-    for (size_t i=0;i<keys.size();i++) CHECK(true,tree->has_child(keys[i]));
+    for (size_t i=0;i<keys.size();i++) CHECK(true,tree->exists(keys[i]));
 }
 */

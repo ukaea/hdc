@@ -68,8 +68,8 @@ private:
     HDC get(vector<boost::variant<size_t,std::string>> vs);
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
-    bool has_child(vector<boost::variant<size_t,std::string>> vs);
-    bool has_child_single(boost::variant<size_t,std::string> index);
+    bool exists(vector<boost::variant<size_t,std::string>> vs);
+    bool exists_single(boost::variant<size_t,std::string> index);
     void add_child_single(const std::string& path, HDC& n);
 //     void add_child_single(const boost::variant<size_t,std::string>& path, HDC& n);
 public:
@@ -158,7 +158,7 @@ public:
     };
 
     template<typename T> void set_data(const std::string& path, int _ndim, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
         }
@@ -172,7 +172,7 @@ public:
     };
 
     template<typename T> void set_data(const std::string& path, initializer_list<T> _data, hdc_flags_t _flags = HDCDefault) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
@@ -181,7 +181,7 @@ public:
 
 
     template<typename T> void set_data(const std::string& path, int _ndim, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
@@ -204,7 +204,7 @@ public:
     /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
     template <typename T> void set_data(const std::string& path, vector<T> data)
     {
-        if (!this->has_child(path)) {
+        if (!this->exists(path)) {
             HDC h;
             this->add_child(path, h);
             DEBUG_STDOUT("\""+path+"\" not found, adding...\n");
@@ -231,14 +231,14 @@ public:
     };
 
     void set_string(const std::string& path, string str) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
         }
         get(path).set_string(str);
     }
     void set_string(std::vector <boost::variant<size_t,std::string>> path, string str) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
         }
@@ -277,7 +277,7 @@ public:
     }
     template <typename T>
     void set_data(const std::string& path, T data) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
@@ -285,7 +285,7 @@ public:
     }
 
     void set_data(const std::string& path, const unsigned char* data, hdc_type_t _type) {
-        if(!has_child(path)) {
+        if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
@@ -320,7 +320,7 @@ public:
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
-    bool has_child(const std::string& path);
+    bool exists(const std::string& path);
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */

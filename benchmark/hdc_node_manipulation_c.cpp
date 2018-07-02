@@ -130,7 +130,7 @@ static void BM_C_HDC_AppendSlicePreallocated(benchmark::State& state) {
 }
 BENCHMARK(BM_C_HDC_AppendSlicePreallocated)->RangeMultiplier(2)->Range(1024,1024<<5);
 
-// Test has_child()
+// Test exists()
 static void BM_C_HDC_HasChildMultipleItems(benchmark::State& state) {
     int n = state.range(0);
     struct hdc_t* tree = hdc_new_empty();
@@ -140,7 +140,7 @@ static void BM_C_HDC_HasChildMultipleItems(benchmark::State& state) {
         // measure
         for (int i=0;i<100;i++) {
             sprintf(cpath,"%d",i*n/100);
-            bool has_child = hdc_has_child(tree,cpath);
+            bool exists = hdc_exists(tree,cpath);
         }
     }
     state.SetItemsProcessed(100 * state.iterations());

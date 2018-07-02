@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
     HDC node = subtree.get("ccc");
 
     // Ask whether child exists
-    cout << "has_child: " << tree.has_child("aaa/bbb/ccc") << endl;
+    cout << "exists: " << tree.exists("aaa/bbb/ccc") << endl;
 
     // Delete subtree
     tree.delete_child("aaa/eee");
