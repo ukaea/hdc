@@ -45,7 +45,7 @@ struct hdc_header_t {
     hdc_type_t  type;
     hdc_flags_t flags;
     size_t      shape[HDC_MAX_DIMS];
-    size_t      ndim;
+    size_t      rank;
     size_t      pad; // Padding
 };
 //} __attribute__((packed));
@@ -59,7 +59,7 @@ struct hdc_header_t {
 struct hdc_data_t {
     hdc_type_t  type;
     hdc_flags_t flags;
-    size_t      ndim;
+    size_t      rank;
     size_t      shape[HDC_MAX_DIMS];
     char*       data;
 };

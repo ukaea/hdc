@@ -73,14 +73,14 @@ cdef extern from "hdc.hpp":
         size_t get_type() except +
         string get_type_str() except +
         intptr_t as_void_ptr() except +
-        int8_t get_ndim() except +
+        int8_t get_rank() except +
         size_t* get_shape() except +
         HDCStorage* get_storage() except +
         string get_uuid() except +
 
         # typedef unsigned long hdc_flags_t;
-        void set_data[T](int _ndim, size_t* _shape, T* _data, unsigned long _flags) except +
-        # void set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type)
+        void set_data[T](int _rank, size_t* _shape, T* _data, unsigned long _flags) except +
+        # void set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type)
         T as[T]() except +
         string as_string() except +
         vector[string] keys() except +
@@ -216,8 +216,8 @@ cdef class HDC:
         #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
         # data_view = np.require(data, requirements=('C', 'O'))
-        if data.ndim == 0:
-            # ascontiguousarray forces ndim >0= 1
+        if data.rank == 0:
+            # ascontiguousarray forces rank >0= 1
             data_view = data
         else:
             # require contiguous C-array
@@ -229,19 +229,19 @@ cdef class HDC:
 
         # TODO support other types
         if np.issubdtype(data.dtype, np.bool_):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <bool*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <bool*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int32_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int32_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int64_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <int64_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <float*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.rank, <size_t*> data_view.shape, <double*> data_view.data, flags)
 
         else:
             NotImplementedError('Type not supported')
@@ -352,9 +352,9 @@ cdef class HDC:
 
         cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
         cdef vector[size_t] strides = deref(self._thisptr).get_strides()
-        cdef int ndim = deref(self._thisptr).get_ndim()
+        cdef int rank = deref(self._thisptr).get_rank()
         cdef Py_ssize_t strides_buf[10]
-        for i in range(ndim):
+        for i in range(rank):
             strides_buf[i] = strides[i]
         buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
@@ -402,7 +402,7 @@ cdef class HDC:
         buffer.itemsize = itemsize
         # product(shape) * itemsize
         buffer.len = deref(self._thisptr).get_datasize()
-        buffer.ndim = ndim
+        buffer.rank = rank
         # A new reference to the exporting object - for reference counting
         buffer.obj = self
         # An indicator of whether the buffer is read-only
@@ -423,9 +423,9 @@ cdef class HDC:
 
     @property
     def shape(self):
-        cdef int ndim = deref(self._thisptr).get_ndim()
+        cdef int rank = deref(self._thisptr).get_rank()
         cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
-        return tuple((shape[i] for i in range(ndim)))
+        return tuple((shape[i] for i in range(rank)))
 
     def __releasebuffer__(self, Py_buffer *buffer):
         pass

@@ -49,10 +49,10 @@ int main(int argc, const char* argv[])
     tree.set_data("aaa/bbb/ccc", 1, shape, array);
 
     // Ask for some data details, use subtree to shorten the path
-    int32_t ndim2 = node.get_ndim();
+    int32_t rank2 = node.get_rank();
     size_t* shape2 = node.get_shape();
-    cout << "Dimension: " << (int)ndim2 << endl << "Shape: ";
-    for (int i = 0; i < ndim2; i++) cout << (int)shape2[i] << " ";
+    cout << "Dimension: " << (int)rank2 << endl << "Shape: ";
+    for (int i = 0; i < rank2; i++) cout << (int)shape2[i] << " ";
     cout << endl;
     cout << "dtype: " << node.get_type_str() << endl;
     // Get data back from tree

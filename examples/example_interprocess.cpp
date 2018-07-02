@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
         tree.set_data("aaa/bbb/ccc",1,shape,array);
 
         // Ask for some data details, use subtree to shorten the path
-//        int32_t ndim2 = node.get_ndim();
+//        int32_t rank2 = node.get_rank();
 //        size_t* shape2 = node.get_shape();
         // Get data back from tree
 //        int32_t* array2 = node.as<int32_t*>();

@@ -35,7 +35,7 @@ contains
         call hdc_copy(equilibriumin, distsourceout)
 
         !UAL do i=1,size(equilibriumin)
-        !HDC we assume here that ndim = 1
+        !HDC we assume here that rank = 1
 
         equilibrium_i = equilibriumin
         distsource_i = distsourceout

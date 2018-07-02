@@ -202,7 +202,7 @@ HDC::HDC(size_t _data_size)
     memset(&header, 0, sizeof(hdc_header_t));
     header.buffer_size = _data_size + sizeof(hdc_header_t);
     header.data_size = _data_size;
-    header.ndim = 1;
+    header.rank = 1;
 
     if (global_storage == nullptr) {
         //HDC::init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
@@ -229,20 +229,20 @@ HDC::HDC() : HDC(0lu)
 {};
 
 /** Creates empty HDC with specified type and shape */
-HDC::HDC(int _ndim, size_t* _shape, hdc_type_t _type, long _flags)
+HDC::HDC(int _rank, size_t* _shape, hdc_type_t _type, long _flags)
 {
-    if (_ndim >= HDC_MAX_DIMS) {
-        throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(_ndim));
+    if (_rank >= HDC_MAX_DIMS) {
+        throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(_rank));
     }
     size_t elem_size = 1;
     memset(&header, 0, sizeof(hdc_header_t));
-    for (int i = 0; i < _ndim; i++) {
+    for (int i = 0; i < _rank; i++) {
         header.shape[i] = _shape[i];
         elem_size *= _shape[i];
     }
     header.type = _type;
     header.flags = _flags;
-    header.ndim = _ndim;
+    header.rank = _rank;
     header.data_size = elem_size * hdc_sizeof(_type);
     header.buffer_size = header.data_size + sizeof(hdc_header_t);
     char* buffer = new char[header.buffer_size];
@@ -369,7 +369,7 @@ bool HDC::is_fortranorder()
 void HDC::print_info()
 {
     printf("Size:\t\t%zu\n", header.buffer_size);
-    printf("NDim:\t\t%d\n", get_ndim());
+    printf("NDim:\t\t%d\n", get_rank());
     printf("Shape:\t\t");
     for (int i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", get_shape()[i]);
     printf("\n");
@@ -939,15 +939,15 @@ HDC* HDC::copy(int copy_arrays UNUSED)
     return new HDC(this);
 }
 
-void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
+void HDC::set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
-    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _ndim, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
+    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _rank, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
              hdc_type_str(static_cast<hdc_type_t>(_type)).c_str());)
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
-    for (int i = 0; i < _ndim; i++) data_size *= _shape[i];
+    for (int i = 0; i < _rank; i++) data_size *= _shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header.buffer_size == buffer_size) {
         storage->lock(uuid);
@@ -959,9 +959,9 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type, h
         header.data_size = data_size;
         header.flags = _flags;
         memset(header.shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-        for (int i = 0; i < _ndim; i++) header.shape[i] = _shape[i];
+        for (int i = 0; i < _rank; i++) header.shape[i] = _shape[i];
         header.type = static_cast<hdc_type_t>(_type);
-        header.ndim = _ndim;
+        header.rank = _rank;
         char* buffer = new char[header.buffer_size];
         memcpy(buffer, &header, sizeof(hdc_header_t));
         memcpy(buffer + sizeof(hdc_header_t), _data, header.data_size);
@@ -971,24 +971,24 @@ void HDC::set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type, h
     }
 }
 
-void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
+void HDC::set_data_c(const std::string& path, int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
     if (!exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
+    get(path).set_data_c(_rank, _shape, _data, _type, _flags);
 }
 
-void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)
+void HDC::set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
-    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _ndim, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
+    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _rank, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
              hdc_type_str(static_cast<hdc_type_t>(_type)).c_str());)
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
-    for (int i = 0; i < _ndim; i++) data_size *= _shape[i];
+    for (int i = 0; i < _rank; i++) data_size *= _shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header.buffer_size == buffer_size) {
         storage->lock(uuid);
@@ -1000,9 +1000,9 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, hdc_type_t _t
         header.data_size = data_size;
         header.flags = _flags;
         memset(header.shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-        for (int i = 0; i < _ndim; i++) header.shape[i] = _shape[i];
+        for (int i = 0; i < _rank; i++) header.shape[i] = _shape[i];
         header.type = static_cast<hdc_type_t>(_type);
-        header.ndim = _ndim;
+        header.rank = _rank;
         char* buffer = new char[header.buffer_size];
         memcpy(buffer, &header, sizeof(hdc_header_t));
         memcpy(buffer + sizeof(hdc_header_t), _data, header.data_size);
@@ -1012,23 +1012,23 @@ void HDC::set_data_c(int _ndim, size_t* _shape, const void* _data, hdc_type_t _t
     }
 }
 
-void HDC::set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)
+void HDC::set_data_c(const std::string& path, int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
     if (!exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
+    get(path).set_data_c(_rank, _shape, _data, _type, _flags);
 }
 
-void HDC::set_data_c(vector<boost::variant<size_t, std::string>> path, int _ndim, size_t* _shape, const void* _data,
+void HDC::set_data_c(vector<boost::variant<size_t, std::string>> path, int _rank, size_t* _shape, const void* _data,
                      hdc_type_t _type, hdc_flags_t _flags)
 {
     if (!exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get(path).set_data_c(_ndim, _shape, _data, _type, _flags);
+    get(path).set_data_c(_rank, _shape, _data, _type, _flags);
 }
 
 void HDC::insert_slice(size_t i, HDC* h)
@@ -1189,10 +1189,10 @@ string HDC::get_datashape_str()
     throw HDCException("get_datashape_str() is not implemented yet.");
 }
 
-int HDC::get_ndim()
+int HDC::get_rank()
 {
     memcpy(&header, storage->get(uuid), sizeof(hdc_header_t)); // TODO: do this in more sophisticately
-    return header.ndim;
+    return header.rank;
 }
 
 size_t* HDC::get_shape()
@@ -1210,7 +1210,7 @@ std::vector<size_t> HDC::get_strides()
     size_t elem_size = hdc_sizeof(static_cast<hdc_type_t>(header.type));
     size_t last_stride;
     if (is_fortranorder()) {
-        for (size_t i = 0; i < header.ndim; ++i) {
+        for (size_t i = 0; i < header.rank; ++i) {
             if (i == 0) {
                 last_stride = elem_size;
             } else {
@@ -1219,11 +1219,11 @@ std::vector<size_t> HDC::get_strides()
             strides.insert(strides.end(), last_stride);
         }
     } else {
-        for (size_t i = 0; i < header.ndim; ++i) {
+        for (size_t i = 0; i < header.rank; ++i) {
             if (i == 0) {
                 last_stride = elem_size;
             } else {
-                last_stride = header.shape[header.ndim - i] * last_stride;
+                last_stride = header.shape[header.rank - i] * last_stride;
             }
             strides.insert(strides.begin(), last_stride);
         }
@@ -1231,11 +1231,11 @@ std::vector<size_t> HDC::get_strides()
     return strides;
 }
 
-int HDC::get_ndim(const std::string& path)
+int HDC::get_rank(const std::string& path)
 {
     //TODO: make more error-proof - add has check -> make it as function???
     memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
-    return get(path).get_ndim();
+    return get(path).get_rank();
 }
 
 size_t* HDC::get_shape(const std::string& path)
@@ -1457,7 +1457,7 @@ hdc_data_t HDC::get_data()
     hdc_data_t obj;
     obj.type = this->header.type;
     obj.flags = this->header.flags;
-    obj.ndim = this->header.ndim;
+    obj.rank = this->header.rank;
     for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = this->header.shape[i];
     obj.data = buffer+sizeof(hdc_header_t);
     return obj;
@@ -1477,10 +1477,10 @@ void HDC::set_data(hdc_data_t obj)
 {
     this->header.type = obj.type;
     this->header.flags = obj.flags;
-    this->header.ndim = obj.ndim;
+    this->header.rank = obj.rank;
     memset(this->header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
     this->header.data_size = hdc_sizeof(obj.type);
-    for (size_t i=0;i<this->header.ndim;i++) {
+    for (size_t i=0;i<this->header.rank;i++) {
         this->header.shape[i] = obj.shape[i];
         this->header.data_size *= obj.shape[i];
     }

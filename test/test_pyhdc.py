@@ -168,9 +168,9 @@ def test_1():
     # assert tree['sub']['sub'] == tree['sub/sub']
 
 
-def random_array(low=0, high=1e10, ndim=1, maxsize=20, dtype=np.float_):
+def random_array(low=0, high=1e10, rank=1, maxsize=20, dtype=np.float_):
     # random size and data
-    size = np.random.random_integers(1, maxsize, ndim)
+    size = np.random.random_integers(1, maxsize, rank)
     a, b = np.random.random_integers(low, high, size=(2, ))
     data = ((high - low) * np.random.random(size=size) + low).astype(dtype)
     return data

@@ -26,7 +26,7 @@ int main() {
 // // // //
 // // // //     hdc_data_t data_in;
 // // // //     memset(&data_in, 0, sizeof(hdc_data_t));
-// // // //     data_in.ndim = 1;
+// // // //     data_in.rank = 1;
 // // // //     data_in.shape[0] = 4;
 // // // //     data_in.type = HDC_DOUBLE;
 // // // //     data_in.flags = HDCDefault;
@@ -87,10 +87,10 @@ struct hdc_t* init_hdc_data() {
     hdc_set_int32_path(tree,"groupA/data/int_array",1,shape,(void*)array,HDCDefault);
 
     // Ask on some data details, use subtree to shorten the path
-    int8_t ndim2 = hdc_get_ndim(node);
+    int8_t rank2 = hdc_get_rank(node);
     size_t* shape2 = hdc_get_shape(node);
-    printf("Dimension: %d\nShape: ", ndim2);
-    for (int8_t i=0; i<ndim2; i++) printf("%ld ",shape2[i]);
+    printf("Dimension: %d\nShape: ", rank2);
+    for (int8_t i=0; i<rank2; i++) printf("%ld ",shape2[i]);
     printf("\n");
     printf("dtype: %s\n",hdc_get_type_str(node));
 
@@ -113,7 +113,7 @@ void manipulate(struct hdc_t* data) {
     struct hdc_t* node = hdc_get(data, "groupA/data/int_array");
     // Get the pointer to the data
     int32_t* array2 = hdc_as_int32_1d(node);
-    // and shape (assime ndim = 1)
+    // and shape (assime rank = 1)
     size_t* shape2 = hdc_get_shape(node);
     // Multiply by 2
     for (size_t i=0; i<shape2[0]; i++)

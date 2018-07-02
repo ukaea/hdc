@@ -10,7 +10,7 @@ contains
         integer(kind=4), dimension(1:4) :: array
         integer(kind=4), dimension(:), pointer:: array2
         integer(kind=c_long), dimension(1:1) :: shape2
-        integer(kind=8) :: ndim2
+        integer(kind=8) :: rank2
         character(len=:), allocatable :: str
         integer, parameter :: nx = 2, ny = 3
         real(kind=DP) :: array2d(nx,ny)
@@ -60,9 +60,9 @@ contains
         ! Add data to subtree
         call hdc_set_data(tree,"aaa/bbb/ccc",array)
         ! Ask on some data details, use subtree to shorten path
-        ndim2 = hdc_get_ndim(node)
+        rank2 = hdc_get_rank(node)
         shape2 = hdc_get_shape(node)
-        print *,"Dimension: ", ndim2
+        print *,"Dimension: ", rank2
         print *,"Shape: ", shape2
         call hdc_print_type_str(node)
         call hdc_get(node,array2)

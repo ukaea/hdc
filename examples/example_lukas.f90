@@ -49,7 +49,7 @@ contains
         !    subroutine hdc_as_double_1d_path_sub(this,path,res)
         !         type(hdc_t) :: this
         !         character(len=*), intent(in) :: path
-        !         integer(kind=c_int8_t) :: ndim
+        !         integer(kind=c_int8_t) :: rank
         !         integer(kind=c_long), dimension(:), pointer :: shape_
         !         type(c_ptr) :: shape_ptr, data_ptr
         !         real(kind=dp), dimension(:), pointer, intent(inout) :: res

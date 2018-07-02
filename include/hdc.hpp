@@ -78,7 +78,7 @@ public:
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(int _ndim, size_t* _shape, hdc_type_t _type,long _flags = HDCDefault);
+    HDC(int _rank, size_t* _shape, hdc_type_t _type,long _flags = HDCDefault);
     /** Constructor from string */
     HDC(const std::string str);
     /** Copy contructor */
@@ -123,13 +123,13 @@ public:
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data();
     /** Stores data in node's buffer */
-    template<typename T> void set_data(int _ndim, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
-        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_ndim,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
+    template<typename T> void set_data(int _rank, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_rank,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
         memcpy(&header,buffer,sizeof(hdc_header_t));
         // Start with determining of the buffer size
         size_t data_size = sizeof(T);
-        for (int i=0;i<_ndim;i++) data_size *= _shape[i];
+        for (int i=0;i<_rank;i++) data_size *= _shape[i];
         size_t buffer_size = data_size + sizeof(hdc_header_t);
         if (header.buffer_size == buffer_size) {
             storage->lock(uuid);
@@ -140,10 +140,10 @@ public:
             header.buffer_size = buffer_size;
             header.data_size = data_size;
             memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            for (int i=0;i<_ndim;i++) header.shape[i] = _shape[i];
+            for (int i=0;i<_rank;i++) header.shape[i] = _shape[i];
             header.flags = _flags;
             header.type = to_typeid(_data[0]);
-            header.ndim = _ndim;
+            header.rank = _rank;
             char* buffer = new char[header.buffer_size];
             memcpy(buffer,&header,sizeof(hdc_header_t));
             memcpy(buffer+sizeof(hdc_header_t),_data,header.data_size);
@@ -153,16 +153,16 @@ public:
         }
     }
 
-    template<typename T> void set_data(int _ndim, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
-        set_data(_ndim,_shape,_data,_flags);
+    template<typename T> void set_data(int _rank, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+        set_data(_rank,_shape,_data,_flags);
     };
 
-    template<typename T> void set_data(const std::string& path, int _ndim, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _rank, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
         }
-        get(path).set_data(_ndim, _shape, _data, _flags);
+        get(path).set_data(_rank, _shape, _data, _flags);
     }
 
     template<typename T> void set_data(initializer_list<T> _data, hdc_flags_t _flags = HDCDefault) {
@@ -180,12 +180,12 @@ public:
     }
 
 
-    template<typename T> void set_data(const std::string& path, int _ndim, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, int _rank, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
-        get(path).set_data(_ndim, _shape, _data, _flags);
+        get(path).set_data(_rank, _shape, _data, _flags);
     }
 
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
@@ -220,7 +220,7 @@ public:
         memset(&header,0,sizeof(hdc_header_t));
         header.data_size = str.length()+1;
         header.type = HDC_STRING;
-        header.ndim = 1;
+        header.rank = 1;
         header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
@@ -245,11 +245,11 @@ public:
         auto h = get(path);
         get(path).set_string(str);
     }
-    void set_data_c(int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _ndim, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(const std::string& path, int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -292,7 +292,7 @@ public:
         get(path).set_data(data,_type);
     }
     /** Returns number of dimensions of current node. */
-    int get_ndim();
+    int get_rank();
     /** Returns shape of current node. */
     size_t* get_shape();
     std::vector<size_t> get_strides();
@@ -344,7 +344,7 @@ public:
     /** Returns true if node is empty. */
     bool is_empty();
     /** Returns number of dimensions of node under path. */
-    int get_ndim(const std::string& path);
+    int get_rank(const std::string& path);
     /** Returns shape of node under path. */
     size_t* get_shape(const std::string& path);
     /** Returns pointer to data of this node. */

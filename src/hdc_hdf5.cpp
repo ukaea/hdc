@@ -17,14 +17,14 @@ void write_node(HDC h, H5File* file, std::string path)
     auto data = buffer + sizeof(hdc_header_t);
     char* transposed_data = NULL;
     if (h.is_fortranorder()) {
-        transposed_data = transpose_buffer(h.get_buffer(), h.get_ndim(), h.get_shape(), (hdc_type_t)h.get_type(),
+        transposed_data = transpose_buffer(h.get_buffer(), h.get_rank(), h.get_shape(), (hdc_type_t)h.get_type(),
                                            h.is_fortranorder());
         data = transposed_data;
     }
     H5std_string DATASET_NAME(path);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     try {
-        hsize_t rank = header.ndim;
+        hsize_t rank = header.rank;
         hsize_t dimsf[10];
         for (unsigned int i = 0; i < rank; i++) {
             dimsf[i] = header.shape[i];
@@ -258,8 +258,8 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
         if (H5Tget_class(h5_dtype_id) == H5T_REFERENCE) {
             // Inspired by this: https://www.physics.ohio-state.edu/~wilkins/computing/HDF/hdf5tutorial/reftoobj.html
             size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
-            size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
-            if (ndim > 1) throw HDCException("Cannot handle array of refferences of ndim > 1");
+            size_t rank = H5Sget_simple_extent_ndims(h5_dspace_id);
+            if (rank > 1) throw HDCException("Cannot handle array of refferences of rank > 1");
             hobj_ref_t ref_out[nelems];
             hid_t h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out);
             HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
@@ -288,20 +288,20 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
                                               << hdf5_dset_id);
 
         size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
-        size_t ndim = H5Sget_simple_extent_ndims(h5_dspace_id);
+        size_t rank = H5Sget_simple_extent_ndims(h5_dspace_id);
         hdc_type_t dt = hdf5_type_to_hdc_type(h5_dtype_id, ref_path);
         if (dt == HDC_STRING) nelems++;
         hid_t h5_status = 0;
         char buffer[nelems * hdc_sizeof(dt)];
         memset(&buffer, 0, nelems * hdc_sizeof(dt));
         h5_status = H5Dread(hdf5_dset_id, h5_dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
-        hsize_t hshape[ndim];
+        hsize_t hshape[rank];
         H5Sget_simple_extent_dims(h5_dspace_id, hshape, NULL);
-        size_t shape[ndim];
-        for (size_t i = 0; i < ndim; i++) shape[i] = hshape[i];
+        size_t shape[rank];
+        for (size_t i = 0; i < rank; i++) shape[i] = hshape[i];
         if (dt == HDC_STRING) {
             dest.set_string(buffer);
-        } else { dest.set_data_c(ndim, shape, buffer, dt); } //TODO: do something more inteligent here
+        } else { dest.set_data_c(rank, shape, buffer, dt); } //TODO: do something more inteligent here
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                       ref_path,
                                       "Error reading HDF5 Dataset: "

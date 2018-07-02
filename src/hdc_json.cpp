@@ -116,7 +116,7 @@ size_t* get_shape(const Json::Value& root)
 }
 
 
-int get_ndim(const Json::Value& root)
+int get_rank(const Json::Value& root)
 {
     if (!root.isArray()) return 0;
     int dim = 0;
@@ -166,21 +166,21 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
         case (Json::arrayValue): {
             DEBUG_STDOUT("root is array, size = " + to_string(root.size()));
             if (is_all_numeric(root) || is_all_bool(root)) {
-                int8_t ndim = ::get_ndim(root);
-                if (ndim > HDC_MAX_DIMS) {
+                int8_t rank = ::get_rank(root);
+                if (rank > HDC_MAX_DIMS) {
                     throw HDCException(
-                            "json_to_hdc(): Unsupported number of dimensions: " + std::to_string(ndim) + "\n");
+                            "json_to_hdc(): Unsupported number of dimensions: " + std::to_string(rank) + "\n");
                 }
                 size_t* shape = ::get_shape(root);
                 hdc_type_t dt;
                 if (is_double(root)) { dt = HDC_DOUBLE; }
                 else if (is_int(root)) { dt = HDC_INT32; }
                 else { dt = HDC_BOOL; }
-                HDC d(ndim, shape, dt);
+                HDC d(rank, shape, dt);
                 tree = d;
                 void* data_ptr = tree.as<void*>();
                 if (dt == HDC_DOUBLE) {
-                    switch (ndim) {
+                    switch (rank) {
                         case 1: {
                             andres::View<double> view(shape, shape + 1, (double*)data_ptr);
                             for (unsigned int i = 0; i < shape[0]; i++) {
@@ -224,12 +224,12 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                         }
                         default: {
                             throw HDCException(
-                                    "json_to_hdc(): Requested number of dimensions: " + std::to_string(ndim) +
+                                    "json_to_hdc(): Requested number of dimensions: " + std::to_string(rank) +
                                     " not implemented yet\n");
                         }
                     }
                 } else if (dt == HDC_BOOL) {
-                    switch (ndim) {
+                    switch (rank) {
                         case 1: {
                             andres::View<bool> view(shape, shape + 1, (bool*)data_ptr);
                             for (unsigned int i = 0; i < shape[0]; i++) {
@@ -273,12 +273,12 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                         }
                         default: {
                             throw HDCException(
-                                    "json_to_hdc(): Requested number of dimensions: " + std::to_string(ndim) +
+                                    "json_to_hdc(): Requested number of dimensions: " + std::to_string(rank) +
                                     " not implemented yet\n");
                         }
                     }
                 } else {
-                    switch (ndim) {
+                    switch (rank) {
                         case 1: {
                             andres::View<int32_t> view(shape, shape + 1, (int32_t*)data_ptr);
                             for (unsigned int i = 0; i < shape[0]; i++) view(i) = root[i].asInt();
@@ -320,7 +320,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                         }
                         default: {
                             throw HDCException(
-                                    "json_to_hdc(): Requested number of dimensions: " + std::to_string(ndim) +
+                                    "json_to_hdc(): Requested number of dimensions: " + std::to_string(rank) +
                                     " not implemented yet\n");
                         }
                     }
@@ -350,7 +350,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
 }
 
 template <typename T>
-Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape, bool fortranOrder = false)
+Json::Value buffer_to_json(char* buffer, int rank, size_t* shape, bool fortranOrder = false)
 {
     // TODO: Add Fortran column order
 
@@ -361,9 +361,9 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape, bool fortranOr
     } else {
         order = andres::FirstMajorOrder;
     }
-    andres::View<T> view(shape, shape + ndim, (T*)buffer, order);
+    andres::View<T> view(shape, shape + rank, (T*)buffer, order);
     //TODO add fortran - C order switch
-    switch (ndim) {
+    switch (rank) {
         case (0): {
             root = ((T*)buffer)[0];
             break;
@@ -441,7 +441,7 @@ Json::Value buffer_to_json(char* buffer, int ndim, size_t* shape, bool fortranOr
                 break;
             }*/
         default: {
-            throw HDCException("buffer_to_json(): unsupported number of dimensions: " + std::to_string(ndim) + "\n");
+            throw HDCException("buffer_to_json(): unsupported number of dimensions: " + std::to_string(rank) + "\n");
         }
     }
     return root;
@@ -454,44 +454,44 @@ Json::Value HDC::to_json(int mode)
     if (mode == 0) {
         switch (header.type) {
             case (HDC_INT8): {
-                root = buffer_to_json<int8_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<int8_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_INT16): {
-                root = buffer_to_json<int16_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<int16_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_INT32): {
-                root = buffer_to_json<int32_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<int32_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_INT64): {
-                root = buffer_to_json<int64_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<int64_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_UINT8): {
-                root = buffer_to_json<uint8_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<uint8_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_UINT16): {
-                root = buffer_to_json<uint16_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<uint16_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_UINT32): {
-                root = buffer_to_json<uint32_t>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<uint32_t>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
                 /*case(HDC_UINT64):
                  {  *
-                 root =  buffer_to_json<uint64_t>(get_data_ptr(),get_ndim(),get_shape(),is_fortranorder());
+                 root =  buffer_to_json<uint64_t>(get_data_ptr(),get_rank(),get_shape(),is_fortranorder());
                  break;
                 }*/
             case (HDC_FLOAT): {
-                root = buffer_to_json<float>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<float>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_DOUBLE): {
-                root = buffer_to_json<double>(get_data_ptr(), get_ndim(), get_shape(), is_fortranorder());
+                root = buffer_to_json<double>(get_data_ptr(), get_rank(), get_shape(), is_fortranorder());
                 break;
             }
             case (HDC_STRUCT): {
@@ -518,7 +518,7 @@ Json::Value HDC::to_json(int mode)
                 break;
             }
             case (HDC_BOOL): {
-                root = buffer_to_json<bool>(get_data_ptr(), get_ndim(), get_shape());
+                root = buffer_to_json<bool>(get_data_ptr(), get_rank(), get_shape());
                 break;
             }
             default: {

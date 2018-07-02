@@ -282,7 +282,7 @@ load(
 
     // get dimension and shape
     hid_t filespace = H5Dget_space(dataset);
-    int dimension = H5Sget_simple_extent_ndims(filespace);
+    int dimension = H5Sget_simple_extent_ranks(filespace);
     if(dimension != 1) {
         throw std::runtime_error("HDF5 dataset is not one-dimensional.");
     }

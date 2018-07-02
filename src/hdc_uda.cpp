@@ -180,14 +180,14 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
         } else {
             uda::Array* value = dynamic_cast<uda::Array*>(uda_data);
             auto shape = value->shape();
-            size_t ndim = shape.size();
-            size_t myshape[ndim];
-            for (size_t i = 0; i < ndim; i++) myshape[i] = shape[i];
-//             result.set_data(ndim,myshape,value->byte_data(),static_cast<size_t>(to_typeid(type)));
-            if (type_name == typeid(short).name()) result.set_data(ndim, myshape, &(value->as<short>())[0]);
-            if (type_name == typeid(int).name()) result.set_data(ndim, myshape, &(value->as<int>())[0]);
-            if (type_name == typeid(float).name()) result.set_data(ndim, myshape, &(value->as<float>())[0]);
-            if (type_name == typeid(double).name()) result.set_data(ndim, myshape, &(value->as<double>())[0]);
+            size_t rank = shape.size();
+            size_t myshape[rank];
+            for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
+//             result.set_data(rank,myshape,value->byte_data(),static_cast<size_t>(to_typeid(type)));
+            if (type_name == typeid(short).name()) result.set_data(rank, myshape, &(value->as<short>())[0]);
+            if (type_name == typeid(int).name()) result.set_data(rank, myshape, &(value->as<int>())[0]);
+            if (type_name == typeid(float).name()) result.set_data(rank, myshape, &(value->as<float>())[0]);
+            if (type_name == typeid(double).name()) result.set_data(rank, myshape, &(value->as<double>())[0]);
         }
     } else if (type_name == typeid(char).name()) {
         if (rank == 0) {
@@ -320,13 +320,13 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                 } else {
                     uda::Array value = tree.atomicArray(name);
                     auto shape = value.shape();
-                    auto ndim = shape.size();
-                    size_t myshape[ndim];
-                    for (size_t i = 0; i < ndim; i++) myshape[i] = shape[i];
-                    if (type_name == "short") result.set_data(ndim, myshape, &(value.as<short>())[0]);
-                    if (type_name == "int") result.set_data(ndim, myshape, &(value.as<int>())[0]);
-                    if (type_name == "float") result.set_data(ndim, myshape, &(value.as<float>())[0]);
-                    if (type_name == "double") result.set_data(ndim, myshape, &(value.as<double>())[0]);
+                    auto rank = shape.size();
+                    size_t myshape[rank];
+                    for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
+                    if (type_name == "short") result.set_data(rank, myshape, &(value.as<short>())[0]);
+                    if (type_name == "int") result.set_data(rank, myshape, &(value.as<int>())[0]);
+                    if (type_name == "float") result.set_data(rank, myshape, &(value.as<float>())[0]);
+                    if (type_name == "double") result.set_data(rank, myshape, &(value.as<double>())[0]);
                 }
             } else {
                 if (a_rank[i] == 0) {
@@ -342,17 +342,17 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                 } else {
                     uda::Array value = tree.atomicArray(name);
                     size_t myshape[HDC_MAX_DIMS];
-                    int ndim = a_rank[i];
+                    int rank = a_rank[i];
                     std::vector<size_t> shape = value.shape();
-                    for (int i = 0; i < ndim; i++) myshape[i] = shape[i];
+                    for (int i = 0; i < rank; i++) myshape[i] = shape[i];
                     auto& type = value.type();
-                    if (type.name() == typeid(int).name()) { result.set_data(ndim, myshape, &(value.as<int>())[0]); }
+                    if (type.name() == typeid(int).name()) { result.set_data(rank, myshape, &(value.as<int>())[0]); }
                     else if (type.name() == typeid(short).name()) {
-                        result.set_data(ndim, myshape, &(value.as<short>()[0]));
+                        result.set_data(rank, myshape, &(value.as<short>()[0]));
                     } else if (type.name() == typeid(double).name()) {
-                        result.set_data(ndim, myshape, &(value.as<double>()[0]));
+                        result.set_data(rank, myshape, &(value.as<double>()[0]));
                     } else if (type.name() == typeid(float).name()) {
-                        result.set_data(ndim, myshape, &(value.as<float>()[0]));
+                        result.set_data(rank, myshape, &(value.as<float>()[0]));
                     } else {
                         throw HDCException("udaTreeNode2HDC(): Unsupported type: " + std::string(type.name()) + "\n");
                     }
