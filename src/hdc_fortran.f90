@@ -24,6 +24,23 @@ module hdc_fortran
     integer(kind=c_size_t), parameter ::  HDCExternal            = 4_8
     integer(kind=c_size_t), parameter ::  HDCChildrenInitialized = 8_8
 
+    integer(kind=c_size_t), parameter ::  HDC_EMPTY  =  0
+    integer(kind=c_size_t), parameter ::  HDC_STRUCT =  1
+    integer(kind=c_size_t), parameter ::  HDC_LIST   =  2
+    integer(kind=c_size_t), parameter ::  HDC_INT8   =  3
+    integer(kind=c_size_t), parameter ::  HDC_INT16  =  4
+    integer(kind=c_size_t), parameter ::  HDC_INT32  =  5
+    integer(kind=c_size_t), parameter ::  HDC_INT64  =  6
+    integer(kind=c_size_t), parameter ::  HDC_UINT8  =  7
+    integer(kind=c_size_t), parameter ::  HDC_UINT16 =  8
+    integer(kind=c_size_t), parameter ::  HDC_UINT32 =  9
+    integer(kind=c_size_t), parameter ::  HDC_UINT64 = 10
+    integer(kind=c_size_t), parameter ::  HDC_FLOAT  = 11
+    integer(kind=c_size_t), parameter ::  HDC_DOUBLE = 12
+    integer(kind=c_size_t), parameter ::  HDC_STRING = 13
+    integer(kind=c_size_t), parameter ::  HDC_BOOL   = 14
+    integer(kind=c_size_t), parameter ::  HDC_ERROR  = 15
+
     private
     interface
         subroutine hello() bind(c,name="hello")
@@ -362,6 +379,13 @@ module hdc_fortran
             type(hdc_t), value:: obj
             type(hdc_data_t) :: res
         end function c_hdc_get_data
+        !> Sets hdc_data_t object. This is interface to C.
+        subroutine c_hdc_set_data(obj,path,data) bind(c,name="hdc_set_data")
+            import
+            character(kind=c_char), intent(in) :: path(*)
+            type(hdc_t), value:: obj
+            type(hdc_data_t),value :: data
+        end subroutine c_hdc_set_data
         !> Sets arbitrary data casted to void pointer. This is interface to C.
         subroutine c_hdc_as_string_fortran(obj,str,strlen) bind(c,name="hdc_as_string_fortran")
             import
@@ -856,20 +880,17 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:), target :: data
-        integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
-        type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
         integer(kind=c_int64_t), intent(in), optional :: flags_
-        integer(kind=c_int64_t) :: flags
-        if (.not. present(flags_)) then
-            flags = HDCFortranOrder;
-        else
-            flags = flags_
-        end if
-        shape_ = shape(data)
-        data_ptr = c_loc(data)
-        shape_ptr = c_loc(shape_)
-        call c_hdc_set_int32(this, rank, shape_ptr, data_ptr, flags)
+        integer(kind=c_int64_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_)) flags = flags_
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(1+1:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_data(this, c_null_char, out);
     end subroutine hdc_set_int32_1d
 
     subroutine hdc_set_int8_scalar(this, data)
@@ -1048,27 +1069,24 @@ contains
         call c_hdc_set_int8_path(this, trim(path)//c_null_char, rank, shape_ptr, data_ptr, flags)
     end subroutine hdc_set_int8_1d_path
 
+
     subroutine hdc_set_int32_1d_path(this, path, data, flags_)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:), target :: data
-        integer(kind=c_long), dimension(1:1), target :: shape_
-        type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
         character(len=*), intent(in) :: path
         integer(kind=c_int64_t), intent(in), optional :: flags_
-        integer(kind=c_int64_t) :: flags
-        if (.not. present(flags_)) then
-            flags = HDCFortranOrder;
-        else
-            flags = flags_
-        end if
-        shape_ = shape(data)
-        data_ptr = c_loc(data)
-        shape_ptr = c_loc(shape_)
-        call c_hdc_set_int32_path(this, trim(path)//c_null_char, rank, shape_ptr, data_ptr, flags)
+        integer(kind=c_int64_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_)) flags = flags_
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(1+1:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_data(this, trim(path)//c_null_char, out);
     end subroutine hdc_set_int32_1d_path
-
 
     subroutine hdc_set_double_2d(this, data, flags_)
         use iso_c_binding
@@ -1241,7 +1259,10 @@ contains
         type(hdc_data_t) :: data
         integer(c_int32_t), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
-        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_"
+        if (data%rank /= 1) then
+            print*, "incompatible ranks in hdc_as_int32_1d_:", data%rank
+            stop
+        end if
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end function hdc_as_int32_1d_
 
