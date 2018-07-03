@@ -1759,35 +1759,6 @@ contains
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_2d_path_sub
 
-!     function hdc_as_int32_1d_path(this, path) result(res)
-!         use iso_c_binding
-!         type(hdc_t) :: this
-!         character(len=*), intent(in) :: path
-!         integer(kind=c_int32_t) :: rank
-!         integer(kind=c_long), dimension(:), pointer :: shape_
-!         type(c_ptr) :: shape_ptr, data_ptr
-!         integer(kind=c_int32_t), dimension(:), pointer :: res
-!         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
-!         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
-!         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-!         call c_f_pointer(shape_ptr, shape_, (/ rank /))
-!         call c_f_pointer(data_ptr, res, shape_)
-!     end function hdc_as_int32_1d_path
-!
-!     subroutine hdc_as_int32_1d_path_sub(this,path,res)
-!         type(hdc_t) :: this
-!         character(len=*), intent(in) :: path
-!         integer(kind=c_int32_t) :: rank
-!         integer(kind=c_size_t), dimension(:), pointer :: shape_
-!         type(c_ptr) :: shape_ptr, data_ptr
-!         integer(kind=c_int32_t), dimension(:), pointer :: res
-!         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
-!         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
-!         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-!         call c_f_pointer(shape_ptr, shape_, (/ rank /))
-!         call c_f_pointer(data_ptr, res, shape_)
-!     end subroutine hdc_as_int32_1d_path_sub
-
     function hdc_as_int32_1d_path(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
@@ -1809,7 +1780,6 @@ contains
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_sub"
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_1d_path_sub
-
 
     function hdc_as_string_path(this,path) result(res)
         use iso_c_binding
