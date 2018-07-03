@@ -6,7 +6,7 @@ struct hdc_t* init_hdc_data();
 void manipulate(struct hdc_t* data);
 
 int main() {
-    HDC_init_c("","");
+    hdc_init("","");
     // init data
     struct hdc_t* tree = init_hdc_data();
 

@@ -722,7 +722,7 @@ size_t hdc_childs_count(hdc_t* tree)
     return t->childs_count();
 }
 
-void HDC_init_c(char* pluginFileName, char* pluginSettingsString)
+void hdc_init(char* pluginFileName, char* pluginSettingsString)
 {
     if (strlen(pluginFileName) != 0) {
         if (strlen(pluginSettingsString) == 0) {
@@ -779,6 +779,12 @@ void hdc_set_data(hdc_t* tree, const char* path, hdc_data_t data)
 {
     HDC* t = (HDC*)tree->obj;
     return t->set_data(path,data);
+}
+
+size_t hdc_get_size(hdc_t* tree)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->get_size();
 }
 
 // end extern C

@@ -116,7 +116,7 @@ void hdc_print_type_str(struct hdc_t* tree);
 const char* hdc_get_type_str_path(struct hdc_t* tree, const char* path); /**  */
 size_t hdc_childs_count(struct hdc_t* tree); /** */
 void test_str(char* str);
-void HDC_init_c(char* pluginFileName, char* pluginSettingsFileName);
+void hdc_init(char* pluginFileName, char* pluginSettingsFileName);
 void HDC_destroy_c();
 char** HDC_get_available_plugins_c();
 const char* hdc_serialize(struct hdc_t* tree);
@@ -125,7 +125,7 @@ struct hdc_t* hdc_deserialize(const char* str);
 struct hdc_data_t hdc_get_data(struct hdc_t* tree, const char* path);
 void hdc_set_data(struct hdc_t* tree, const char* path, struct hdc_data_t data);
 
-
+size_t hdc_get_size(struct hdc_t* tree);
 #ifdef __cplusplus
 }
 #endif // __cplusplus

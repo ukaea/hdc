@@ -67,6 +67,8 @@ contains
         call hdc_print_type_str(node)
         call hdc_get(node,array2)
         print *,array2
+        print *,"----------------------------------------"
+        print *,hdc_as_int32_1d_(node)
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         call hdc_set_data(node,3*array2(:))
         call hdc_get(node,array2)
