@@ -267,7 +267,7 @@ public:
     void set_data(const unsigned char* data, hdc_type_t _type) {
         memset(&header,0,sizeof(hdc_header_t));
         header.type = _type;
-        header.data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
+        header.data_size = hdc_sizeof(_type);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));

@@ -942,33 +942,32 @@ HDC* HDC::copy(int copy_arrays UNUSED)
 void HDC::set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _rank, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
-             hdc_type_str(static_cast<hdc_type_t>(_type)).c_str());)
+             hdc_type_str(_type).c_str());)
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     // Start with determining of the buffer size
-    size_t data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
+    size_t data_size = hdc_sizeof(_type);
     for (int i = 0; i < _rank; i++) data_size *= _shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header.buffer_size == buffer_size) {
         storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), _data, data_size);
         storage->unlock(uuid);
-        return;
     } else {
         header.buffer_size = buffer_size;
         header.data_size = data_size;
         header.flags = _flags;
         memset(header.shape, 0, HDC_MAX_DIMS * sizeof(size_t));
         for (int i = 0; i < _rank; i++) header.shape[i] = _shape[i];
-        header.type = static_cast<hdc_type_t>(_type);
+        header.type = _type;
         header.rank = _rank;
         char* buffer = new char[header.buffer_size];
         memcpy(buffer, &header, sizeof(hdc_header_t));
         memcpy(buffer + sizeof(hdc_header_t), _data, header.data_size);
         storage->set(uuid, buffer, header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
-        return;
     }
+    return;
 }
 
 void HDC::set_data_c(const std::string& path, int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
@@ -983,11 +982,11 @@ void HDC::set_data_c(const std::string& path, int _rank, size_t* _shape, void* _
 void HDC::set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _rank, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
-             hdc_type_str(static_cast<hdc_type_t>(_type)).c_str());)
+             hdc_type_str(_type).c_str());)
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     // Start with determining of the buffer size
-    size_t data_size = hdc_sizeof(static_cast<hdc_type_t>(_type));
+    size_t data_size = hdc_sizeof(_type);
     for (int i = 0; i < _rank; i++) data_size *= _shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header.buffer_size == buffer_size) {
@@ -1001,7 +1000,7 @@ void HDC::set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _t
         header.flags = _flags;
         memset(header.shape, 0, HDC_MAX_DIMS * sizeof(size_t));
         for (int i = 0; i < _rank; i++) header.shape[i] = _shape[i];
-        header.type = static_cast<hdc_type_t>(_type);
+        header.type = _type;
         header.rank = _rank;
         char* buffer = new char[header.buffer_size];
         memcpy(buffer, &header, sizeof(hdc_header_t));
