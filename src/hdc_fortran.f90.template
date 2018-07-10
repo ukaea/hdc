@@ -1,3 +1,49 @@
+module hdc_fortran
+    use iso_c_binding
+    implicit none
+    type, bind(c) :: hdc_t
+        type(c_ptr) :: obj !< void pointer to HDC container
+    end type hdc_t
+
+    integer, parameter :: HDC_MAX_DIMS = 10
+
+    type, bind(c) :: hdc_data_t
+        integer(c_size_t) :: dtype
+        integer(c_size_t) :: flags
+        integer(c_size_t) :: rank
+        integer(c_size_t) :: dshape(HDC_MAX_DIMS)
+        type(c_ptr) :: data !< data pointer
+    end type hdc_data_t
+
+    integer, parameter :: dp=kind(1.0D0)
+    integer, parameter :: sp=kind(1.0)
+
+    integer(kind=c_size_t), parameter ::  HDCDefault             = 0_8
+    integer(kind=c_size_t), parameter ::  HDCFortranOrder        = 1_8
+    integer(kind=c_size_t), parameter ::  HDCReadOnly            = 2_8
+    integer(kind=c_size_t), parameter ::  HDCExternal            = 4_8
+    integer(kind=c_size_t), parameter ::  HDCChildrenInitialized = 8_8
+
+    integer(kind=c_size_t), parameter ::  HDC_EMPTY  =  0
+    integer(kind=c_size_t), parameter ::  HDC_STRUCT =  1
+    integer(kind=c_size_t), parameter ::  HDC_LIST   =  2
+    integer(kind=c_size_t), parameter ::  HDC_INT8   =  3
+    integer(kind=c_size_t), parameter ::  HDC_INT16  =  4
+    integer(kind=c_size_t), parameter ::  HDC_INT32  =  5
+    integer(kind=c_size_t), parameter ::  HDC_INT64  =  6
+    integer(kind=c_size_t), parameter ::  HDC_UINT8  =  7
+    integer(kind=c_size_t), parameter ::  HDC_UINT16 =  8
+    integer(kind=c_size_t), parameter ::  HDC_UINT32 =  9
+    integer(kind=c_size_t), parameter ::  HDC_UINT64 = 10
+    integer(kind=c_size_t), parameter ::  HDC_FLOAT  = 11
+    integer(kind=c_size_t), parameter ::  HDC_DOUBLE = 12
+    integer(kind=c_size_t), parameter ::  HDC_STRING = 13
+    integer(kind=c_size_t), parameter ::  HDC_BOOL   = 14
+    integer(kind=c_size_t), parameter ::  HDC_ERROR  = 15
+
+    private
+    interface
+
 {% for type_ in types %}
     {% for rank in ranks %}
         interface hdc_as_{{ type_[0] }}_{{ rank[0] }}d
@@ -5,94 +51,102 @@
             module procedure hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path
         end interface hdc_as_{{ type_[0] }}_{{ rank[0] }}d
     {% endfor %}
-
-    {% for rank in ranks %}
-        function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_(this) result(res)
-            use iso_c_binding
-            type(hdc_t) :: this
-            type(hdc_data_t) :: data
-            integer(c_{{ type_[0] }}_t), pointer :: res{{ rank[1] }}
-            data = c_hdc_get_data(this,c_null_char)
-            if (data%rank /= 1) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_"
-            call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-        end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_
-
-        subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub(this, res)
-            use iso_c_binding
-            type(hdc_t) :: this
-            type(hdc_data_t) :: data
-            integer(c_{{ type_[0] }}_t), pointer :: res{{ rank[1] }}
-            data = c_hdc_get_data(this,c_null_char)
-            if (data%rank /= 1) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub"
-            call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-        end subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub
-
-        function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path(this, path) result(res)
-            use iso_c_binding
-            type(hdc_t) :: this
-            character(len=*), intent(in) :: path
-            type(hdc_data_t) :: data
-            integer(c_{{ type_[0] }}_t), pointer :: res{{ rank[1] }}
-            data = c_hdc_get_data(this,trim(path)//c_null_char)
-            if (data%rank /= {{ rank[0] }}) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path"
-            call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-        end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path
-
-        subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub(this,path,res)
-            use iso_c_binding
-            type(hdc_t) :: this
-            character(len=*), intent(in) :: path
-            type(hdc_data_t) :: data
-            integer(c_{{ type_[0] }}_t), pointer :: res{{ rank[1] }}
-            data = c_hdc_get_data(this,trim(path)//c_null_char)
-            if (data%rank /= {{ rank[0] }}) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub"
-            call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-        end subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub
-
-        module procedure hdc_set_{{ type_[0] }}_scalar
-
-        subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_(this, data, flags_)
-            use iso_c_binding
-            type(hdc_t) :: this
-            integer(kind=c_{{ type_[0] }}_t), dimension(:), target :: data
-            integer(kind=c_size_t), intent(in), optional :: flags_
-            integer(kind=c_size_t) :: flags = HDCFortranOrder
-            type(hdc_data_t) :: out
-            if (present(flags_)) flags = flags_
-            out%dtype = {{ type_[1] }}
-            out%flags = flags
-            out%rank = {{ rank[0] }}
-            out%dshape(1:{{ rank[0] }}) = shape(data)
-            out%dshape(1+{{ rank[0] }}:) = 0
-            out%data = c_loc(data)
-            call c_hdc_set_data(this, c_null_char, out);
-        end subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_
-
-        subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path(this, path, data, flags_)
-            use iso_c_binding
-            type(hdc_t) :: this
-            integer(kind=c_{{ type_[0] }}_t), dimension(:), target :: data
-            character(len=*), intent(in) :: path
-            integer(kind=c_size_t), intent(in), optional :: flags_
-            integer(kind=c_size_t) :: flags = HDCFortranOrder
-            type(hdc_data_t) :: out
-            if (present(flags_)) flags = flags_
-            out%dtype = {{ type_[1] }}
-            out%flags = flags
-            out%rank = {{ rank[0] }}
-            out%dshape(1:{{ rank[0] }}) = shape(data)
-            out%dshape(1+{{ rank[0] }}:) = 0
-            out%data = c_loc(data)
-            call c_hdc_set_data(this, trim(path)//c_null_char, out);
-        end subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
-
-        ! TODO: add c_ version
-
-        subroutine hdc_set_{{ type_[0] }}_scalar(this, data)
-            use iso_c_binding
-            type(hdc_t) :: this
-            integer(kind=c_{{ type_[0] }}_t) :: data
-            call c_hdc_set_{{ type_[0] }}_scalar(this, data)
-        end subroutine hdc_set_{{ type_[0] }}_scalar
-        {% endfor %}
 {% endfor %}
+
+    public ::
+{% for type_ in types %}
+    {% for rank in ranks %}
+        interface hdc_as_{{ type_[0] }}_{{ rank[0] }}d, &
+    {% endfor %}
+{% endfor %}
+contains
+
+{% for type_ in types %}
+    {% for rank in ranks %}
+    function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        type(hdc_data_t) :: data
+        {{ type_[2] }}, pointer :: res({{ rank[1] }})
+        data = c_hdc_get_data(this,c_null_char)
+        if (data%rank /= 1) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_"
+        call c_f_pointer(data%data, res, data%dshape(1:data%rank))
+    end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_
+
+    subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub(this, res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        type(hdc_data_t) :: data
+        {{ type_[2] }}, pointer :: res({{ rank[1] }})
+        data = c_hdc_get_data(this,c_null_char)
+        if (data%rank /= 1) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub"
+        call c_f_pointer(data%data, res, data%dshape(1:data%rank))
+    end subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub
+
+    function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path(this, path) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*), intent(in) :: path
+        type(hdc_data_t) :: data
+        {{ type_[2] }}, pointer :: res({{ rank[1] }})
+        data = c_hdc_get_data(this,trim(path)//c_null_char)
+        if (data%rank /= {{ rank[0] }}) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path"
+        call c_f_pointer(data%data, res, data%dshape(1:data%rank))
+    end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path
+
+    subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_(this, data, flags_)
+        use iso_c_binding
+        type(hdc_t) :: this
+        {{ type_[2] }}, dimension(:), target :: data
+        integer(kind=c_size_t), intent(in), optional :: flags_
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_)) flags = flags_
+        out%dtype = {{ type_[1] }}
+        out%flags = flags
+        out%rank = {{ rank[0] }}
+        out%dshape(1:{{ rank[0] }}) = shape(data)
+        out%dshape({{ 1+rank[0] }}:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_data(this, c_null_char, out)
+    end subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_
+
+    subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path(this, path, data, flags_)
+        use iso_c_binding
+        type(hdc_t) :: this
+        {{ type_[2] }}, dimension(:), target :: data
+        character(len=*), intent(in) :: path
+        integer(kind=c_size_t), intent(in), optional :: flags_
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_)) flags = flags_
+        out%dtype = {{ type_[1] }}
+        out%flags = flags
+        out%rank = {{ rank[0] }}
+        out%dshape(1:{{ rank[0] }}) = shape(data)
+        out%dshape({{ 1+rank[0] }}:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_data(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
+
+    {% endfor %}
+    subroutine hdc_set_{{ type_[0] }}_scalar(this, data)
+        use iso_c_binding
+        type(hdc_t) :: this
+        {{ type_[2] }} :: data
+        call c_hdc_set_{{ type_[0] }}_scalar(this, data)
+    end subroutine hdc_set_{{ type_[0] }}_scalar
+
+    subroutine hdc_set_{{ type_[0] }}_scalar(this, path, data)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*), intent(in) :: path
+        {{ type_[2] }} :: data
+        call c_hdc_set_{{ type_[0] }}_scalar(this, data)
+    end subroutine hdc_set_{{ type_[0] }}_scalar_path
+
+{% endfor %}
+
+end module hdc_fortran
+! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
+! https://gcc.gnu.org/onlinedocs/gfortran/Derived-Types-and-struct.html

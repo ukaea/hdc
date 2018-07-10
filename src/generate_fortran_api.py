@@ -5,16 +5,16 @@ env = Environment(
 
 
 types = [
-    ("int8",    "HDC_INT8"),
-    #("int16",   "HDC_INT16"),
-    #("int32",   "HDC_INT32"),
-    #("int64",   "HDC_INT64"),
-    #("uint8",   "HDC_UINT8"),
-    #("uint16",  "HDC_UINT16"),
-    #("uint32",  "HDC_UINT32"),
-    #("uint64",  "HDC_UINT64"),
-    #("float",   "HDC_FLOAT"),
-    #("double",  "HDC_DOUBLE"),
+    ("int8",    "HDC_INT8",   "integer(kind=c_int8_t)"),
+    #("int16",   "HDC_INT16",  "integer(kind=c_int16_t)"),
+    #("int32",   "HDC_INT32",  "integer(kind=c_int32_t)"),
+    #("int64",   "HDC_INT64",  "integer(kind=c_int64_t)"),
+    #("uint8",   "HDC_UINT8",  "integer(kind=c_int8_t)"),
+    #("uint16",  "HDC_UINT16", "integer(kind=c_int16_t)"),
+    #("uint32",  "HDC_UINT32", "integer(kind=c_int32_t)"),
+    #("uint64",  "HDC_UINT64", "integer(kind=c_int64_t)"),
+    #("float",   "HDC_FLOAT",  "real(kind=sp)"),
+    #("double",  "HDC_DOUBLE", "real(kind=dp)"),
 ]
 ranks = [
     ( 1,":"),
