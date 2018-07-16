@@ -7,12 +7,13 @@ program cpo_hdc
     equilibrium = hdc_new_empty()
     call hdc_set(equilibrium, 'time', 1.1d0)
     call hdc_set(equilibrium, 'profiles_1d/psi', (/0.1d0, 0.2d0, 0.3d0/))
+    call hdc_dump(equilibrium)
     call test_cpos(equilibrium, distsource)
 contains
 
     subroutine test_cpos(equilibriumin, distsourceout)
         integer(kind=8) :: i
-        !UAL ! Always describe cpo as array 
+        !UAL ! Always describe cpo as array
         !UAL ! In case of time slice, the size of the input cpo is 1
         !UAL type (type_equilibrium),pointer :: equilibriumin(:)
         !UAL type (type_distsource),pointer :: distsourceout(:)

@@ -59,6 +59,16 @@ module hdc_fortran
         interface hdc_as_{{ type_[0] }}_{{ rank[0] }}d, &
     {% endfor %}
 {% endfor %}
+
+interface hdc_set
+{% for type_ in types %}
+    {% for rank in ranks %}
+        hdc_set_{{ type_[0] }}_scalar_path
+        hdc_set_{{ type_[0] }}_scalar
+    {% endfor %}
+{% endfor %}
+end interface hdc_set
+
 contains
 
 {% for type_ in types %}
@@ -133,8 +143,8 @@ contains
     subroutine hdc_set_{{ type_[0] }}_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
-        {{ type_[2] }} :: data
-        call c_hdc_set_{{ type_[0] }}_scalar(this, data)
+        {{ type_[2] }}, target :: data
+        call c_hdc_set_scalar(this, c_null_char, data, {{ type_[1] }})
     end subroutine hdc_set_{{ type_[0] }}_scalar
 
     subroutine hdc_set_{{ type_[0] }}_scalar(this, path, data)
@@ -142,7 +152,7 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         {{ type_[2] }} :: data
-        call c_hdc_set_{{ type_[0] }}_scalar(this, data)
+        call c_hdc_set_{{ type_[0] }}_scalar(this, trim(path)//c_null_char, data, {{ type_[1] }})
     end subroutine hdc_set_{{ type_[0] }}_scalar_path
 
 {% endfor %}

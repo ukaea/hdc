@@ -124,7 +124,7 @@ struct hdc_t* hdc_deserialize(const char* str);
 
 struct hdc_data_t hdc_get_data(struct hdc_t* tree, const char* path);
 void hdc_set_data(struct hdc_t* tree, const char* path, struct hdc_data_t data);
-
+void hdc_set_scalar(struct hdc_t* tree, const char* path, const unsigned char* data, hdc_type_t _type);
 size_t hdc_get_size(struct hdc_t* tree);
 #ifdef __cplusplus
 }

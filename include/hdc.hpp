@@ -271,9 +271,37 @@ public:
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
-        memcpy(buffer+sizeof(hdc_header_t),&data,header.data_size);
+        memcpy(buffer+sizeof(hdc_header_t),data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
+    }
+    /** Sets scalar data to given node - UDA version. */
+    void set_data(void* data, hdc_type_t _type) {
+        return this->set_data((const unsigned char*)data,_type);
+    }
+    /** Sets scalar data to given node - UDA version with path. */
+    void set_data(const std::string path, const unsigned char* data, hdc_type_t _type) {
+        if (path.empty()) {
+            set_data(data, _type);
+        } else {
+            if(!exists(path)) {
+                HDC h;
+                add_child(path, h); // TODO: add constructor for this!!
+            }
+            get(path).set_data(data, _type);
+        }
+    }
+    /** Sets scalar data to given node - UDA version with path. */
+    void set_data(const std::string path, void* data, hdc_type_t _type) {
+        if (path.empty()) {
+            set_data(data, _type);
+        } else {
+            if(!exists(path)) {
+                HDC h;
+                add_child(path, h); // TODO: add constructor for this!!
+            }
+            get(path).set_data(data, _type);
+        }
     }
     template <typename T>
     void set_data(const std::string& path, T data) {

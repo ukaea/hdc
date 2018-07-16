@@ -71,7 +71,7 @@ module hdc_fortran
         function c_hdc_new_dtype(rank, shape_, type_str) result(obj) bind(c,name="hdc_new_dtype")
             import
             type(hdc_t) :: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             character(kind=c_char), intent(in) :: type_str(*)
         end function c_hdc_new_dtype
@@ -226,7 +226,7 @@ module hdc_fortran
         subroutine c_hdc_set_int8(obj, rank, shape_, data, flags) bind(c,name="hdc_set_int8")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
             integer(kind=c_int64_t), value :: flags
@@ -236,7 +236,7 @@ module hdc_fortran
         subroutine c_hdc_set_int32(obj, rank, shape_, data, flags) bind(c,name="hdc_set_int32")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
             integer(kind=c_int64_t), value :: flags
@@ -246,7 +246,7 @@ module hdc_fortran
         subroutine c_hdc_set_int32_path(obj, path, rank, shape_, data, flags) bind(c,name="hdc_set_int32_path")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             character(kind=c_char), intent(in) :: path(*)
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
@@ -257,7 +257,7 @@ module hdc_fortran
         subroutine c_hdc_set_int8_path(obj, path, rank, shape_, data, flags) bind(c,name="hdc_set_int8_path")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             character(kind=c_char), intent(in) :: path(*)
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
@@ -269,7 +269,7 @@ module hdc_fortran
         subroutine c_hdc_set_double(obj, rank, shape_, data, flags) bind(c,name="hdc_set_double")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
             integer(kind=c_int64_t), value :: flags
@@ -278,63 +278,11 @@ module hdc_fortran
         subroutine c_hdc_set_float(obj, rank, shape_, data, flags) bind(c,name="hdc_set_float")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
             integer(kind=c_int64_t), value :: flags
         end subroutine c_hdc_set_float
-        !> Stes scalar double.This is interface to C.
-        subroutine c_hdc_set_double_scalar(obj, data) bind(c,name="hdc_set_double_scalar")
-            import
-            type(hdc_t), value:: obj
-            real(kind=c_double), value :: data
-        end subroutine c_hdc_set_double_scalar
-        !> Sets scalar float.This is interface to C.
-        subroutine c_hdc_set_float_scalar(obj, data) bind(c,name="hdc_set_float_scalar")
-            import
-            type(hdc_t), value:: obj
-            real(kind=c_float), value :: data
-        end subroutine c_hdc_set_float_scalar
-        !> Sets scalar double to given path. This is interface to C.
-        subroutine c_hdc_set_double_scalar_path(obj, path, data) bind(c,name="hdc_set_double_scalar_path")
-            import
-            type(hdc_t), value:: obj
-            character(kind=c_char), intent(in) :: path(*)
-            real(kind=c_double), value :: data
-        end subroutine c_hdc_set_double_scalar_path
-        !> Sets scalar float to given path. This is interface to C.
-        subroutine c_hdc_set_float_scalar_path(obj, path, data) bind(c,name="hdc_set_float_scalar_path")
-            import
-            type(hdc_t), value:: obj
-            character(kind=c_char), intent(in) :: path(*)
-            real(kind=c_float), value :: data
-        end subroutine c_hdc_set_float_scalar_path
-        !> Sets scalar int32.This is interface to C.
-        subroutine c_hdc_set_int32_scalar(obj, data) bind(c,name="hdc_set_int32_scalar")
-            import
-            type(hdc_t), value:: obj
-            integer(kind=c_int32_t), value :: data
-        end subroutine c_hdc_set_int32_scalar
-        !> Sets scalar int32 to given path. This is interface to C.
-        subroutine c_hdc_set_int32_scalar_path(obj, path, data) bind(c,name="hdc_set_int32_scalar_path")
-            import
-            type(hdc_t), value:: obj
-            character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int32_t), value :: data
-        end subroutine c_hdc_set_int32_scalar_path
-        !> Sets scalar int8. This is interface to C.
-        subroutine c_hdc_set_int8_scalar(obj, data) bind(c,name="hdc_set_int8_scalar")
-            import
-            type(hdc_t), value:: obj
-            integer(kind=c_int8_t), value :: data
-        end subroutine c_hdc_set_int8_scalar
-        !>  Sets scalar int8 to given path. This is interface to C.
-        subroutine c_hdc_set_int8_scalar_path(obj, path, data) bind(c,name="hdc_set_int8_scalar_path")
-            import
-            type(hdc_t), value:: obj
-            character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int8_t), value :: data
-        end subroutine c_hdc_set_int8_scalar_path
         !> Sets string to given path. This is interface to C.
         subroutine c_hdc_set_string_path(obj, path, str) bind(c,name="hdc_set_string_path")
             import
@@ -353,7 +301,7 @@ module hdc_fortran
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_double_path
@@ -362,7 +310,7 @@ module hdc_fortran
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_float_path
@@ -386,6 +334,7 @@ module hdc_fortran
             type(hdc_t), value:: obj
             type(hdc_data_t),value :: data
         end subroutine c_hdc_set_data
+
         !> Sets arbitrary data casted to void pointer. This is interface to C.
         subroutine c_hdc_as_string_fortran(obj,str,strlen) bind(c,name="hdc_as_string_fortran")
             import
@@ -514,16 +463,25 @@ module hdc_fortran
         subroutine c_hdc_set_int64(obj, rank, shape_, data) bind(c,name="hdc_set_int64")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
         end subroutine c_hdc_set_int64
+
+        !> Sets scalar. This is interface to C.
+        subroutine c_hdc_set_scalar(obj, path, data, type_) bind(c,name="hdc_set_scalar")
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            type(c_ptr), value :: data
+            integer(kind=c_size_t),value :: type_
+        end subroutine c_hdc_set_scalar
 
         !> Sets array of int64. This is interface to C.
         subroutine c_hdc_set_int64_path(obj, path, rank, shape_, data) bind(c,name="hdc_set_int64_path")
             import
             type(hdc_t), value:: obj
-            integer(kind=c_int8_t),value :: rank
+            integer(kind=c_size_t),value :: rank
             character(kind=c_char), intent(in) :: path(*)
             type(c_ptr), value :: shape_
             type(c_ptr), value :: data
@@ -813,37 +771,37 @@ contains
     function hdc_get_shape_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: res
         type(c_ptr) :: shape_ptr
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
-        call c_f_pointer(shape_ptr, res, (/ rank /))
+        call c_f_pointer(shape_ptr, res, [ rank ])
     end function hdc_get_shape_
 
     function hdc_get_shape_path(this,path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         character(len=*), intent(in) :: path
         integer(kind=c_long), dimension(:),pointer :: res
         type(c_ptr) :: shape_ptr
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, res, (/ rank /))
+        call c_f_pointer(shape_ptr, res, [ rank ])
     end function hdc_get_shape_path
 
     function hdc_get_shape_pos(this, pos) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t) :: pos
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:),pointer :: shape_
         integer(kind=c_long) :: res
         type(c_ptr) :: shape_ptr
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         res = shape_(pos)
     end function hdc_get_shape_pos
 
@@ -862,7 +820,7 @@ contains
         integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
 !        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         integer(kind=c_int64_t), intent(in), optional :: flags_
         integer(kind=c_int64_t) :: flags
         if (.not. present(flags_)) then
@@ -896,23 +854,23 @@ contains
     subroutine hdc_set_int8_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: data
-        call c_hdc_set_int8_scalar(this, data)
+        integer(kind=c_int8_t), pointer :: data
+        call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT8)
     end subroutine hdc_set_int8_scalar
 
     subroutine hdc_set_int8_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: data
+        integer(kind=c_int8_t), target :: data
         character(len=*), intent(in) :: path
-        call c_hdc_set_int8_scalar_path(this, trim(path)//c_null_char, data)
+        call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT8)
     end subroutine hdc_set_int8_scalar_path
 
     subroutine hdc_set_int32_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int32_t) :: data
-        call c_hdc_set_int32_scalar(this, data)
+        integer(kind=c_int32_t), target :: data
+        call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT32)
     end subroutine hdc_set_int32_scalar
 
     subroutine hdc_copy(src, dest)
@@ -924,9 +882,9 @@ contains
     subroutine hdc_set_int32_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int32_t) :: data
+        integer(kind=c_int32_t), target :: data
         character(len=*), intent(in) :: path
-        call c_hdc_set_int32_scalar_path(this, trim(path)//c_null_char, data)
+        call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT32)
     end subroutine hdc_set_int32_scalar_path
 
     subroutine hdc_set_double_1d(this, data, flags_)
@@ -935,7 +893,7 @@ contains
         real(kind=dp), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         integer(kind=c_int64_t), intent(in), optional :: flags_
         integer(kind=c_int64_t) :: flags
         if (.not. present(flags_)) then
@@ -955,7 +913,7 @@ contains
         real(kind=sp), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         integer(kind=c_int64_t), intent(in), optional :: flags_
         integer(kind=c_int64_t) :: flags
         if (.not. present(flags_)) then
@@ -976,7 +934,7 @@ contains
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         character(len=*), intent(in) :: path
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
@@ -990,7 +948,7 @@ contains
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
         character(len=*), intent(in) :: path
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
@@ -1002,35 +960,35 @@ contains
     subroutine hdc_set_double_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
-        real(kind=dp) :: data
+        real(kind=dp), target :: data
         ! path stuff
         character(len=*), intent(in) :: path
-        call c_hdc_set_double_scalar_path(this, trim(path)//c_null_char, data)
+        call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_DOUBLE)
     end subroutine hdc_set_double_scalar_path
 
 
     subroutine hdc_set_double_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
-        real(kind=dp) :: data
-        call c_hdc_set_double_scalar(this, data)
+        real(kind=dp), target :: data
+        call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_DOUBLE)
     end subroutine hdc_set_double_scalar
 
     subroutine hdc_set_float_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
-        real(kind=sp) :: data
+        real(kind=sp), target :: data
         ! path stuff
         character(len=*), intent(in) :: path
-        call c_hdc_set_float_scalar_path(this, trim(path)//c_null_char, data)
+        call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_FLOAT)
     end subroutine hdc_set_float_scalar_path
 
 
     subroutine hdc_set_float_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
-        real(kind=sp) :: data
-        call c_hdc_set_float_scalar(this, data)
+        real(kind=sp), target :: data
+        call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_FLOAT)
     end subroutine hdc_set_float_scalar
 
 
@@ -1054,7 +1012,7 @@ contains
         integer(kind=c_int8_t), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         character(len=*), intent(in) :: path
         integer(kind=c_int64_t), intent(in), optional :: flags_
         integer(kind=c_int64_t) :: flags
@@ -1094,7 +1052,7 @@ contains
         real(kind=dp), dimension(:,:), target :: data
         integer(kind=c_long), dimension(1:2), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 2
+        integer(kind=c_size_t) :: rank = 2
         integer(kind=c_int64_t), intent(in), optional :: flags_
         integer(kind=c_int64_t) :: flags
         if (.not. present(flags_)) then
@@ -1117,7 +1075,7 @@ contains
         integer(kind=c_long), dimension(1) :: s
         type(c_ptr) :: data_ptr, shape_ptr
 !         integer(kind=c_long)
-        integer(1) :: rank
+        integer(kind=c_size_t) :: rank
 !         shape_ = shape(data)
         integer(kind=c_int64_t), intent(in), optional :: flags_
         integer(kind=c_int64_t) :: flags
@@ -1202,54 +1160,54 @@ contains
     function hdc_as_int8_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int8_1d_
 
     subroutine hdc_as_int8_1d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_1d_sub
 
     function hdc_as_int8_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int8_2d_
 
     subroutine hdc_as_int8_2d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_2d_sub
 
@@ -1319,27 +1277,27 @@ contains
     function hdc_as_int32_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int32_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int32_2d_
 
     subroutine hdc_as_int32_2d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int32_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_2d_sub
 
@@ -1456,7 +1414,7 @@ contains
     end subroutine hdc_as_int32_sub
 
     function hdc_new_dtype(rank, shape_, type_str) result(res)
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), target :: shape_
         character(len=*), intent(in) :: type_str
         type(hdc_t) :: res
@@ -1485,41 +1443,41 @@ contains
 
     subroutine hdc_as_double_1d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_double_1d_sub
 
     function hdc_as_double_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_double_2d_
 
     subroutine hdc_as_double_2d_sub(this,res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_double_2d_sub
 
@@ -1527,28 +1485,28 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_double_2d_path
 
     subroutine hdc_as_double_2d_path_sub(this,path,res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_double_2d_path_sub
 
@@ -1556,82 +1514,82 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_double_1d_path
 
     subroutine hdc_as_double_1d_path_sub(this,path,res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=dp), dimension(:), pointer, intent(inout) :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_double_1d_path_sub
 
     function hdc_as_float_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_float_1d_
 
     subroutine hdc_as_float_1d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_float_1d_sub
 
     function hdc_as_float_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_float_2d_
 
     subroutine hdc_as_float_2d_sub(this,res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_float_2d_sub
 
@@ -1639,28 +1597,28 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_float_2d_path
 
     subroutine hdc_as_float_2d_path_sub(this,path,res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_float_2d_path_sub
 
@@ -1668,28 +1626,28 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_float_1d_path
 
     subroutine hdc_as_float_1d_path_sub(this,path,res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         real(kind=sp), dimension(:), pointer, intent(inout) :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_float_1d_path_sub
 
@@ -1697,28 +1655,28 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int8_2d_path
 
     subroutine hdc_as_int8_2d_path_sub(this,path,res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_2d_path_sub
 
@@ -1726,28 +1684,28 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int8_1d_path
 
     subroutine hdc_as_int8_1d_path_sub(this,path,res)
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int8_t), dimension(:), pointer :: res
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int8_1d_path_sub
 
@@ -1762,7 +1720,7 @@ contains
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int32_2d_path
 
@@ -1776,7 +1734,7 @@ contains
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int32_2d_path_sub
 
@@ -1894,7 +1852,7 @@ contains
         integer(kind=c_long), dimension(1:1), target :: shape_ ! Won't compile on gfortran-4.8
 !        integer(kind=c_long), dimension(1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         shape_ = shape(data)
         data_ptr = c_loc(data)
         shape_ptr = c_loc(shape_)
@@ -1904,16 +1862,16 @@ contains
     subroutine hdc_set_int64_scalar(this, data)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int64_t) :: data
-        call c_hdc_set_int64_scalar(this, data)
+        integer(kind=c_int64_t), target :: data
+        call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT8)
     end subroutine hdc_set_int64_scalar
 
     subroutine hdc_set_int64_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int64_t) :: data
+        integer(kind=c_int64_t), target :: data
         character(len=*), intent(in) :: path
-        call c_hdc_set_int64_scalar_path(this, trim(path)//c_null_char, data)
+        call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT8)
     end subroutine hdc_set_int64_scalar_path
 
     subroutine hdc_set_int64_1d_path(this, path, data)
@@ -1922,7 +1880,7 @@ contains
         integer(kind=c_int64_t), dimension(:), target :: data
         integer(kind=c_long), dimension(1:1), target :: shape_
         type(c_ptr) :: data_ptr, shape_ptr
-        integer(1) :: rank = 1
+        integer(kind=c_size_t) :: rank = 1
         character(len=*), intent(in) :: path
         shape_ = shape(data)
         data_ptr = c_loc(data)
@@ -1933,54 +1891,54 @@ contains
     function hdc_as_int64_1d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int64_t), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int64_1d_
 
     subroutine hdc_as_int64_1d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int64_t), dimension(:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int64_1d_sub
 
     function hdc_as_int64_2d_(this) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int64_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int64_2d_
 
     subroutine hdc_as_int64_2d_sub(this, res)
         type(hdc_t) :: this
-        integer(kind=c_int8_t) :: rank
+        integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), pointer :: shape_
         type(c_ptr) :: shape_ptr, data_ptr
         integer(kind=c_int64_t), dimension(:,:), pointer :: res
         rank = c_hdc_get_rank(this)
         shape_ptr = c_hdc_get_shape(this)
         data_ptr = c_hdc_as_voidptr(this)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int64_2d_sub
 
@@ -2024,7 +1982,7 @@ contains
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int64_2d_path
 
@@ -2038,7 +1996,7 @@ contains
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int64_2d_path_sub
 
@@ -2053,7 +2011,7 @@ contains
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end function hdc_as_int64_1d_path
 
@@ -2067,7 +2025,7 @@ contains
         rank = c_hdc_get_rank_path(this,trim(path)//c_null_char)
         shape_ptr = c_hdc_get_shape_path(this,trim(path)//c_null_char)
         data_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, shape_, (/ rank /))
+        call c_f_pointer(shape_ptr, shape_, [ rank ])
         call c_f_pointer(data_ptr, res, shape_)
     end subroutine hdc_as_int64_1d_path_sub
 

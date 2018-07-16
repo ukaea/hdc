@@ -787,5 +787,11 @@ size_t hdc_get_size(hdc_t* tree)
     return t->get_size();
 }
 
+void hdc_set_scalar(struct hdc_t* tree, const char* path, const unsigned char* data, hdc_type_t _type)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->set_data(path,(void*)data,_type);
+}
+
 // end extern C
 }
