@@ -1234,14 +1234,19 @@ int HDC::get_rank(const std::string& path)
 {
     //TODO: make more error-proof - add has check -> make it as function???
     memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
-    return get(path).get_rank();
+    if (path.empty())
+        return get_rank();
+    else
+        return get(path).get_rank();
 }
 
 size_t* HDC::get_shape(const std::string& path)
 {
     memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
-    return get(path).get_shape();
-
+    if (path.empty())
+        return get_shape();
+    else
+        return get(path).get_shape();
 }
 
 

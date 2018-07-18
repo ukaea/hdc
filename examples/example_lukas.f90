@@ -9,7 +9,7 @@ contains
     subroutine test_hdc(hdc_out)
         use hdc_fortran
         implicit none
-        
+
         type(hdc_t), intent(out) :: hdc_out
         type(hdc_t) :: hdc
 
@@ -33,14 +33,14 @@ contains
         call hdc_set_data(hdc, "in/arr2", array2)
         call hdc_set(hdc, "in/param_d", 3.14d0)
         call hdc_set(hdc, "in/param_i", 333)
-        
+
         call hdc_set_data(hdc, "in/arrays/A1", array3)
 
         call hdc_dump(hdc)
 
-        write(*,*) "--- Copy to hdc_out ---" 
-        call hdc_copy(hdc, hdc_out) 
-        
+        write(*,*) "--- Copy to hdc_out ---"
+        call hdc_copy(hdc, hdc_out)
+
     end subroutine test_hdc
 
 
@@ -56,11 +56,11 @@ contains
         !     end subroutine hdc_as_double_1d_path_sub
         ! end interface
 
-        
+
         type(hdc_t) :: hdc_test
 
-        integer    :: i 
-        
+        integer    :: i
+
         integer, dimension(5) :: arr
         integer, dimension(:), pointer  :: arr_p
         !  integer, dimension(:), pointer  :: arr3
@@ -83,12 +83,12 @@ contains
 
         if (hdc_exists(hdc_test, "in/arrays/A1")) then
             call hdc_get(hdc_test, "in/arrays/A1", arr_p)
-            ! arr_p = hdc_as_int32_1d(hdc_test, "in/arrays/A1") ! doesn't work ether, even for pointer... 
+            ! arr_p = hdc_as_int32_1d(hdc_test, "in/arrays/A1") ! doesn't work ether, even for pointer...
             ! call hdc_as_double_1d
 
         !     arr_p = hdc_as_double_1d_path(hdc_test, "in/arrays/A1")
         !     call hdc_as_double_1d_path_sub(hdc_test, "in/arrays/A1", arr)
-            
+
             arr = arr_p
 
             print *

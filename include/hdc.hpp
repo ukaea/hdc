@@ -411,7 +411,8 @@ public:
     template<typename T> T as(const std::string& path)
     {
         DEBUG_STDOUT("as<T>("+path+")\n");
-        return get(path).as<T>();
+        if (path.empty()) return as<T>();
+        else return get(path).as<T>();
     }
 
     /** Returns double. */
