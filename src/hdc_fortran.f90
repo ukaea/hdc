@@ -498,9 +498,9 @@ module hdc_fortran
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hello_fort, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
     hdc_set_double_1d_path, hdc_get_rank, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
-    hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_as_int32_1d_, hdc_as_int32_2d_, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
+    hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
-    hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_init_, hdc_as_string_sub, &
+    hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_as_string_sub, &
     hdc_as_string_path_sub, hdc_as_int32, hdc_as_string, hdc_as_int64_path_sub, &
     hdc_as_int64, hdc_new_string, hdc_print_info, &
     hdc_as_float_2d
@@ -938,15 +938,6 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_sub
 
-    function hdc_as_int32_2d_(this) result(res)
-        use iso_c_binding
-        type(hdc_t) :: this
-        integer(kind=c_int32_t), dimension(:,:), pointer :: res
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this)
-        call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-    end function hdc_as_int32_2d_
-
     subroutine hdc_as_int32_2d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int32_t), dimension(:,:), pointer :: res
@@ -954,13 +945,6 @@ contains
         data = hdc_get_data(this)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_2d_sub
-
-    function hdc_as_float_(this) result(res)
-        use iso_c_binding
-        type(hdc_t) :: this
-        real(kind=sp) :: res
-        res = c_hdc_as_float_scalar(this)
-    end function hdc_as_float_
 
     subroutine hdc_as_double_sub(this, res)
         type(hdc_t) :: this
@@ -971,7 +955,11 @@ contains
     subroutine hdc_as_float_sub(this, res)
         type(hdc_t) :: this
         real(kind=sp) :: res
-        res = hdc_as_float_(this)
+        real(kind=sp), pointer :: pres
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this, c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end subroutine hdc_as_float_sub
 
     function hdc_as_double(this, path) result(res)
@@ -979,30 +967,47 @@ contains
         type(hdc_t) :: this
         character(len=*), optional :: path
         real(kind=dp) :: res
+        real(kind=dp), pointer :: pres
+        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        res = c_hdc_as_double_scalar_path(this, trim(path)//c_null_char)
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end function hdc_as_double
 
     function hdc_as_float(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
-        character(len=*) :: path
+        character(len=*),optional :: path
         real(kind=sp) :: res
-        res = c_hdc_as_float_scalar_path(this, trim(path)//c_null_char)
+        real(kind=sp), pointer :: pres
+        type(hdc_data_t) :: data
+        if (.not.present(path)) path = ""
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end function hdc_as_float
 
     subroutine hdc_as_double_path_sub(this, path, res)
         type(hdc_t) :: this
         character(len=*) :: path
         real(kind=dp) :: res
-        res = hdc_as_double(this,path)
+        real(kind=dp), pointer :: pres
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end subroutine hdc_as_double_path_sub
 
     subroutine hdc_as_float_path_sub(this, path, res)
         type(hdc_t) :: this
         character(len=*) :: path
         real(kind=sp) :: res
-        res = hdc_as_float(this,path)
+        real(kind=sp), pointer :: pres
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end subroutine hdc_as_float_path_sub
 
     function hdc_as_int8(this, path) result(res)
@@ -1010,16 +1015,24 @@ contains
         type(hdc_t) :: this
         character(len=*), optional :: path
         integer(kind=c_int8_t) :: res
+        integer(kind=c_int8_t), pointer :: pres
+        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        res = c_hdc_as_int8_scalar_path(this, trim(path)//c_null_char)
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end function hdc_as_int8
 
     subroutine hdc_as_int8_path_sub(this, path, res)
         type(hdc_t) :: this
         character(len=*), optional :: path
         integer(kind=c_int8_t) :: res
+        integer(kind=c_int8_t), pointer :: pres
+        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        res = hdc_as_int8(this,trim(path)//c_null_char)
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end subroutine hdc_as_int8_path_sub
 
     function hdc_as_int32(this, path) result(res)
@@ -1027,8 +1040,12 @@ contains
         type(hdc_t) :: this
         character(len=*), optional :: path
         integer(kind=c_int32_t) :: res
+        integer(kind=c_int32_t), pointer :: pres
+        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        res = c_hdc_as_int32_scalar_path(this, trim(path)//c_null_char)
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
     end function hdc_as_int32
 
     subroutine hdc_as_int32_path_sub(this, path, res)
@@ -1038,25 +1055,11 @@ contains
         res = hdc_as_int32(this,trim(path)//c_null_char)
     end subroutine hdc_as_int32_path_sub
 
-!     function hdc_as_int8_(this) result(res)
-!         use iso_c_binding
-!         type(hdc_t) :: this
-!         integer(kind=c_int8_t) :: res
-!         res = c_hdc_as_int8_scalar(this)
-!     end function hdc_as_int8_
-
     subroutine hdc_as_int8_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int8_t) :: res
         res = hdc_as_int8(this)
     end subroutine hdc_as_int8_sub
-
-!     function hdc_as_int32_(this) result(res)
-!         use iso_c_binding
-!         type(hdc_t) :: this
-!         integer(kind=c_int32_t) :: res
-!         res = c_hdc_as_int32_scalar(this)
-!     end function hdc_as_int32_
 
     subroutine hdc_as_int32_sub(this, res)
         type(hdc_t) :: this
@@ -1141,15 +1144,6 @@ contains
         data = hdc_get_data(this)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_1d_sub
-
-!     function hdc_as_float_2d_(this) result(res)
-!         use iso_c_binding
-!         type(hdc_t) :: this
-!         real(kind=sp), dimension(:,:), pointer :: res
-!         type(hdc_data_t) :: data
-!         data = hdc_get_data(this)
-!         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-!     end function hdc_as_float_2d_
 
     subroutine hdc_as_float_2d_sub(this,res)
         type(hdc_t) :: this
@@ -1376,15 +1370,6 @@ contains
         call c_hdc_set_int64_path(this, trim(path)//c_null_char, rank, shape_ptr, data_ptr)
     end subroutine hdc_set_int64_1d_path
 
-!     function hdc_as_int64_1d_(this) result(res)
-!         use iso_c_binding
-!         type(hdc_t) :: this
-!         integer(kind=c_int64_t), dimension(:), pointer :: res
-!         type(hdc_data_t) :: data
-!         data = hdc_get_data(this)
-!         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-!     end function hdc_as_int64_1d_
-
     subroutine hdc_as_int64_1d_sub(this, res)
         type(hdc_t) :: this
         integer(kind=c_int64_t), dimension(:), pointer :: res
@@ -1392,15 +1377,6 @@ contains
         data = hdc_get_data(this)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_1d_sub
-
-!     function hdc_as_int64_2d_(this) result(res)
-!         use iso_c_binding
-!         type(hdc_t) :: this
-!         integer(kind=c_int64_t), dimension(:,:), pointer :: res
-!         type(hdc_data_t) :: data
-!         data = hdc_get_data(this)
-!         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-!     end function hdc_as_int64_2d_
 
     subroutine hdc_as_int64_2d_sub(this, res)
         type(hdc_t) :: this
