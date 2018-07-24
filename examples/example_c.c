@@ -81,21 +81,21 @@ struct hdc_t* init_hdc_data() {
 
     // Add data to a single node
     struct hdc_t* data = hdc_new_empty();
-    hdc_set_int32(data,1,shape,(void*)array,0);
+    hdc_set_int32(data,"",1,shape,(void*)array,0);
 
     // Add data to a subtree
-    hdc_set_int32_path(tree,"groupA/data/int_array",1,shape,(void*)array,HDCDefault);
+    hdc_set_int32(tree,"groupA/data/int_array",1,shape,(void*)array,HDCDefault);
 
     // Ask on some data details, use subtree to shorten the path
-    int8_t rank2 = hdc_get_rank(node);
-    size_t* shape2 = hdc_get_shape(node);
+    int8_t rank2 = hdc_get_rank(node,"");
+    size_t* shape2 = hdc_get_shape(node,"");
     printf("Dimension: %d\nShape: ", rank2);
     for (int8_t i=0; i<rank2; i++) printf("%ld ",shape2[i]);
     printf("\n");
-    printf("dtype: %s\n",hdc_get_type_str(node));
+    printf("dtype: %s\n",hdc_get_type_str(node,""));
 
     // Get data back from tree
-    int32_t* array2 = hdc_as_int32_1d(node);
+    int32_t* array2 = hdc_as_int32_1d(node,"");
     printf("Data: ");
     for (size_t i=0; i<shape2[0]; i++) printf("%d ",array2[i]);
     printf("\n");
@@ -112,9 +112,9 @@ void manipulate(struct hdc_t* data) {
     // Get the HDC node
     struct hdc_t* node = hdc_get(data, "groupA/data/int_array");
     // Get the pointer to the data
-    int32_t* array2 = hdc_as_int32_1d(node);
+    int32_t* array2 = hdc_as_int32_1d(node,"");
     // and shape (assime rank = 1)
-    size_t* shape2 = hdc_get_shape(node);
+    size_t* shape2 = hdc_get_shape(node,"");
     // Multiply by 2
     for (size_t i=0; i<shape2[0]; i++)
         array2[i] *= 2;

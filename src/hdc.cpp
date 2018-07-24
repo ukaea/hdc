@@ -685,6 +685,7 @@ HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
+    if (vs.empty()) return *this;
     auto first = vs[0];
     vs.erase(vs.begin());
     char* buffer = storage->get(uuid);
@@ -713,26 +714,6 @@ HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
         else { return child.get(vs); }
     }
 }
-
-
-
-// HDC HDC::get_single(boost::variant<size_t,std::string> key) {
-//     char* buffer = storage->get(uuid);
-//     auto segment = bip::managed_external_buffer(bip::open_only,buffer+sizeof(hdc_header_t),0);
-//     hdc_map_t* children = segment.find<hdc_map_t>("d").first;
-//     if (key.type() == typeid(std::string)) {
-//         const char* str = boost::get<std::string>(key).c_str();
-//         if (children->count(str)) {
-//             auto rec = children->find(str);
-//             return HDC(storage,rec->address.c_str());
-//         } else throw HDCException("get(string): Not found\n");
-//     } else {
-//         size_t index = boost::get<size_t>(key);
-//         if (index < children->size()) {
-//             return HDC(storage,children->get<by_index>()[index].address.c_str());
-//         } else throw HDCException("get(index): index > size()\n");
-//     }
-// }
 
 HDC HDC::get_slice(vector<boost::variant<size_t, std::string>> vs, size_t i)
 {
