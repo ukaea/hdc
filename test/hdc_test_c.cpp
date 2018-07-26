@@ -17,7 +17,7 @@ TEST_CASE("C_EmptyNode", "[CHDC]")
     CHECK(false == hdc_exists(h, "aaa"));
     hdc_delete(h);
 }
-/*
+
 TEST_CASE("C_EmptyArrayNode", "[CHDC]")
 {
     int rank = 1;
@@ -105,11 +105,11 @@ TEST_CASE("C_Int8DataManipulation", "[CHDC]")
     CHECK(1 == hdc_get_rank(h, ""));
     CHECK(4 == hdc_get_shape(h, "")[0]);
     CHECK(strcmp("int8", hdc_get_type_str(h, "")) == 0);
-    int8_t* data2 = hdc_as_int8_1d(h, "");
+    int8_t* data2 = hdc_as_int8_array(h, "");
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
     data[3] = 120;
     hdc_set_int8(h, "", rank, shape, (void*)data, HDCDefault);
-    data2 = hdc_as_int8_1d(h, "");
+    data2 = hdc_as_int8_array(h, "");
     CHECK(120 == data2[3]);
 }
 
@@ -124,11 +124,11 @@ TEST_CASE("C_Int32DataManipulation", "[CHDC]")
     CHECK(1 == hdc_get_rank(h, ""));
     CHECK(4 == hdc_get_shape(h, "")[0]);
     CHECK(strcmp("int32", hdc_get_type_str(h, "")) == 0);
-    int32_t* data2 = hdc_as_int32_1d(h, "");
+    int32_t* data2 = hdc_as_int32_array(h, "");
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
     data[3] = 666;
     hdc_set_int32(h, "", rank, shape, (void*)data, HDCDefault);
-    data2 = hdc_as_int32_1d(h, "");
+    data2 = hdc_as_int32_array(h, "");
     CHECK(666 == data2[3]);
 }
 
@@ -143,11 +143,11 @@ TEST_CASE("C_Int64DataManipulation", "[CHDC]")
     CHECK(1 == hdc_get_rank(h, ""));
     CHECK(4 == hdc_get_shape(h, "")[0]);
     CHECK(strcmp("int64", hdc_get_type_str(h, "")) == 0);
-    int64_t* data2 = hdc_as_int64_1d(h, "");
+    int64_t* data2 = hdc_as_int64_array(h, "");
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
     data[3] = 666;
     hdc_set_int64(h, "", rank, shape, (void*)data, HDCDefault);
-    data2 = hdc_as_int64_1d(h, "");
+    data2 = hdc_as_int64_array(h, "");
     CHECK(666 == data2[3]);
 }
 
@@ -163,11 +163,11 @@ TEST_CASE("C_DoubleDataManipulation", "[CHDC]")
     CHECK(1 == hdc_get_rank(h, ""));
     CHECK(4 == hdc_get_shape(h, "")[0]);
     CHECK(strcmp("float64", hdc_get_type_str(h, "")) == 0);
-    double* data2 = hdc_as_double_1d(h, "");
+    double* data2 = hdc_as_double_array(h, "");
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
     data[3] = 666.666;
     hdc_set_double(h, "", rank, shape, data, HDCDefault);
-    data2 = hdc_as_double_1d(h, "");
+    data2 = hdc_as_double_array(h, "");
     CHECK(666.666 == data2[3]);
 }
 
@@ -225,7 +225,7 @@ TEST_CASE("C_get_data", "[CHDC]")
     for (size_t i=0; i<HDC_MAX_DIMS; i++) CHECK(data_in.shape[i] == data_out.shape[i]);
     hdc_delete(h);
 }
-*/
+
 //-----------------------------------------------------------------------------------------
 /*
 TEST_CASE("C_GetKeys","[CHDC]") {

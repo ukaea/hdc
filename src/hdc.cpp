@@ -650,6 +650,7 @@ HDC* HDC::get_ptr(vector<boost::variant<size_t, std::string>> vs)
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
+    if (vs.empty()) return this;
     auto first = vs[0];
     vs.erase(vs.begin());
     if (first.type() == typeid(size_t)) return get_slice_ptr(boost::get<size_t>(first));
@@ -750,6 +751,7 @@ HDC* HDC::get_slice_ptr(vector<boost::variant<size_t, std::string>> vs, size_t i
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
+    if (vs.empty()) return get_slice_ptr(i);
     auto first = vs[0];
     vs.erase(vs.begin());
     hdc_map_t* children = get_children_ptr();
@@ -797,12 +799,14 @@ HDC* HDC::get_slice_ptr(const std::string& path, size_t i)
 
 HDC* HDC::get_ptr(const std::string& path)
 {
-    return get_ptr(split(path));
+    if (path.empty()) return this;
+    else return get_ptr(split(path));
 }
 
 HDC HDC::get(const std::string& path)
 {
-    return get(split(path));
+    if (path.empty()) return *this;
+    else return get(split(path));
 }
 
 void HDC::set_child(vector<boost::variant<size_t, std::string>> vs, HDC* n)
@@ -953,11 +957,13 @@ void HDC::set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, h
 
 void HDC::set_data_c(const std::string& path, int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags)
 {
-    if (!exists(path)) {
+
+    if (!path.empty() && !exists(path)) {
         HDC h;
         add_child(path, h); // TODO: add constructor for this!!
     }
-    get(path).set_data_c(_rank, _shape, _data, _type, _flags);
+    if (!path.empty()) get(path).set_data_c(_rank, _shape, _data, _type, _flags);
+    else set_data_c(_rank, _shape, _data, _type, _flags);
 }
 
 void HDC::set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags)

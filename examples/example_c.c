@@ -95,7 +95,7 @@ struct hdc_t* init_hdc_data() {
     printf("dtype: %s\n",hdc_get_type_str(node,""));
 
     // Get data back from tree
-    int32_t* array2 = hdc_as_int32_1d(node,"");
+    int32_t* array2 = hdc_as_int32_array(node,"");
     printf("Data: ");
     for (size_t i=0; i<shape2[0]; i++) printf("%d ",array2[i]);
     printf("\n");
@@ -112,7 +112,7 @@ void manipulate(struct hdc_t* data) {
     // Get the HDC node
     struct hdc_t* node = hdc_get(data, "groupA/data/int_array");
     // Get the pointer to the data
-    int32_t* array2 = hdc_as_int32_1d(node,"");
+    int32_t* array2 = hdc_as_int32_array(node,"");
     // and shape (assime rank = 1)
     size_t* shape2 = hdc_get_shape(node,"");
     // Multiply by 2

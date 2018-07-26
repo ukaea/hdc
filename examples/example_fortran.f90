@@ -65,7 +65,6 @@ contains
         shape2 = hdc_get_shape(node)
         print *,"Dimension: ", rank2
         print *,"Shape: ", shape2
-        call hdc_print_type_str(node)
         call hdc_get(node,array2)
         print *,array2
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

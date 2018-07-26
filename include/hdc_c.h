@@ -38,10 +38,11 @@ const char* hdc_as_string(struct hdc_t* tree, const char* path);
 const char* hdc_get_uuid(struct hdc_t* tree);  /**  */
 size_t hdc_get_rank(struct hdc_t* tree, const char* path);  /**  */
 size_t* hdc_get_shape(struct hdc_t* tree, const char* path);  /** Returns shape of array at given path. */
-uint8_t hdc_get_type(struct hdc_t* tree, const char* path);  /**  */
-int8_t* hdc_as_int8_1d(struct hdc_t* tree, const char* path); /**  */
-double* hdc_as_double_1d(struct hdc_t* tree, const char* path); /**  */
-int32_t* hdc_as_int32_1d(struct hdc_t* tree, const char* path); /**  */
+size_t hdc_get_type(struct hdc_t* tree, const char* path);  /**  */
+int8_t* hdc_as_int8_array(struct hdc_t* tree, const char* path); /**  */
+double* hdc_as_double_array(struct hdc_t* tree, const char* path); /**  */
+float* hdc_as_float_array(struct hdc_t* tree, const char* path); /**  */
+int32_t* hdc_as_int32_array(struct hdc_t* tree, const char* path); /**  */
 void* hdc_as_voidptr(struct hdc_t* tree, const char* path); /**  */
 void hdc_set_int8_scalar(struct hdc_t* tree, const char* path, int8_t data); /**  */
 void hdc_set_int32_scalar(struct hdc_t* tree, const char* path, int32_t data); /**  */
@@ -54,7 +55,7 @@ hdc_set_float(struct hdc_t* tree, const char* path, int rank, size_t* shape, voi
 void hdc_set_float_scalar(struct hdc_t* tree, const char* path, float data); /**  */
 double hdc_as_double_scalar(struct hdc_t* tree, const char* path); /**   Returns scalar double.  */
 float hdc_as_float_scalar(struct hdc_t* tree, const char* path); /**   Returns scalar double.  */
-int8_t hdc_as_int8_scalar_path(struct hdc_t* tree, const char* path); /** Returns scalar int8.  */
+int8_t hdc_as_int8_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int8.  */
 int32_t hdc_as_int32_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int32.  */
 char** hdc_keys(struct hdc_t* tree);
 void hdc_keys_py(struct hdc_t* tree, char** keys);
@@ -65,7 +66,7 @@ const char* hdc_dumps(struct hdc_t* tree);
 const char* hdc_get_datashape_str(struct hdc_t* tree);
 struct hdc_t*
 hdc_new_int64(int rank, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-int64_t* hdc_as_int64_1d(struct hdc_t* tree, const char* path); /**  */
+int64_t* hdc_as_int64_array(struct hdc_t* tree, const char* path); /**  */
 void hdc_set_int64_scalar(struct hdc_t* tree, const char* path, int64_t data); /**  */
 void hdc_set_int64(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags);
 int64_t hdc_as_int64_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int64.  */

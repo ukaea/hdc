@@ -230,20 +230,22 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
 
-    void set_string(const std::string& path, string str) {
-        if(!exists(path)) {
+    void set_string(const std::string& path, const std::string& str) {
+        if(!path.empty() && !exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
         }
-        get(path).set_string(str);
+        if (!path.empty()) get(path).set_string(str);
+        else set_string(str);
     }
-    void set_string(std::vector <boost::variant<size_t,std::string>> path, string str) {
-        if(!exists(path)) {
+
+    void set_string(std::vector <boost::variant<size_t,std::string>> path, const std::string& str) {
+        if(!path.empty() && !exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
         }
-        auto h = get(path);
-        get(path).set_string(str);
+        if (!path.empty()) get(path).set_string(str);
+        else set_string(str);
     }
     void set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
     void set_data_c(const std::string& path, int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
@@ -390,8 +392,9 @@ public:
     /** Returns string. Needs to have separate function */
     std::string as_string() {
         if (header.type == HDC_STRING) {
-            string str(storage->get(uuid)+sizeof(hdc_header_t));
-            return std::string(str);
+           std::string str(storage->get(uuid)+sizeof(hdc_header_t));
+           return str;
+
         } else {
             cout << header.type << endl;
             std::ostringstream oss;
@@ -404,7 +407,14 @@ public:
     std::string as_string(const std::string& path)
     {
         DEBUG_STDOUT("as_string("+path+")\n");
-        return get(path).as_string();
+        if (path.empty()) {
+            std::cerr << "DD::\n";
+            return as_string();
+        }
+        else {
+            std::cerr << "EE::\n";
+            return get(path).as_string();
+        }
     }
 
     /** Returns pointer to data of node under given path. */

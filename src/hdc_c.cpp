@@ -192,16 +192,16 @@ void hdc_set_int8(struct hdc_t* tree, const char* path, int rank, size_t* shape,
 size_t hdc_get_rank(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->get_rank((string)path);
+    return t->get(path).get_rank();
 }
 
 size_t* hdc_get_shape(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->get_shape(path);
+    return t->get(path).get_shape();
 }
 
-uint8_t hdc_get_type(struct hdc_t* tree, const char* path)
+size_t hdc_get_type(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return t->get(path).get_type();
@@ -213,33 +213,33 @@ void* hdc_as_voidptr(struct hdc_t* tree, const char* path)
     return t->as<void*>(path);
 }
 
-int8_t* hdc_as_int8_1d(struct hdc_t* tree, const char* path)
+int8_t* hdc_as_int8_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return t->as<int8_t*>(path);
 }
 
-int32_t* hdc_as_int32_1d(struct hdc_t* tree, const char* path)
+int32_t* hdc_as_int32_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return t->as<int32_t*>((string)path);
 }
 
-int64_t* hdc_as_int64_1d(struct hdc_t* tree, const char* path)
+int64_t* hdc_as_int64_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return t->as<int64_t*>((string)path);
 }
 
 
-double* hdc_as_double_1d(struct hdc_t* tree, const char* path)
+double* hdc_as_double_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return t->as<double*>((string)path);
 }
 
 
-float* hdc_as_float_1d(struct hdc_t* tree, const char* path)
+float* hdc_as_float_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return t->as<float*>((string)path);
@@ -313,14 +313,15 @@ struct hdc_t* hdc_copy(hdc_t* src)
 void hdc_set_string(hdc_t* tree, const char* path, const char* str)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_string(path, (std::string)str);
+    t->set_string((string)path, str);
     return;
 }
 
 const char* hdc_as_string(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->as_string(path).c_str();
+    auto data = t->get_data(path);
+    return reinterpret_cast<const char *>(data.data);
 }
 
 double hdc_as_double_scalar(hdc_t* tree, const char* path)
@@ -335,13 +336,7 @@ float hdc_as_float_scalar(hdc_t* tree, const char* path)
     return (t->as<float*>((string)path))[0];
 }
 
-int8_t hdc_as_int8_scalar(hdc_t* tree)
-{
-    HDC* t = (HDC*)tree->obj;
-    return (t->as<int8_t*>())[0];
-}
-
-int8_t hdc_as_int8_scalar_path(hdc_t* tree, const char* path)
+int8_t hdc_as_int8_scalar(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     return (t->as<int8_t*>((string)path))[0];
@@ -355,14 +350,15 @@ int32_t hdc_as_int32_scalar_path(hdc_t* tree, const char* path)
 
 void hdc_print_type_str(hdc_t* tree, const char* path)
 {
-    printf("dtype: %s\n", hdc_get_type_str(tree,path));
+    HDC* t = (HDC*)tree->obj;
+    std::cout << t->get_type_str(path) << std::endl;
     return;
 }
 
 const char* hdc_get_type_str(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->get_type_str((string)path).c_str());
+    return (t->get_type_str(path).c_str());
 }
 
 

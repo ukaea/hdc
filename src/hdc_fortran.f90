@@ -145,11 +145,6 @@ module hdc_fortran
             type(hdc_t), value :: node
         end subroutine hdc_append_slice
 
-        subroutine hdc_print_type_str(obj) bind(c,name="hdc_print_type_str")
-            import
-            type(hdc_t), value :: obj
-        end subroutine hdc_print_type_str
-
         subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
             import
             type(hdc_t), value :: obj
@@ -235,20 +230,13 @@ module hdc_fortran
         end subroutine c_hdc_set_data
 
         !> Sets arbitrary data casted to void pointer. This is interface to C.
-        subroutine c_hdc_as_string_fortran(obj,str,strlen) bind(c,name="hdc_as_string_fortran")
-            import
-            type(hdc_t), value:: obj
-            integer(c_int) :: strlen
-            character(kind=c_char) :: str(*)
-        end subroutine c_hdc_as_string_fortran
-        !> Sets arbitrary data casted to void pointer. This is interface to C.
-        subroutine c_hdc_as_string_path_fortran(obj,path,str,strlen)  bind(c,name="hdc_as_string_path_fortran")
+        subroutine c_hdc_as_string_fortran(obj,path,str,strlen)  bind(c,name="hdc_as_string_fortran")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             integer(c_int) :: strlen
             character(kind=c_char) :: str(*)
-        end subroutine c_hdc_as_string_path_fortran
+        end subroutine c_hdc_as_string_fortran
         !> Sets arbitrary data casted to void pointer to given path. This is interface to C.
         function c_hdc_as_voidptr_path(obj, path) result(res) bind(c,name="hdc_as_voidptr")
             import
@@ -394,17 +382,10 @@ module hdc_fortran
         module procedure hdc_init_
     end interface hdc_init
 
-
-! TODO:
-!     interface hdc_new
-! !         module procedure hdc_new_empty
-!         module procedure hdc_new_size
-!     end interface hdc_new
-!
     public :: hello, hdc_new_empty, hdc_new_size, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_exists, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
-    hdc_set_double_1d_path, hdc_get_rank, hdc_print_type_str, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
+    hdc_set_double_1d_path, hdc_get_rank, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
     hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
     hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_as_string_sub, &
