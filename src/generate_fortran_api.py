@@ -5,9 +5,9 @@ env = Environment(
 
 
 types = [
-    ("int8",    "HDC_INT8",   "integer(kind=c_int8_t)"),
+    #("int8",    "HDC_INT8",   "integer(kind=c_int8_t)"),
     #("int16",   "HDC_INT16",  "integer(kind=c_int16_t)"),
-    #("int32",   "HDC_INT32",  "integer(kind=c_int32_t)"),
+    ("int32",   "HDC_INT32",  "integer(kind=c_int32_t)"),
     #("int64",   "HDC_INT64",  "integer(kind=c_int64_t)"),
     #("uint8",   "HDC_UINT8",  "integer(kind=c_int8_t)"),
     #("uint16",  "HDC_UINT16", "integer(kind=c_int16_t)"),
