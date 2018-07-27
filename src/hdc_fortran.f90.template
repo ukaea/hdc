@@ -65,6 +65,8 @@ interface hdc_set
     {% for rank in ranks %}
         hdc_set_{{ type_[0] }}_scalar_path
         hdc_set_{{ type_[0] }}_scalar
+        hdc_set_{{ type_[0] }}_{{ rank[0] }}d_
+        hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
     {% endfor %}
 {% endfor %}
 end interface hdc_set
@@ -73,15 +75,16 @@ contains
 
 {% for type_ in types %}
     {% for rank in ranks %}
-    function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_(this) result(res)
+    function hdc_as_{{ type_[0] }}_{{ rank[0] }}d(this, path) result(res)
         use iso_c_binding
         type(hdc_t) :: this
+        character(len=*), optional :: path
         type(hdc_data_t) :: data
         {{ type_[2] }}, pointer :: res({{ rank[1] }})
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_"
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-    end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_
+    end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d
 
     subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub(this, res)
         use iso_c_binding
@@ -92,17 +95,6 @@ contains
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub"
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub
-
-    function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path(this, path) result(res)
-        use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
-        type(hdc_data_t) :: data
-        {{ type_[2] }}, pointer :: res({{ rank[1] }})
-        data = c_hdc_get_data(this,trim(path)//c_null_char)
-        if (data%rank /= {{ rank[0] }}) stop "incompatible ranks in hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path"
-        call c_f_pointer(data%data, res, data%dshape(1:data%rank))
-    end function hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path
 
     subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_(this, data, flags_)
         use iso_c_binding
@@ -147,7 +139,7 @@ contains
         call c_hdc_set_scalar(this, c_null_char, data, {{ type_[1] }})
     end subroutine hdc_set_{{ type_[0] }}_scalar
 
-    subroutine hdc_set_{{ type_[0] }}_scalar(this, path, data)
+    subroutine hdc_set_{{ type_[0] }}_scalar_path(this, path, data)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), intent(in) :: path

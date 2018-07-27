@@ -348,13 +348,6 @@ int32_t hdc_as_int32_scalar_path(hdc_t* tree, const char* path)
     return (t->as<int32_t*>((string)path))[0];
 }
 
-void hdc_print_type_str(hdc_t* tree, const char* path)
-{
-    HDC* t = (HDC*)tree->obj;
-    std::cout << t->get_type_str(path) << std::endl;
-    return;
-}
-
 const char* hdc_get_type_str(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
@@ -484,7 +477,7 @@ hdc_data_t hdc_get_data(hdc_t* tree, const char* path)
 void hdc_set_data(hdc_t* tree, const char* path, hdc_data_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->set_data(path,data);
+    t->set_data(path,data);
 }
 
 size_t hdc_get_size(hdc_t* tree)

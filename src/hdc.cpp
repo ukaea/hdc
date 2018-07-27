@@ -1445,6 +1445,7 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
 hdc_data_t HDC::get_data()
 {
     auto buffer = this->get_buffer();
+    memcpy(&header, buffer, sizeof(hdc_header_t));
     hdc_data_t obj;
     obj.type = this->header.type;
     obj.flags = this->header.flags;
@@ -1466,30 +1467,51 @@ hdc_data_t HDC::get_data(const std::string& path)
 
 void HDC::set_data(hdc_data_t obj)
 {
-    this->header.type = obj.type;
-    this->header.flags = obj.flags;
-    this->header.rank = obj.rank;
-    memset(this->header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-    this->header.data_size = hdc_sizeof(obj.type);
-    for (size_t i=0;i<this->header.rank;i++) {
-        this->header.shape[i] = obj.shape[i];
-        this->header.data_size *= obj.shape[i];
-    }
-    this->header.buffer_size = this->header.data_size + sizeof(hdc_header_t);
-    char* buffer = new char[this->header.buffer_size];
-    memcpy(buffer,&(this->header),sizeof(hdc_header_t));
-    memcpy(buffer+sizeof(hdc_header_t),obj.data,this->header.data_size);
-    storage->set(uuid, buffer, header.buffer_size);
-    // Now it is safe to
-    if (!storage->usesBuffersDirectly()) delete[] buffer;
+        auto buffer = storage->get(uuid);
+        memcpy(&header, buffer, sizeof(hdc_header_t));
+        // Start with determining of the buffer size
+        size_t data_size = hdc_sizeof(obj.type);
+        for (size_t i = 0; i < obj.rank; i++) data_size *= obj.shape[i];
+        size_t buffer_size = data_size + sizeof(hdc_header_t);
+        if (header.buffer_size == buffer_size) {
+            storage->lock(uuid);
+            this->header.type = obj.type;
+            this->header.flags = obj.flags;
+            memcpy(buffer,&header,sizeof(hdc_header_t));
+            memcpy(buffer + sizeof(hdc_header_t), obj.data, data_size);
+            storage->unlock(uuid);
+            return;
+        } else {
+            storage->remove(uuid);
+            this->header.type = obj.type;
+            this->header.flags = obj.flags;
+            this->header.rank = obj.rank;
+            memset(this->header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            this->header.data_size = hdc_sizeof(obj.type);
+            for (size_t i=0;i<this->header.rank;i++) {
+                this->header.shape[i] = obj.shape[i];
+                this->header.data_size *= obj.shape[i];
+            }
+            this->header.buffer_size = this->header.data_size + sizeof(hdc_header_t);
+            char* buffer = new char[this->header.buffer_size];
+            memcpy(buffer,&header,sizeof(hdc_header_t));
+            memcpy(buffer+sizeof(hdc_header_t),obj.data,this->header.data_size);
+            storage->set(uuid, buffer, header.buffer_size);
+            // Now it is safe to
+            if (!storage->usesBuffersDirectly()) delete[] buffer;
+        }
 };
 
 void HDC::set_data(const std::string& path, hdc_data_t obj)
 {
-    if (path.empty())
-    {
-        return this->set_data(obj);
+    if (path.empty()) {
+        set_data(obj);
+        return;
     } else {
-        return this->get(path).set_data(obj);
+        if (!exists(path)) {
+            HDC h;
+            add_child(path, h); // TODO: add constructor for this!!
+        }
+        get(path).set_data(obj);
     }
 }

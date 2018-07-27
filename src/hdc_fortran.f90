@@ -48,10 +48,10 @@ module hdc_fortran
         end subroutine hello
 
         !> Default constructor. This is interface to C.
-        function hdc_new_empty() result( obj) bind(c,name="hdc_new_empty")
+        function c_hdc_new_empty() result( obj) bind(c,name="hdc_new_empty")
             import
             type(hdc_t) :: obj
-        end function hdc_new_empty
+        end function c_hdc_new_empty
 
         !> Constructs HDC from string/uri
         function c_hdc_new_string(str) result(obj) bind(c,name="hdc_new_string")
@@ -59,13 +59,6 @@ module hdc_fortran
             type(hdc_t) :: obj
             character(kind=c_char), intent(in) :: str(*)
         end function c_hdc_new_string
-
-        !> Default constructor. This is interface to C.
-        function hdc_new_size(s) result(obj) bind(c,name="hdc_new_size")
-            import
-            integer(kind=c_size_t),value :: s
-            type(hdc_t) :: obj
-        end function hdc_new_size
 
         !> Construct empty arra of type given by string.
         function c_hdc_new_dtype(rank, shape_, type_str) result(obj) bind(c,name="hdc_new_dtype")
@@ -365,32 +358,19 @@ module hdc_fortran
         module procedure hdc_get_shape_path
     end interface hdc_get_shape
 
-    interface hdc_set_int8_scalar
-        module procedure hdc_set_int8_scalar_path
-        module procedure hdc_set_int8_scalar_
-    end interface hdc_set_int8_scalar
+    interface hdc_new
+        module procedure hdc_new_dt
+    end interface hdc_new
 
-    interface hdc_get_ptr_f
-        module procedure hdc_get_ptr_f
-    end interface hdc_get_ptr_f
-
-    interface hdc_get_rank
-        module procedure hdc_get_rank
-    end interface hdc_get_rank
-
-    interface hdc_init
-        module procedure hdc_init_
-    end interface hdc_init
-
-    public :: hello, hdc_new_empty, hdc_new_size, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_exists, &
+    public :: hello, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_exists, &
     hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
     hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
     hdc_set_double_1d_path, hdc_get_rank, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
-    hdc_set_int8_scalar, hdc_get_slice_path_sub, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
+    hdc_get_slice_path_sub, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
     hdc_as_int8_sub, hdc_as_int32_sub, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
     hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_as_string_sub, &
     hdc_as_string_path_sub, hdc_as_int32, hdc_as_string, hdc_as_int64_path_sub, &
-    hdc_as_int64, hdc_new_string, hdc_print_info, hdc_as_float_2d
+    hdc_as_int64, hdc_new_string, hdc_print_info, hdc_as_float_2d, hdc_new
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -468,15 +448,15 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int8_t), dimension(:), target :: data
-        integer(kind=c_int64_t), intent(in), optional :: flags_in
-        integer(kind=c_int64_t) :: flags = HDCFortranOrder
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
         out%dtype = HDC_INT8
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, c_null_char, out)
     end subroutine hdc_set_int8_1d
@@ -484,16 +464,16 @@ contains
     subroutine hdc_set_int32_1d(this, data, flags_in)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int32_t), dimension(:), target :: data
-        integer(kind=c_int64_t), intent(in), optional :: flags_in
-        integer(kind=c_int64_t) :: flags = HDCFortranOrder
+        integer(kind=c_int32_t), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
         out%dtype = HDC_INT32
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, c_null_char, out);
     end subroutine hdc_set_int32_1d
@@ -541,7 +521,7 @@ contains
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, c_null_char, out)
     end subroutine hdc_set_double_1d
@@ -559,7 +539,7 @@ contains
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_1d_path
@@ -577,7 +557,7 @@ contains
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_1d_path
@@ -629,7 +609,7 @@ contains
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_1d_path
@@ -638,20 +618,21 @@ contains
     subroutine hdc_set_int32_1d_path(this, path, data, flags_in)
         use iso_c_binding
         type(hdc_t) :: this
-        integer(kind=c_int32_t), dimension(:), target :: data
+        integer(kind=c_int32_t), intent(in), target :: data(:)
         character(len=*):: path
-        integer(kind=c_int64_t), intent(in), optional  :: flags_in
-        integer(kind=c_int64_t) :: flags = HDCFortranOrder
+        integer(kind=c_size_t), intent(in), optional  :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
         out%dtype = HDC_INT32
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_1d_path
+
 
     subroutine hdc_set_double_2d(this, data, flags_in)
         use iso_c_binding
@@ -777,7 +758,7 @@ contains
         type(hdc_data_t) :: data
         integer(c_int32_t), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
-        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_"
+        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_sub"
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_1d_sub
 
@@ -1141,7 +1122,7 @@ contains
         integer(c_int32_t), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
-        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_"
+        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d"
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end function hdc_as_int32_1d
 
@@ -1152,7 +1133,7 @@ contains
         type(hdc_data_t) :: data
         integer(c_int32_t), pointer :: res(:)
         data = c_hdc_get_data(this,trim(path)//c_null_char)
-        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_sub"
+        if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_path_sub"
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_1d_path_sub
 
@@ -1210,14 +1191,14 @@ contains
     end subroutine hdc_destroy
 
     !> Init HDC
-    subroutine hdc_init_(pluginFileName, pluginSettingsString)
+    subroutine hdc_init(pluginFileName, pluginSettingsString)
         use iso_c_binding
         character(kind=c_char,len=*), optional :: pluginFileName
         character(kind=c_char,len=*), optional :: pluginSettingsString
         if (.not.present(pluginFileName)) pluginFileName = ""
         if (.not.present(pluginSettingsString)) pluginSettingsString = ""
         call c_hdc_init(trim(pluginFileName)//c_null_char,trim(pluginSettingsString)//c_null_char)
-    end subroutine hdc_init_
+    end subroutine hdc_init
 
     subroutine hdc_set_int64_scalar(this, data)
         use iso_c_binding
@@ -1247,7 +1228,7 @@ contains
         out%flags = flags
         out%rank = 1
         out%dshape(1:1) = shape(data)
-        out%dshape(1+1:) = 0
+        out%dshape(2:) = 0
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_1d_path
@@ -1329,6 +1310,21 @@ contains
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_1d_path_sub
+
+    function hdc_new_dt(shape_, dtype) result(res)
+        integer(kind=c_long), dimension(:), target, optional :: shape_
+        character(len=*), intent(in), optional :: dtype
+        integer(kind=c_size_t) :: rank
+        type(hdc_t) :: res
+        if (present(shape_)) then
+            if (.not.present(dtype)) stop "hdc_new_dt: Please, provide both shape and dtype, or none of them..."
+            rank = size(shape_)
+            res = c_hdc_new_dtype(rank, c_loc(shape_), trim(dtype)//c_null_char)
+        else
+            res = c_hdc_new_empty()
+        end if
+    end function hdc_new_dt
+
 end module hdc_fortran
 ! http://fortranwiki.org/fortran/show/Fortran+and+Cpp+objs
 ! https://gcc.gnu.org/onlinedocs/gfortran/Derived-Types-and-struct.html

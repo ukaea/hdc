@@ -4,7 +4,7 @@ program cpo_hdc
     implicit none
 
     type(hdc_t) :: equilibrium, distsource
-    equilibrium = hdc_new_empty()
+    equilibrium = hdc_new()
     call hdc_set(equilibrium, 'time', 1.1d0)
     call hdc_set(equilibrium, 'profiles_1d/psi', (/0.1d0, 0.2d0, 0.3d0/))
     call hdc_dump(equilibrium)
@@ -29,7 +29,7 @@ contains
 
         !UAL allocate(distsourceout(size(equilibriumin)))
         !HDC we explicitely create a new container
-        distsourceout = hdc_new_empty()
+        distsourceout = hdc_new()
         !HDC resize will create empty containers
         !call hdc_resize(distsourceout, source=equilibriumin) resize is not in dynd
 

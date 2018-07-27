@@ -43,7 +43,7 @@ function test_hdc_create() bind(c, name="test_hdc_create") result(res)
     ! init array first
     array(:,:) = 2.22_dp
     array(2,2) = 3.14159_dp
-    res = hdc_new_empty()
+    res = hdc_new()
     call hdc_set(res,array)
 end function test_hdc_create
 

@@ -18,10 +18,10 @@ contains
         ! allocate(hdc)
         !  allocate(hdc2)
 
-        hdc = hdc_new_empty()
+        hdc = hdc_new()
 
-        call hdc_add_child(hdc, "in", hdc_new_empty())
-        call hdc_add_child(hdc, "in/arrays", hdc_new_empty())
+        call hdc_add_child(hdc, "in", hdc_new())
+        call hdc_add_child(hdc, "in/arrays", hdc_new())
 
         call hdc_dump(hdc)
 
