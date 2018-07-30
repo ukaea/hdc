@@ -290,7 +290,7 @@ HDC::HDC(byte* src_buffer)
     storage->set(uuid, buffer, header.buffer_size);
 }
 
-/** Copy contructor */
+/** Copy constructor */
 HDC::HDC(HDC* h) : HDC(h->get_buffer())
 {};
 
@@ -1351,7 +1351,7 @@ char* HDC::buffer_grow(char* old_buffer, size_t extra_size)
     return new_buffer;
 }
 
-// "static contructor" from void* HDC
+// "static constructor" from void* HDC
 HDC* HDC::new_HDC_from_cpp_ptr(intptr_t cpp_ptr)
 {
     HDC* tree;
@@ -1359,7 +1359,7 @@ HDC* HDC::new_HDC_from_cpp_ptr(intptr_t cpp_ptr)
     return tree;
 }
 
-// "static contructor" from hdc_t*
+// "static constructor" from hdc_t*
 HDC* HDC::new_HDC_from_c_ptr(intptr_t c_ptr)
 {
     HDC* tree;
