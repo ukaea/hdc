@@ -1,3 +1,5 @@
+{{ header }}
+
 module hdc_fortran
     use iso_c_binding
     implicit none
@@ -12,7 +14,7 @@ module hdc_fortran
         integer(kind=c_size_t) :: flags
         integer(kind=c_size_t) :: rank
         integer(kind=c_size_t) :: dshape(HDC_MAX_DIMS)
-        type(kind=c_ptr) :: data !< data pointer
+        type(c_ptr) :: data !< data pointer
     end type hdc_data_t
 
     integer, parameter :: dp=kind(1.0D0)
@@ -306,11 +308,11 @@ module hdc_fortran
         module procedure hdc_set_string
         module procedure hdc_set_string_path
 {% for type_ in types %}
+        module procedure hdc_set_{{ type_[0] }}_scalar_path
+        module procedure hdc_set_{{ type_[0] }}_scalar
     {% for rank in ranks %}
-        hdc_set_{{ type_[0] }}_scalar_path
-        hdc_set_{{ type_[0] }}_scalar
-        hdc_set_{{ type_[0] }}_{{ rank[0] }}d_
-        hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
+        module procedure hdc_set_{{ type_[0] }}_{{ rank[0] }}d
+        module procedure hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
     {% endfor %}
 {% endfor %}
     end interface hdc_set_data
@@ -322,26 +324,80 @@ module hdc_fortran
         module procedure hdc_set_string
         module procedure hdc_set_string_path
 {% for type_ in types %}
+        module procedure hdc_set_{{ type_[0] }}_scalar_path
+        module procedure hdc_set_{{ type_[0] }}_scalar
     {% for rank in ranks %}
-        hdc_set_{{ type_[0] }}_scalar_path
-        hdc_set_{{ type_[0] }}_scalar
-        hdc_set_{{ type_[0] }}_{{ rank[0] }}d_
-        hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
+        module procedure hdc_set_{{ type_[0] }}_{{ rank[0] }}d
+        module procedure hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
     {% endfor %}
 {% endfor %}
     end interface hdc_set
 
-    public ::  hello, hdc_delete, hdc_add_child, hdc_get_child, hdc_set_child, hdc_exists, &
-    hdc_delete_child, hdc_as_int8_1d, hdc_as_int8_2d, hdc_set, hdc_as_double_1d, hdc_as_double_2d, hdc_get_shape, hdc_set_data, &
-    hdc_get_slice, hdc_get, hdc_as_double, hdc_copy, hdc_t, dp, hdc_dump, hdc_new_ptr, hdc_delete_ptr, hdc_get_ptr_f, &
-    hdc_set_double_1d_path, hdc_get_rank, hdc_to_json, hdc_insert_slice, hdc_append_slice, hdc_set_slice, &
-    hdc_get_slice_path_sub, hdc_as_int8_path_sub, hdc_as_int32_path_sub, &
-    hdc_as_int8_sub, hdc_as_int32_sub, hdc_new_dtype, hdc_get_type, hdc_as_float_1d_sub, hdc_as_float_2d_sub, &
-    hdc_as_float_2d_path_sub, hdc_as_float_1d_path_sub, hdc_as_float_sub, hdc_as_float_path_sub, hdc_destroy, hdc_init, hdc_as_string_sub, &
-    hdc_as_string_path_sub, hdc_as_int32, hdc_as_string, hdc_as_int64_path_sub, &
-    hdc_as_int64, hdc_new_string, hdc_print_info, hdc_as_float_2d, hdc_new
+    interface hdc_get_slice
+       module procedure hdc_get_slice_
+       module procedure hdc_get_slice_l
+       module procedure hdc_get_slice_path
+    end interface hdc_get_slice
+
+   !> Generic hdc_get interface
+   interface hdc_get
+       module procedure hdc_get_child_sub
+       module procedure hdc_as_string_sub
+       module procedure hdc_as_string_path_sub
+       module procedure hdc_get_slice_path_sub
+   {% for type_ in types %}
+     {% for rank in ranks %}
+       module procedure hdc_as_{{ type_[0] }}_{{ rank[0] }}d_sub
+       module procedure hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub
+     {% endfor %}
+       module procedure hdc_as_{{ type_[0] }}_sub
+       module procedure hdc_as_{{ type_[0] }}_path_sub
+   {% endfor %}
+   end interface hdc_get
 
 
+
+    public ::   hdc_t, &
+                hdc_data_t, &
+                dp, &
+                sp, &
+                hdc_delete, &
+                hdc_add_child, &
+                hdc_get_child, &
+                hdc_set_child, &
+                hdc_exists, &
+                hdc_delete_child, &
+                hdc_set, &
+                hdc_get_shape, &
+                hdc_set_data, &
+                hdc_get_slice, &
+                hdc_get, &
+                hdc_copy, &
+                hdc_dump, &
+                hdc_new_ptr, &
+                hdc_delete_ptr, &
+                hdc_get_ptr_f, &
+                hdc_get_rank, &
+                hdc_to_json, &
+                hdc_insert_slice, &
+                hdc_append_slice, &
+                hdc_set_slice, &
+                hdc_new_dtype, &
+                hdc_get_type, &
+                hdc_destroy, &
+                hdc_init, &
+                hdc_as_string_sub, &
+                hdc_as_string, &
+                hdc_new_string, &
+                hdc_print_info, &
+                hdc_new, &
+  {% for type_ in types %}
+                hdc_as_{{ type_[0] }}, &
+    {% for rank in ranks %}
+                hdc_as_{{ type_[0] }}_{{ rank[0] }}d, &
+    {% endfor %}
+  {% endfor %}
+                hello
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -584,10 +640,6 @@ contains
         res = c_loc(struct)
     end function hdc_new_ptr
 
-    subroutine hello_fort()
-        print *, "Hello from fortran..."
-    end subroutine hello_fort
-
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding
         type(hdc_t), target :: tree
@@ -683,6 +735,15 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
 
+    subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub(this,path,res)
+        type(hdc_t) :: this
+        character(len=*) :: path
+        {{ type_[2] }}, pointer, intent(inout) :: res({{rank[1]}})
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this,path)
+        call c_f_pointer(data%data, res, data%dshape(1:data%rank))
+    end subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub
+
     {% endfor %}
     subroutine hdc_set_{{ type_[0] }}_scalar(this, data)
         use iso_c_binding
@@ -696,8 +757,44 @@ contains
         type(hdc_t) :: this
         character(len=*), intent(in) :: path
         {{ type_[2] }}, intent(in), target :: data
-        call c_hdc_set_{{ type_[0] }}_scalar(this, trim(path)//c_null_char, c_loc(data), {{ type_[1] }})
+        call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), {{ type_[1] }})
     end subroutine hdc_set_{{ type_[0] }}_scalar_path
+
+    subroutine hdc_as_{{ type_[0] }}_sub(this, res)
+        type(hdc_t) :: this
+        {{ type_[2] }} :: res
+        {{ type_[2] }}, pointer :: pres
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this, c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
+    end subroutine hdc_as_{{ type_[0] }}_sub
+
+
+    function hdc_as_{{ type_[0] }}(this, path) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        character(len=*), optional :: path
+        {{ type_[2] }} :: res
+        {{ type_[2] }}, pointer :: pres
+        type(hdc_data_t) :: data
+        if (.not.present(path)) path = ""
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
+    end function hdc_as_{{ type_[0] }}
+
+    subroutine hdc_as_{{ type_[0] }}_path_sub(this, path, res)
+        type(hdc_t) :: this
+        character(len=*) :: path
+        {{ type_[2] }} :: res
+        {{ type_[2] }}, pointer :: pres
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this, trim(path)//c_null_char)
+        call c_f_pointer(data%data, pres)
+        res = pres
+    end subroutine hdc_as_{{ type_[0] }}_path_sub
+
 
 {% endfor %}
 
