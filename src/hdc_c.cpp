@@ -8,7 +8,7 @@ struct hdc_t {
 
 extern "C" {
 
-struct hdc_t* hdc_new_empty()
+hdc_t* hdc_new_empty()
 {
     HDC* node = new HDC();
     struct hdc_t* h = new struct hdc_t;
@@ -16,7 +16,7 @@ struct hdc_t* hdc_new_empty()
     return h;
 }
 
-struct hdc_t* hdc_new_string(const char* str)
+hdc_t* hdc_new_string(const char* str)
 {
     HDC* node = new HDC(str);
     struct hdc_t* h = new struct hdc_t;
@@ -24,41 +24,17 @@ struct hdc_t* hdc_new_string(const char* str)
     return h;
 }
 
-struct hdc_t* hdc_new_size(size_t s)
+hdc_t* hdc_new_array(size_t rank, size_t* shape, hdc_type_t type)
 {
-    HDC* node = new HDC(s);
+    HDC* node = new HDC(rank,shape,type);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
 }
 
-hdc_t* hdc_new_int8(int rank, size_t* shape)
+hdc_t* hdc_new_array2(size_t rank, size_t* shape, hdc_type_t type, size_t flags)
 {
-    HDC* node = new HDC(rank, shape, HDC_INT8);
-    struct hdc_t* h = new struct hdc_t;
-    h->obj = (void*)node;
-    return h;
-}
-
-hdc_t* hdc_new_int32(int rank, size_t* shape)
-{
-    HDC* node = new HDC(rank, shape, HDC_INT32);
-    struct hdc_t* h = new struct hdc_t;
-    h->obj = (void*)node;
-    return h;
-}
-
-hdc_t* hdc_new_int64(int rank, size_t* shape)
-{
-    HDC* node = new HDC(rank, shape, HDC_INT64);
-    struct hdc_t* h = new struct hdc_t;
-    h->obj = (void*)node;
-    return h;
-}
-
-hdc_t* hdc_new_double(int rank, size_t* shape)
-{
-    HDC* node = new HDC(rank, shape, HDC_DOUBLE);
+    HDC* node = new HDC(rank,shape,type, flags);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -103,18 +79,18 @@ void hdc_add_child(struct hdc_t* tree, const char* path, struct hdc_t* n)
 void hdc_set_child(struct hdc_t* tree, const char* path, struct hdc_t* n)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_child((string)path, (HDC*)n->obj);
+    t->set_child(path, (HDC*)n->obj);
     return;
 }
 
 void hdc_delete_child(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    t->delete_child((string)path);
+    t->delete_child(path);
     return;
 }
 
-struct hdc_t* hdc_get(struct hdc_t* tree, const char* path)
+hdc_t* hdc_get(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
     HDC* node = t->get_ptr(path);
@@ -131,10 +107,10 @@ const char* hdc_get_uuid(struct hdc_t* tree)
     return a;
 }
 
-struct hdc_t* hdc_get_slice(struct hdc_t* tree, const char* path, size_t i)
+hdc_t* hdc_get_slice(struct hdc_t* tree, const char* path, size_t i)
 {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_slice_ptr((string)path, i);
+    HDC* node = t->get_slice_ptr(path, i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;
@@ -146,7 +122,6 @@ void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n)
     t->set_slice(i, (HDC*)n->obj);
     return;
 }
-
 
 void hdc_insert_slice(struct hdc_t* tree, size_t i, struct hdc_t* n)
 {
@@ -165,27 +140,34 @@ void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n)
 bool hdc_exists(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->exists((string)path);
+    return t->exists(path);
+}
+
+void hdc_set_int8(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags)
+{
+    HDC* t = (HDC*)tree->obj;
+    t->set_data_c(path, rank, shape, data, HDC_INT8, _flags);
+    return;
+}
+
+void hdc_set_int16(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags)
+{
+    HDC* t = (HDC*)tree->obj;
+    t->set_data_c(path, rank, shape, data, HDC_INT16, _flags);
+    return;
 }
 
 void hdc_set_int32(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_c((string)path, rank, shape, data, HDC_INT32, _flags);
+    t->set_data_c(path, rank, shape, data, HDC_INT32, _flags);
     return;
 }
 
 void hdc_set_int64(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_c((string)path, rank, shape, data, HDC_INT64, _flags);
-    return;
-}
-
-void hdc_set_int8(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags)
-{
-    HDC* t = (HDC*)tree->obj;
-    t->set_data_c((string)path, rank, shape, data, HDC_INT8, _flags);
+    t->set_data_c(path, rank, shape, data, HDC_INT64, _flags);
     return;
 }
 
@@ -219,50 +201,56 @@ int8_t* hdc_as_int8_array(struct hdc_t* tree, const char* path)
     return t->as<int8_t*>(path);
 }
 
+int16_t* hdc_as_int16_array(struct hdc_t* tree, const char* path)
+{
+    HDC* t = (HDC*)tree->obj;
+    return t->as<int16_t*>(path);
+}
+
 int32_t* hdc_as_int32_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->as<int32_t*>((string)path);
+    return t->as<int32_t*>(path);
 }
 
 int64_t* hdc_as_int64_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->as<int64_t*>((string)path);
+    return t->as<int64_t*>(path);
 }
 
 
 double* hdc_as_double_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->as<double*>((string)path);
+    return t->as<double*>(path);
 }
 
 
 float* hdc_as_float_array(struct hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return t->as<float*>((string)path);
+    return t->as<float*>(path);
 }
 
 void hdc_set_int8_scalar(hdc_t* tree, const char* path, int8_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((string)path, data);
+    t->set_data(path, data);
     return;
 }
 
 void hdc_set_int32_scalar(hdc_t* tree, const char* path, int32_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((string)path, data);
+    t->set_data(path, data);
     return;
 }
 
 void hdc_set_int64_scalar_path(hdc_t* tree, const char* path, int64_t data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((string)path, data);
+    t->set_data(path, data);
     return;
 }
 
@@ -275,14 +263,14 @@ void hello()
 void hdc_set_double(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_c((string)path, rank, shape, data, HDC_DOUBLE, _flags);
+    t->set_data_c(path, rank, shape, data, HDC_DOUBLE, _flags);
     return;
 }
 
 void hdc_set_double_scalar(hdc_t* tree, const char* path, double data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((string)path, data);
+    t->set_data(path, data);
     return;
 }
 
@@ -291,14 +279,14 @@ void hdc_set_float(struct hdc_t* tree, const char* path, int rank, size_t* shape
                         hdc_flags_t _flags UNUSED)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data_c((string)path, rank, shape, data, HDC_FLOAT);
+    t->set_data_c(path, rank, shape, data, HDC_FLOAT);
     return;
 }
 
 void hdc_set_float_scalar(hdc_t* tree, const char* path, float data)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_data((string)path, data);
+    t->set_data(path, data);
     return;
 }
 
@@ -313,7 +301,7 @@ struct hdc_t* hdc_copy(hdc_t* src)
 void hdc_set_string(hdc_t* tree, const char* path, const char* str)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_string((string)path, str);
+    t->set_string(path, str);
     return;
 }
 
@@ -327,25 +315,25 @@ const char* hdc_as_string(hdc_t* tree, const char* path)
 double hdc_as_double_scalar(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<double*>((string)path))[0];
+    return (t->as<double*>(path))[0];
 }
 
 float hdc_as_float_scalar(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<float*>((string)path))[0];
+    return (t->as<float*>(path))[0];
 }
 
 int8_t hdc_as_int8_scalar(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<int8_t*>((string)path))[0];
+    return (t->as<int8_t*>(path))[0];
 }
 
 int32_t hdc_as_int32_scalar_path(hdc_t* tree, const char* path)
 {
     HDC* t = (HDC*)tree->obj;
-    return (t->as<int32_t*>((string)path))[0];
+    return (t->as<int32_t*>(path))[0];
 }
 
 const char* hdc_get_type_str(hdc_t* tree, const char* path)
@@ -364,7 +352,7 @@ const char* hdc_get_datashape_str(hdc_t* tree)
 void hdc_to_json(hdc_t* tree, const char* filename, int mode)
 {
     HDC* t = (HDC*)tree->obj;
-    t->to_json((string)filename, mode);
+    t->to_json(filename, mode);
 }
 
 void hdc_dump(hdc_t* tree)
@@ -396,14 +384,6 @@ void hdc_keys_py(hdc_t* tree, char** arr)
     for (size_t i = 0; i < size; i++) {
         strcpy(arr[i], keys[i].c_str());
     }
-}
-
-hdc_t* hdc_new_dtype(int rank, size_t* shape, hdc_type_t type)
-{
-    HDC* t = new HDC(rank, shape, type);
-    struct hdc_t* h = new struct hdc_t;
-    h->obj = (void*)t;
-    return h;
 }
 
 const char* hdc_dumps(hdc_t* tree)
@@ -462,7 +442,7 @@ const char* hdc_serialize(hdc_t* tree)
 
 struct hdc_t* hdc_deserialize(const char* str)
 {
-    HDC* node = HDC::deserialize_HDC_string((string)str);
+    HDC* node = HDC::deserialize_HDC_string(str);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;

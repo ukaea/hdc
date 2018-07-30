@@ -9,14 +9,8 @@ extern "C" {
 struct hdc_t* hdc_new_empty(); /** Default constructor. Creates empty HDC  */
 struct hdc_t* hdc_new_string(const char* str); /** Creates HDC from string/uri */
 struct hdc_t* hdc_new_size(size_t size); /** Creates empty HDC of given size */
-struct hdc_t*
-hdc_new_int8(int rank, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-struct hdc_t*
-hdc_new_int32(int rank, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-struct hdc_t*
-hdc_new_double(int rank, size_t* shape); /** Creates new HDC with empty array of given shape and dimension.  */
-struct hdc_t* hdc_new_dtype(int rank, size_t* shape,
-                            hdc_type_t type); /** Creates new HDC empty array of a given type string, shape and dimension. */
+struct hdc_t* hdc_new_array(size_t rank, size_t* shape, hdc_type_t type); /** Array constructor */
+struct hdc_t* hdc_new_array2(size_t rank, size_t* shape, hdc_type_t type, size_t flags); /** Array constructor */
 void* hdc_new_void_ptr(); /** Alernative constuctor to be used in Fortran. */
 void hdc_delete(struct hdc_t* tree); /** Deletes HDC object (Destructor). */
 void hdc_delete_ptr(void* obj);
@@ -56,7 +50,9 @@ void hdc_set_float_scalar(struct hdc_t* tree, const char* path, float data); /**
 double hdc_as_double_scalar(struct hdc_t* tree, const char* path); /**   Returns scalar double.  */
 float hdc_as_float_scalar(struct hdc_t* tree, const char* path); /**   Returns scalar double.  */
 int8_t hdc_as_int8_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int8.  */
+int16_t hdc_as_int16_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int16.  */
 int32_t hdc_as_int32_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int32.  */
+int64_t hdc_as_int64_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int64.  */
 char** hdc_keys(struct hdc_t* tree);
 void hdc_keys_py(struct hdc_t* tree, char** keys);
 struct hdc_t* hdc_copy(struct hdc_t* src); /** Makes deep copy of HDC tree. */
@@ -69,7 +65,6 @@ hdc_new_int64(int rank, size_t* shape); /** Creates new HDC with empty array of 
 int64_t* hdc_as_int64_array(struct hdc_t* tree, const char* path); /**  */
 void hdc_set_int64_scalar(struct hdc_t* tree, const char* path, int64_t data); /**  */
 void hdc_set_int64(struct hdc_t* tree, const char* path, int rank, size_t* shape, void* data, hdc_flags_t _flags);
-int64_t hdc_as_int64_scalar(struct hdc_t* tree, const char* path); /** Returns scalar int64.  */
 const char* hdc_get_type_str(struct hdc_t* tree, const char* path); /**  */
 size_t hdc_childs_count(struct hdc_t* tree); /** */
 void test_str(char* str);

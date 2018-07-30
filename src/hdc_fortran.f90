@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-07-30 12:39:18.771451 by generate_fortran_api.py
+! This file was generated on 2018-07-30 15:35:34.638920 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -66,13 +66,13 @@ module hdc_fortran
         end function c_hdc_new_string
 
         !> Construct empty arra of type given by string.
-        function c_hdc_new_dtype(rank, shape_, type_str) result(obj) bind(c,name="hdc_new_dtype")
+        function c_hdc_new_array(rank, shape_, type_str) result(obj) bind(c,name="hdc_new_array")
             import
             type(hdc_t) :: obj
             integer(kind=c_size_t),value :: rank
             type(c_ptr), value :: shape_
             character(kind=c_char), intent(in) :: type_str(*)
-        end function c_hdc_new_dtype
+        end function c_hdc_new_array
 
 
         function c_hdc_new_void_ptr() result(obj) bind(c, name="hdc_new_void_ptr")
@@ -649,7 +649,7 @@ module hdc_fortran
                 hdc_insert_slice, &
                 hdc_append_slice, &
                 hdc_set_slice, &
-                hdc_new_dtype, &
+                hdc_new_array, &
                 hdc_get_type, &
                 hdc_destroy, &
                 hdc_init, &
@@ -898,13 +898,13 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_sub
 
-    function hdc_new_dtype(rank, shape_, type_str) result(res)
+    function hdc_new_array(rank, shape_, type_str) result(res)
         integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), target :: shape_
         character(len=*), intent(in) :: type_str
         type(hdc_t) :: res
-        res = c_hdc_new_dtype(rank, c_loc(shape_), trim(type_str)//c_null_char)
-    end function hdc_new_dtype
+        res = c_hdc_new_array(rank, c_loc(shape_), trim(type_str)//c_null_char)
+    end function hdc_new_array
 
     function hdc_new_string(str) result(res)
         character(len=*), intent(in) :: str
@@ -979,7 +979,7 @@ contains
         if (present(shape_)) then
             if (.not.present(dtype)) stop "hdc_new_dt: Please, provide both shape and dtype, or none of them..."
             rank = size(shape_)
-            res = c_hdc_new_dtype(rank, c_loc(shape_), trim(dtype)//c_null_char)
+            res = c_hdc_new_array(rank, c_loc(shape_), trim(dtype)//c_null_char)
         else
             res = c_hdc_new_empty()
         end if

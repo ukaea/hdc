@@ -23,35 +23,35 @@ TEST_CASE("C_EmptyArrayNode", "[CHDC]")
     int rank = 1;
     size_t shape[] = { 4 };
 
-    struct hdc_t* hi8 = hdc_new_dtype(rank, shape, HDC_INT8);
+    struct hdc_t* hi8 = hdc_new_array(rank, shape, HDC_INT8);
     CHECK(1 == hdc_get_rank(hi8, ""));
     CHECK(4 == hdc_get_shape(hi8, "")[0]);
     CHECK(HDC_INT8 == hdc_get_type(hi8, ""));
     CHECK(strcmp("int8", hdc_get_type_str(hi8, "")) == 0);
     hdc_delete(hi8);
 
-    struct hdc_t* hi32 = hdc_new_dtype(rank, shape, HDC_INT32);
+    struct hdc_t* hi32 = hdc_new_array(rank, shape, HDC_INT32);
     CHECK(1 == hdc_get_rank(hi32, ""));
     CHECK(4 == hdc_get_shape(hi32, "")[0]);
     CHECK(HDC_INT32 == hdc_get_type(hi32, ""));
     CHECK(strcmp("int32", hdc_get_type_str(hi32, "")) == 0);
     hdc_delete(hi32);
 
-    struct hdc_t* hi64 = hdc_new_dtype(rank, shape, HDC_INT64);
+    struct hdc_t* hi64 = hdc_new_array(rank, shape, HDC_INT64);
     CHECK(1 == hdc_get_rank(hi64, ""));
     CHECK(4 == hdc_get_shape(hi64, "")[0]);
     CHECK(HDC_INT64 == hdc_get_type(hi64, ""));
     CHECK(strcmp("int64", hdc_get_type_str(hi64, "")) == 0);
     hdc_delete(hi64);
 
-    struct hdc_t* hd = hdc_new_dtype(rank, shape, HDC_DOUBLE);
+    struct hdc_t* hd = hdc_new_array(rank, shape, HDC_DOUBLE);
     CHECK(1 == hdc_get_rank(hd, ""));
     CHECK(4 == hdc_get_shape(hd, "")[0]);
     CHECK(HDC_DOUBLE == hdc_get_type(hd, ""));
     CHECK(strcmp("float64", hdc_get_type_str(hd, "")) == 0);
     hdc_delete(hd);
 
-    hd = hdc_new_dtype(rank, shape, HDC_DOUBLE);
+    hd = hdc_new_array(rank, shape, HDC_DOUBLE);
     CHECK(1 == hdc_get_rank(hd, ""));
     CHECK(4 == hdc_get_shape(hd, "")[0]);
     CHECK(HDC_DOUBLE == hdc_get_type(hd, ""));
