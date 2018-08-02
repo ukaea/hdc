@@ -318,29 +318,29 @@ HDC::~HDC()
 }
 
 //---------------------------- Header information ----------------------------------
-size_t HDC::get_datasize()
+size_t HDC::get_datasize() const
 {
     return header.data_size;
 }
 
-size_t HDC::get_size()
+size_t HDC::get_size() const
 {
     return header.buffer_size;
 }
 
 /** Returns type of current node. */
-size_t HDC::get_type()
+size_t HDC::get_type() const
 {
     return header.type;
 }
 
 /** Returns the size of a single item in bytes */
-size_t HDC::get_itemsize()
+size_t HDC::get_itemsize() const
 {
     return hdc_sizeof(static_cast<hdc_type_t>(header.type));
 }
 
-size_t HDC::get_flags()
+size_t HDC::get_flags() const
 {
     return header.flags;
 }
@@ -351,17 +351,17 @@ T* HDC::get_data()
     return reinterpret_cast<T*>(get_buffer() + sizeof(hdc_header_t));
 }
 
-bool HDC::is_external()
+bool HDC::is_external() const
 {
     return (header.flags & HDCExternal) != 0;
 }
 
-bool HDC::is_readonly()
+bool HDC::is_readonly() const
 {
     return (header.flags & HDCReadOnly) != 0;
 }
 
-bool HDC::is_fortranorder()
+bool HDC::is_fortranorder() const
 {
     return (header.flags & HDCFortranOrder) != 0;
 }
@@ -1237,7 +1237,7 @@ size_t* HDC::get_shape(const std::string& path)
 }
 
 
-size_t HDC::childs_count()
+size_t HDC::childs_count() const
 {
     return get_children_ptr()->size();
 }
@@ -1247,20 +1247,20 @@ char* HDC::get_buffer()
     return storage->get(uuid);
 }
 
-string HDC::get_uuid()
+string HDC::get_uuid() const
 {
     return uuid;
 }
 
 // allocator stuff
-bip::managed_external_buffer HDC::get_segment()
+bip::managed_external_buffer HDC::get_segment() const
 {
     char* buffer = storage->get(uuid);
     bip::managed_external_buffer segment;
     return bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
 }
 
-hdc_map_t* HDC::get_children_ptr()
+hdc_map_t* HDC::get_children_ptr() const
 {
     if (header.type != HDC_STRUCT && header.type != HDC_LIST) return nullptr;
     char* buffer = storage->get(uuid);

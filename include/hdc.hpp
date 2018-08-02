@@ -111,15 +111,15 @@ public:
     static void destroy();
     /** Returns the available space in buffer (in bytes) */
 
-    size_t get_datasize();
+    size_t get_datasize() const;
     /** Returns the the size of object buffer (= header+data, in bytes) */
-    size_t get_size();
+    size_t get_size() const;
     /** Returns type of current node. */
-    size_t get_type();
+    size_t get_type() const;
     /** Returns the size of a single item in bytes */
-    size_t get_itemsize();
+    size_t get_itemsize() const;
     /** Returns object flags (i.e. array ordering)*/
-    size_t get_flags();
+    size_t get_flags() const;
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data();
     /** Stores data in node's buffer */
@@ -326,9 +326,9 @@ public:
     /** Returns shape of current node. */
     size_t* get_shape();
     std::vector<size_t> get_strides();
-    bool is_external();
-    bool is_readonly();
-    bool is_fortranorder();
+    bool is_external() const;
+    bool is_readonly() const;
+    bool is_fortranorder() const;
     void print_info();
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
@@ -462,13 +462,13 @@ public:
     char* get_data_ptr();
     /** Returns vector of keys of a struct node and empty vector otherwise. */
     vector<string> keys();
-    size_t childs_count();
+    size_t childs_count() const;
     char* get_buffer();
-    string get_uuid();
+    string get_uuid() const;
     void grow(size_t extra_size);
     // allocator stuff
-    bip::managed_external_buffer get_segment();
-    hdc_map_t* get_children_ptr();
+    bip::managed_external_buffer get_segment() const;
+    hdc_map_t* get_children_ptr() const;
     void delete_data();
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
     // "static contructor" from void* HDC
@@ -489,7 +489,7 @@ public:
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
     static HDC load(const std::string& str, const std::string& datapath="");
-    HDCStorage* get_storage() {return this->storage; };
+    HDCStorage* get_storage() const {return this->storage; };
 
     hdc_data_t get_data();
     hdc_data_t get_data(const std::string& path);
