@@ -79,7 +79,7 @@ public:
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(size_t rank, size_t* shape, hdc_type_t _type,long flags = HDCDefault);
+    HDC(size_t rank, size_t* shape, hdc_type_t type,long flags = HDCDefault);
     /** Constructor from string */
     HDC(const std::string str);
     /** Copy contructor */
@@ -250,11 +250,11 @@ public:
         if (!path.empty()) get(path).set_string(str);
         else set_string(str);
     }
-    void set_data_c(size_t rank, size_t* shape, void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(const std::string& path, size_t rank, size_t* shape, void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(size_t rank, size_t* shape, const void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(const std::string& path, size_t rank, size_t* shape, const void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(vector<boost::variant<size_t,std::string>> path, size_t rank, size_t* shape, const void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(size_t rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::string& path, size_t rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::string& path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -270,10 +270,10 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /** Sets scalar data to given node - UDA version. */
-    void set_data(const unsigned char* data, hdc_type_t _type) {
+    void set_data(const unsigned char* data, hdc_type_t type) {
         hdc_header_t header = get_header();
-        header.type = _type;
-        header.data_size = hdc_sizeof(_type);
+        header.type = type;
+        header.data_size = hdc_sizeof(type);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
@@ -282,31 +282,31 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /** Sets scalar data to given node - UDA version. */
-    void set_data(void* data, hdc_type_t _type) {
-        return this->set_data((const unsigned char*)data,_type);
+    void set_data(void* data, hdc_type_t type) {
+        return this->set_data((const unsigned char*)data,type);
     }
     /** Sets scalar data to given node - UDA version with path. */
-    void set_data(const std::string path, const unsigned char* data, hdc_type_t _type) {
+    void set_data(const std::string path, const unsigned char* data, hdc_type_t type) {
         if (path.empty()) {
-            set_data(data, _type);
+            set_data(data, type);
         } else {
             if(!exists(path)) {
                 HDC h;
                 add_child(path, h); // TODO: add constructor for this!!
             }
-            get(path).set_data(data, _type);
+            get(path).set_data(data, type);
         }
     }
     /** Sets scalar data to given node - UDA version with path. */
-    void set_data(const std::string path, void* data, hdc_type_t _type) {
+    void set_data(const std::string path, void* data, hdc_type_t type) {
         if (path.empty()) {
-            set_data(data, _type);
+            set_data(data, type);
         } else {
             if(!exists(path)) {
                 HDC h;
                 add_child(path, h); // TODO: add constructor for this!!
             }
-            get(path).set_data(data, _type);
+            get(path).set_data(data, type);
         }
     }
     template <typename T>
@@ -318,12 +318,12 @@ public:
         get(path).set_data(data);
     }
 
-    void set_data(const std::string& path, const unsigned char* data, hdc_type_t _type) {
+    void set_data(const std::string& path, const unsigned char* data, hdc_type_t type) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
-        get(path).set_data(data,_type);
+        get(path).set_data(data,type);
     }
     /** Returns shape of current node. */
     size_t* get_shape() const;
@@ -374,7 +374,7 @@ public:
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
     void append_slice(HDC& h);
     /** Sets HDC type of current node. */
-    void set_type(hdc_type_t _type);
+    void set_type(hdc_type_t type);
     /** Returns true if node is empty. */
     bool is_empty() const;
     /** Returns number of dimensions of node under path. */
