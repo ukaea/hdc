@@ -448,7 +448,7 @@ Json::Value buffer_to_json(char* buffer, int rank, size_t* shape, bool fortranOr
 }
 
 
-Json::Value HDC::to_json(int mode)
+Json::Value HDC::to_json(int mode) const
 {
     hdc_header_t header = get_header();
     Json::Value root;
@@ -506,7 +506,7 @@ Json::Value HDC::to_json(int mode)
             case (HDC_LIST): {
                 root = Json::arrayValue;
                 for (size_t i = 0; i < this->childs_count(); i++) {
-                    root[static_cast<int>(i)] = this->get_slice(i).to_json(mode);
+                    root[static_cast<int>(i)] = get_slice(i).to_json(mode);
                 }
                 break;
             }
@@ -532,7 +532,7 @@ Json::Value HDC::to_json(int mode)
     return root;
 }
 
-void HDC::to_json(string filename, int mode)
+void HDC::to_json(string filename, int mode) const
 {
     DEBUG_STDOUT("Saving output JSON to " + filename);
     ofstream json_file;
@@ -542,7 +542,7 @@ void HDC::to_json(string filename, int mode)
     return;
 }
 
-string HDC::to_json_string(int mode)
+string HDC::to_json_string(int mode) const
 {
     Json::StreamWriterBuilder writerBuilder;
     std::ostringstream oss;

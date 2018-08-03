@@ -354,13 +354,6 @@ const char* hdc_get_type_str(hdc_t* tree, const char* path)
     return (t->get_type_str(path).c_str());
 }
 
-
-const char* hdc_get_datashape_str(hdc_t* tree)
-{
-    HDC* t = (HDC*)tree->obj;
-    return (t->get_datashape_str().c_str());
-}
-
 void hdc_to_json(hdc_t* tree, const char* filename, int mode)
 {
     HDC* t = (HDC*)tree->obj;

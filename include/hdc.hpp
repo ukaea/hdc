@@ -65,20 +65,21 @@ private:
     void delete_child(vector<boost::variant<size_t,std::string>> vs);
     HDC* get_ptr(vector<boost::variant<size_t,std::string>> vs);
     HDC get(vector<boost::variant<size_t,std::string>> vs);
+    const HDC get(vector<boost::variant<size_t,std::string>> vs) const;
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
+    const HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i) const;
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
     bool exists(vector<boost::variant<size_t,std::string>> vs) const;
     bool exists_single(boost::variant<size_t,std::string> index) const;
     void add_child_single(const std::string& path, HDC& n);
     hdc_header_t get_header() const;
-//     void add_child_single(const boost::variant<size_t,std::string>& path, HDC& n);
 public:
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(int _rank, size_t* _shape, hdc_type_t _type,long _flags = HDCDefault);
+    HDC(size_t rank, size_t* shape, hdc_type_t _type,long flags = HDCDefault);
     /** Constructor from string */
     HDC(const std::string str);
     /** Copy contructor */
@@ -123,70 +124,70 @@ public:
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
-    template<typename T> void set_data(int _rank, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+    template<typename T> void set_data(size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
         hdc_header_t header = get_header();
-        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_rank,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
+        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
         auto buffer = storage->get(uuid);
         memcpy(&header,buffer,sizeof(hdc_header_t));
         // Start with determining of the buffer size
         size_t data_size = sizeof(T);
-        for (int i=0;i<_rank;i++) data_size *= _shape[i];
+        for (size_t i=0;i<rank;i++) data_size *= shape[i];
         size_t buffer_size = data_size + sizeof(hdc_header_t);
         if (header.buffer_size == buffer_size) {
             storage->lock(uuid);
-            memcpy(buffer+sizeof(hdc_header_t),_data,data_size);
+            memcpy(buffer+sizeof(hdc_header_t),data,data_size);
             storage->unlock(uuid);
             return;
         } else {
             header.buffer_size = buffer_size;
             header.data_size = data_size;
             memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            for (int i=0;i<_rank;i++) header.shape[i] = _shape[i];
-            header.flags = _flags;
-            header.type = to_typeid(_data[0]);
-            header.rank = _rank;
+            for (size_t i=0;i<rank;i++) header.shape[i] = shape[i];
+            header.flags = flags;
+            header.type = to_typeid(data[0]);
+            header.rank = rank;
             char* buffer = new char[header.buffer_size];
             memcpy(buffer,&header,sizeof(hdc_header_t));
-            memcpy(buffer+sizeof(hdc_header_t),_data,header.data_size);
+            memcpy(buffer+sizeof(hdc_header_t),data,header.data_size);
             storage->set(uuid,buffer,header.buffer_size);
             if (!storage->usesBuffersDirectly()) delete[] buffer;
             return;
         }
     }
 
-    template<typename T> void set_data(int _rank, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
-        set_data(_rank,_shape,_data,_flags);
+    template<typename T> void set_data(size_t rank, initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
+        set_data(rank,shape,data,flags);
     };
 
-    template<typename T> void set_data(const std::string& path, int _rank, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
         }
-        get(path).set_data(_rank, _shape, _data, _flags);
+        get(path).set_data(rank, shape, data, flags);
     }
 
-    template<typename T> void set_data(initializer_list<T> _data, hdc_flags_t _flags = HDCDefault) {
-        DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> _data, hdc_flags_t _flags = HDCDefault)"+to_string(_data[0]));
-        vector<T> vec = _data;
-        set_data(1,{vec.size()},&vec[0],_flags);
+    template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
+        DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)"+to_string(data[0]));
+        vector<T> vec = data;
+        set_data(1,{vec.size()},&vec[0],flags);
     };
 
-    template<typename T> void set_data(const std::string& path, initializer_list<T> _data, hdc_flags_t _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
-        get(path).set_data(_data, _flags);
+        get(path).set_data(data, flags);
     }
 
 
-    template<typename T> void set_data(const std::string& path, int _rank, initializer_list<size_t> _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, size_t rank, initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h);
         }
-        get(path).set_data(_rank, _shape, _data, _flags);
+        get(path).set_data(rank, shape, data, flags);
     }
 
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
@@ -197,8 +198,8 @@ public:
             cout << "The node has already children set..." << endl;
             return;
         }
-        size_t _shape[1] = {data.size()};
-        set_data<T>(1,_shape,&data[0]);
+        size_t shape[1] = {data.size()};
+        set_data<T>(1,shape,&data[0]);
         return;
     };
 
@@ -249,11 +250,11 @@ public:
         if (!path.empty()) get(path).set_string(str);
         else set_string(str);
     }
-    void set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _rank, size_t* _shape, void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(const std::string& path, int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
-    void set_data_c(vector<boost::variant<size_t,std::string>> path, int _rank, size_t* _shape, const void* _data, hdc_type_t _type, hdc_flags_t _flags = HDCDefault);
+    void set_data_c(size_t rank, size_t* shape, void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::string& path, size_t rank, size_t* shape, void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(size_t rank, size_t* shape, const void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::string& path, size_t rank, size_t* shape, const void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(vector<boost::variant<size_t,std::string>> path, size_t rank, size_t* shape, const void* data, hdc_type_t _type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -324,8 +325,6 @@ public:
         }
         get(path).set_data(data,_type);
     }
-    /** Returns number of dimensions of current node. */
-    int get_rank() const;
     /** Returns shape of current node. */
     size_t* get_shape() const;
     std::vector<size_t> get_strides() const;
@@ -345,10 +344,12 @@ public:
     /** Returns subtree by path. */
     HDC* get_ptr(const std::string& path);
     HDC get(const std::string& path);
+    const HDC get(const std::string& path) const;
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC get_slice(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC get_slice(size_t i);
+    const HDC get_slice(size_t i) const;
     HDC* get_slice_ptr(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice_ptr(size_t i);
@@ -377,11 +378,11 @@ public:
     /** Returns true if node is empty. */
     bool is_empty() const;
     /** Returns number of dimensions of node under path. */
-    int get_rank(const std::string& path);
+    size_t get_rank(const std::string& path = "") const;
     /** Returns shape of node under path. */
-    size_t* get_shape(const std::string& path);
+    size_t* get_shape(const std::string& path) const;
     /** Returns pointer to data of this node. */
-    template<typename T> T as()
+    template<typename T> T as() const
     {
         hdc_header_t header = get_header();
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
@@ -394,7 +395,8 @@ public:
         return reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
     }
     /** Returns string. Needs to have separate function */
-    std::string as_string() {
+    const std::string as_string() const
+    {
         hdc_header_t header = get_header();
         if (header.type == HDC_STRING) {
            std::string str(storage->get(uuid)+sizeof(hdc_header_t));
@@ -409,60 +411,42 @@ public:
     }
 
     /** Returns string of node under given path. Needs to have separate function */
-    std::string as_string(const std::string& path)
+    const std::string as_string(const std::string& path) const
     {
         DEBUG_STDOUT("as_string("+path+")\n");
         if (path.empty()) {
-            std::cerr << "DD::\n";
             return as_string();
         }
         else {
-            std::cerr << "EE::\n";
             return get(path).as_string();
         }
     }
 
     /** Returns pointer to data of node under given path. */
-    template<typename T> T as(const std::string& path)
+    template<typename T> T as(const std::string& path) const
     {
         DEBUG_STDOUT("as<T>("+path+")\n");
         if (path.empty()) return as<T>();
         else return get(path).as<T>();
     }
 
-    /** Returns double. */
-    double as_double()
-    {
-        return as<double*>()[0];
-    }
-    /** Returns double. */
-    double as_double(const std::string& path)
-    {
-        return as<double*>(path)[0];
-    }
     /** Returns pointer to self. */
-    hdc_t* as_hdc_ptr();
+    hdc_t* as_hdc_ptr() const;
     /** Serialization to JSON file. */
-    void to_json(string filename, int mode = 0);
+    void to_json(string filename, int mode = 0) const;
     /** Serialization to Json::Value object. */
-    Json::Value to_json(int mode = 0);
+    Json::Value to_json(int mode = 0) const;
     /** Serialization to string object. */
-    string to_json_string(int mode = 0);
+    string to_json_string(int mode = 0) const;
     /** Dumps JSON to cout */
-    void dump();
+    void dump() const;
     /** Serializes HDC to special json file*/
-    string serialize();
-    void serialize(string filename);
+    const std::string serialize() const;
+    void serialize(const std::string& filename) const;
     /** Returns void pointer to data. */
     intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
-    const char* get_type_str() const;
-    /** Returns datashape desctiption string. */
-    string get_datashape_str() const;
-    /** Returns string representing data/node type. */
-    string get_type_str(const std::string& path);
-    /** Returns datashape desctiption string. */
-    string get_datashape_str(const std::string& path);
+    const std::string get_type_str(const std::string& path = "") const;
     /** Returns void pointer to data */
     char* get_data_ptr() const;
     /** Returns vector of keys of a struct node and empty vector otherwise. */
@@ -496,8 +480,7 @@ public:
     static HDC load(const std::string& str, const std::string& datapath="");
     HDCStorage* get_storage() const {return this->storage; };
 
-    hdc_data_t get_data();
-    hdc_data_t get_data(const std::string& path);
+    hdc_data_t get_data(const std::string& path = "") const;
     void set_data(hdc_data_t obj);
     void set_data(const std::string& path,hdc_data_t obj);
 
