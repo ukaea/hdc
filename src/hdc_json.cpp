@@ -450,6 +450,7 @@ Json::Value buffer_to_json(char* buffer, int rank, size_t* shape, bool fortranOr
 
 Json::Value HDC::to_json(int mode)
 {
+    hdc_header_t header = get_header();
     Json::Value root;
     if (mode == 0) {
         switch (header.type) {

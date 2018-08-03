@@ -199,6 +199,7 @@ void HDC::destroy()
 HDC::HDC(size_t _data_size)
 {
     // fill some data
+    hdc_header_t header;
     memset(&header, 0, sizeof(hdc_header_t));
     header.buffer_size = _data_size + sizeof(hdc_header_t);
     header.data_size = _data_size;
@@ -231,6 +232,7 @@ HDC::HDC() : HDC(0lu)
 /** Creates empty HDC with specified type and shape */
 HDC::HDC(int _rank, size_t* _shape, hdc_type_t _type, long _flags)
 {
+    hdc_header_t header;
     if (_rank >= HDC_MAX_DIMS) {
         throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(_rank));
     }
@@ -261,6 +263,7 @@ HDC::HDC(const std::string str) : HDC()
 
 HDC::HDC(byte* src_buffer)
 {
+    hdc_header_t header;
     storage = global_storage;
     uuid = generate_uuid_str();
     memcpy(&header, src_buffer, sizeof(hdc_header_t));
@@ -299,7 +302,6 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 {
     uuid = _uuid;
     storage = _storage;
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
 }
 
 /** Destructor */
@@ -320,60 +322,61 @@ HDC::~HDC()
 //---------------------------- Header information ----------------------------------
 size_t HDC::get_datasize() const
 {
-    return header.data_size;
+    return get_header().data_size;
 }
 
 size_t HDC::get_size() const
 {
-    return header.buffer_size;
+    return get_header().buffer_size;
 }
 
 /** Returns type of current node. */
 size_t HDC::get_type() const
 {
-    return header.type;
+    return get_header().type;
 }
 
 /** Returns the size of a single item in bytes */
 size_t HDC::get_itemsize() const
 {
-    return hdc_sizeof(static_cast<hdc_type_t>(header.type));
+    return hdc_sizeof(static_cast<hdc_type_t>(get_header().type));
 }
 
 size_t HDC::get_flags() const
 {
-    return header.flags;
+    return get_header().flags;
 }
 
 template <typename T>
-T* HDC::get_data()
+T* HDC::get_data() const
 {
     return reinterpret_cast<T*>(get_buffer() + sizeof(hdc_header_t));
 }
 
 bool HDC::is_external() const
 {
-    return (header.flags & HDCExternal) != 0;
+    return (get_header().flags & HDCExternal) != 0;
 }
 
 bool HDC::is_readonly() const
 {
-    return (header.flags & HDCReadOnly) != 0;
+    return (get_header().flags & HDCReadOnly) != 0;
 }
 
 bool HDC::is_fortranorder() const
 {
-    return (header.flags & HDCFortranOrder) != 0;
+    return (get_header().flags & HDCFortranOrder) != 0;
 }
 
-void HDC::print_info()
+void HDC::print_info() const
 {
+    hdc_header_t header = get_header();
     printf("Size:\t\t%zu\n", header.buffer_size);
-    printf("NDim:\t\t%d\n", get_rank());
+    printf("NDim:\t\t%zu\n", header.rank);
     printf("Shape:\t\t");
-    for (int i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", get_shape()[i]);
+    for (int i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", header.shape[i]);
     printf("\n");
-    printf("Data Size:\t\t%zu\n", get_datasize());
+    printf("Data Size:\t\t%zu\n", header.data_size);
     printf("External:\t\t%d\n", is_external());
     printf("ReadOnly:\t\t%d\n", is_readonly());
     printf("FortranOrder:\t%d\n", is_fortranorder());
@@ -383,12 +386,12 @@ void HDC::print_info()
 
 //---------------------------- Tree manipulation -----------------------------------
 
-bool HDC::exists(const std::string& path)
+bool HDC::exists(const std::string& path) const
 {
     return exists(split(path));
 }
 
-bool HDC::exists_single(boost::variant<size_t, std::string> index)
+bool HDC::exists_single(boost::variant<size_t, std::string> index) const
 {
     auto children = get_children_ptr();
     if (children == nullptr) return false;
@@ -399,8 +402,9 @@ bool HDC::exists_single(boost::variant<size_t, std::string> index)
     }
 }
 
-bool HDC::exists(vector<boost::variant<size_t, std::string>> vs)
+bool HDC::exists(vector<boost::variant<size_t, std::string>> vs) const
 {
+    hdc_header_t header = get_header();
     D(
             printf("exists(");
             for (size_t i = 0; i < vs.size() - 1; i++) {
@@ -493,6 +497,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
         cout << "add_child_single(" + path + ")\n";
     )
     // sync buffer
+    hdc_header_t header;
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     size_t old_size = header.buffer_size;
@@ -557,13 +562,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
     return;
 }
 
-// void HDC::add_child_single(const boost::variant<size_t,std::string>& path, HDC& n) {
-//     std::cout << "##### HDC::add_child_single(const boost::variant<size_t,std::string>& path, HDC& n) :: " << path << std::endl;
-//     if (path.type() == typeid(size_t)) insert_slice(boost::get<size_t>(path), n);
-//     else add_child_single(boost::get<std::string>(path), n);
-// }
-
-vector<string> HDC::keys()
+vector<string> HDC::keys() const
 {
     vector<string> k;
     hdc_map_t* children;
@@ -595,6 +594,7 @@ void HDC::add_child(const std::string& path, HDC& n)
 
 void HDC::delete_child(vector<boost::variant<size_t, std::string>> vs)
 {
+    hdc_header_t header = get_header();
     D(
             cout << "delete_child(";
             for (size_t i = 0; i < vs.size() - 1; i++) {
@@ -623,7 +623,6 @@ void HDC::delete_child(vector<boost::variant<size_t, std::string>> vs)
                 children->erase(it);
             }
         }
-        memcpy(&header, buffer, sizeof(hdc_header_t));
         header.shape[0] = children->size();
         memcpy(buffer, &header, sizeof(hdc_header_t));
     } else {
@@ -729,7 +728,7 @@ HDC HDC::get_slice(vector<boost::variant<size_t, std::string>> vs, size_t i)
     hdc_map_t* children = get_children_ptr();
     if (children->count(boost::get<std::string>(first).c_str())) {
         if (vs.empty()) {
-            if (header.type != HDC_LIST) return HDC(storage, uuid);
+            if (get_type() != HDC_LIST) return HDC(storage, uuid);
             if (i > children->size()) {
                 throw HDCException("get_slice(): index out of range!\n");
             }
@@ -741,7 +740,7 @@ HDC HDC::get_slice(vector<boost::variant<size_t, std::string>> vs, size_t i)
     return HDC();
 }
 
-HDC* HDC::get_slice_ptr(vector<boost::variant<size_t, std::string>> vs, size_t i)
+HDC* HDC::get_slice_ptr(std::vector< boost::variant< size_t, std::__cxx11::string > > vs, size_t i)
 {
     D(
             cout << "get_slice(";
@@ -757,7 +756,7 @@ HDC* HDC::get_slice_ptr(vector<boost::variant<size_t, std::string>> vs, size_t i
     hdc_map_t* children = get_children_ptr();
     if (children->count(boost::get<std::string>(first).c_str())) {
         if (vs.empty()) {
-            if (header.type != HDC_LIST) return this;
+            if (get_type() != HDC_LIST) return this;
             if (i > children->size()) {
                 throw HDCException("get_slice_ptr(): index out of range!\n");
             }
@@ -773,7 +772,7 @@ HDC HDC::get_slice(size_t i)
 {
     DEBUG_STDOUT("get_slice(" + to_string(i) + ")\n");
     hdc_map_t* children = get_children_ptr();
-    if (header.type == HDC_LIST) return HDC(storage, children->get<by_index>()[i].address.c_str());
+    if (get_type() == HDC_LIST) return HDC(storage, children->get<by_index>()[i].address.c_str());
     return HDC(); // return empty if not list TODO: this is very, very very bad!!!! redo!!!
 }
 
@@ -781,7 +780,7 @@ HDC* HDC::get_slice_ptr(size_t i)
 {
     DEBUG_STDOUT("get_slice(" + to_string(i) + ")\n");
     hdc_map_t* children = get_children_ptr();
-    if (header.type == HDC_LIST) {
+    if (get_type() == HDC_LIST) {
         return new HDC(storage, children->get<by_index>()[i].address.c_str());
     }
     return new HDC(); // return empty if not list
@@ -792,7 +791,7 @@ HDC HDC::get_slice(const std::string& path, size_t i)
     return get_slice(split(path), i);
 }
 
-HDC* HDC::get_slice_ptr(const std::string& path, size_t i)
+HDC* HDC::get_slice_ptr(const std::__cxx11::string& path, size_t i)
 {
     return get_slice_ptr(split(path), i);
 }
@@ -860,6 +859,7 @@ void HDC::set_type(hdc_type_t _type)
 {
     // More to be added here later
     DEBUG_STDOUT("set_type(" + to_string(header.type) + " -> " + to_string(_type) + ")\n");
+    hdc_header_t header;
     char* old_buffer = storage->get(uuid);
     memcpy(&header, old_buffer, sizeof(hdc_header_t)); //sync header
     if (header.type == _type) return; // Nothing to do
@@ -928,6 +928,7 @@ void HDC::set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type, h
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _rank, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
              hdc_type_str(_type).c_str());)
+    hdc_header_t header;
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     // Start with determining of the buffer size
@@ -970,6 +971,7 @@ void HDC::set_data_c(int _rank, size_t* _shape, const void* _data, hdc_type_t _t
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", _rank, _shape[0], _shape[1], _shape[2], ((double*)_data)[0],
              hdc_type_str(_type).c_str());)
+    hdc_header_t header;
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     // Start with determining of the buffer size
@@ -1026,6 +1028,7 @@ void HDC::insert_slice(size_t i, HDC* h)
 void HDC::insert_slice(size_t i, HDC& h)
 {
     DEBUG_STDOUT("insert_slice(" + to_string(i) + ")\n");
+    hdc_header_t header;
     memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
     size_t old_size = header.buffer_size;
     if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
@@ -1085,7 +1088,7 @@ void HDC::set_slice(size_t i, HDC* h)
 void HDC::set_slice(size_t i, HDC& h)
 {
     DEBUG_STDOUT("set_slice(" + to_string(i) + ")\n");
-    if (header.type != HDC_LIST) {
+    if (get_type() != HDC_LIST) {
         throw HDCException("set_slice(): called on non list type node\n");
     };
     auto children = get_children_ptr();
@@ -1106,7 +1109,7 @@ void HDC::append_slice(HDC* h)
 
 void HDC::append_slice(HDC& h)
 {
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
+    hdc_header_t header = get_header();
     insert_slice(header.shape[0], h);
     return;
 }
@@ -1118,9 +1121,9 @@ hdc_t* HDC::as_hdc_ptr()
     return wrap;
 }
 
-const char* HDC::get_type_str()
+const char* HDC::get_type_str() const
 {
-    switch (header.type) {
+    switch (get_type()) {
         case HDC_EMPTY:
             return "null";
         case HDC_STRUCT:
@@ -1169,29 +1172,34 @@ string HDC::get_datashape_str(const std::string& path)
     return get(path).get_datashape_str();
 }
 
-string HDC::get_datashape_str()
+string HDC::get_datashape_str() const
 {
     // TODO: redo this
     throw HDCException("get_datashape_str() is not implemented yet.");
 }
 
-int HDC::get_rank()
-{
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t)); // TODO: do this in more sophisticately
-    return header.rank;
+hdc_header_t HDC::get_header() const {
+    hdc_header_t h;
+    memcpy(&h,storage->get(uuid),sizeof(hdc_header_t));
+    return h;
 }
 
-size_t* HDC::get_shape()
+int HDC::get_rank() const
 {
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
+    return get_header().rank;
+}
+
+size_t* HDC::get_shape() const
+{
+    hdc_header_t header = get_header();
     size_t offset = reinterpret_cast<size_t>(header.shape) - reinterpret_cast<size_t>(&header);
     //TODO: C++17 has offsetoff
     return reinterpret_cast<size_t*>(get_buffer() + offset);
 }
 
-std::vector<size_t> HDC::get_strides()
+std::vector<size_t> HDC::get_strides() const
 {
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
+    hdc_header_t header = get_header();
     std::vector<size_t> strides;
     size_t elem_size = hdc_sizeof(static_cast<hdc_type_t>(header.type));
     size_t last_stride;
@@ -1220,7 +1228,6 @@ std::vector<size_t> HDC::get_strides()
 int HDC::get_rank(const std::string& path)
 {
     //TODO: make more error-proof - add has check -> make it as function???
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
     if (path.empty())
         return get_rank();
     else
@@ -1229,7 +1236,6 @@ int HDC::get_rank(const std::string& path)
 
 size_t* HDC::get_shape(const std::string& path)
 {
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
     if (path.empty())
         return get_shape();
     else
@@ -1242,7 +1248,7 @@ size_t HDC::childs_count() const
     return get_children_ptr()->size();
 }
 
-char* HDC::get_buffer()
+char* HDC::get_buffer() const
 {
     return storage->get(uuid);
 }
@@ -1262,6 +1268,7 @@ bip::managed_external_buffer HDC::get_segment() const
 
 hdc_map_t* HDC::get_children_ptr() const
 {
+    hdc_header_t header = get_header();
     if (header.type != HDC_STRUCT && header.type != HDC_LIST) return nullptr;
     char* buffer = storage->get(uuid);
     auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t),
@@ -1272,6 +1279,7 @@ hdc_map_t* HDC::get_children_ptr() const
 /* Grows underlying storage by given extra size, it does nothing if extra_size <= 0.*/
 void HDC::grow(size_t extra_size)
 {
+    hdc_header_t header = get_header();
     cout << "Growing  " << extra_size << endl;
     if (extra_size <= 0) return;
     char* old_buffer = storage->get(uuid);
@@ -1287,16 +1295,18 @@ void HDC::grow(size_t extra_size)
 }
 
 
-char* HDC::get_data_ptr()
+char* HDC::get_data_ptr() const
 {
+    hdc_header_t header = get_header();
     if (header.data_size == 0) return nullptr;
     return (char*)(storage->get(uuid) + sizeof(hdc_header_t));
 }
 
 void HDC::delete_data()
 {
+    hdc_header_t header;
     auto buffer = storage->get(uuid);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    memcpy(&header,buffer,sizeof(hdc_header_t));
     if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
         auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
         hdc_map_t* children = segment.find<hdc_map_t>("d").first;
@@ -1444,13 +1454,14 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
 
 hdc_data_t HDC::get_data()
 {
-    auto buffer = this->get_buffer();
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    hdc_header_t header;
+    auto buffer = storage->get(uuid);
+    memcpy(&header,buffer,sizeof(hdc_header_t));
     hdc_data_t obj;
-    obj.type = this->header.type;
-    obj.flags = this->header.flags;
-    obj.rank = this->header.rank;
-    for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = this->header.shape[i];
+    obj.type = header.type;
+    obj.flags = header.flags;
+    obj.rank = header.rank;
+    for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = header.shape[i];
     obj.data = buffer+sizeof(hdc_header_t);
     return obj;
 }
@@ -1467,35 +1478,36 @@ hdc_data_t HDC::get_data(const std::string& path)
 
 void HDC::set_data(hdc_data_t obj)
 {
+        hdc_header_t header;
         auto buffer = storage->get(uuid);
-        memcpy(&header, buffer, sizeof(hdc_header_t));
+        memcpy(&header,buffer,sizeof(hdc_header_t));
         // Start with determining of the buffer size
         size_t data_size = hdc_sizeof(obj.type);
         for (size_t i = 0; i < obj.rank; i++) data_size *= obj.shape[i];
         size_t buffer_size = data_size + sizeof(hdc_header_t);
         if (header.buffer_size == buffer_size) {
             storage->lock(uuid);
-            this->header.type = obj.type;
-            this->header.flags = obj.flags;
+            header.type = obj.type;
+            header.flags = obj.flags;
             memcpy(buffer,&header,sizeof(hdc_header_t));
             memcpy(buffer + sizeof(hdc_header_t), obj.data, data_size);
             storage->unlock(uuid);
             return;
         } else {
             storage->remove(uuid);
-            this->header.type = obj.type;
-            this->header.flags = obj.flags;
-            this->header.rank = obj.rank;
-            memset(this->header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            this->header.data_size = hdc_sizeof(obj.type);
-            for (size_t i=0;i<this->header.rank;i++) {
-                this->header.shape[i] = obj.shape[i];
-                this->header.data_size *= obj.shape[i];
+            header.type = obj.type;
+            header.flags = obj.flags;
+            header.rank = obj.rank;
+            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            header.data_size = hdc_sizeof(obj.type);
+            for (size_t i=0;i<header.rank;i++) {
+                header.shape[i] = obj.shape[i];
+                header.data_size *= obj.shape[i];
             }
-            this->header.buffer_size = this->header.data_size + sizeof(hdc_header_t);
-            char* buffer = new char[this->header.buffer_size];
+            header.buffer_size = header.data_size + sizeof(hdc_header_t);
+            char* buffer = new char[header.buffer_size];
             memcpy(buffer,&header,sizeof(hdc_header_t));
-            memcpy(buffer+sizeof(hdc_header_t),obj.data,this->header.data_size);
+            memcpy(buffer+sizeof(hdc_header_t),obj.data,header.data_size);
             storage->set(uuid, buffer, header.buffer_size);
             // Now it is safe to
             if (!storage->usesBuffersDirectly()) delete[] buffer;

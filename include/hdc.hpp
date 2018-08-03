@@ -57,7 +57,6 @@ class HDC
 private:
     string uuid;
     HDCStorage* storage;
-    hdc_header_t header;
 
 /* ------------------------------- methods ----------------------------------------- */
     void add_child(vector<boost::variant<size_t,std::string>> vs, HDC* n);
@@ -68,9 +67,10 @@ private:
     HDC get(vector<boost::variant<size_t,std::string>> vs);
     HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
     HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
-    bool exists(vector<boost::variant<size_t,std::string>> vs);
-    bool exists_single(boost::variant<size_t,std::string> index);
+    bool exists(vector<boost::variant<size_t,std::string>> vs) const;
+    bool exists_single(boost::variant<size_t,std::string> index) const;
     void add_child_single(const std::string& path, HDC& n);
+    hdc_header_t get_header() const;
 //     void add_child_single(const boost::variant<size_t,std::string>& path, HDC& n);
 public:
     /** Creates empty HDC with specified buffer size */
@@ -121,9 +121,10 @@ public:
     /** Returns object flags (i.e. array ordering)*/
     size_t get_flags() const;
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
-    template<typename T> T* get_data();
+    template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
     template<typename T> void set_data(int _rank, size_t* _shape, T* _data, hdc_flags_t _flags = HDCDefault) {
+        hdc_header_t header = get_header();
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",_rank,_shape[0],_shape[1],_shape[2],((double*)_data)[0]);)
         auto buffer = storage->get(uuid);
         memcpy(&header,buffer,sizeof(hdc_header_t));
@@ -214,6 +215,7 @@ public:
     };
 
     void set_string(std::string str) {
+        hdc_header_t header = get_header();
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
@@ -223,7 +225,7 @@ public:
         header.rank = 1;
         header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        char* buffer = new char[header.buffer_size];
+        auto buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
         memcpy(buffer+sizeof(hdc_header_t),str.c_str(),header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
@@ -255,6 +257,7 @@ public:
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
+        hdc_header_t header = get_header();
         memset(&header,0,sizeof(hdc_header_t));
         header.type = to_typeid(data);
         header.data_size = sizeof(T);
@@ -267,7 +270,7 @@ public:
     }
     /** Sets scalar data to given node - UDA version. */
     void set_data(const unsigned char* data, hdc_type_t _type) {
-        memset(&header,0,sizeof(hdc_header_t));
+        hdc_header_t header = get_header();
         header.type = _type;
         header.data_size = hdc_sizeof(_type);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
@@ -322,14 +325,14 @@ public:
         get(path).set_data(data,_type);
     }
     /** Returns number of dimensions of current node. */
-    int get_rank();
+    int get_rank() const;
     /** Returns shape of current node. */
-    size_t* get_shape();
-    std::vector<size_t> get_strides();
+    size_t* get_shape() const;
+    std::vector<size_t> get_strides() const;
     bool is_external() const;
     bool is_readonly() const;
     bool is_fortranorder() const;
-    void print_info();
+    void print_info() const;
 /* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
     void add_child(const std::string& path, HDC* n);
@@ -350,7 +353,7 @@ public:
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
-    bool exists(const std::string& path);
+    bool exists(const std::string& path) const;
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
     void set_list(deque<HDC*>* list);
     /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
@@ -372,7 +375,7 @@ public:
     /** Sets HDC type of current node. */
     void set_type(hdc_type_t _type);
     /** Returns true if node is empty. */
-    bool is_empty();
+    bool is_empty() const;
     /** Returns number of dimensions of node under path. */
     int get_rank(const std::string& path);
     /** Returns shape of node under path. */
@@ -380,6 +383,7 @@ public:
     /** Returns pointer to data of this node. */
     template<typename T> T as()
     {
+        hdc_header_t header = get_header();
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
@@ -391,6 +395,7 @@ public:
     }
     /** Returns string. Needs to have separate function */
     std::string as_string() {
+        hdc_header_t header = get_header();
         if (header.type == HDC_STRING) {
            std::string str(storage->get(uuid)+sizeof(hdc_header_t));
            return str;
@@ -451,19 +456,19 @@ public:
     /** Returns void pointer to data. */
     intptr_t as_void_ptr();
     /** Returns string representing data/node type. */
-    const char* get_type_str();
+    const char* get_type_str() const;
     /** Returns datashape desctiption string. */
-    string get_datashape_str();
+    string get_datashape_str() const;
     /** Returns string representing data/node type. */
     string get_type_str(const std::string& path);
     /** Returns datashape desctiption string. */
     string get_datashape_str(const std::string& path);
     /** Returns void pointer to data */
-    char* get_data_ptr();
+    char* get_data_ptr() const;
     /** Returns vector of keys of a struct node and empty vector otherwise. */
-    vector<string> keys();
+    vector<string> keys() const;
     size_t childs_count() const;
-    char* get_buffer();
+    char* get_buffer() const;
     string get_uuid() const;
     void grow(size_t extra_size);
     // allocator stuff
