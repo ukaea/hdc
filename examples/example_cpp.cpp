@@ -60,17 +60,29 @@ int main(int argc, const char* argv[])
     cout << "Data: ";
     for (size_t i = 0; i < shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;
+
     //Serialize data to JSON
-//    tree.to_json("tree.txt",0);
-// #ifdef _USE_HDF5
-//     tree.to_hdf5("tree.h5");
-//     cout << "written\n";
-//     HDC hhh = from_hdf5("tree.h5","/data");
-//     hhh.dump();
-// #endif
+   tree.to_json("tree.txt",0);
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
+
+//Serialize data to HDF5
+#ifdef _USE_HDF5
+    tree.to_hdf5("tree.h5");
+    HDC hhh = HDC::from_hdf5("tree.h5","/data");
+    hhh.dump();
+#endif
+
+
+    std::cout << "---------------------------- overloaded operators start------------------------------\n";
+    tree["aaa/bbb/ccc"].dump(); // works
+    int32_t test[4] = { 100, 200, 300, 400 };
+    HDC htest;
+    htest.set_data(1, shape, test);
+    tree["aaa/bbb/ccc"] = htest; // TODO
+    tree["aaa/bbb/ccc"].dump();
+    std::cout << "---------------------------- overloaded operators end --------------------------------\n";
 
     return 0;
 }

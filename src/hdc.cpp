@@ -862,6 +862,40 @@ const HDC HDC::get(const std::string& path) const
     else return get(split(path));
 }
 
+HDC& HDC::get_ref(const std::string& path)
+{
+    HDC* h = get_ptr(path);
+    return *h;
+}
+
+HDC& HDC::operator=(const HDC& other)
+{
+    if (this != &other && uuid != other.get_uuid()) {
+        //TODO: this copies the buffer, AFAIK we would need parrent pointer to make this zero-copy - it can have some performance hit...
+        storage->set(uuid, other.get_buffer(), other.get_header().buffer_size);
+    }
+    return *this;
+}
+
+HDC& HDC::operator[](const std::string& path)
+{
+    return get_ref(path);
+}
+
+const HDC HDC::operator[](const std::string& path) const
+{
+    return get(path);
+}
+
+// const HDC  HDC::operator [](size_t index) const
+// {
+//     return get_slice(index);
+// }
+// HDC& HDC::operator [](size_t index)
+// {
+//     return get_slice_ref(index);
+// }
+
 void HDC::set_child(vector<boost::variant<size_t, std::string>> vs, HDC* n)
 {
     D(
@@ -941,7 +975,7 @@ void HDC::set_type(hdc_type_t type)
     return;
 }
 
-intptr_t HDC::as_void_ptr()
+intptr_t HDC::as_void_ptr() const
 {
     return (intptr_t)(void*)this;
 }

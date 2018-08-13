@@ -124,6 +124,13 @@ public:
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
+
+    const HDC operator[](const std::string& path) const;
+    HDC& operator[](const std::string& path);
+    HDC& operator=(const HDC& other);
+//     const HDC operator [](size_t i) const; // Seems to be ok
+//     HDC& operator [](size_t i);
+
     template<typename T> void set_data(size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
         hdc_header_t header = get_header();
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
@@ -345,6 +352,7 @@ public:
     HDC* get_ptr(const std::string& path);
     HDC get(const std::string& path);
     const HDC get(const std::string& path) const;
+    HDC& get_ref(const std::string& path);
     /** Returns i-th subnode if HDC_LIST is the type. */
     HDC get_slice(const std::string& path, size_t i);
     /** Returns i-th subnode if HDC_LIST is the type. */
@@ -444,7 +452,7 @@ public:
     const std::string serialize() const;
     void serialize(const std::string& filename) const;
     /** Returns void pointer to data. */
-    intptr_t as_void_ptr();
+    intptr_t as_void_ptr() const;
     /** Returns string representing data/node type. */
     const std::string get_type_str(const std::string& path = "") const;
     /** Returns void pointer to data */

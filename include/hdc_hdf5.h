@@ -70,6 +70,9 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& d
 void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string  &ref_path, HDC& dest);
 void hdf5_read(hid_t hdf5_id, std::string hdf5_path, HDC& dest);
 void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& node);
+HDC from_hdf5(hid_t file, const std::string& dataset_name);
+HDC from_hdf5(const std::string& filename, const std::string& dataset_name);
+HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name);
 
 #endif // _USE_HDF5
 
