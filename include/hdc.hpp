@@ -128,12 +128,11 @@ public:
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
-
+//     const HDC operator[](const size_t index) const;
+//     HDC& operator[](const size_t index);
     const HDC operator[](const std::string& path) const;
     HDC& operator[](const std::string& path);
     HDC& operator=(const HDC& other);
-//     const HDC operator [](size_t i) const; // Seems to be ok
-//     HDC& operator [](size_t i);
 
     template<typename T> void set_data(size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
         hdc_header_t header = get_header();
@@ -206,7 +205,7 @@ public:
     {
         DEBUG_STDOUT("template <typename T> void set_data(vector<T> data)"+to_string(data[0]));
         if (get_children_ptr() != nullptr) {
-            cout << "The node has already children set..." << endl;
+            std::cout << "The node has already children set..." << std::endl;
             return;
         }
         size_t shape[1] = {data.size()};
@@ -365,17 +364,15 @@ public:
     /** Returns copy of current object. */
     HDC* copy(int copy_arrays = 1);
     /** Inserts node to i-th slice of current node. */
-    void insert_slice(size_t i, HDC* h);
+    void insert(size_t i, HDC* h);
     /** Inserts node to i-th slice of current node. */
-    void insert_slice(size_t i, HDC& h);
-    /** Sets node to i-th slice of current node. */
-    void set_slice(size_t i, HDC* h);
-    /** Sets node to i-th slice of current node. */
-    void set_slice(size_t i, HDC& h);
+    void insert(size_t i, HDC& h);
+    void set_child_single(hdc_index_t path, HDC& n);
+    void set_child_single(hdc_index_t path, HDC* n);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
-    void append_slice(HDC* h);
+    void append(HDC* h);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
-    void append_slice(HDC& h);
+    void append(HDC& h);
     /** Sets HDC type of current node. */
     void set_type(hdc_type_t type);
     /** Returns true if node is empty. */
@@ -406,7 +403,7 @@ public:
            return str;
 
         } else {
-            cout << header.type << endl;
+            std::cout << header.type << std::endl;
             std::ostringstream oss;
             oss << to_json(0) << "\n";
             return oss.str();
@@ -441,7 +438,7 @@ public:
     Json::Value to_json(int mode = 0) const;
     /** Serialization to string object. */
     string to_json_string(int mode = 0) const;
-    /** Dumps JSON to cout */
+    /** Dumps JSON to std::cout */
     void dump() const;
     /** Serializes HDC to special json file*/
     const std::string serialize() const;

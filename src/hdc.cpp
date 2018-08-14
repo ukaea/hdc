@@ -80,7 +80,7 @@ void HDC::load_config(std::string configPath)
     }
 }
 
-void HDC::search_plugins(string searchPath)
+void HDC::search_plugins(std::string searchPath)
 {
     std::string delimiters(":");
     std::vector<std::string> parts;
@@ -307,15 +307,19 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 /** Destructor */
 HDC::~HDC()
 {
-    /*hdc_map_t* children;
-    try {
-        children = get_children_ptr();
-    } catch(...) {
-        return;
-    };
-    for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
-        storage->remove(it->address.c_str());
-    }*/
+    /*
+    auto t = get_type();
+    if (t == HDC_LIST || t == HDC_STRUCT) {
+        try {
+            hdc_map_t* children = get_children_ptr();
+            for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
+                storage->remove(it->address.c_str());
+            }
+        } catch(...) {
+            return;
+        }
+    }
+    */
     //storage->remove(uuid); // This is responsibility of storage from now
 }
 
@@ -470,7 +474,7 @@ void HDC::add_child(hdc_path_t path, HDC& n)
         HDC h;
         if (first.type() == typeid(size_t)) {
             auto index = boost::get<size_t>(first);
-            if (!exists_single(index)) insert_slice(index, h);
+            if (!exists_single(index)) insert(index, h);
         } else {
             add_child_single(boost::get<std::string>(first), h);
         }
@@ -478,7 +482,7 @@ void HDC::add_child(hdc_path_t path, HDC& n)
     } else {
         if (first.type() == typeid(size_t)) {
             auto index = boost::get<size_t>(first);
-            if (!exists_single(index)) insert_slice(index, n);
+            if (!exists_single(index)) insert(index, n);
         } else {
             add_child_single(boost::get<std::string>(first), n);
         }
@@ -712,7 +716,7 @@ HDC HDC::get_single(hdc_index_t index)
         if (children->count(str)) {
             return HDC(storage, children->find(str)->address.c_str());
         } else {
-            throw HDCException("get(string): Not found\n");
+            throw HDCException("get(std::string): Not found\n");
         }
     } else {
         size_t i = boost::get<size_t>(index);
@@ -735,7 +739,7 @@ const HDC HDC::get_single(hdc_index_t index) const
         if (children->count(str)) {
             return HDC(storage, children->find(str)->address.c_str());
         } else {
-            throw HDCException("get(string): Not found\n");
+            throw HDCException("get(std::string): Not found\n");
         }
     } else {
         size_t i = boost::get<size_t>(index);
@@ -758,7 +762,7 @@ HDC* HDC::get_single_ptr(hdc_index_t index)
         if (children->count(str)) {
             return new HDC(storage, children->find(str)->address.c_str());
         } else {
-            throw HDCException("get(string): Not found\n");
+            throw HDCException("get(std::string): Not found\n");
         }
     } else {
         size_t i = boost::get<size_t>(index);
@@ -812,6 +816,16 @@ const HDC HDC::operator[](const std::string& path) const
     return get(path);
 }
 
+// HDC& HDC::operator[](const size_t index)
+// {
+//     return get_ref(index);
+// }
+//
+// const HDC HDC::operator[](const size_t index) const
+// {
+//     return get(index);
+// }
+
 // const HDC  HDC::operator [](size_t index) const
 // {
 //     return get_slice(index);
@@ -820,6 +834,45 @@ const HDC HDC::operator[](const std::string& path) const
 // {
 //     return get_slice_ref(index);
 // }
+
+void HDC::set_child_single(hdc_index_t path, HDC& n)
+{
+    D(
+        std::cout << "set_child_single(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
+    )
+    hdc_map_t* children = get_children_ptr();
+    bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
+    if (path.type() == typeid(size_t)) {
+        size_t i = boost::get<size_t>(path);
+        if (get_type() != HDC_LIST) {
+            throw HDCException("set_child_single(): called on non list type node\n");
+        }
+        if (i >= children->size()) {
+            throw HDCException("set_child_single(): Index " + std::to_string(i) + " >= list size.\n");
+        }
+        shared_string str(n.get_uuid().c_str(), ca);
+        children->modify(children->iterator_to(children->get<by_index>()[i]), change_node(str));
+    } else {
+        // check whether children container exists
+        if (children == nullptr) children = get_children_ptr();
+        // check whether given path exists
+        if (children->count(boost::get<std::string>(path).c_str())) {
+            shared_string str(n.get_uuid().c_str(), ca); // TODO wrap this up to try catch block
+            children->modify(children->find(boost::get<std::string>(path).c_str()), change_node(str));
+        } else {
+            // TODO: get_allocator -- viz vyse...
+            children->insert(record(boost::get<std::string>(path).c_str(), n.get_uuid().c_str(), ca));
+        }
+    }
+    return;
+}
+
+void HDC::set_child_single(hdc_index_t path, HDC* n)
+{
+    set_child_single(path,*n);
+}
 
 void HDC::set_child(hdc_path_t path, HDC* n)
 {
@@ -834,27 +887,13 @@ void HDC::set_child(hdc_path_t path, HDC* n)
     }
     auto first = path.front();
     path.pop_front();
-    bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
-    hdc_map_t* children = get_children_ptr();
     if (path.empty()) {
-        if (first.type() == typeid(size_t)) {
-            set_slice(boost::get<size_t>(first), n);
-        } else {
-            // check whether children container exists
-            if (children == nullptr) children = get_children_ptr();
-            // check whether given path exists
-            if (children->count(boost::get<std::string>(first).c_str())) {
-                shared_string str(n->get_uuid().c_str(), ca); // TODO wrap this up to try catch block
-                children->modify(children->find(boost::get<std::string>(first).c_str()), change_node(str));
-            } else {
-                // TODO: get_allocator -- viz vyse...
-                children->insert(record(boost::get<std::string>(first).c_str(), n->get_uuid().c_str(), ca));
-            }
-        }
-    } else { get(boost::get<std::string>(first)).set_child(path, n); }
+        set_child_single(first, n);
+    } else {
+        get(boost::get<std::string>(first)).set_child(path, n);
+    }
     return;
 }
-
 
 void HDC::set_child(const std::string& path, HDC* n)
 {
@@ -1029,30 +1068,30 @@ void HDC::set_data_c(hdc_path_t path, size_t  rank, size_t* shape, const void* d
     get(path).set_data_c(rank, shape, data, type, flags);
 }
 
-void HDC::insert_slice(size_t i, HDC* h)
+void HDC::insert(size_t i, HDC* h)
 {
-    insert_slice(i, *h);
+    insert(i, *h);
     return;
 }
 
-void HDC::insert_slice(size_t i, HDC& h)
+void HDC::insert(size_t i, HDC& h)
 {
-    DEBUG_STDOUT("insert_slice(" + to_string(i) + ")\n");
+    DEBUG_STDOUT("insert(" + to_string(i) + ")\n");
     hdc_header_t header;
     memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
     size_t old_size = header.buffer_size;
     if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
-        throw HDCException("insert_slice(): Wrong type to call insert_slice.\n");
+        throw HDCException("insert(): Wrong type to call insert.\n");
     }
     if (header.type == HDC_EMPTY) set_type(HDC_LIST);
 
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
     if (get_shape()[0] < i) {
-        std::cout << "Warning: insert_slice():: inserting behind current list length, filling with empty containers\n";
+        std::cout << "Warning: insert():: inserting behind current list length, filling with empty containers\n";
         for (size_t k = get_shape()[0]; k < i; k++) {
             HDC ch;
-            append_slice(ch);
+            append(ch);
         }
     }
 
@@ -1080,7 +1119,7 @@ void HDC::insert_slice(size_t i, HDC& h)
         }
     }
     if (redo == 1 && k >= HDC_MAX_RESIZE_ATTEMPTS - 1) {
-        throw HDCBadAllocException("insert_slice(): Could not allocate enough memory.\n");
+        throw HDCBadAllocException("insert(): Could not allocate enough memory.\n");
     }
     header.shape[0] = children->size();
     memcpy(buffer, &header, sizeof(hdc_header_t));
@@ -1088,39 +1127,15 @@ void HDC::insert_slice(size_t i, HDC& h)
     return;
 }
 
-
-void HDC::set_slice(size_t i, HDC* h)
+void HDC::append(HDC* h)
 {
-    set_slice(i, *h);
+    append(*h);
     return;
 }
 
-void HDC::set_slice(size_t i, HDC& h)
+void HDC::append(HDC& h)
 {
-    DEBUG_STDOUT("set_slice(" + to_string(i) + ")\n");
-    if (get_type() != HDC_LIST) {
-        throw HDCException("set_slice(): called on non list type node\n");
-    };
-    auto children = get_children_ptr();
-    bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
-    shared_string str(h.get_uuid().c_str(), ca); // TODO try-catch this (or make factory object/function???)
-    if (i >= children->size()) {
-        throw HDCException("set_slice(): Index " + std::to_string(i) + " >= list size.\n");
-    }
-    children->modify(children->iterator_to(children->get<by_index>()[i]), change_node(str));
-    return;
-}
-
-void HDC::append_slice(HDC* h)
-{
-    append_slice(*h);
-    return;
-}
-
-void HDC::append_slice(HDC& h)
-{
-    hdc_header_t header = get_header();
-    insert_slice(header.shape[0], h);
+    insert(get_header().shape[0], h);
     return;
 }
 
@@ -1233,7 +1248,6 @@ size_t* HDC::get_shape(const std::string& path) const
     else
         return get(path).get_shape();
 }
-
 
 size_t HDC::childs_count() const
 {

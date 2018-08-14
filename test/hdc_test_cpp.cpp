@@ -135,14 +135,14 @@ TEST_CASE("ListManipulation", "[HDC]")
     HDC k;
     for (size_t i = 0; i < 5; i++) {
         HDC ch("data" + std::to_string(i));
-        k.append_slice(ch);
+        k.append(ch);
     }
     h.add_child("k", k);
 
     HDC l;
     for (size_t i = 0; i < 5; i++) {
         HDC ch("data" + std::to_string(i * 10));
-        l.append_slice(ch);
+        l.append(ch);
     }
     h.add_child("l", l);
 
@@ -277,8 +277,8 @@ TEST_CASE("SliceManipulation", "[HDC]")
     HDC sl2;
     sl2.set_string("2");
     h.set_type(HDC_LIST);
-    h.append_slice(sl);
-    h.append_slice(sl2);
+    h.append(sl);
+    h.append(sl2);
     CHECK(HDC_LIST == h.get_type());
     CHECK(strcmp("list", h.get_type_str().c_str()) == 0);
     CHECK(1 == h.get_rank());
@@ -287,18 +287,18 @@ TEST_CASE("SliceManipulation", "[HDC]")
     CHECK(strcmp("2", h.get_single_ptr(1)->as_string().c_str()) == 0);
     HDC sl3;
     sl3.set_string("3");
-    h.insert_slice(1, sl3);
+    h.insert(1, sl3);
     vector<string> keys = h.keys();
     CHECK(strcmp("3", h.get_single_ptr(1)->as_string().c_str()) == 0);
     CHECK(strcmp("2", h.get_single_ptr(2)->as_string().c_str()) == 0);
     HDC sl4;
     sl4.set_string("4");
-    h.set_slice(1, sl4);
+    h.set_child_single(1, sl4);
     CHECK(strcmp("4", h.get_single_ptr(1)->as_string().c_str()) == 0);
 
     HDC n;
     HDC ch;
-    n.insert_slice(10, ch);
+    n.insert(10, ch);
     CHECK(11 == n.get_shape()[0]);
     CHECK(HDC_LIST == n.get_type());
     for (int i = 0; i < 11; i++) CHECK(HDC_EMPTY == n.get_single(i).get_type());
@@ -341,7 +341,7 @@ TEST_CASE("GetKeys", "[HDC]")
     HDC lch;                                                                                        \
     for (int i=0;i<5;i++) {                                                                         \
         HDC lch;                                                                                    \
-        list.append_slice(lch);                                                                     \
+        list.append(lch);                                                                     \
     }                                                                                               \
     tree.add_child("aaa/list", list);                                                               \
     tree.set_string("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");      \

@@ -278,7 +278,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
 #endif
                 HDC h;
                 hdf5_tree_to_hdc(dsetv_id, "", h);
-                dest.append_slice(h);
+                dest.append(h);
             }
             return;
         }

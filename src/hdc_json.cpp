@@ -331,7 +331,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 tree.set_type(HDC_LIST);
                 for (unsigned int i = 0; i < root.size(); i++) {
                     HDC h = HDC::json_to_HDC(root[i]);
-                    tree.append_slice(h);
+                    tree.append(h);
                 }
             }
             break;

@@ -119,21 +119,21 @@ hdc_t* hdc_get_slice(struct hdc_t* tree, const char* path, size_t i)
 void hdc_set_slice(struct hdc_t* tree, size_t i, struct hdc_t* n)
 {
     HDC* t = (HDC*)tree->obj;
-    t->set_slice(i, (HDC*)n->obj);
+    t->set_child_single(i, (HDC*)n->obj);
     return;
 }
 
 void hdc_insert_slice(struct hdc_t* tree, size_t i, struct hdc_t* n)
 {
     HDC* t = (HDC*)tree->obj;
-    t->insert_slice(i, (HDC*)n->obj);
+    t->insert(i, (HDC*)n->obj);
     return;
 }
 
 void hdc_append_slice(struct hdc_t* tree, struct hdc_t* n)
 {
     HDC* t = (HDC*)tree->obj;
-    t->append_slice((HDC*)n->obj);
+    t->append((HDC*)n->obj);
     return;
 }
 
