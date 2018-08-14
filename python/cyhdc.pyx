@@ -63,9 +63,9 @@ cdef extern from "hdc.hpp":
         size_t get_datasize() except +
         string to_json_string(int mode) except +
         void set_child(string path, CppHDC* n) except +
-        void append_slice(CppHDC* h) except +
+        void append(CppHDC* h) except +
         void add_child(string path, CppHDC* n) except +
-        CppHDC* get_slice_ptr(size_t i) except +
+        CppHDC* get_single_ptr(size_t i) except +
         CppHDC* get_ptr(string path) except +
         bool exists(string path) except +
         void set_string(string data) except +
@@ -155,7 +155,7 @@ cdef class HDC:
         elif isinstance(key, numbers.Integral):
             res = <HDC> self.__class__()
             # TODO move to constructor
-            res._thisptr = deref(self._thisptr).get_slice_ptr(<size_t> key)
+            res._thisptr = deref(self._thisptr).get_single_ptr(<size_t> key)
             return res
         else:
             raise ValueError("key must be either string or integer")
@@ -268,7 +268,7 @@ cdef class HDC:
 
     def append(self, data):
         new_hdc = HDC(data)
-        deref(self._thisptr).append_slice(new_hdc._thisptr)
+        deref(self._thisptr).append(new_hdc._thisptr)
 
     def dumps(self, mode=0):
         """Dump to JSON string"""
