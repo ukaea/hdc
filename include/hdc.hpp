@@ -70,14 +70,14 @@ private:
     HDC* get_ptr(hdc_path_t path);
     HDC get(hdc_path_t path);
     const HDC get(hdc_path_t path) const;
-    HDC get_slice(hdc_path_t path, size_t i);
-    const HDC get_slice(hdc_path_t path, size_t i) const;
-    HDC* get_slice_ptr(hdc_path_t path, size_t i);
     bool exists(hdc_path_t path) const;
     bool exists_single(hdc_index_t index) const;
     void add_child_single(const std::string& path, HDC& n);
     hdc_header_t get_header() const;
 public:
+    HDC* get_single_ptr(hdc_index_t index);
+    HDC get_single(hdc_index_t index);
+    const HDC get_single(hdc_index_t index) const;
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
     /** Default constructor. Creates empty HDC */
@@ -356,14 +356,6 @@ public:
     HDC get(const std::string& path);
     const HDC get(const std::string& path) const;
     HDC& get_ref(const std::string& path);
-    /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC get_slice(const std::string& path, size_t i);
-    /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC get_slice(size_t i);
-    const HDC get_slice(size_t i) const;
-    HDC* get_slice_ptr(const std::string& path, size_t i);
-    /** Returns i-th subnode if HDC_LIST is the type. */
-    HDC* get_slice_ptr(size_t i);
     /** Returns true if subtree with given path with exists and false otherwise. */
     bool exists(const std::string& path) const;
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
@@ -490,7 +482,6 @@ public:
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
     static HDC load(const std::string& str, const std::string& datapath="");
     HDCStorage* get_storage() const {return this->storage; };
-
     hdc_data_t get_data(const std::string& path = "") const;
     void set_data(hdc_data_t obj);
     void set_data(const std::string& path,hdc_data_t obj);

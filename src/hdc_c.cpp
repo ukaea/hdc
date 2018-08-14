@@ -110,7 +110,7 @@ const char* hdc_get_uuid(struct hdc_t* tree)
 hdc_t* hdc_get_slice(struct hdc_t* tree, const char* path, size_t i)
 {
     HDC* t = (HDC*)tree->obj;
-    HDC* node = t->get_slice_ptr(path, i);
+    HDC* node = t->get_ptr(path)->get_single_ptr(i);
     struct hdc_t* h = new struct hdc_t;
     h->obj = (void*)node;
     return h;

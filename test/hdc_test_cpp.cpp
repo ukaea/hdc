@@ -98,10 +98,10 @@ TEST_CASE("NodeManipulation", "[HDC]")
     HDC h = tree->get("aaa/list[0]/ddd");
     CHECK(true == tree->exists("aaa/list[0]/ddd"));
     CHECK(true == tree->exists("aaa/list[0]/eee"));
-    tree->get_ptr("aaa/list")->get_slice_ptr(0)->add_child("kkk", new HDC());
+    tree->get_ptr("aaa/list")->get_single_ptr(0)->add_child("kkk", new HDC()); // Remove this - unnecessary
     CHECK(2LU == tree->get_ptr("aaa/list")->get_shape()[0]);
-    CHECK(true == tree->get_ptr("aaa/list")->get_slice_ptr(0)->exists("ddd"));
-    CHECK(true == tree->get_ptr("aaa/list")->get_slice_ptr(0)->exists("eee"));
+    CHECK(true == tree->get_ptr("aaa/list")->get_single_ptr(0)->exists("ddd"));
+    CHECK(true == tree->get_ptr("aaa/list")->get_single_ptr(0)->exists("eee"));
     // Try subtree
     HDC* sub = tree->get_ptr("aaa");
     CHECK(true == sub->exists("bbb"));
@@ -283,25 +283,25 @@ TEST_CASE("SliceManipulation", "[HDC]")
     CHECK(strcmp("list", h.get_type_str().c_str()) == 0);
     CHECK(1 == h.get_rank());
     CHECK(2 == h.get_shape()[0]);
-    CHECK(strcmp("1", h.get_slice_ptr(0)->as_string().c_str()) == 0);
-    CHECK(strcmp("2", h.get_slice_ptr(1)->as_string().c_str()) == 0);
+    CHECK(strcmp("1", h.get_single_ptr(0)->as_string().c_str()) == 0);
+    CHECK(strcmp("2", h.get_single_ptr(1)->as_string().c_str()) == 0);
     HDC sl3;
     sl3.set_string("3");
     h.insert_slice(1, sl3);
     vector<string> keys = h.keys();
-    CHECK(strcmp("3", h.get_slice_ptr(1)->as_string().c_str()) == 0);
-    CHECK(strcmp("2", h.get_slice_ptr(2)->as_string().c_str()) == 0);
+    CHECK(strcmp("3", h.get_single_ptr(1)->as_string().c_str()) == 0);
+    CHECK(strcmp("2", h.get_single_ptr(2)->as_string().c_str()) == 0);
     HDC sl4;
     sl4.set_string("4");
     h.set_slice(1, sl4);
-    CHECK(strcmp("4", h.get_slice_ptr(1)->as_string().c_str()) == 0);
+    CHECK(strcmp("4", h.get_single_ptr(1)->as_string().c_str()) == 0);
 
     HDC n;
     HDC ch;
     n.insert_slice(10, ch);
     CHECK(11 == n.get_shape()[0]);
     CHECK(HDC_LIST == n.get_type());
-    for (int i = 0; i < 11; i++) CHECK(HDC_EMPTY == n.get_slice(i).get_type());
+    for (int i = 0; i < 11; i++) CHECK(HDC_EMPTY == n.get_single(i).get_type());
 }
 
 TEST_CASE("GetKeys", "[HDC]")
@@ -383,7 +383,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(5 == s.get_shape()[0]);
     CHECK(HDC_LIST == s.get_type());
     CHECK(strcmp(tree.get("aaa/list").get_type_str().c_str(), tree2.get("aaa/list").get_type_str().c_str()) == 0);
-    for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get_slice(i).get_type());
+    for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get_single(i).get_type());
 
     // Test string
     CHECK(strcmp(tree.get("aaa/string").as_string().c_str(), tree2.get("aaa/string").as_string().c_str()) ==

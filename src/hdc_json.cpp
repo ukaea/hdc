@@ -506,7 +506,7 @@ Json::Value HDC::to_json(int mode) const
             case (HDC_LIST): {
                 root = Json::arrayValue;
                 for (size_t i = 0; i < this->childs_count(); i++) {
-                    root[static_cast<int>(i)] = get_slice(i).to_json(mode);
+                    root[static_cast<int>(i)] = get_single(i).to_json(mode);
                 }
                 break;
             }
