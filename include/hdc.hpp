@@ -13,6 +13,7 @@
 // some other stuff -- to be reduced later
 #include <cstdint>
 #include <vector>
+#include <list>
 #include <deque>
 #include <unordered_map>
 #include <sstream>
@@ -51,6 +52,8 @@ extern HDCStorage* global_storage;
 extern unordered_map<string,string> avail_stores;
 
 using byte = unsigned char;
+using hdc_index_t = boost::variant<size_t,std::string>;
+using hdc_path_t = std::list<hdc_index_t>;
 
 class HDC
 {
@@ -59,18 +62,19 @@ private:
     HDCStorage* storage;
 
 /* ------------------------------- methods ----------------------------------------- */
-    void add_child(vector<boost::variant<size_t,std::string>> vs, HDC* n);
-    void add_child(vector<boost::variant<size_t,std::string>> vs, HDC& n);
-    void set_child(vector<boost::variant<size_t,std::string>> vs, HDC* n);
-    void delete_child(vector<boost::variant<size_t,std::string>> vs);
-    HDC* get_ptr(vector<boost::variant<size_t,std::string>> vs);
-    HDC get(vector<boost::variant<size_t,std::string>> vs);
-    const HDC get(vector<boost::variant<size_t,std::string>> vs) const;
-    HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i);
-    const HDC get_slice(vector<boost::variant<size_t,std::string>> vs, size_t i) const;
-    HDC* get_slice_ptr(vector<boost::variant<size_t,std::string>> vs, size_t i);
-    bool exists(vector<boost::variant<size_t,std::string>> vs) const;
-    bool exists_single(boost::variant<size_t,std::string> index) const;
+    void add_child(hdc_path_t path, HDC* n);
+    void add_child(hdc_path_t path, HDC& n);
+    void set_child(hdc_path_t path, HDC* n);
+    void set_data_c(hdc_path_t path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void delete_child(hdc_path_t path);
+    HDC* get_ptr(hdc_path_t path);
+    HDC get(hdc_path_t path);
+    const HDC get(hdc_path_t path) const;
+    HDC get_slice(hdc_path_t path, size_t i);
+    const HDC get_slice(hdc_path_t path, size_t i) const;
+    HDC* get_slice_ptr(hdc_path_t path, size_t i);
+    bool exists(hdc_path_t path) const;
+    bool exists_single(hdc_index_t index) const;
     void add_child_single(const std::string& path, HDC& n);
     hdc_header_t get_header() const;
 public:
@@ -249,7 +253,7 @@ public:
         else set_string(str);
     }
 
-    void set_string(std::vector <boost::variant<size_t,std::string>> path, const std::string& str) {
+    void set_string(hdc_path_t path, const std::string& str) {
         if(!path.empty() && !exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add constructor for this!!
@@ -261,7 +265,6 @@ public:
     void set_data_c(const std::string& path, size_t rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     void set_data_c(size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     void set_data_c(const std::string& path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(vector<boost::variant<size_t,std::string>> path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {

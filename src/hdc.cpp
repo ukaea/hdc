@@ -33,7 +33,7 @@ void HDC::parse_cmdline(int argc, const char* argv[])
     po::notify(vm);
 
     if (vm.count("help")) {
-        cout << desc << "\n";
+        std::cout << desc << "\n";
         exit(0);
     }
 
@@ -65,7 +65,7 @@ void HDC::load_config(std::string configPath)
                 break;
             }
             catch (...) {
-                cout << "HDC::load_config(): something bad happened" << endl;
+                std::cout << "HDC::load_config(): something bad happened" << endl;
             }
         }
     }
@@ -109,7 +109,7 @@ void HDC::search_plugins(string searchPath)
                         }
                     }
                 } catch (...) {
-                    cout << "Nope\n";
+                    std::cout << "Nope\n";
                 }
             }
             globfree(&globbuf);
@@ -128,9 +128,9 @@ std::vector<std::string> HDC::get_available_plugins()
 
 void HDC::list_plugins()
 {
-    cout << "Available storage plugins:\n";
+    std::cout << "Available storage plugins:\n";
     for (const auto& store : avail_stores) {
-        cout << "  - " << store.first << " : " << store.second << "\n";
+        std::cout << "  - " << store.first << " : " << store.second << "\n";
     }
 }
 
@@ -391,7 +391,7 @@ bool HDC::exists(const std::string& path) const
     return exists(split(path));
 }
 
-bool HDC::exists_single(boost::variant<size_t, std::string> index) const
+bool HDC::exists_single(hdc_index_t index) const
 {
     auto children = get_children_ptr();
     if (children == nullptr) return false;
@@ -402,32 +402,29 @@ bool HDC::exists_single(boost::variant<size_t, std::string> index) const
     }
 }
 
-bool HDC::exists(vector<boost::variant<size_t, std::string>> vs) const
+bool HDC::exists(hdc_path_t path) const
 {
     hdc_header_t header = get_header();
     D(
-            printf("exists(");
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "exists(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
-    if (vs.empty()) {
+    if (path.empty()) {
         return false; //TODO: re-do this!!!
     }
     if (header.type != HDC_STRUCT && header.type != HDC_LIST) {
         return false;
     }
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    auto first = path.front();
+    path.pop_front();
 
     auto children = get_children_ptr();
     if (children == nullptr) return false;
     if (first.type() == typeid(std::string)) {
         if (children->count(boost::get<std::string>(first).c_str()) == 0) return false;
     }
-    if (vs.empty()) {
+    if (path.empty()) {
         return exists_single(first);
     } else {
         if (first.type() == typeid(size_t)) {
@@ -436,7 +433,7 @@ bool HDC::exists(vector<boost::variant<size_t, std::string>> vs) const
                 if (children->size() <= index) return false;
                 auto it = children->get<by_index>()[index];
                 HDC child(storage, it.address.c_str());
-                return child.exists(vs);
+                return child.exists(path);
             } catch (std::exception e) {
                 std::cerr << "exists(): Caught exception: index" << "\n";
                 std::cerr << e.what() << std::endl;
@@ -447,7 +444,7 @@ bool HDC::exists(vector<boost::variant<size_t, std::string>> vs) const
                 auto it = children->find(boost::get<std::string>(first).c_str());
                 if (it != children->end()) {
                     HDC ch(storage, it->address.c_str());
-                    return ch.exists(vs);
+                    return ch.exists(path);
                 } else { return false; } // TODO Create error HDC obj here???
             } catch (...) {
                 std::cerr << "exists(): Caught exception: string" << "\n";
@@ -458,27 +455,26 @@ bool HDC::exists(vector<boost::variant<size_t, std::string>> vs) const
     return false; // never goes here
 }
 
-void HDC::add_child(vector<boost::variant<size_t, std::string>> vs, HDC* n)
+void HDC::add_child(hdc_path_t path, HDC* n)
 {
-    add_child(vs, *n);
+    add_child(path, *n);
     return;
 }
 
-void HDC::add_child(vector<boost::variant<size_t, std::string>> vs, HDC& n)
+void HDC::add_child(hdc_path_t path, HDC& n)
 {
-    auto first = vs[0];
+    auto first = path.front();
+    path.pop_front();
 
-    vs.erase(vs.begin());
-
-    if (!vs.empty()) { // Create intermediate nodes here
+    if (!path.empty()) { // Create intermediate nodes here
         HDC h;
         if (first.type() == typeid(size_t)) {
             auto index = boost::get<size_t>(first);
             if (!exists_single(index)) insert_slice(index, h);
-            get_slice(boost::get<size_t>(first)).add_child(vs, n);
+            get_slice(boost::get<size_t>(first)).add_child(path, n);
         } else {
             add_child_single(boost::get<std::string>(first), h);
-            get(boost::get<std::string>(first)).add_child(vs, n);
+            get(boost::get<std::string>(first)).add_child(path, n);
         }
     } else {
         if (first.type() == typeid(size_t)) {
@@ -494,7 +490,7 @@ void HDC::add_child(vector<boost::variant<size_t, std::string>> vs, HDC& n)
 void HDC::add_child_single(const std::string& path, HDC& n)
 {
     D(
-        cout << "add_child_single(" + path + ")\n";
+        std::cout << "add_child_single(" + path + ")\n";
     )
     // sync buffer
     hdc_header_t header;
@@ -592,25 +588,22 @@ void HDC::add_child(const std::string& path, HDC& n)
     return;
 }
 
-void HDC::delete_child(vector<boost::variant<size_t, std::string>> vs)
+void HDC::delete_child(hdc_path_t path)
 {
     hdc_header_t header = get_header();
     D(
-            cout << "delete_child(";
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "delete_child(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
-    if (!exists(vs) || vs.empty()) {
+    if (!exists(path) || path.empty()) {
         return;
     }
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    auto first = path.front();
+    path.pop_front();
     hdc_map_t* children = get_children_ptr();
     auto buffer = get_buffer();
-    if (vs.empty()) {
+    if (path.empty()) {
         //size_t index;
         if (first.type() == typeid(size_t)) {
             auto it = children->get<by_index>()[boost::get<size_t>(first)];
@@ -626,7 +619,7 @@ void HDC::delete_child(vector<boost::variant<size_t, std::string>> vs)
         header.shape[0] = children->size();
         memcpy(buffer, &header, sizeof(hdc_header_t));
     } else {
-        get(boost::get<std::string>(first)).delete_child(vs);
+        get(boost::get<std::string>(first)).delete_child(path);
     }
     // set type back to empty if the only child was deleted.
     //if (children->empty()) set_type(HDC_EMPTY); Not sure if to do this
@@ -639,19 +632,16 @@ void HDC::delete_child(const std::string& path)
     return;
 }
 
-HDC* HDC::get_ptr(vector<boost::variant<size_t, std::string>> vs)
+HDC* HDC::get_ptr(hdc_path_t path)
 {
     D(
-            cout << "get_ptr(";
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "get_ptr(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
-    if (vs.empty()) return this;
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    if (path.empty()) return this;
+    auto first = path.front();
+    path.pop_front();
     if (first.type() == typeid(size_t)) return get_slice_ptr(boost::get<size_t>(first));
 
     char* buffer = storage->get(uuid);
@@ -662,36 +652,32 @@ HDC* HDC::get_ptr(vector<boost::variant<size_t, std::string>> vs)
     }
     if (children->count(boost::get<std::string>(first).c_str())) {
         auto rec = children->find(boost::get<std::string>(first).c_str());
-        //cout << rec->key << " " << rec->address << "\n";
         string child_uuid = rec->address.c_str();
-        if (vs.empty()) {
+        if (path.empty()) {
             return new HDC(storage, child_uuid);
         } else {
             HDC child(storage, child_uuid);
-            return child.get_ptr(vs);
+            return child.get_ptr(path);
         }
     } else {
         throw HDCException("get_ptr(): Node not found\n");
     }
 }
 
-HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
+HDC HDC::get(hdc_path_t path)
 {
     D(
-            cout << "get(";
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "get(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
     // Return itself when empty list
-    if (vs.empty()) {
+    if (path.empty()) {
         return *this;
     }
     // else do lookup
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    auto first = path.front();
+    path.pop_front();
     hdc_map_t* children = get_children_ptr();
 
     if (children == nullptr) {
@@ -702,7 +688,7 @@ HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
         const char* str = boost::get<std::string>(first).c_str();
         if (children->count(str)) {
             HDC child(storage, children->find(str)->address.c_str());
-            return child.get(vs);
+            return child.get(path);
         } else {
             throw HDCException("get(string): Not found\n");
         }
@@ -712,27 +698,24 @@ HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
             throw HDCException("get(index): index > size()\n");
         }
         HDC child = HDC(storage, children->get<by_index>()[index].address.c_str());
-        return child.get(vs);
+        return child.get(path);
     }
 }
 
-const HDC HDC::get(vector<boost::variant<size_t, std::string>> vs) const
+const HDC HDC::get(hdc_path_t path) const
 {
     D(
-            cout << "get(";
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "get(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
     // Return itself when empty list
-    if (vs.empty()) {
+    if (path.empty()) {
         return *this;
     }
     // else do lookup
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    auto first = path.front();
+    path.pop_front();
     hdc_map_t* children = get_children_ptr();
 
     if (children == nullptr) {
@@ -743,7 +726,7 @@ const HDC HDC::get(vector<boost::variant<size_t, std::string>> vs) const
         const char* str = boost::get<std::string>(first).c_str();
         if (children->count(str)) {
             HDC child(storage, children->find(str)->address.c_str());
-            return child.get(vs);
+            return child.get(path);
         } else {
             throw HDCException("get(string): Not found\n");
         }
@@ -753,57 +736,53 @@ const HDC HDC::get(vector<boost::variant<size_t, std::string>> vs) const
             throw HDCException("get(index): index > size()\n");
         }
         HDC child = HDC(storage, children->get<by_index>()[index].address.c_str());
-        return child.get(vs);
+        return child.get(path);
     }
 }
 
-HDC HDC::get_slice(vector<boost::variant<size_t, std::string>> vs, size_t i)
+HDC HDC::get_slice(hdc_path_t path, size_t i)
 {
     D(
-            printf("get_slice(");
-            for (size_t i = 0; i < vs.size() - 1; i++) printf("%s/", boost::get<std::string>(vs[i]).c_str());
-            printf("%s", boost::get<std::string>(vs[vs.size() - 1]).c_str());
-            printf(",%zu)\n", i);
+        std::cout << "get_slice(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    auto first = path.front();
+    path.pop_front();
     hdc_map_t* children = get_children_ptr();
     if (children->count(boost::get<std::string>(first).c_str())) {
-        if (vs.empty()) {
+        if (path.empty()) {
             if (get_type() != HDC_LIST) return HDC(storage, uuid);
             if (i > children->size()) {
                 throw HDCException("get_slice(): index out of range!\n");
             }
             return HDC(storage, children->get<by_index>()[i].address.c_str());
-        } else { return get(boost::get<std::string>(first)).get_slice(vs, i); }
+        } else { return get(boost::get<std::string>(first)).get_slice(path, i); }
     } else {
         throw HDCException("get_slice(): Not found\n");
     }
     return HDC();
 }
 
-HDC* HDC::get_slice_ptr(std::vector< boost::variant< size_t, std::__cxx11::string > > vs, size_t i)
+HDC* HDC::get_slice_ptr(hdc_path_t path, size_t i)
 {
     D(
-            cout << "get_slice(";
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "get(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
-    if (vs.empty()) return get_slice_ptr(i);
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    if (path.empty()) return get_slice_ptr(i);
+    auto first = path.front();
+    path.pop_front();
     hdc_map_t* children = get_children_ptr();
     if (children->count(boost::get<std::string>(first).c_str())) {
-        if (vs.empty()) {
+        if (path.empty()) {
             if (get_type() != HDC_LIST) return this;
             if (i > children->size()) {
                 throw HDCException("get_slice_ptr(): index out of range!\n");
             }
             return new HDC(storage, children->get<by_index>()[i].address.c_str());
-        } else { return get(boost::get<std::string>(first)).get_slice_ptr(vs, i); }
+        } else { return get(boost::get<std::string>(first)).get_slice_ptr(path, i); }
     } else {
         throw HDCException("get_slice_ptr(): Not found\n");
     }
@@ -906,25 +885,22 @@ const HDC HDC::operator[](const std::string& path) const
 //     return get_slice_ref(index);
 // }
 
-void HDC::set_child(vector<boost::variant<size_t, std::string>> vs, HDC* n)
+void HDC::set_child(hdc_path_t path, HDC* n)
 {
     D(
-            cout << "set_child(";
-            for (size_t i = 0; i < vs.size() - 1; i++) {
-                cout << vs[i] << "/";
-            }
-            cout << vs[vs.size() - 1];
-            cout << ")\n";
+        std::cout << "set_child(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
     )
-    if (!exists(vs)) { // Nothing to set
-        cout << "Nothing to set, maybe you want to add..." << endl;
+    if (!exists(path)) { // Nothing to set
+        std::cout << "Nothing to set, maybe you want to add..." << endl;
         return;
     }
-    auto first = vs[0];
-    vs.erase(vs.begin());
+    auto first = path.front();
+    path.pop_front();
     bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
     hdc_map_t* children = get_children_ptr();
-    if (vs.empty()) {
+    if (path.empty()) {
         if (first.type() == typeid(size_t)) {
             set_slice(boost::get<size_t>(first), n);
         } else {
@@ -939,7 +915,7 @@ void HDC::set_child(vector<boost::variant<size_t, std::string>> vs, HDC* n)
                 children->insert(record(boost::get<std::string>(first).c_str(), n->get_uuid().c_str(), ca));
             }
         }
-    } else { get(boost::get<std::string>(first)).set_child(vs, n); }
+    } else { get(boost::get<std::string>(first)).set_child(path, n); }
     return;
 }
 
@@ -1107,7 +1083,7 @@ void HDC::set_data_c(const std::string& path, size_t  rank, size_t* shape, const
     get(path).set_data_c(rank, shape, data, type, flags);
 }
 
-void HDC::set_data_c(vector<boost::variant<size_t, std::string>> path, size_t  rank, size_t* shape, const void* data,
+void HDC::set_data_c(hdc_path_t path, size_t  rank, size_t* shape, const void* data,
                      hdc_type_t type, hdc_flags_t flags)
 {
     if (!exists(path)) {
@@ -1360,7 +1336,7 @@ hdc_map_t* HDC::get_children_ptr() const
 void HDC::grow(size_t extra_size)
 {
     hdc_header_t header = get_header();
-    cout << "Growing  " << extra_size << endl;
+    std::cout << "Growing  " << extra_size << endl;
     if (extra_size <= 0) return;
     char* old_buffer = storage->get(uuid);
     memcpy(&header, old_buffer, sizeof(hdc_header_t));
@@ -1467,7 +1443,7 @@ HDC* HDC::deserialize_HDC_file(const std::string& filename)
         return deserialize_HDC_string(str);
     }
     catch (const ifstream::failure& e) {
-        cout << "deserialize_HDC_file(): Error reading / opening file." << endl;
+        std::cout << "deserialize_HDC_file(): Error reading / opening file." << endl;
         //TODO: what here???
     }
     return NULL;

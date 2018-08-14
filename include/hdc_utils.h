@@ -21,14 +21,17 @@
 #include <andres/marray.hxx>
 #include <sys/stat.h>
 
+using hdc_index_t = boost::variant<size_t,std::string>;
+using hdc_path_t = std::list<hdc_index_t>;
+
 /* ------------------------- UUID generation ----------------------------- */
 
 void print_uuid(std::vector<char> uuid);
 std::vector<char> generate_uuid();
 std::string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
-std::vector <boost::variant<size_t,std::string>> split(const std::string& s);
-std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::string& s);
+hdc_path_t split(const std::string& s);
+hdc_path_t split_no_brackets(const std::string& s);
 /* -------------------------  Types Definitions  ------------------------- */
 size_t hdc_sizeof (hdc_type_t type);
 bool hdc_is_primitive_type(hdc_type_t type);
