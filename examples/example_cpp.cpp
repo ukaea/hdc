@@ -82,6 +82,21 @@ int main(int argc, const char* argv[])
     htest.set_data(1, shape, test);
     tree["aaa/bbb/ccc"] = htest; // TODO
     tree["aaa/bbb/ccc"].dump();
+
+    HDC lst, ch, ch2;
+    ch.set_data(5);
+    ch2.set_data(7);
+    lst.append(ch);
+    lst[0].dump();
+    lst.dump();
+    lst[0] = ch2;
+    lst.dump();
+    lst[0] = 3.14;
+    lst.dump();
+    lst[0] = 3;
+    lst.dump();
+    lst[0] = "lalalala";
+    lst.dump();
     std::cout << "---------------------------- overloaded operators end --------------------------------\n";
 
     return 0;

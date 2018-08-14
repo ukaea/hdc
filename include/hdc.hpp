@@ -77,6 +77,7 @@ private:
 public:
     HDC* get_single_ptr(hdc_index_t index);
     HDC get_single(hdc_index_t index);
+    HDC& get_single_ref(hdc_index_t index);
     const HDC get_single(hdc_index_t index) const;
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
@@ -128,11 +129,19 @@ public:
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
-//     const HDC operator[](const size_t index) const;
-//     HDC& operator[](const size_t index);
+    const HDC operator[](size_t index) const;
+    HDC& operator[](size_t index);
     const HDC operator[](const std::string& path) const;
     HDC& operator[](const std::string& path);
+    template <typename T>
+    HDC& operator=(T d)
+    {
+        set_data(d);
+        return *this;
+    }
+    HDC& operator=(char const* str);
     HDC& operator=(const HDC& other);
+
 
     template<typename T> void set_data(size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
         hdc_header_t header = get_header();
@@ -225,7 +234,7 @@ public:
         return;
     };
 
-    void set_string(std::string str) {
+    void set_string(const std::string& str) {
         hdc_header_t header = get_header();
         if (storage->has(uuid)) {
             storage->remove(uuid);

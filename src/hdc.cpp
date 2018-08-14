@@ -561,9 +561,9 @@ void HDC::add_child_single(const std::string& path, HDC& n)
     return;
 }
 
-vector<string> HDC::keys() const
+std::vector<std::string> HDC::keys() const
 {
-    vector<string> k;
+    std::vector<std::string> k;
     hdc_map_t* children;
     children = get_children_ptr();
     if (children == nullptr) return k;
@@ -773,6 +773,12 @@ HDC* HDC::get_single_ptr(hdc_index_t index)
     }
 }
 
+HDC& HDC::get_single_ref(hdc_index_t index)
+{
+    HDC* h = get_single_ptr(index);
+    return *h;
+}
+
 HDC* HDC::get_ptr(const std::string& path)
 {
     if (path.empty()) return this;
@@ -806,6 +812,12 @@ HDC& HDC::operator=(const HDC& other)
     return *this;
 }
 
+HDC& HDC::operator=(char const* str)
+{
+    set_string(str);
+    return *this;
+}
+
 HDC& HDC::operator[](const std::string& path)
 {
     return get_ref(path);
@@ -816,24 +828,15 @@ const HDC HDC::operator[](const std::string& path) const
     return get(path);
 }
 
-// HDC& HDC::operator[](const size_t index)
-// {
-//     return get_ref(index);
-// }
-//
-// const HDC HDC::operator[](const size_t index) const
-// {
-//     return get(index);
-// }
+HDC& HDC::operator[](size_t index)
+{
+    return get_single_ref(index);
+}
 
-// const HDC  HDC::operator [](size_t index) const
-// {
-//     return get_slice(index);
-// }
-// HDC& HDC::operator [](size_t index)
-// {
-//     return get_slice_ref(index);
-// }
+const HDC HDC::operator[](size_t index) const
+{
+    return get_single(index);
+}
 
 void HDC::set_child_single(hdc_index_t path, HDC& n)
 {
