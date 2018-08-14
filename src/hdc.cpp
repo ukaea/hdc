@@ -685,22 +685,24 @@ HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
-    if (vs.empty()) return *this;
+    // Return itself when empty list
+    if (vs.empty()) {
+        return *this;
+    }
+    // else do lookup
     auto first = vs[0];
     vs.erase(vs.begin());
-    char* buffer = storage->get(uuid);
-    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
-    hdc_map_t* children = segment.find<hdc_map_t>("d").first;
+    hdc_map_t* children = get_children_ptr();
+
     if (children == nullptr) {
         throw HDCException("get(): This node has no children.");
     }
+
     if (first.type() == typeid(std::string)) {
         const char* str = boost::get<std::string>(first).c_str();
         if (children->count(str)) {
-            auto rec = children->find(str);
-            HDC child(storage, rec->address.c_str());
-            if (vs.empty()) { return child; }
-            else { return child.get(vs); }
+            HDC child(storage, children->find(str)->address.c_str());
+            return child.get(vs);
         } else {
             throw HDCException("get(string): Not found\n");
         }
@@ -709,9 +711,8 @@ HDC HDC::get(vector<boost::variant<size_t, std::string>> vs)
         if (index >= children->size()) {
             throw HDCException("get(index): index > size()\n");
         }
-        HDC child = get_slice(index);
-        if (vs.empty()) { return child; }
-        else { return child.get(vs); }
+        HDC child = HDC(storage, children->get<by_index>()[index].address.c_str());
+        return child.get(vs);
     }
 }
 
@@ -725,22 +726,24 @@ const HDC HDC::get(vector<boost::variant<size_t, std::string>> vs) const
             cout << vs[vs.size() - 1];
             cout << ")\n";
     )
-    if (vs.empty()) return *this;
+    // Return itself when empty list
+    if (vs.empty()) {
+        return *this;
+    }
+    // else do lookup
     auto first = vs[0];
     vs.erase(vs.begin());
-    char* buffer = storage->get(uuid);
-    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
-    hdc_map_t* children = segment.find<hdc_map_t>("d").first;
+    hdc_map_t* children = get_children_ptr();
+
     if (children == nullptr) {
         throw HDCException("get(): This node has no children.");
     }
+
     if (first.type() == typeid(std::string)) {
         const char* str = boost::get<std::string>(first).c_str();
         if (children->count(str)) {
-            auto rec = children->find(str);
-            HDC child(storage, rec->address.c_str());
-            if (vs.empty()) { return child; }
-            else { return child.get(vs); }
+            HDC child(storage, children->find(str)->address.c_str());
+            return child.get(vs);
         } else {
             throw HDCException("get(string): Not found\n");
         }
@@ -749,9 +752,8 @@ const HDC HDC::get(vector<boost::variant<size_t, std::string>> vs) const
         if (index >= children->size()) {
             throw HDCException("get(index): index > size()\n");
         }
-        HDC child = get_slice(index);
-        if (vs.empty()) { return child; }
-        else { return child.get(vs); }
+        HDC child = HDC(storage, children->get<by_index>()[index].address.c_str());
+        return child.get(vs);
     }
 }
 
@@ -812,16 +814,24 @@ HDC HDC::get_slice(size_t i)
 {
     DEBUG_STDOUT("get_slice(" + to_string(i) + ")\n");
     hdc_map_t* children = get_children_ptr();
-    if (get_type() == HDC_LIST) return HDC(storage, children->get<by_index>()[i].address.c_str());
-    return HDC(); // return empty if not list TODO: this is very, very very bad!!!! redo!!!
+    if (get_type() == HDC_LIST) {
+        return HDC(storage, children->get<by_index>()[i].address.c_str());
+    } else {
+        throw HDCException("get_slice called on non list object\n");
+    }
+    return HDC(); // never goes here
 }
 
 const HDC HDC::get_slice(size_t i) const
 {
     DEBUG_STDOUT("get_slice(" + to_string(i) + ")\n");
     hdc_map_t* children = get_children_ptr();
-    if (get_type() == HDC_LIST) return HDC(storage, children->get<by_index>()[i].address.c_str());
-    return HDC(); // return empty if not list TODO: this is very, very very bad!!!! redo!!!
+    if (get_type() == HDC_LIST) {
+        return HDC(storage, children->get<by_index>()[i].address.c_str());
+    } else {
+        throw HDCException("get_slice called on non list object\n");
+    }
+    return HDC(); // never goes here
 }
 
 HDC* HDC::get_slice_ptr(size_t i)
