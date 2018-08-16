@@ -93,9 +93,9 @@ bool is_jagged(const Json::Value& root)
     return jagged;
 }
 
-size_t* get_shape(const Json::Value& root)
+std::vector<size_t> get_shape(const Json::Value& root)
 {
-    if (!root.isArray()) return 0;
+    if (!root.isArray()) return {0};
     unsigned int dim = 0;
     size_t shape[HDC_MAX_DIMS];
     Json::Value curr = root;
@@ -110,7 +110,7 @@ size_t* get_shape(const Json::Value& root)
         for (unsigned int i = 1; i < dim; i++) std::cout << ", " << shape[i];
         std::cout << ")" << std::endl;
     )
-    size_t* res = new size_t[dim];
+    std::vector<size_t> res(dim);
     for (unsigned int i = 0; i < dim; i++) res[i] = shape[i];
     return res;
 }
@@ -171,7 +171,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                     throw HDCException(
                             "json_to_hdc(): Unsupported number of dimensions: " + std::to_string(rank) + "\n");
                 }
-                size_t* shape = ::get_shape(root);
+                auto shape = ::get_shape(root);
                 hdc_type_t dt;
                 if (is_double(root)) { dt = HDC_DOUBLE; }
                 else if (is_int(root)) { dt = HDC_INT32; }
@@ -182,21 +182,21 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 if (dt == HDC_DOUBLE) {
                     switch (rank) {
                         case 1: {
-                            andres::View<double> view(shape, shape + 1, (double*)data_ptr);
+                            andres::View<double> view(&shape[0], &shape[0] + 1, (double*)data_ptr);
                             for (unsigned int i = 0; i < shape[0]; i++) {
                                 view(i) = root[i].asDouble();
                             }
                             break;
                         }
                         case 2: {
-                            andres::View<double> view(shape, shape + 2, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 2, (double*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i, j) = root[i][j].asDouble();
                             break;
                         }
                         case 3: {
-                            andres::View<double> view(shape, shape + 3, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 3, (double*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -204,7 +204,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 4: {
-                            andres::View<double> view(shape, shape + 4, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 4, (double*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -213,7 +213,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 5: {
-                            andres::View<double> view(shape, shape + 5, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 5, (double*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -231,21 +231,21 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 } else if (dt == HDC_BOOL) {
                     switch (rank) {
                         case 1: {
-                            andres::View<bool> view(shape, shape + 1, (bool*)data_ptr);
+                            andres::View<bool> view(&shape[0], &shape[0] + 1, (bool*)data_ptr);
                             for (unsigned int i = 0; i < shape[0]; i++) {
                                 view(i) = root[i].asBool();
                             }
                             break;
                         }
                         case 2: {
-                            andres::View<bool> view(shape, shape + 2, (bool*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<bool> view(&shape[0], &shape[0] + 2, (bool*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i, j) = root[i][j].asBool();
                             break;
                         }
                         case 3: {
-                            andres::View<bool> view(shape, shape + 3, (bool*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<bool> view(&shape[0], &shape[0] + 3, (bool*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -253,7 +253,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 4: {
-                            andres::View<bool> view(shape, shape + 4, (bool*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<bool> view(&shape[0], &shape[0] + 4, (bool*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -262,7 +262,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 5: {
-                            andres::View<bool> view(shape, shape + 5, (bool*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<bool> view(&shape[0], &shape[0] + 5, (bool*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -280,19 +280,19 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 } else {
                     switch (rank) {
                         case 1: {
-                            andres::View<int32_t> view(shape, shape + 1, (int32_t*)data_ptr);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 1, (int32_t*)data_ptr);
                             for (unsigned int i = 0; i < shape[0]; i++) view(i) = root[i].asInt();
                             break;
                         }
                         case 2: {
-                            andres::View<int32_t> view(shape, shape + 2, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 2, (int32_t*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i, j) = root[i][j].asInt();
                             break;
                         }
                         case 3: {
-                            andres::View<int32_t> view(shape, shape + 3, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 3, (int32_t*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -300,7 +300,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 4: {
-                            andres::View<int32_t> view(shape, shape + 4, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 4, (int32_t*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -309,7 +309,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 5: {
-                            andres::View<int32_t> view(shape, shape + 5, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 5, (int32_t*)data_ptr, andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -325,7 +325,6 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                         }
                     }
                 }
-                delete[] shape;
             } else {
                 // call recursively -- save list
                 tree.set_type(HDC_LIST);
@@ -350,7 +349,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
 }
 
 template <typename T>
-Json::Value buffer_to_json(char* buffer, int rank, size_t* shape, bool fortranOrder = false)
+Json::Value buffer_to_json(char* buffer, int rank, std::vector<size_t> shape, bool fortranOrder = false)
 {
     // TODO: Add Fortran column order
 
@@ -361,7 +360,7 @@ Json::Value buffer_to_json(char* buffer, int rank, size_t* shape, bool fortranOr
     } else {
         order = andres::FirstMajorOrder;
     }
-    andres::View<T> view(shape, shape + rank, (T*)buffer, order);
+    andres::View<T> view(&shape[0], &shape[0] + rank, (T*)buffer, order);
     //TODO add fortran - C order switch
     switch (rank) {
         case (0): {

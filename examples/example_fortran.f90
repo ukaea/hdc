@@ -31,7 +31,7 @@ contains
         call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new())
         call hdc_add_child(tree,"aaa/bbb/eee",hdc_new())
         call hdc_add_child(tree,"bbb/eee/aaa",hdc_new())
-        call hdc_set_data(tree,"aaa/bbb/ccc","pokuss")
+        call hdc_set_data(tree,"aaa/bbb/ccc","pokus")
         call hdc_set(tree,"scalar",3.14159_dp)
         str = hdc_as_string(tree,"aaa/bbb/ccc")
         ! Get subtree

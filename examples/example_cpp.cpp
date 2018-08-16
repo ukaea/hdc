@@ -7,8 +7,8 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    HDC::parse_cmdline(argc, argv);
     HDC::init();
+    HDC::parse_cmdline(argc, argv);
     // Create new HDC tree
     HDC tree;
     // Add some children
@@ -39,9 +39,7 @@ int main(int argc, const char* argv[])
 
     // Prepare some data
     int32_t array[4] = { 7, 2, 3, 4 };
-    size_t shape[1];
-    shape[0] = 4;
-
+    std::vector<size_t> shape = {4};
     // Add data to a single node
     HDC data;
     data.set_data(1, shape, array);
@@ -50,7 +48,7 @@ int main(int argc, const char* argv[])
 
     // Ask for some data details, use subtree to shorten the path
     int32_t rank2 = node.get_rank();
-    size_t* shape2 = node.get_shape();
+    auto shape2 = node.get_shape();
     cout << "Dimension: " << (int)rank2 << endl << "Shape: ";
     for (int i = 0; i < rank2; i++) cout << (int)shape2[i] << " ";
     cout << endl;
@@ -62,7 +60,7 @@ int main(int argc, const char* argv[])
     cout << endl;
 
     //Serialize data to JSON
-   tree.to_json("tree.txt",0);
+    tree.to_json("tree.txt",0);
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
@@ -80,7 +78,7 @@ int main(int argc, const char* argv[])
     int32_t test[4] = { 100, 200, 300, 400 };
     HDC htest;
     htest.set_data(1, shape, test);
-    tree["aaa/bbb/ccc"] = htest; // TODO
+    tree["aaa/bbb/ccc"] = htest;
     tree["aaa/bbb/ccc"].dump();
 
     HDC lst, ch, ch2;
@@ -97,7 +95,10 @@ int main(int argc, const char* argv[])
     lst.dump();
     lst[0] = "lalalala";
     lst.dump();
+//     lst[0] = {1,2,3,4}; //TODO
     std::cout << "---------------------------- overloaded operators end --------------------------------\n";
+
+    HDC::destroy();
 
     return 0;
 }

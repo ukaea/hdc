@@ -45,7 +45,7 @@ void HDC::parse_cmdline(int argc, const char* argv[])
 
     if (vm.count("storage")) {
         string plugin_name = vm["storage"].as<std::string>();
-        options->put("storage_cmdline", plugin_name);
+        options->put("storage_cmdline", plugin_name.c_str());
     }
 }
 
@@ -230,7 +230,7 @@ HDC::HDC() : HDC(0lu)
 {};
 
 /** Creates empty HDC with specified type and shape */
-HDC::HDC(size_t  rank, size_t* shape, hdc_type_t type, long flags)
+HDC::HDC(size_t  rank, std::vector<size_t>& shape, hdc_type_t type, long flags)
 {
     hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
@@ -406,12 +406,17 @@ bool HDC::exists_single(hdc_index_t index) const
     }
 }
 
+bool HDC::exists(size_t index) const
+{
+    return exists(index);
+}
+
 bool HDC::exists(hdc_path_t path) const
 {
     hdc_header_t header = get_header();
     D(
         std::cout << "exists(";
-        for {auto str: path} std::cout << str;
+        for {auto str : path} std::cout << str;
         std::cout << ")\n";
     )
     if (path.empty()) {
@@ -513,7 +518,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
     buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
 
-    bip::managed_external_buffer segment(bip::open_only, buffer + sizeof(hdc_header_t), 0);
+    auto segment = get_segment();
     auto children = segment.find<hdc_map_t>("d").first;
     if (children == nullptr) throw HDCException("add_child_single(): Could not get the children.\n");
     if (children->count(path.c_str()) == 0) {
@@ -803,6 +808,25 @@ HDC& HDC::get_ref(const std::string& path)
     return *h;
 }
 
+HDC* HDC::get_ptr(size_t index)
+{
+    return get_single_ptr(index);
+}
+
+HDC HDC::get(size_t index)
+{
+    return get_single(index);
+}
+
+HDC& HDC::get_ref(size_t index)
+{
+    return get_single_ref(index);
+}
+const HDC HDC::get(size_t index) const
+{
+    return get_single(index);
+}
+
 HDC& HDC::operator=(const HDC& other)
 {
     if (this != &other && uuid != other.get_uuid()) {
@@ -846,7 +870,7 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
         std::cout << ")\n";
     )
     hdc_map_t* children = get_children_ptr();
-    bip::managed_external_buffer::allocator<record>::type ca = get_segment().get_allocator<record>();
+    auto ca = get_segment().get_allocator<record>();
     if (path.type() == typeid(size_t)) {
         size_t i = boost::get<size_t>(path);
         if (get_type() != HDC_LIST) {
@@ -875,6 +899,16 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
 void HDC::set_child_single(hdc_index_t path, HDC* n)
 {
     set_child_single(path,*n);
+}
+
+void HDC::set_child(size_t index, HDC* n)
+{
+    set_child_single(index,*n);
+}
+
+void HDC::set_child(size_t index, HDC& n)
+{
+    set_child_single(index,n);
 }
 
 void HDC::set_child(hdc_path_t path, HDC* n)
@@ -924,6 +958,7 @@ void HDC::set_type(hdc_type_t type)
             header.data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
             header.buffer_size = HDC_NODE_SIZE_DEFAULT;
             memcpy(new_buffer, &header, sizeof(hdc_header_t));
+            if (!storage->usesBuffersDirectly()) delete[] old_buffer;
         } else {
             new_buffer = old_buffer;
         }
@@ -976,7 +1011,7 @@ HDC* HDC::copy(int copy_arrays UNUSED)
     return new HDC(this);
 }
 
-void HDC::set_data_c(size_t  rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
@@ -1008,7 +1043,7 @@ void HDC::set_data_c(size_t  rank, size_t* shape, void* data, hdc_type_t type, h
     return;
 }
 
-void HDC::set_data_c(const std::string& path, size_t  rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(const std::string& path, size_t  rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
 {
 
     if (!path.empty() && !exists(path)) {
@@ -1019,7 +1054,7 @@ void HDC::set_data_c(const std::string& path, size_t  rank, size_t* shape, void*
     else set_data_c(rank, shape, data, type, flags);
 }
 
-void HDC::set_data_c(size_t  rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
@@ -1052,7 +1087,7 @@ void HDC::set_data_c(size_t  rank, size_t* shape, const void* data, hdc_type_t t
     }
 }
 
-void HDC::set_data_c(const std::string& path, size_t  rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(const std::string& path, size_t  rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
     if (!exists(path)) {
         HDC h;
@@ -1061,7 +1096,7 @@ void HDC::set_data_c(const std::string& path, size_t  rank, size_t* shape, const
     get(path).set_data_c(rank, shape, data, type, flags);
 }
 
-void HDC::set_data_c(hdc_path_t path, size_t  rank, size_t* shape, const void* data,
+void HDC::set_data_c(hdc_path_t path, size_t  rank, std::vector<size_t>& shape, const void* data,
                      hdc_type_t type, hdc_flags_t flags)
 {
     if (!exists(path)) {
@@ -1200,12 +1235,14 @@ hdc_header_t HDC::get_header() const {
     return h;
 }
 
-size_t* HDC::get_shape() const
+std::vector<size_t> HDC::get_shape() const
 {
     hdc_header_t header = get_header();
-    size_t offset = reinterpret_cast<size_t>(header.shape) - reinterpret_cast<size_t>(&header);
+//     size_t offset = reinterpret_cast<size_t>(header.shape) - reinterpret_cast<size_t>(&header);
+    std::vector<size_t> shape(&header.shape[0], &header.shape[0]+header.rank);
     //TODO: C++17 has offsetoff
-    return reinterpret_cast<size_t*>(get_buffer() + offset);
+//     return reinterpret_cast<size_t*>(get_buffer() + offset);
+    return shape;
 }
 
 std::vector<size_t> HDC::get_strides() const
@@ -1236,20 +1273,9 @@ std::vector<size_t> HDC::get_strides() const
     return strides;
 }
 
-size_t HDC::get_rank(const std::string& path) const
+size_t HDC::get_rank() const
 {
-    if (path.empty())
-        return get_header().rank;
-    else
-        return get(path).get_rank();
-}
-
-size_t* HDC::get_shape(const std::string& path) const
-{
-    if (path.empty())
-        return get_shape();
-    else
-        return get(path).get_shape();
+    return get_header().rank;
 }
 
 size_t HDC::childs_count() const
@@ -1277,11 +1303,9 @@ bip::managed_external_buffer HDC::get_segment() const
 
 hdc_map_t* HDC::get_children_ptr() const
 {
-    hdc_header_t header = get_header();
-    if (header.type != HDC_STRUCT && header.type != HDC_LIST) return nullptr;
-    char* buffer = storage->get(uuid);
-    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t),
-                                                header.buffer_size - sizeof(hdc_header_t));
+    auto t = get_type();
+    if (t != HDC_STRUCT && t != HDC_LIST) return nullptr;
+    auto segment = get_segment();
     return segment.find<hdc_map_t>("d").first;
 }
 
@@ -1289,7 +1313,6 @@ hdc_map_t* HDC::get_children_ptr() const
 void HDC::grow(size_t extra_size)
 {
     hdc_header_t header = get_header();
-    std::cout << "Growing  " << extra_size << endl;
     if (extra_size <= 0) return;
     char* old_buffer = storage->get(uuid);
     memcpy(&header, old_buffer, sizeof(hdc_header_t));

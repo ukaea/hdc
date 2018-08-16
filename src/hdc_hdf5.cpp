@@ -297,7 +297,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
         h5_status = H5Dread(hdf5_dset_id, h5_dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
         hsize_t hshape[rank];
         H5Sget_simple_extent_dims(h5_dspace_id, hshape, NULL);
-        size_t shape[rank];
+        std::vector<size_t> shape(rank);
         for (size_t i = 0; i < rank; i++) shape[i] = hshape[i];
         if (dt == HDC_STRING) {
             dest.set_string(buffer);

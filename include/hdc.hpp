@@ -58,33 +58,49 @@ using hdc_path_t = std::list<hdc_index_t>;
 class HDC
 {
 private:
-    string uuid;
+    std::string uuid;
     HDCStorage* storage;
 
 /* ------------------------------- methods ----------------------------------------- */
+
+    /**
+    * @brief Adds node as child under the path
+    *
+    * @param path p_path: path where to node
+    * @param n p_n: node
+    */
     void add_child(hdc_path_t path, HDC* n);
+    /**
+    * @brief Adds node as child under the path
+    *
+    * @param path p_path: path where to node
+    * @param n p_n: node
+    */
     void add_child(hdc_path_t path, HDC& n);
     void set_child(hdc_path_t path, HDC* n);
-    void set_data_c(hdc_path_t path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(hdc_path_t path, size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     void delete_child(hdc_path_t path);
     HDC* get_ptr(hdc_path_t path);
     HDC get(hdc_path_t path);
     const HDC get(hdc_path_t path) const;
     bool exists(hdc_path_t path) const;
+    bool exists(size_t index) const;
     bool exists_single(hdc_index_t index) const;
     void add_child_single(const std::string& path, HDC& n);
     hdc_header_t get_header() const;
-public:
+    void set_child_single(hdc_index_t path, HDC& n);
+    void set_child_single(hdc_index_t path, HDC* n);
     HDC* get_single_ptr(hdc_index_t index);
     HDC get_single(hdc_index_t index);
     HDC& get_single_ref(hdc_index_t index);
     const HDC get_single(hdc_index_t index) const;
+public:
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
     /** Default constructor. Creates empty HDC */
     HDC();
     /** Creates empty HDC with specified type and shape */
-    HDC(size_t rank, size_t* shape, hdc_type_t type,long flags = HDCDefault);
+    HDC(size_t rank, std::vector<size_t>& shape, hdc_type_t type,long flags = HDCDefault);
     /** Constructor from string */
     HDC(const std::string str);
     /** Copy contructor */
@@ -115,8 +131,11 @@ public:
     static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
     /** Cleans up global_storage  -- mainly due to C and Fortran */
     static void destroy();
+    HDC* get_ptr(size_t index);
+    HDC get(size_t index);
+    HDC& get_ref(size_t index);
+    const HDC get(size_t index) const;
     /** Returns the available space in buffer (in bytes) */
-
     size_t get_datasize() const;
     /** Returns the the size of object buffer (= header+data, in bytes) */
     size_t get_size() const;
@@ -142,8 +161,7 @@ public:
     HDC& operator=(char const* str);
     HDC& operator=(const HDC& other);
 
-
-    template<typename T> void set_data(size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
+    template<typename T> void set_data(size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         hdc_header_t header = get_header();
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
         auto buffer = storage->get(uuid);
@@ -178,7 +196,7 @@ public:
         set_data(rank,shape,data,flags);
     };
 
-    template<typename T> void set_data(const std::string& path, size_t rank, size_t* shape, T* data, hdc_flags_t flags = HDCDefault) {
+    template<typename T> void set_data(const std::string& path, size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         if(!exists(path)) {
             HDC h;
             add_child(path, h); // TODO: add contructor for this!!
@@ -269,10 +287,10 @@ public:
         if (!path.empty()) get(path).set_string(str);
         else set_string(str);
     }
-    void set_data_c(size_t rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(const std::string& path, size_t rank, size_t* shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(const std::string& path, size_t rank, size_t* shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(size_t rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::string& path, size_t rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::string& path, size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -344,7 +362,7 @@ public:
         get(path).set_data(data,type);
     }
     /** Returns shape of current node. */
-    size_t* get_shape() const;
+    std::vector<size_t> get_shape() const;
     std::vector<size_t> get_strides() const;
     bool is_external() const;
     bool is_readonly() const;
@@ -357,6 +375,8 @@ public:
     void add_child(const std::string& path, HDC& n);
     /** Sets HDC subtree to given path. */
     void set_child(const std::string& path, HDC* n);
+    void set_child(size_t index, HDC* n);
+    void set_child(size_t index, HDC& n);
     /** Deletes HDC subtree. */
     void delete_child(const std::string& path);
     /** Returns subtree by path. */
@@ -376,8 +396,6 @@ public:
     void insert(size_t i, HDC* h);
     /** Inserts node to i-th slice of current node. */
     void insert(size_t i, HDC& h);
-    void set_child_single(hdc_index_t path, HDC& n);
-    void set_child_single(hdc_index_t path, HDC* n);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
     void append(HDC* h);
     /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
@@ -387,9 +405,7 @@ public:
     /** Returns true if node is empty. */
     bool is_empty() const;
     /** Returns number of dimensions of node under path. */
-    size_t get_rank(const std::string& path = "") const;
-    /** Returns shape of node under path. */
-    size_t* get_shape(const std::string& path) const;
+    size_t get_rank() const;
     /** Returns pointer to data of this node. */
     template<typename T> T as() const
     {
@@ -469,13 +485,14 @@ public:
     hdc_map_t* get_children_ptr() const;
     void delete_data();
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
-    // "static contructor" from void* HDC
+    //  "static contructor" from void* HDC
     static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
     // "static contructor" from hdc_t*
     static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
     // "deserialize from storage"
     static HDC* deserialize_HDC_file(const std::string& filename);
     // "deserialize from storage"
+
     static HDC* deserialize_HDC_string(const std::string& filename);
     static HDC from_json(const string& filename, const std::string& datapath = "");
     static string hdc_map_to_json(hdc_map_t& children);
@@ -491,7 +508,6 @@ public:
     hdc_data_t get_data(const std::string& path = "") const;
     void set_data(hdc_data_t obj);
     void set_data(const std::string& path,hdc_data_t obj);
-
 };
 
 #endif // HDC_HPP

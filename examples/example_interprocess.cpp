@@ -50,8 +50,7 @@ int main(int argc, char *argv[]) {
 
         // Prepare some data
         int32_t array[4] = {7,2,3,4};
-        size_t shape[1];
-        shape[0] = 4;
+        std::vector<size_t> shape = {4};
 
         // Add data to a single node
         HDC data;

@@ -41,8 +41,8 @@ extensions = [
             numpy.get_include(),
         ],
         libraries=['hdc'],
-        library_dirs=[os.path.join("${CMAKE_INSTALL_PREFIX}", 'lib')],
-        runtime_library_dirs=[os.path.abspath(os.path.join("${CMAKE_INSTALL_PREFIX}", 'lib'))], )
+        library_dirs=[os.path.abspath(os.path.join("..","${CMAKE_INSTALL_PREFIX}", 'lib'))],
+        runtime_library_dirs=[os.path.abspath(os.path.join("..","${CMAKE_INSTALL_PREFIX}", 'lib'))], )
 ]
 
 options = dict(

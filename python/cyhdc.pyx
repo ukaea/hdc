@@ -65,7 +65,7 @@ cdef extern from "hdc.hpp":
         void set_child(string path, CppHDC* n) except +
         void append(CppHDC* h) except +
         void add_child(string path, CppHDC* n) except +
-        CppHDC* get_single_ptr(size_t i) except +
+        CppHDC* get_ptr(size_t i) except +
         CppHDC* get_ptr(string path) except +
         bool exists(string path) except +
         void set_string(string data) except +
@@ -74,13 +74,13 @@ cdef extern from "hdc.hpp":
         string get_type_str() except +
         intptr_t as_void_ptr() except +
         int8_t get_rank() except +
-        size_t* get_shape() except +
+        vector[size_t] get_shape() except +
         HDCStorage* get_storage() except +
         string get_uuid() except +
 
         # typedef unsigned long hdc_flags_t;
-        void set_data[T](int _rank, size_t* _shape, T* _data, unsigned long _flags) except +
-        # void set_data_c(int _rank, size_t* _shape, void* _data, hdc_type_t _type)
+        void set_data[T](int _rank, vector[size_t] _shape, T* _data, unsigned long _flags) except +
+        # void set_data_c(int _rank, vector[size_t] _shape, void* _data, hdc_type_t _type)
         T as[T]() except +
         string as_string() except +
         vector[string] keys() except +
@@ -149,13 +149,13 @@ cdef class HDC:
                 raise KeyError('{} key not found'.format(key))
             res = <HDC> self.__class__()
             # TODO move to constructor
-            res._thisptr = deref(self._thisptr).get_ptr(ckey)
+            res._thisptr = deref(self._thisptr).get_ptr(<string> ckey)
             # deref(self._thisptr).get_ptr(ckey)
             return res
         elif isinstance(key, numbers.Integral):
             res = <HDC> self.__class__()
             # TODO move to constructor
-            res._thisptr = deref(self._thisptr).get_single_ptr(<size_t> key)
+            res._thisptr = deref(self._thisptr).get_ptr(<size_t> key)
             return res
         else:
             raise ValueError("key must be either string or integer")
@@ -226,22 +226,25 @@ cdef class HDC:
                 flags |= HDCFortranOrder
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
-
+        cdef vector[size_t] _shape
+        _shape.reserve(data_view.ndim)
+        for i in range(data_view.ndim):
+            _shape[i] = data_view.shape[i]
         # TODO support other types
         if np.issubdtype(data.dtype, np.bool_):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <bool*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <bool*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int8_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int16_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <int16_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int32_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <int32_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <int64_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <int64_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float32):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <float*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <float*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float64):
-            deref(self._thisptr).set_data(data_view.ndim, <size_t*> data_view.shape, <double*> data_view.data, flags)
+            deref(self._thisptr).set_data(data_view.ndim,_shape, <double*> data_view.data, flags)
 
         else:
             NotImplementedError('Type not supported')
@@ -350,9 +353,14 @@ cdef class HDC:
         # TODO generalize
         cdef Py_ssize_t itemsize = deref(self._thisptr).get_itemsize()
 
-        cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
+        cdef vector[size_t] shape = deref(self._thisptr).get_shape()
         cdef vector[size_t] strides = deref(self._thisptr).get_strides()
         cdef int rank = deref(self._thisptr).get_rank()
+        cdef Py_ssize_t shape_buf[10]
+        for i in range(rank):
+            shape_buf[i] = shape[i]
+        for i in range(rank,10):
+            shape_buf[i] = 0
         cdef Py_ssize_t strides_buf[10]
         for i in range(rank):
             strides_buf[i] = strides[i]
@@ -408,7 +416,7 @@ cdef class HDC:
         # An indicator of whether the buffer is read-only
         buffer.readonly = 0
         # the shape of the memory as an n-dimensional array
-        buffer.shape = shape
+        buffer.shape = shape_buf
         # strides can be NULL if contiguity is not explicitely requested
         buffer.strides = NULL  # strides
         buffer.strides = strides_buf
@@ -424,7 +432,7 @@ cdef class HDC:
     @property
     def shape(self):
         cdef int rank = deref(self._thisptr).get_rank()
-        cdef Py_ssize_t* shape = <Py_ssize_t*> deref(self._thisptr).get_shape()
+        cdef vector[size_t] shape = deref(self._thisptr).get_shape()
         return tuple((shape[i] for i in range(rank)))
 
     def __releasebuffer__(self, Py_buffer *buffer):

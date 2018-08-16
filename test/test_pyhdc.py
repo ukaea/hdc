@@ -9,7 +9,6 @@ import tempfile
 import collections
 import future.builtins
 
-
 @pytest.fixture
 def test_trees():
     pytree = {

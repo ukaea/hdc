@@ -248,12 +248,11 @@ hdc_type_t uda_str_to_typeid(std::string& str) {
 
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
-char* transpose_buffer(char* buffer, int8_t rank, size_t* shape, hdc_type_t type_, bool fortranOrder) {
+char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder) {
     //TODO: remove these ugly switch - cases and use something better (if possible)
     auto item_size = hdc_sizeof(type_);
     auto n_items = 1lu;
-    size_t new_shape[HDC_MAX_DIMS];
-    memset(new_shape, 0, sizeof(size_t)*HDC_MAX_DIMS);
+    std::vector<size_t> new_shape(rank);
     for (int i=0; i<rank;i++) {
         n_items *= shape[i];
         new_shape[i] = shape[rank-i-1];
@@ -273,81 +272,81 @@ char* transpose_buffer(char* buffer, int8_t rank, size_t* shape, hdc_type_t type
     switch(type_) {
         case(HDC_INT8):
         {
-            andres::View<int8_t> view(shape, shape+rank, (int8_t*)buffer,order);
-            andres::View<int8_t> new_view((size_t*)new_shape, new_shape+rank, (int8_t*)new_buffer,new_order);
+            andres::View<int8_t> view(&shape[0], &shape[0]+rank, (int8_t*)buffer,order);
+            andres::View<int8_t> new_view(&new_shape[0], &new_shape[0]+rank, (int8_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_INT16):
         {
-            andres::View<int16_t> view(shape, shape+rank, (int16_t*)buffer,order);
-            andres::View<int16_t> new_view((size_t*)new_shape, new_shape+rank, (int16_t*)new_buffer,new_order);
+            andres::View<int16_t> view(&shape[0], &shape[0]+rank, (int16_t*)buffer,order);
+            andres::View<int16_t> new_view(&new_shape[0], &new_shape[0]+rank, (int16_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_INT32):
         {
-            andres::View<int32_t> view(shape, shape+rank, (int32_t*)buffer,order);
-            andres::View<int32_t> new_view((size_t*)new_shape, new_shape+rank, (int32_t*)new_buffer,new_order);
+            andres::View<int32_t> view(&shape[0], &shape[0]+rank, (int32_t*)buffer,order);
+            andres::View<int32_t> new_view(&new_shape[0], &new_shape[0]+rank, (int32_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
 //             std::cout << view.asString() << std::endl;
-//             andres::View<int32_t> transposed_view(shape, shape+rank, (int32_t*)new_buffer,order);
+//             andres::View<int32_t> transposed_view(&shape[0], &shape[0]+rank, (int32_t*)new_buffer,order);
 //             std::cout << transposed_view.asString() << std::endl;
             break;
         }
         case(HDC_INT64):
         {
-            andres::View<int64_t> view(shape, shape+rank, (int64_t*)buffer,order);
-            andres::View<int64_t> new_view((size_t*)new_shape, new_shape+rank, (int64_t*)new_buffer,new_order);
+            andres::View<int64_t> view(&shape[0], &shape[0]+rank, (int64_t*)buffer,order);
+            andres::View<int64_t> new_view(&new_shape[0], &new_shape[0]+rank, (int64_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_UINT8):
         {
-            andres::View<uint8_t> view(shape, shape+rank, (uint8_t*)buffer,order);
-            andres::View<uint8_t> new_view((size_t*)new_shape, new_shape+rank, (uint8_t*)new_buffer,new_order);
+            andres::View<uint8_t> view(&shape[0], &shape[0]+rank, (uint8_t*)buffer,order);
+            andres::View<uint8_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint8_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_UINT16):
         {
-            andres::View<uint16_t> view(shape, shape+rank, (uint16_t*)buffer,order);
-            andres::View<uint16_t> new_view((size_t*)new_shape, new_shape+rank, (uint16_t*)new_buffer,new_order);
+            andres::View<uint16_t> view(&shape[0], &shape[0]+rank, (uint16_t*)buffer,order);
+            andres::View<uint16_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint16_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_UINT32):
         {
-            andres::View<uint32_t> view(shape, shape+rank, (uint32_t*)buffer,order);
-            andres::View<uint32_t> new_view((size_t*)new_shape, new_shape+rank, (uint32_t*)new_buffer,new_order);
+            andres::View<uint32_t> view(&shape[0], &shape[0]+rank, (uint32_t*)buffer,order);
+            andres::View<uint32_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint32_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_UINT64):
         {
-            andres::View<uint64_t> view(shape, shape+rank, (uint64_t*)buffer,order);
-            andres::View<uint64_t> new_view((size_t*)new_shape, new_shape+rank, (uint64_t*)new_buffer,new_order);
+            andres::View<uint64_t> view(&shape[0], &shape[0]+rank, (uint64_t*)buffer,order);
+            andres::View<uint64_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint64_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_FLOAT):
         {
-            andres::View<float> view(shape, shape+rank, (float*)buffer,order);
-            andres::View<float> new_view((size_t*)new_shape, new_shape+rank, (float*)new_buffer,new_order);
+            andres::View<float> view(&shape[0], &shape[0]+rank, (float*)buffer,order);
+            andres::View<float> new_view(&new_shape[0], &new_shape[0]+rank, (float*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_DOUBLE):
         {
-            andres::View<double> view(shape, shape+rank, (double*)buffer,order);
-            andres::View<double> new_view((size_t*)new_shape, new_shape+rank, (double*)new_buffer,new_order);
+            andres::View<double> view(&shape[0], &shape[0]+rank, (double*)buffer,order);
+            andres::View<double> new_view(&new_shape[0], &new_shape[0]+rank, (double*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
         case(HDC_BOOL):
         {
-            andres::View<bool> view(shape, shape+rank, (bool*)buffer,order);
-            andres::View<bool> new_view((size_t*)new_shape, new_shape+rank, (bool*)new_buffer,new_order);
+            andres::View<bool> view(&shape[0], &shape[0]+rank, (bool*)buffer,order);
+            andres::View<bool> new_view(&new_shape[0], &new_shape[0]+rank, (bool*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
@@ -371,8 +370,8 @@ char* transpose_buffer(char* buffer) {
     auto data = buffer+sizeof(hdc_header_t);
     char* new_buffer = new char[header.buffer_size];
     bool fortranOrder = (header.flags & HDCFortranOrder) == HDCFortranOrder;
-    std::cout << "fortranOrder" << (int)fortranOrder<< std::endl;
-    auto transposed_data = transpose_buffer(data, header.rank, header.shape, (hdc_type_t)header.type, fortranOrder);
+    std::vector<size_t> shape(&header.shape[0],&header.shape[0]+header.rank);
+    auto transposed_data = transpose_buffer(data, header.rank, shape, (hdc_type_t)header.type, fortranOrder);
     memcpy(new_buffer,&header,sizeof(hdc_header_t));
     memcpy(new_buffer,transposed_data,header.data_size);
     return new_buffer;
