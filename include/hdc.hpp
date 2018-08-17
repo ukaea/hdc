@@ -9,19 +9,18 @@
 // Boost
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 // some other stuff -- to be reduced later
 #include <cstdint>
+#include <cstdlib>
+#include <cstdio>
 #include <vector>
 #include <list>
-#include <deque>
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
-#include <cstdlib>
-#include <cstdio>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <json/json.h>
 #include <exception>
 
@@ -31,6 +30,7 @@
 #include "hdc_utils.h"
 #include "hdc_storage.h"
 #include "hdc_errors.hpp"
+#include "hdc_helpers.h"
 
 #ifdef _USE_HDF5
 #include <H5Cpp.h>
@@ -38,8 +38,6 @@
 
 // #define DEBUG
 
-#include "hdc_helpers.h"
-#include <unordered_map>
 
 using namespace std;
 namespace pt = boost::property_tree;
@@ -49,7 +47,7 @@ extern pt::ptree* options;
 //this is default global storage
 extern HDCStorage* global_storage;
 //list of found plugins
-extern unordered_map<string,string> avail_stores;
+extern std::unordered_map<std::string,std::string> avail_stores;
 
 using byte = unsigned char;
 using hdc_index_t = boost::variant<size_t,std::string>;
@@ -94,6 +92,14 @@ private:
     HDC get_single(hdc_index_t index);
     HDC& get_single_ref(hdc_index_t index);
     const HDC get_single(hdc_index_t index) const;
+    /** Sets scalar data to given node - UDA version with path. */
+    void set_data(const std::string path, const unsigned char* data, hdc_type_t type) {
+        get_or_create(path).set_data(data, type);
+    }
+    /** Sets scalar data to given node - UDA version with path. */
+    void set_data(const std::string path, void* data, hdc_type_t type) {
+        get_or_create(path).set_data(data, type);
+    }
 public:
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
@@ -145,6 +151,8 @@ public:
     size_t get_itemsize() const;
     /** Returns object flags (i.e. array ordering)*/
     size_t get_flags() const;
+    HDC get_or_create(size_t index);
+    HDC get_or_create(const std::string& path);
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
@@ -152,8 +160,7 @@ public:
     HDC& operator[](size_t index);
     const HDC operator[](const std::string& path) const;
     HDC& operator[](const std::string& path);
-    template <typename T>
-    HDC& operator=(T d)
+    template <typename T> HDC& operator=(T d)
     {
         set_data(d);
         return *this;
@@ -269,28 +276,8 @@ public:
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
-
-    void set_string(const std::string& path, const std::string& str) {
-        if(!path.empty() && !exists(path)) {
-            HDC h;
-            add_child(path, h); // TODO: add constructor for this!!
-        }
-        if (!path.empty()) get(path).set_string(str);
-        else set_string(str);
-    }
-
-    void set_string(hdc_path_t path, const std::string& str) {
-        if(!path.empty() && !exists(path)) {
-            HDC h;
-            add_child(path, h); // TODO: add constructor for this!!
-        }
-        if (!path.empty()) get(path).set_string(str);
-        else set_string(str);
-    }
     void set_data_c(size_t rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(const std::string& path, size_t rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     void set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    void set_data_c(const std::string& path, size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     void set_data(T data) {
@@ -306,10 +293,11 @@ public:
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /** Sets scalar data to given node - UDA version. */
-    void set_data(const unsigned char* data, hdc_type_t type) {
+    void set_data(const unsigned char* data, hdc_type_t _type) {
         hdc_header_t header = get_header();
-        header.type = type;
-        header.data_size = hdc_sizeof(type);
+        memset(&header,0,sizeof(hdc_header_t));
+        header.type = _type;
+        header.data_size = hdc_sizeof(_type);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
         char* buffer = new char[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
@@ -321,46 +309,6 @@ public:
     void set_data(void* data, hdc_type_t type) {
         return this->set_data((const unsigned char*)data,type);
     }
-    /** Sets scalar data to given node - UDA version with path. */
-    void set_data(const std::string path, const unsigned char* data, hdc_type_t type) {
-        if (path.empty()) {
-            set_data(data, type);
-        } else {
-            if(!exists(path)) {
-                HDC h;
-                add_child(path, h); // TODO: add constructor for this!!
-            }
-            get(path).set_data(data, type);
-        }
-    }
-    /** Sets scalar data to given node - UDA version with path. */
-    void set_data(const std::string path, void* data, hdc_type_t type) {
-        if (path.empty()) {
-            set_data(data, type);
-        } else {
-            if(!exists(path)) {
-                HDC h;
-                add_child(path, h); // TODO: add constructor for this!!
-            }
-            get(path).set_data(data, type);
-        }
-    }
-    template <typename T>
-    void set_data(const std::string& path, T data) {
-        if(!exists(path)) {
-            HDC h;
-            add_child(path, h);
-        }
-        get(path).set_data(data);
-    }
-
-    void set_data(const std::string& path, const unsigned char* data, hdc_type_t type) {
-        if(!exists(path)) {
-            HDC h;
-            add_child(path, h);
-        }
-        get(path).set_data(data,type);
-    }
     /** Returns shape of current node. */
     std::vector<size_t> get_shape() const;
     std::vector<size_t> get_strides() const;
@@ -368,7 +316,6 @@ public:
     bool is_readonly() const;
     bool is_fortranorder() const;
     void print_info() const;
-/* -------------------------------- Old methods -- to be preserved ------------------------------- */
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
     void add_child(const std::string& path, HDC* n);
     /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version. */
@@ -435,26 +382,6 @@ public:
         }
     }
 
-    /** Returns string of node under given path. Needs to have separate function */
-    const std::string as_string(const std::string& path) const
-    {
-        DEBUG_STDOUT("as_string("+path+")\n");
-        if (path.empty()) {
-            return as_string();
-        }
-        else {
-            return get(path).as_string();
-        }
-    }
-
-    /** Returns pointer to data of node under given path. */
-    template<typename T> T as(const std::string& path) const
-    {
-        DEBUG_STDOUT("as<T>("+path+")\n");
-        if (path.empty()) return as<T>();
-        else return get(path).as<T>();
-    }
-
     /** Returns pointer to self. */
     hdc_t* as_hdc_ptr() const;
     /** Serialization to JSON file. */
@@ -462,7 +389,7 @@ public:
     /** Serialization to Json::Value object. */
     Json::Value to_json(int mode = 0) const;
     /** Serialization to string object. */
-    string to_json_string(int mode = 0) const;
+    std::string to_json_string(int mode = 0) const;
     /** Dumps JSON to std::cout */
     void dump() const;
     /** Serializes HDC to special json file*/
@@ -471,14 +398,14 @@ public:
     /** Returns void pointer to data. */
     intptr_t as_void_ptr() const;
     /** Returns string representing data/node type. */
-    const std::string get_type_str(const std::string& path = "") const;
+    const std::string get_type_str() const;
     /** Returns void pointer to data */
     char* get_data_ptr() const;
     /** Returns vector of keys of a struct node and empty vector otherwise. */
-    vector<string> keys() const;
+    std::vector<std::string> keys() const;
     size_t childs_count() const;
     char* get_buffer() const;
-    string get_uuid() const;
+    std::string get_uuid() const;
     void grow(size_t extra_size);
     // allocator stuff
     bip::managed_external_buffer get_segment() const;
@@ -492,9 +419,8 @@ public:
     // "deserialize from storage"
     static HDC* deserialize_HDC_file(const std::string& filename);
     // "deserialize from storage"
-
     static HDC* deserialize_HDC_string(const std::string& filename);
-    static HDC from_json(const string& filename, const std::string& datapath = "");
+    static HDC from_json(const std::string& filename, const std::string& datapath = "");
     static string hdc_map_to_json(hdc_map_t& children);
     static char* buffer_grow(char* old_buffer, size_t extra_size);
     static HDC json_to_HDC(const ::Json::Value& root);
@@ -505,9 +431,8 @@ public:
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
     static HDC load(const std::string& str, const std::string& datapath="");
     HDCStorage* get_storage() const {return this->storage; };
-    hdc_data_t get_data(const std::string& path = "") const;
+    hdc_data_t get_data() const;
     void set_data(hdc_data_t obj);
-    void set_data(const std::string& path,hdc_data_t obj);
 };
 
 #endif // HDC_HPP

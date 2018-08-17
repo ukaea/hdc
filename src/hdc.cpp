@@ -822,9 +822,33 @@ HDC& HDC::get_ref(size_t index)
 {
     return get_single_ref(index);
 }
+
 const HDC HDC::get(size_t index) const
 {
     return get_single(index);
+}
+
+HDC HDC::get_or_create(const std::string& path)
+{
+    if (path.empty()) return *this;
+    if (!exists(path)) {
+        HDC h;
+        add_child(path,h);
+        return h;
+    } else {
+        return get(path);
+    }
+}
+
+HDC HDC::get_or_create(size_t index)
+{
+    if (!exists(index)) {
+        HDC h;
+        insert(index,h);
+        return h;
+    } else {
+        return get(index);
+    }
 }
 
 HDC& HDC::operator=(const HDC& other)
@@ -1043,16 +1067,6 @@ void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_t
     return;
 }
 
-void HDC::set_data_c(const std::string& path, size_t  rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
-{
-
-    if (!path.empty() && !exists(path)) {
-        HDC h;
-        add_child(path, h); // TODO: add constructor for this!!
-    }
-    if (!path.empty()) get(path).set_data_c(rank, shape, data, type, flags);
-    else set_data_c(rank, shape, data, type, flags);
-}
 
 void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
@@ -1085,15 +1099,6 @@ void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, const void* data,
         if (!storage->usesBuffersDirectly()) delete[] buffer;
         return;
     }
-}
-
-void HDC::set_data_c(const std::string& path, size_t  rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
-{
-    if (!exists(path)) {
-        HDC h;
-        add_child(path, h); // TODO: add constructor for this!!
-    }
-    get(path).set_data_c(rank, shape, data, type, flags);
 }
 
 void HDC::set_data_c(hdc_path_t path, size_t  rank, std::vector<size_t>& shape, const void* data,
@@ -1184,49 +1189,45 @@ hdc_t* HDC::as_hdc_ptr() const
     return wrap;
 }
 
-const std::string HDC::get_type_str(const std::string& path) const
+const std::string HDC::get_type_str() const
 {
-    if (path.empty()) {
-        switch (get_type()) {
-            case HDC_EMPTY:
-                return "null";
-            case HDC_STRUCT:
-                return "struct";
-            case HDC_LIST:
-                return "list";
-            case HDC_INT8:
-                return "int8";
-            case HDC_INT16:
-                return "int16";
-            case HDC_INT32:
-                return "int32";
-            case HDC_INT64:
-                return "int64";
-            case HDC_UINT8:
-                return "int8";
-            case HDC_UINT16:
-                return "int16";
-            case HDC_UINT32:
-                return "int32";
-            case HDC_UINT64:
-                return "int64";
-            case HDC_FLOAT:
-                return "float32";
-            case HDC_DOUBLE:
-                return "float64";
-            case HDC_STRING:
-                return "string";
-            case HDC_BOOL:
-                return "bool";
-            case HDC_ERROR:
-                return "error";
-            default:
-                return "unknown";
-        };
-        return "unknown";
-    } else {
-        return get(path).get_type_str();
-    }
+    switch (get_type()) {
+        case HDC_EMPTY:
+            return "null";
+        case HDC_STRUCT:
+            return "struct";
+        case HDC_LIST:
+            return "list";
+        case HDC_INT8:
+            return "int8";
+        case HDC_INT16:
+            return "int16";
+        case HDC_INT32:
+            return "int32";
+        case HDC_INT64:
+            return "int64";
+        case HDC_UINT8:
+            return "int8";
+        case HDC_UINT16:
+            return "int16";
+        case HDC_UINT32:
+            return "int32";
+        case HDC_UINT64:
+            return "int64";
+        case HDC_FLOAT:
+            return "float32";
+        case HDC_DOUBLE:
+            return "float64";
+        case HDC_STRING:
+            return "string";
+        case HDC_BOOL:
+            return "bool";
+        case HDC_ERROR:
+            return "error";
+        default:
+            return "unknown";
+    };
+    return "unknown";
 }
 
 hdc_header_t HDC::get_header() const {
@@ -1484,10 +1485,8 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
     return h;
 }
 
-hdc_data_t HDC::get_data(const std::string& path) const
+hdc_data_t HDC::get_data() const
 {
-    if (path.empty())
-    {
         hdc_header_t header;
         auto buffer = storage->get(uuid);
         memcpy(&header,buffer,sizeof(hdc_header_t));
@@ -1498,9 +1497,6 @@ hdc_data_t HDC::get_data(const std::string& path) const
         for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = header.shape[i];
         obj.data = buffer+sizeof(hdc_header_t);
         return obj;
-    } else {
-        return this->get(path).get_data();
-    }
 }
 
 void HDC::set_data(hdc_data_t obj)
@@ -1540,17 +1536,3 @@ void HDC::set_data(hdc_data_t obj)
             if (!storage->usesBuffersDirectly()) delete[] buffer;
         }
 };
-
-void HDC::set_data(const std::string& path, hdc_data_t obj)
-{
-    if (path.empty()) {
-        set_data(obj);
-        return;
-    } else {
-        if (!exists(path)) {
-            HDC h;
-            add_child(path, h); // TODO: add constructor for this!!
-        }
-        get(path).set_data(obj);
-    }
-}

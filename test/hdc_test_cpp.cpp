@@ -325,7 +325,7 @@ TEST_CASE("GetKeys", "[HDC]")
 
 #define PREPARE_TREE()                                                                              \
     int rank = 1;                                                                                   \
-    std::vector<size_t> shape = {4};                                                                           \
+    std::vector<size_t> shape = {4};                                                                \
     double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
     int32_t data_int[] = {777,20202020,3333,555555};                                                \
     HDC tree;                                                                                       \
@@ -341,10 +341,11 @@ TEST_CASE("GetKeys", "[HDC]")
     HDC lch;                                                                                        \
     for (int i=0;i<5;i++) {                                                                         \
         HDC lch;                                                                                    \
-        list.append(lch);                                                                     \
+        list.append(lch);                                                                           \
     }                                                                                               \
     tree.add_child("aaa/list", list);                                                               \
-    tree.set_string("aaa/string","Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");      \
+    HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
+    tree.add_child("aaa/string",str);                                                               \
 
 TEST_CASE("JsonComplete", "[HDC]")
 {
