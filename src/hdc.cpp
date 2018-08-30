@@ -142,7 +142,7 @@ void HDC::set_storage(std::string storage)
         options->put("storage", *storage_cmd);
         while (options->count("storage_cmdline") > 0) options->erase("storage_cmdline");
     }
-    string selected_store_name = options->get<std::string>("storage", storage);
+    std::string selected_store_name = options->get<std::string>("storage", storage);
     //cout << "Selected storage: " << selected_store_name <<endl;
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
         //cout << avail_stores[selected_store_name] << endl;
