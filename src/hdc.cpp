@@ -408,7 +408,7 @@ bool HDC::exists_single(hdc_index_t index) const
 
 bool HDC::exists(size_t index) const
 {
-    return exists(index);
+    return exists_single(index);
 }
 
 bool HDC::exists(hdc_path_t path) const
@@ -655,9 +655,8 @@ HDC* HDC::get_ptr(hdc_path_t path)
     auto first = path.front();
     path.pop_front();
     hdc_map_t* children = get_children_ptr();
-
     if (children == nullptr) {
-        throw HDCException("get(): This node has no children.");
+        throw HDCException("get_ptr(): This node has no children.");
     }
 
     return get_single_ptr(first)->get_ptr(path);
@@ -808,6 +807,12 @@ HDC& HDC::get_ref(const std::string& path)
     return *h;
 }
 
+HDC& HDC::get_or_create_ref(const std::string& path)
+{
+    HDC* h = get_or_create_ptr(path);
+    return *h;
+}
+
 HDC* HDC::get_ptr(size_t index)
 {
     return get_single_ptr(index);
@@ -823,8 +828,16 @@ HDC& HDC::get_ref(size_t index)
     return get_single_ref(index);
 }
 
+HDC& HDC::get_or_create_ref(size_t index)
+{
+    HDC* h = get_or_create_ptr(index);
+    return *h;
+}
+
+
 const HDC HDC::get(size_t index) const
 {
+
     return get_single(index);
 }
 
@@ -851,6 +864,29 @@ HDC HDC::get_or_create(size_t index)
     }
 }
 
+HDC* HDC::get_or_create_ptr(const std::string& path)
+{
+    if (path.empty()) return this;
+    if (!exists(path)) {
+        auto h = new HDC();
+        add_child(path,h);
+        return h;
+    } else {
+        return get_ptr(path);
+    }
+}
+
+HDC* HDC::get_or_create_ptr(size_t index)
+{
+    if (!exists(index)) {
+        auto h = new HDC();
+        insert(index,h);
+        return h;
+    } else {
+        return get_single_ptr(index);
+    }
+}
+
 HDC& HDC::operator=(const HDC& other)
 {
     if (this != &other && uuid != other.get_uuid()) {
@@ -866,9 +902,15 @@ HDC& HDC::operator=(char const* str)
     return *this;
 }
 
+HDC& HDC::operator=(const std::string& str)
+{
+    set_string(str.c_str());
+    return *this;
+}
+
 HDC& HDC::operator[](const std::string& path)
 {
-    return get_ref(path);
+    return get_or_create_ref(path);
 }
 
 const HDC HDC::operator[](const std::string& path) const
@@ -878,7 +920,7 @@ const HDC HDC::operator[](const std::string& path) const
 
 HDC& HDC::operator[](size_t index)
 {
-    return get_single_ref(index);
+    return get_or_create_ref(index);
 }
 
 const HDC HDC::operator[](size_t index) const
@@ -1068,7 +1110,7 @@ void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_t
 }
 
 
-void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
@@ -1099,16 +1141,6 @@ void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, const void* data,
         if (!storage->usesBuffersDirectly()) delete[] buffer;
         return;
     }
-}
-
-void HDC::set_data_c(hdc_path_t path, size_t  rank, std::vector<size_t>& shape, const void* data,
-                     hdc_type_t type, hdc_flags_t flags)
-{
-    if (!exists(path)) {
-        HDC h;
-        add_child(path, h); // TODO: add constructor for this!!
-    }
-    get(path).set_data_c(rank, shape, data, type, flags);
 }
 
 void HDC::insert(size_t i, HDC* h)

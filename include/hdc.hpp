@@ -76,13 +76,10 @@ private:
     */
     void add_child(hdc_path_t path, HDC& n);
     void set_child(hdc_path_t path, HDC* n);
-    void set_data_c(hdc_path_t path, size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     void delete_child(hdc_path_t path);
     HDC* get_ptr(hdc_path_t path);
     HDC get(hdc_path_t path);
     const HDC get(hdc_path_t path) const;
-    bool exists(hdc_path_t path) const;
-    bool exists(size_t index) const;
     bool exists_single(hdc_index_t index) const;
     void add_child_single(const std::string& path, HDC& n);
     hdc_header_t get_header() const;
@@ -92,14 +89,6 @@ private:
     HDC get_single(hdc_index_t index);
     HDC& get_single_ref(hdc_index_t index);
     const HDC get_single(hdc_index_t index) const;
-    /** Sets scalar data to given node - UDA version with path. */
-    void set_data(const std::string path, const unsigned char* data, hdc_type_t type) {
-        get_or_create(path).set_data(data, type);
-    }
-    /** Sets scalar data to given node - UDA version with path. */
-    void set_data(const std::string path, void* data, hdc_type_t type) {
-        get_or_create(path).set_data(data, type);
-    }
 public:
     /** Creates empty HDC with specified buffer size */
     HDC(size_t byte_size);
@@ -137,6 +126,8 @@ public:
     static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
     /** Cleans up global_storage  -- mainly due to C and Fortran */
     static void destroy();
+    bool exists(hdc_path_t path) const;
+    bool exists(size_t index) const;
     HDC* get_ptr(size_t index);
     HDC get(size_t index);
     HDC& get_ref(size_t index);
@@ -153,6 +144,10 @@ public:
     size_t get_flags() const;
     HDC get_or_create(size_t index);
     HDC get_or_create(const std::string& path);
+    HDC* get_or_create_ptr(size_t index);
+    HDC* get_or_create_ptr(const std::string& path);
+    HDC& get_or_create_ref(size_t index);
+    HDC& get_or_create_ref(const std::string& path);
     /** Returns the data, the pointer is just casted => there is no conversion for now.*/
     template<typename T> T* get_data() const;
     /** Stores data in node's buffer */
@@ -166,6 +161,7 @@ public:
         return *this;
     }
     HDC& operator=(char const* str);
+    HDC& operator=(const std::string& str);
     HDC& operator=(const HDC& other);
 
     template<typename T> void set_data(size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
@@ -203,36 +199,11 @@ public:
         set_data(rank,shape,data,flags);
     };
 
-    template<typename T> void set_data(const std::string& path, size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
-        if(!exists(path)) {
-            HDC h;
-            add_child(path, h); // TODO: add contructor for this!!
-        }
-        get(path).set_data(rank, shape, data, flags);
-    }
-
     template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
         DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)"+to_string(data[0]));
         vector<T> vec = data;
         set_data(1,{vec.size()},&vec[0],flags);
     };
-
-    template<typename T> void set_data(const std::string& path, initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
-        if(!exists(path)) {
-            HDC h;
-            add_child(path, h);
-        }
-        get(path).set_data(data, flags);
-    }
-
-
-    template<typename T> void set_data(const std::string& path, size_t rank, initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
-        if(!exists(path)) {
-            HDC h;
-            add_child(path, h);
-        }
-        get(path).set_data(rank, shape, data, flags);
-    }
 
     /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
     template <typename T> void set_data(vector<T> data)
@@ -244,18 +215,6 @@ public:
         }
         size_t shape[1] = {data.size()};
         set_data<T>(1,shape,&data[0]);
-        return;
-    };
-
-    /** Sets data to node on given path from vector<T> data. This function is primarily designed for interoperability with Python */
-    template <typename T> void set_data(const std::string& path, vector<T> data)
-    {
-        if (!this->exists(path)) {
-            HDC h;
-            this->add_child(path, h);
-            DEBUG_STDOUT("\""+path+"\" not found, adding...\n");
-        }
-        get(path).set_data<T>(data);
         return;
     };
 
@@ -366,6 +325,21 @@ public:
         }
         return reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
     }
+    template<typename T> T as_scalar() const
+    {
+        hdc_header_t header = get_header();
+        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+            throw std::runtime_error("This is not a terminal node...");
+        }
+        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        if (!storage->has(uuid)) {
+            throw HDCException("as_scalar(): Not found: "+std::string(uuid.c_str())+"\n");
+        }
+        T result;
+        memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(T));
+        return result;
+        //return *reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
+    }
     /** Returns string. Needs to have separate function */
     const std::string as_string() const
     {
@@ -381,7 +355,6 @@ public:
             return oss.str();
         }
     }
-
     /** Returns pointer to self. */
     hdc_t* as_hdc_ptr() const;
     /** Serialization to JSON file. */

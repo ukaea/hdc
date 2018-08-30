@@ -323,6 +323,58 @@ TEST_CASE("GetKeys", "[HDC]")
     for (size_t i = 0; i < keys.size(); i++) CHECK(true == tree.exists(keys[i]));
 }
 
+TEST_CASE("BracketOperators", "[HDC]")
+{
+    HDC tree;
+    tree["aaa/bbb/ccc"] = HDC();
+    CHECK(tree.get_type() == HDC_STRUCT);
+    CHECK(tree.exists("aaa/bbb/ccc"));
+    CHECK(tree["aaa/bbb/ccc"].get_type() == HDC_EMPTY);
+
+    HDC list;
+    list[0] = HDC();
+    CHECK(list.get_type() == HDC_LIST);
+    CHECK(list.exists(0));
+
+    int8_t i8 = 8;
+    int16_t i16 = 16;
+    int32_t i32 = 32;
+    int64_t i64 = 64;
+    float f = 3.14;
+    double d = 3.141592;
+    std::string str = "test";
+    tree["i8"] = i8;
+    tree["i16"] = i16;
+    tree["i32"] = i32;
+    tree["i64"] = i64;
+    tree["f"] = f;
+    tree["d"] = d;
+    tree["str"] = str;
+    CHECK(tree.exists("i8"));
+    CHECK(tree.exists("i16"));
+    CHECK(tree.exists("i32"));
+    CHECK(tree.exists("i64"));
+    CHECK(tree.exists("f"));
+    CHECK(tree.exists("d"));
+    CHECK(tree.exists("str"));
+    CHECK(tree["i8"].get_type() == HDC_INT8);
+    CHECK(tree["i16"].get_type() == HDC_INT16);
+    CHECK(tree["i32"].get_type() == HDC_INT32);
+    CHECK(tree["i64"].get_type() == HDC_INT64);
+    CHECK(tree["f"].get_type() == HDC_FLOAT);
+    CHECK(tree["d"].get_type() == HDC_DOUBLE);
+    CHECK(tree["str"].get_type() == HDC_STRING);
+    CHECK(tree["i8"].as_scalar<int8_t>() == i8);
+    CHECK(tree["i16"].as_scalar<int16_t>() == i16);
+    CHECK(tree["i32"].as_scalar<int32_t>() == i32);
+    CHECK(tree["i64"].as_scalar<int64_t>() == i64);
+    CHECK(tree["f"].as_scalar<float>() == f);
+    CHECK(tree["d"].as_scalar<double>() == d);
+    CHECK(strcmp(tree["str"].as_string().c_str(),str.c_str()) == 0);
+    tree.to_json("dump.txt");
+
+}
+
 #define PREPARE_TREE()                                                                              \
     int rank = 1;                                                                                   \
     std::vector<size_t> shape = {4};                                                                \
@@ -332,9 +384,9 @@ TEST_CASE("GetKeys", "[HDC]")
     HDC scalar;                                                                                     \
     scalar.set_data(333.333);                                                                       \
     tree.add_child("aaa/bbb/_scalar", scalar);                                                      \
-    tree.set_data<double>("aaa/bbb/double",rank,shape,data_double);                                 \
-    tree.set_data<double>("aaa/bbb/double2",rank,shape,data_double);                                \
-    tree.set_data<int>("aaa/bbb/int",rank,shape,data_int);                                          \
+    tree["aaa/bbb/double"].set_data<double>(rank,shape,data_double);                                \
+    tree["aaa/bbb/double2"].set_data<double>(rank,shape,data_double);                               \
+    tree["aaa/bbb/int"].set_data<int>(rank,shape,data_int);                                         \
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \

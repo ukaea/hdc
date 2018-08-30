@@ -44,8 +44,8 @@ int main(int argc, const char* argv[])
     HDC data;
     data.set_data(1, shape, array);
     // Add data to a subtree
-    tree.set_data("aaa/bbb/ccc", 1, shape, array);
-
+//     tree.set_data("aaa/bbb/ccc", 1, shape, array);
+    tree["aaa/bbb/ccc"].set_data(1, shape, array);
     // Ask for some data details, use subtree to shorten the path
     int32_t rank2 = node.get_rank();
     auto shape2 = node.get_shape();
@@ -95,7 +95,10 @@ int main(int argc, const char* argv[])
     lst.dump();
     lst[0] = "lalalala";
     lst.dump();
+    lst[0] = HDC("lalalala");
+    lst.dump();
 //     lst[0] = {1,2,3,4}; //TODO
+//     lst.dump();
     std::cout << "---------------------------- overloaded operators end --------------------------------\n";
 
     HDC::destroy();

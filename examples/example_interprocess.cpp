@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
         HDC data;
         data.set_data(1,shape,array);
         // Add data to a subtree
-        tree.set_data("aaa/bbb/ccc",1,shape,array);
+        tree["aaa/bbb/ccc"].set_data(1,shape,array);
 
         // Ask for some data details, use subtree to shorten the path
 //        int32_t rank2 = node.get_rank();
