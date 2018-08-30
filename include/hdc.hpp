@@ -82,95 +82,399 @@ private:
     * @param n p_n: node
     */
     void set_child(hdc_path_t& path, HDC* n);
-
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    */
     void delete_child(hdc_path_t& path);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC*
+    */
     HDC* get_ptr(hdc_path_t& path);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC
+    */
     HDC get(hdc_path_t& path);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return const HDC
+    */
     const HDC get(hdc_path_t& path) const;
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return bool
+    */
     bool exists_single(hdc_index_t index) const;
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
     void add_child_single(const std::string& path, HDC& n);
+    /**
+    * @brief ...
+    *
+    * @return hdc_header_t
+    */
     hdc_header_t get_header() const;
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
     void set_child_single(hdc_index_t path, HDC& n);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
     void set_child_single(hdc_index_t path, HDC* n);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC*
+    */
     HDC* get_single_ptr(hdc_index_t index);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC
+    */
     HDC get_single(hdc_index_t index);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC&
+    */
     HDC& get_single_ref(hdc_index_t index);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return const HDC
+    */
     const HDC get_single(hdc_index_t index) const;
 public:
-    /** Creates empty HDC with specified buffer size */
+    /**
+    * @brief Creates empty HDC with specified buffer size
+    *
+    * @param byte_size p_byte_size:...
+    */
     HDC(size_t byte_size);
-    /** Default constructor. Creates empty HDC */
+    /**
+    * @brief Default constructor. Creates empty HDC
+    *
+    */
     HDC();
-    /** Creates empty HDC with specified type and shape */
+    /**
+    * @brief Creates empty HDC with specified type and shape
+    *
+    * @param rank p_rank: Rank of the data
+    * @param shape p_shape: Shape of the data
+    * @param type p_type: Type of the data (e.g. HDC_INT32)
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
     HDC(size_t rank, std::vector<size_t>& shape, hdc_type_t type,long flags = HDCDefault);
-    /** Constructor from string */
+    /**
+    * @brief Constructor from string
+    *
+    * @param str p_str:...
+    */
     HDC(const std::string str);
-    /** Copy contructor */
+    /**
+    * @brief Copy contructor
+    *
+    * @param h p_h:...
+    */
     HDC(HDC* h);
-    /** Deserializing constructor */
+    /**
+    * @brief Deserializing constructor
+    *
+    * @param _storage p__storage:...
+    * @param _uuid p__uuid:...
+    */
     HDC(HDCStorage* _storage, const std::string& _uuid);
-    /** constructor from object buffer -- this should be void* as we want cha* to be used for strings */
+    /**
+    * @brief constructor from object buffer -- this should be void* as we want cha* to be used for strings
+    *
+    * @param src_buffer p_src_buffer:...
+    */
     HDC(byte* src_buffer);
-    /** Destructor */
+    /**
+    * @brief Destructor
+    *
+    */
     ~HDC();
-    /** Parses command line arguments */
+    /**
+    * @brief Parses command line arguments
+    *
+    * @param argc p_argc:...
+    * @param argv p_argv:...
+    */
     static void parse_cmdline(int argc, const char *argv[]);
-    /** Loads settings from file */
+    /**
+    * @brief Loads settings from file
+    *
+    * @param configPath p_configPath:...
+    */
     static void load_config(std::string configPath="./hdc.conf:~/.config/hdc.conf");
-    /** Searches for available storage plugins */
+    /**
+    * @brief Searches for available storage plugins
+    *
+    * @param searchPath p_searchPath:...
+    */
     static void search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
-    /** Prints out all found storage plugins. */
+    /**
+    * @brief Prints out all found storage plugins.
+    *
+    */
     static void list_plugins();
-    /** Sets the default storage to be used. */
+    /**
+    * @brief Sets the default storage to be used.
+    *
+    * @param storage p_storage:...
+    */
     static void set_storage(std::string storage="umap");
-    /** Returns list of all available storage plugins */
+    /**
+    * @brief Returns list of all available storage plugins
+    *
+    * @return std::vector< std::__cxx11::string >
+    */
     static std::vector<std::string> get_available_plugins();
-    /** Returns a directory path where the HDC library is loaded from.  */
+    /**
+    * @brief Returns a directory path where the HDC library is loaded from.
+    *
+    * @return std::__cxx11::string
+    */
     static std::string get_library_dir(void);
-    /** Initializes global_storage  -- mainly due to C and Fortran */
+    /**
+    * @brief Initializes global_storage  -- mainly due to C and Fortran
+    *
+    * @param storage p_storage:...
+    * @param storage_options p_storage_options:...
+    */
     static void init(std::string storage="umap",std::string storage_options="");
-    /** Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions. */
+    /**
+    * @brief Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions.
+    *
+    * @param storage p_storage:...
+    * @param storage_options p_storage_options:...
+    */
     static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
-    /** Cleans up global_storage  -- mainly due to C and Fortran */
+    /**
+    * @brief Cleans up the global_storage  -- mainly due to C and Fortran
+    *
+    */
     static void destroy();
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return bool
+    */
     bool exists(hdc_path_t& path) const;
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return bool
+    */
     bool exists(size_t index) const;
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC*
+    */
     HDC* get_ptr(size_t index);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC
+    */
     HDC get(size_t index);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC&
+    */
     HDC& get_ref(size_t index);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return const HDC
+    */
     const HDC get(size_t index) const;
-    /** Returns the available space in buffer (in bytes) */
+    /**
+    * @brief Returns the available space in buffer (in bytes)
+    *
+    * @return size_t
+    */
     size_t get_datasize() const;
-    /** Returns the the size of object buffer (= header+data, in bytes) */
+    /**
+    * @brief Returns the the size of object buffer (= header+data, in bytes)
+    *
+    * @return size_t
+    */
     size_t get_size() const;
-    /** Returns type of current node. */
+    /**
+    * @brief Returns type of current node.
+    *
+    * @return size_t
+    */
     size_t get_type() const;
-    /** Returns the size of a single item in bytes */
+    /**
+    * @brief Returns the size of a single item in bytes
+    *
+    * @return size_t
+    */
     size_t get_itemsize() const;
-    /** Returns object flags (i.e. array ordering)*/
+    /**
+    * @brief Returns object flags (i.e. array ordering)
+    *
+    * @return size_t
+    */
     size_t get_flags() const;
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC
+    */
     HDC get_or_create(size_t index);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC
+    */
     HDC get_or_create(const std::string& path);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC*
+    */
     HDC* get_or_create_ptr(size_t index);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC*
+    */
     HDC* get_or_create_ptr(const std::string& path);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC&
+    */
     HDC& get_or_create_ref(size_t index);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC&
+    */
     HDC& get_or_create_ref(const std::string& path);
-    /** Returns the data, the pointer is just casted => there is no conversion for now.*/
+    /**
+    * @brief Returns the data, the pointer is just casted => there is no conversion for now.
+    *
+    * @param T p_T:...
+    * @return T*
+    */
     template<typename T> T* get_data() const;
-    /** Stores data in node's buffer */
+    /**
+    * @brief Stores data in node's buffer
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return const HDC
+    */
     const HDC operator[](size_t index) const;
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @return HDC&
+    */
     HDC& operator[](size_t index);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return const HDC
+    */
     const HDC operator[](const std::string& path) const;
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC&
+    */
     HDC& operator[](const std::string& path);
+    /**
+    * @brief ...
+    *
+    * @param T p_T:...
+    * @param d p_d:...
+    * @return HDC&
+    */
     template <typename T> HDC& operator=(T d)
     {
         set_data(d);
         return *this;
     }
+    /**
+    * @brief ...
+    *
+    * @param str p_str:...
+    * @return HDC&
+    */
     HDC& operator=(char const* str);
+    /**
+    * @brief ...
+    *
+    * @param str p_str:...
+    * @return HDC&
+    */
     HDC& operator=(const std::string& str);
+    /**
+    * @brief ...
+    *
+    * @param other p_other:...
+    * @return HDC&
+    */
     HDC& operator=(const HDC& other);
 
+    /**
+    * @brief ...
+    *
+    * @param T p_T:...
+    * @param rank p_rank: Rank of the data
+    * @param shape p_shape: Shape of the data
+    * @param data p_data:...
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
     template<typename T> void set_data(size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         hdc_header_t header = get_header();
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
@@ -202,17 +506,38 @@ public:
         }
     }
 
+    /**
+    * @brief ...
+    *
+    * @param T p_T:...
+    * @param rank p_rank: Rank of the data
+    * @param shape p_shape: Shape of the data
+    * @param data p_data:...
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
     template<typename T> void set_data(size_t rank, initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
         set_data(rank,shape,data,flags);
     };
 
+    /**
+    * @brief ...
+    *
+    * @param T p_T:...
+    * @param data p_data:...
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
     template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
         DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)"+to_string(data[0]));
         vector<T> vec = data;
         set_data(1,{vec.size()},&vec[0],flags);
     };
 
-    /** Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python */
+    /**
+    * @brief Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python
+    *
+    * @param T p_T:...
+    * @param data p_data:...
+    */
     template <typename T> void set_data(vector<T> data)
     {
         DEBUG_STDOUT("template <typename T> void set_data(vector<T> data)"+to_string(data[0]));
@@ -225,6 +550,11 @@ public:
         return;
     };
 
+    /**
+    * @brief ...
+    *
+    * @param str p_str:...
+    */
     void set_string(const std::string& str) {
         hdc_header_t header = get_header();
         if (storage->has(uuid)) {
@@ -242,10 +572,34 @@ public:
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
+    /**
+    * @brief ...
+    *
+    * @param rank p_rank: Rank of the data
+    * @param shape p_shape: Shape of the data
+    * @param data p_data:...
+    * @param type p_type: Type of the data (e.g. HDC_INT32)
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
     void set_data_c(size_t rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    /**
+    * @brief ...
+    *
+    * @param rank p_rank: Rank of the data
+    * @param shape p_shape: Shape of the data
+    * @param data p_data:...
+    * @param type p_type: Type of the data (e.g. HDC_INT32)
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
     void set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
+    /**
+    * @brief ...
+    *
+    * @param T p_T:...
+    * @param data p_data:...
+    */
     void set_data(T data) {
         hdc_header_t header = get_header();
         memset(&header,0,sizeof(hdc_header_t));
@@ -258,7 +612,12 @@ public:
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
-    /** Sets scalar data to given node - UDA version. */
+    /**
+    * @brief Sets scalar data to given node - UDA version.
+    *
+    * @param data p_data:...
+    * @param _type p__type:...
+    */
     void set_data(const unsigned char* data, hdc_type_t _type) {
         hdc_header_t header = get_header();
         memset(&header,0,sizeof(hdc_header_t));
@@ -271,55 +630,197 @@ public:
         storage->set(uuid,buffer,header.buffer_size);
         if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
-    /** Sets scalar data to given node - UDA version. */
+    /**
+    * @brief Sets scalar data to given node - UDA version.
+    *
+    * @param data p_data:...
+    * @param type p_type: Type of the data (e.g. HDC_INT32)
+    */
     void set_data(void* data, hdc_type_t type) {
         return this->set_data((const unsigned char*)data,type);
     }
-    /** Returns shape of current node. */
+    /**
+    * @brief Returns shape of current node.
+    *
+    * @return std::vector< size_t >
+    */
     std::vector<size_t> get_shape() const;
+    /**
+    * @brief ...
+    *
+    * @return std::vector< size_t >
+    */
     std::vector<size_t> get_strides() const;
+    /**
+    * @brief ...
+    *
+    * @return bool
+    */
     bool is_external() const;
+    /**
+    * @brief ...
+    *
+    * @return bool
+    */
     bool is_readonly() const;
+    /**
+    * @brief ...
+    *
+    * @return bool
+    */
     bool is_fortranorder() const;
+    /**
+    * @brief ...
+    *
+    */
     void print_info() const;
-    /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version. */
+    /**
+    * @brief Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version.
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
     void add_child(const std::string& path, HDC* n);
-    /** Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version. */
+    /**
+    * @brief Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version.
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
     void add_child(const std::string& path, HDC& n);
-    /** Sets HDC subtree to given path. */
+    /**
+    * @brief Sets HDC subtree to given path.
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
     void set_child(const std::string& path, HDC* n);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @param n p_n: HDC node
+    */
     void set_child(size_t index, HDC* n);
+    /**
+    * @brief ...
+    *
+    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
+    * @param n p_n: HDC node
+    */
     void set_child(size_t index, HDC& n);
-    /** Deletes HDC subtree. */
+    /**
+    * @brief Deletes HDC subtree.
+    *
+    * @param path p_path: path in the subtree of this node
+    */
     void delete_child(const std::string& path);
-    /** Returns subtree by path. */
+    /**
+    * @brief Returns subtree by path.
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC*
+    */
     HDC* get_ptr(const std::string& path);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC
+    */
     HDC get(const std::string& path);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return const HDC
+    */
     const HDC get(const std::string& path) const;
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC&
+    */
     HDC& get_ref(const std::string& path);
-    /** Returns true if subtree with given path with exists and false otherwise. */
+    /**
+    * @brief Returns true if subtree with given path with exists and false otherwise.
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return bool
+    */
     bool exists(const std::string& path) const;
     /** Sets HDC_LIST from std::deque<HDC*> data.*/
+    /**
+    * @brief ...
+    *
+    * @param list p_list:...
+    */
     void set_list(deque<HDC*>* list);
-    /** Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise. */
+    /**
+    * @brief Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise.
+    *
+    * @param h p_h:...
+    * @param recursively p_recursively:...
+    */
     void resize(HDC* h, int recursively = 0);
-    /** Returns copy of current object. */
+    /**
+    * @brief Returns copy of current object.
+    *
+    * @param copy_arrays p_copy_arrays:...
+    * @return HDC*
+    */
     HDC* copy(int copy_arrays = 1);
-    /** Inserts node to i-th slice of current node. */
+    /**
+    * @brief Inserts node to i-th slice of current node.
+    *
+    * @param i p_i:...
+    * @param h p_h:...
+    */
     void insert(size_t i, HDC* h);
-    /** Inserts node to i-th slice of current node. */
+    /**
+    * @brief Inserts node to i-th slice of current node.
+    *
+    * @param i p_i:...
+    * @param h p_h:...
+    */
     void insert(size_t i, HDC& h);
-    /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
+    /**
+    * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
+    *
+    * @param h p_h:...
+    */
     void append(HDC* h);
-    /** Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).*/
+    /**
+    * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
+    *
+    * @param h p_h:...
+    */
     void append(HDC& h);
-    /** Sets HDC type of current node. */
+    /**
+    * @brief Sets HDC type of current node.
+    *
+    * @param type p_type: Type of the data (e.g. HDC_INT32)
+    */
     void set_type(hdc_type_t type);
-    /** Returns true if node is empty. */
+    /**
+    * @brief Returns true if node is empty.
+    *
+    * @return bool
+    */
     bool is_empty() const;
-    /** Returns number of dimensions of node under path. */
+    /**
+    * @brief Returns number of dimensions of node under path.
+    *
+    * @return size_t
+    */
     size_t get_rank() const;
-    /** Returns pointer to data of this node. */
+    /**
+    * @brief Returns pointer to data of this node.
+    *
+    * @param T p_T:...
+    * @return T
+    */
     template<typename T> T as() const
     {
         hdc_header_t header = get_header();
@@ -332,6 +833,12 @@ public:
         }
         return reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
     }
+    /**
+    * @brief Returns scalar value.
+    *
+    * @param T p_T:...
+    * @return T
+    */
     template<typename T> T as_scalar() const
     {
         hdc_header_t header = get_header();
@@ -347,7 +854,11 @@ public:
         return result;
         //return *reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
     }
-    /** Returns string. Needs to have separate function */
+    /**
+    * @brief Returns string. Needs to have separate function
+    *
+    * @return const std::__cxx11::string
+    */
     const std::string as_string() const
     {
         hdc_header_t header = get_header();
@@ -362,56 +873,245 @@ public:
             return oss.str();
         }
     }
-    /** Returns pointer to self. */
+    /**
+    * @brief Returns pointer to itself.
+    *
+    * @return hdc_t*
+    */
     hdc_t* as_hdc_ptr() const;
-    /** Serialization to JSON file. */
+    /**
+    * @brief Serialization to JSON file.
+    *
+    * @param filename p_filename:...
+    * @param mode p_mode:...
+    */
     void to_json(string filename, int mode = 0) const;
-    /** Serialization to Json::Value object. */
+    /**
+    * @brief Serialization to Json::Value object.
+    *
+    * @param mode p_mode:...
+    * @return Json::Value
+    */
     Json::Value to_json(int mode = 0) const;
-    /** Serialization to string object. */
+    /**
+    * @brief Serialization to string object.
+    *
+    * @param mode p_mode:...
+    * @return std::__cxx11::string
+    */
     std::string to_json_string(int mode = 0) const;
-    /** Dumps JSON to std::cout */
+    /**
+    * @brief Dumps JSON to std::cout
+    *
+    */
     void dump() const;
-    /** Serializes HDC to special json file*/
+    /**
+    * @brief Serializes HDC to special json file
+    *
+    * @return const std::__cxx11::string
+    */
     const std::string serialize() const;
+    /**
+    * @brief ...
+    *
+    * @param filename p_filename:...
+    */
     void serialize(const std::string& filename) const;
-    /** Returns void pointer to data. */
+    /**
+    * @brief Returns void pointer to data.
+    *
+    * @return intptr_t
+    */
     intptr_t as_void_ptr() const;
-    /** Returns string representing data/node type. */
+    /**
+    * @brief Returns string representing data/node type.
+    *
+    * @return const std::__cxx11::string
+    */
     const std::string get_type_str() const;
-    /** Returns void pointer to data */
+    /**
+    * @brief Returns void pointer to data
+    *
+    * @return char*
+    */
     char* get_data_ptr() const;
-    /** Returns vector of keys of a struct node and empty vector otherwise. */
+    /**
+    * @brief Returns vector of keys of a struct node and empty vector otherwise.
+    *
+    * @return std::vector< std::__cxx11::string >
+    */
     std::vector<std::string> keys() const;
+    /**
+    * @brief ...
+    *
+    * @return size_t
+    */
     size_t childs_count() const;
+    /**
+    * @brief ...
+    *
+    * @return char*
+    */
     char* get_buffer() const;
+    /**
+    * @brief ...
+    *
+    * @return std::__cxx11::string
+    */
     std::string get_uuid() const;
+    /**
+    * @brief ...
+    *
+    * @param extra_size p_extra_size:...
+    */
     void grow(size_t extra_size);
-    // allocator stuff
+    /**
+    * @brief "allocator stuff"
+    *
+    * @return boost::interprocess::managed_external_buffer
+    */
     bip::managed_external_buffer get_segment() const;
+    /**
+    * @brief ...
+    *
+    * @return hdc_map_t*
+    */
     hdc_map_t* get_children_ptr() const;
+    /**
+    * @brief ...
+    *
+    */
     void delete_data();
+    /**
+    * @brief ...
+    *
+    * @param signalName p_signalName:...
+    * @param dataSource p_dataSource:...
+    * @param withMetadata p_withMetadata:...
+    * @return HDC
+    */
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
-    //  "static contructor" from void* HDC
+    /**
+    * @brief "static contructor" from void* HDC
+    *
+    * @param cpp_ptr p_cpp_ptr:...
+    * @return HDC*
+    */
     static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
-    // "static contructor" from hdc_t*
+    /**
+    * @brief "static contructor" from hdc_t*
+    *
+    * @param c_ptr p_c_ptr:...
+    * @return HDC*
+    */
     static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
-    // "deserialize from storage"
+    /**
+    * @brief deserialize from storage
+    *
+    * @param filename p_filename:...
+    * @return HDC*
+    */
     static HDC* deserialize_HDC_file(const std::string& filename);
-    // "deserialize from storage"
+    /**
+    * @brief deserialize from storage
+    *
+    * @param filename p_filename:...
+    * @return HDC*
+    */
     static HDC* deserialize_HDC_string(const std::string& filename);
+    /**
+    * @brief ...
+    *
+    * @param filename p_filename:...
+    * @param datapath p_datapath:...
+    * @return HDC
+    */
     static HDC from_json(const std::string& filename, const std::string& datapath = "");
+    /**
+    * @brief ...
+    *
+    * @param children p_children:...
+    * @return std::__cxx11::string
+    */
     static string hdc_map_to_json(hdc_map_t& children);
+    /**
+    * @brief ...
+    *
+    * @param old_buffer p_old_buffer:...
+    * @param extra_size p_extra_size:...
+    * @return char*
+    */
     static char* buffer_grow(char* old_buffer, size_t extra_size);
+    /**
+    * @brief ...
+    *
+    * @param root p_root:...
+    * @return HDC
+    */
     static HDC json_to_HDC(const ::Json::Value& root);
+    /**
+    * @brief ...
+    *
+    * @param json_string p_json_string:...
+    * @return HDC
+    */
     static HDC from_json_string(const std::string& json_string);
+    /**
+    * @brief ...
+    *
+    * @param filename p_filename:...
+    * @param dataset_name p_dataset_name:...
+    */
     void to_hdf5(std::string filename, std::string dataset_name = "data");
+    /**
+    * @brief ...
+    *
+    * @param filename p_filename:...
+    * @param dataset_name p_dataset_name:...
+    * @return HDC
+    */
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
+    /**
+    * @brief ...
+    *
+    * @param filename p_filename:...
+    * @param dataset_name p_dataset_name:...
+    * @return HDC*
+    */
     static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
+    /**
+    * @brief ...
+    *
+    * @param data_object p_data_object:...
+    * @param data_source p_data_source:...
+    * @return HDC
+    */
     static HDC uda2HDC(const std::string& data_object, const std::string& data_source);
+    /**
+    * @brief ...
+    *
+    * @param str p_str:...
+    * @param datapath p_datapath:...
+    * @return HDC
+    */
     static HDC load(const std::string& str, const std::string& datapath="");
+    /**
+    * @brief ...
+    *
+    * @return HDCStorage*
+    */
     HDCStorage* get_storage() const {return this->storage; };
+    /**
+    * @brief ...
+    *
+    * @return hdc_data_t
+    */
     hdc_data_t get_data() const;
+    /**
+    * @brief ...
+    *
+    * @param obj p_obj:...
+    */
     void set_data(hdc_data_t obj);
 };
 
