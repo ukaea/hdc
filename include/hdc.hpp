@@ -64,22 +64,29 @@ private:
     /**
     * @brief Adds node as child under the path
     *
-    * @param path p_path: path where to node
+    * @param path p_path: path under which to add node
     * @param n p_n: node
     */
-    void add_child(hdc_path_t path, HDC* n);
+    void add_child(hdc_path_t& path, HDC* n);
     /**
     * @brief Adds node as child under the path
     *
-    * @param path p_path: path where to node
+    * @param path p_path: path under which to add node
     * @param n p_n: node
     */
-    void add_child(hdc_path_t path, HDC& n);
-    void set_child(hdc_path_t path, HDC* n);
-    void delete_child(hdc_path_t path);
-    HDC* get_ptr(hdc_path_t path);
-    HDC get(hdc_path_t path);
-    const HDC get(hdc_path_t path) const;
+    void add_child(hdc_path_t& path, HDC& n);
+    /**
+    * @brief Sets child under the path
+    *
+    * @param path p_path: path uder which to set node
+    * @param n p_n: node
+    */
+    void set_child(hdc_path_t& path, HDC* n);
+
+    void delete_child(hdc_path_t& path);
+    HDC* get_ptr(hdc_path_t& path);
+    HDC get(hdc_path_t& path);
+    const HDC get(hdc_path_t& path) const;
     bool exists_single(hdc_index_t index) const;
     void add_child_single(const std::string& path, HDC& n);
     hdc_header_t get_header() const;
@@ -126,7 +133,7 @@ public:
     static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
     /** Cleans up global_storage  -- mainly due to C and Fortran */
     static void destroy();
-    bool exists(hdc_path_t path) const;
+    bool exists(hdc_path_t& path) const;
     bool exists(size_t index) const;
     HDC* get_ptr(size_t index);
     HDC get(size_t index);

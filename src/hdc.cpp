@@ -392,7 +392,8 @@ void HDC::print_info() const
 
 bool HDC::exists(const std::string& path) const
 {
-    return exists(split(path));
+    auto pth = split(path);
+    return exists(pth);
 }
 
 bool HDC::exists_single(hdc_index_t index) const
@@ -411,7 +412,7 @@ bool HDC::exists(size_t index) const
     return exists_single(index);
 }
 
-bool HDC::exists(hdc_path_t path) const
+bool HDC::exists(hdc_path_t& path) const
 {
     hdc_header_t header = get_header();
     D(
@@ -464,13 +465,13 @@ bool HDC::exists(hdc_path_t path) const
     return false; // never goes here
 }
 
-void HDC::add_child(hdc_path_t path, HDC* n)
+void HDC::add_child(hdc_path_t& path, HDC* n)
 {
     add_child(path, *n);
     return;
 }
 
-void HDC::add_child(hdc_path_t path, HDC& n)
+void HDC::add_child(hdc_path_t& path, HDC& n)
 {
     auto first = path.front();
     path.pop_front();
@@ -584,7 +585,8 @@ void HDC::add_child(const std::string& path, HDC* n)
 {
     DEBUG_STDOUT("add_child(" + path + ")\n");
     if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
-    add_child(split(path), n);
+    auto pth = split(path);
+    add_child(pth, n);
     return;
 }
 
@@ -592,11 +594,12 @@ void HDC::add_child(const std::string& path, HDC& n)
 {
     DEBUG_STDOUT("add_child(" + path + ")\n");
     if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
-    add_child(split(path), n);
+    auto pth = split(path);
+    add_child(pth, n);
     return;
 }
 
-void HDC::delete_child(hdc_path_t path)
+void HDC::delete_child(hdc_path_t& path)
 {
     hdc_header_t header = get_header();
     D(
@@ -604,7 +607,8 @@ void HDC::delete_child(hdc_path_t path)
         for {auto str: path} std::cout << str;
         std::cout << ")\n";
     )
-    if (!exists(path) || path.empty()) {
+    auto path2 = path;
+    if (!exists(path2) || path.empty()) {
         return;
     }
     auto first = path.front();
@@ -636,11 +640,12 @@ void HDC::delete_child(hdc_path_t path)
 
 void HDC::delete_child(const std::string& path)
 {
-    delete_child(split(path));
+    auto pth = split(path);
+    delete_child(pth);
     return;
 }
 
-HDC* HDC::get_ptr(hdc_path_t path)
+HDC* HDC::get_ptr(hdc_path_t& path)
 {
     D(
         std::cout << "get_ptr(";
@@ -662,7 +667,7 @@ HDC* HDC::get_ptr(hdc_path_t path)
     return get_single_ptr(first)->get_ptr(path);
 }
 
-HDC HDC::get(hdc_path_t path)
+HDC HDC::get(hdc_path_t& path)
 {
     D(
         std::cout << "get(";
@@ -685,7 +690,7 @@ HDC HDC::get(hdc_path_t path)
     return get_single(first).get(path);
 }
 
-const HDC HDC::get(hdc_path_t path) const
+const HDC HDC::get(hdc_path_t& path) const
 {
     D(
         std::cout << "get(";
@@ -786,19 +791,28 @@ HDC& HDC::get_single_ref(hdc_index_t index)
 HDC* HDC::get_ptr(const std::string& path)
 {
     if (path.empty()) return this;
-    else return get_ptr(split(path));
+    else {
+        auto pth = split(path);
+        return get_ptr(pth);
+    }
 }
 
 HDC HDC::get(const std::string& path)
 {
     if (path.empty()) return *this;
-    else return get(split(path));
+    else {
+        auto pth = split(path);
+        return get(pth);
+    }
 }
 
 const HDC HDC::get(const std::string& path) const
 {
     if (path.empty()) return *this;
-    else return get(split(path));
+    else {
+        auto pth = split(path);
+        return get(pth);
+    }
 }
 
 HDC& HDC::get_ref(const std::string& path)
@@ -977,14 +991,15 @@ void HDC::set_child(size_t index, HDC& n)
     set_child_single(index,n);
 }
 
-void HDC::set_child(hdc_path_t path, HDC* n)
+void HDC::set_child(hdc_path_t& path, HDC* n)
 {
     D(
         std::cout << "set_child(";
         for {auto str: path} std::cout << str;
         std::cout << ")\n";
     )
-    if (!exists(path)) { // Nothing to set
+    auto path2 = path;
+    if (!exists(path2)) { // Nothing to set
         std::cout << "Nothing to set, maybe you want to add..." << endl;
         return;
     }
@@ -1000,7 +1015,8 @@ void HDC::set_child(hdc_path_t path, HDC* n)
 
 void HDC::set_child(const std::string& path, HDC* n)
 {
-    set_child(split(path), n);
+    auto pth = split(path);
+    set_child(pth, n);
     return;
 }
 
