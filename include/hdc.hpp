@@ -372,7 +372,7 @@ public:
     /**
     * @brief Returns the data, the pointer is just casted => there is no conversion for now.
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @return T*
     */
     template<typename T> T* get_data() const;
@@ -407,7 +407,7 @@ public:
     /**
     * @brief ...
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @param d p_d:...
     * @return HDC&
     */
@@ -441,7 +441,7 @@ public:
     /**
     * @brief ...
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
@@ -481,7 +481,7 @@ public:
     /**
     * @brief ...
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
@@ -494,7 +494,7 @@ public:
     /**
     * @brief ...
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
@@ -507,7 +507,7 @@ public:
     /**
     * @brief Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
     */
     template <typename T> void set_data(vector<T> data)
@@ -523,9 +523,9 @@ public:
     };
 
     /**
-    * @brief ...
+    * @brief Sets string to current node
     *
-    * @param str p_str:...
+    * @param str p_str: string to ne set.
     */
     void set_string(const std::string& str) {
         hdc_header_t header = get_header();
@@ -569,7 +569,7 @@ public:
     /**
     * @brief ...
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
     */
     void set_data(T data) {
@@ -783,7 +783,7 @@ public:
     /**
     * @brief Returns pointer to data of this node.
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @return T
     */
     template<typename T> T as() const
@@ -801,7 +801,7 @@ public:
     /**
     * @brief Returns scalar value.
     *
-    * @param T p_T:...
+    * @param T p_T: Desired data type.
     * @return T
     */
     template<typename T> T as_scalar() const
