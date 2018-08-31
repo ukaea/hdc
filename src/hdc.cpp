@@ -782,12 +782,6 @@ HDC* HDC::get_single_ptr(hdc_index_t index)
     }
 }
 
-HDC& HDC::get_single_ref(hdc_index_t index)
-{
-    HDC* h = get_single_ptr(index);
-    return *h;
-}
-
 HDC* HDC::get_ptr(const std::string& path)
 {
     if (path.empty()) return this;
@@ -815,18 +809,6 @@ const HDC HDC::get(const std::string& path) const
     }
 }
 
-HDC& HDC::get_ref(const std::string& path)
-{
-    HDC* h = get_ptr(path);
-    return *h;
-}
-
-HDC& HDC::get_or_create_ref(const std::string& path)
-{
-    HDC* h = get_or_create_ptr(path);
-    return *h;
-}
-
 HDC* HDC::get_ptr(size_t index)
 {
     return get_single_ptr(index);
@@ -836,18 +818,6 @@ HDC HDC::get(size_t index)
 {
     return get_single(index);
 }
-
-HDC& HDC::get_ref(size_t index)
-{
-    return get_single_ref(index);
-}
-
-HDC& HDC::get_or_create_ref(size_t index)
-{
-    HDC* h = get_or_create_ptr(index);
-    return *h;
-}
-
 
 const HDC HDC::get(size_t index) const
 {
@@ -922,9 +892,9 @@ HDC& HDC::operator=(const std::string& str)
     return *this;
 }
 
-HDC& HDC::operator[](const std::string& path)
+HDC HDC::operator[](const std::string& path)
 {
-    return get_or_create_ref(path);
+    return get_or_create(path);
 }
 
 const HDC HDC::operator[](const std::string& path) const
@@ -932,9 +902,10 @@ const HDC HDC::operator[](const std::string& path) const
     return get(path);
 }
 
-HDC& HDC::operator[](size_t index)
+
+HDC HDC::operator[](size_t index)
 {
-    return get_or_create_ref(index);
+    return get_or_create(index);
 }
 
 const HDC HDC::operator[](size_t index) const

@@ -161,13 +161,6 @@ private:
     * @brief ...
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC&
-    */
-    HDC& get_single_ref(hdc_index_t index);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return const HDC
     */
     const HDC get_single(hdc_index_t index) const;
@@ -315,13 +308,6 @@ public:
     * @brief ...
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC&
-    */
-    HDC& get_ref(size_t index);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return const HDC
     */
     const HDC get(size_t index) const;
@@ -384,20 +370,6 @@ public:
     */
     HDC* get_or_create_ptr(const std::string& path);
     /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC&
-    */
-    HDC& get_or_create_ref(size_t index);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC&
-    */
-    HDC& get_or_create_ref(const std::string& path);
-    /**
     * @brief Returns the data, the pointer is just casted => there is no conversion for now.
     *
     * @param T p_T:...
@@ -417,7 +389,7 @@ public:
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC&
     */
-    HDC& operator[](size_t index);
+    HDC operator[](size_t index);
     /**
     * @brief ...
     *
@@ -431,7 +403,7 @@ public:
     * @param path p_path: path in the subtree of this node
     * @return HDC&
     */
-    HDC& operator[](const std::string& path);
+    HDC operator[](const std::string& path);
     /**
     * @brief ...
     *
@@ -472,7 +444,7 @@ public:
     * @param T p_T:...
     * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
@@ -512,7 +484,7 @@ public:
     * @param T p_T:...
     * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(size_t rank, initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
@@ -523,7 +495,7 @@ public:
     * @brief ...
     *
     * @param T p_T:...
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
@@ -536,7 +508,7 @@ public:
     * @brief Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python
     *
     * @param T p_T:...
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     */
     template <typename T> void set_data(vector<T> data)
     {
@@ -577,7 +549,7 @@ public:
     *
     * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
@@ -587,7 +559,7 @@ public:
     *
     * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
@@ -598,7 +570,7 @@ public:
     * @brief ...
     *
     * @param T p_T:...
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     */
     void set_data(T data) {
         hdc_header_t header = get_header();
@@ -615,7 +587,7 @@ public:
     /**
     * @brief Sets scalar data to given node - UDA version.
     *
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param _type p__type:...
     */
     void set_data(const unsigned char* data, hdc_type_t _type) {
@@ -633,7 +605,7 @@ public:
     /**
     * @brief Sets scalar data to given node - UDA version.
     *
-    * @param data p_data:...
+    * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     */
     void set_data(void* data, hdc_type_t type) {
@@ -736,13 +708,6 @@ public:
     * @return const HDC
     */
     const HDC get(const std::string& path) const;
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC&
-    */
-    HDC& get_ref(const std::string& path);
     /**
     * @brief Returns true if subtree with given path with exists and false otherwise.
     *
