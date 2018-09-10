@@ -81,6 +81,13 @@ private:
     * @param path p_path: path uder which to set node
     * @param n p_n: node
     */
+    void set_child(hdc_path_t& path, HDC& n);
+    /**
+    * @brief Sets child under the path
+    *
+    * @param path p_path: path uder which to set node
+    * @param n p_n: node
+    */
     void set_child(hdc_path_t& path, HDC* n);
     /**
     * @brief ...
@@ -660,6 +667,13 @@ public:
     * @param n p_n: HDC node
     */
     void add_child(const std::string& path, HDC& n);
+    /**
+    * @brief Sets HDC subtree to given path.
+    *
+    * @param path p_path: path in the subtree of this node
+    * @param n p_n: HDC node
+    */
+    void set_child(const std::string& path, HDC& n);
     /**
     * @brief Sets HDC subtree to given path.
     *

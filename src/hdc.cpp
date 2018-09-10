@@ -984,7 +984,36 @@ void HDC::set_child(hdc_path_t& path, HDC* n)
     return;
 }
 
+void HDC::set_child(hdc_path_t& path, HDC& n)
+{
+    D(
+        std::cout << "set_child(";
+        for {auto str: path} std::cout << str;
+        std::cout << ")\n";
+    )
+    auto path2 = path;
+    if (!exists(path2)) { // Nothing to set
+        std::cout << "Nothing to set, maybe you want to add..." << endl;
+        return;
+    }
+    auto first = path.front();
+    path.pop_front();
+    if (path.empty()) {
+        set_child_single(first, n);
+    } else {
+        get(boost::get<std::string>(first)).set_child(path, n);
+    }
+    return;
+}
+
 void HDC::set_child(const std::string& path, HDC* n)
+{
+    auto pth = split(path);
+    set_child(pth, n);
+    return;
+}
+
+void HDC::set_child(const std::string& path, HDC& n)
 {
     auto pth = split(path);
     set_child(pth, n);
