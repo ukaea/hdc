@@ -11,13 +11,13 @@ int main(int argc, const char* argv[])
     HDC::parse_cmdline(argc, argv);
     // Create new HDC tree
     HDC tree;
-    // Add some children
+    // Add some children - one can use either bracket operator or add_child() method
     HDC dummy1;
-    tree.add_child("aaa/bbb/ccc", dummy1);
+    tree["aaa/bbb/ccc"] = dummy1;
     HDC dummy2;
-    tree.add_child("aaa/bbb/eee", dummy2);
+    tree["aaa/bbb/eee"] = dummy2;
     HDC dummy3;
-    tree.add_child("aaa/eee/bbb", dummy3);
+    tree["aaa/eee/bbb"] =  dummy3;
     HDC dummy4;
     tree.add_child("eee", dummy4);
     HDC dummy5;
@@ -29,7 +29,7 @@ int main(int argc, const char* argv[])
     // Get subtree
     HDC subtree = tree.get("aaa/bbb");
     // Get node
-    HDC node = subtree.get("ccc");
+    HDC node = subtree["ccc"];
 
     // Ask whether child exists
     cout << "exists: " << tree.exists("aaa/bbb/ccc") << endl;
@@ -44,13 +44,13 @@ int main(int argc, const char* argv[])
     HDC data;
     data.set_data(1, shape, array);
     // Add data to a subtree
-//     tree.set_data("aaa/bbb/ccc", 1, shape, array);
+    //tree.get_or_create("aaa/bbb/ccc").set_data(1, shape, array);
     tree["aaa/bbb/ccc"].set_data(1, shape, array);
     // Ask for some data details, use subtree to shorten the path
     int32_t rank2 = node.get_rank();
     auto shape2 = node.get_shape();
     cout << "Dimension: " << (int)rank2 << endl << "Shape: ";
-    for (int i = 0; i < rank2; i++) cout << (int)shape2[i] << " ";
+    for (int i = 0; i < rank2; i++) cout << shape2[i] << " ";
     cout << endl;
     cout << "dtype: " << node.get_type_str() << endl;
     // Get data back from tree
@@ -71,35 +71,6 @@ int main(int argc, const char* argv[])
     HDC hhh = HDC::from_hdf5("tree.h5","/data");
     hhh.dump();
 #endif
-
-
-    std::cout << "---------------------------- overloaded operators start------------------------------\n";
-    tree["aaa/bbb/ccc"].dump(); // works
-    int32_t test[4] = { 100, 200, 300, 400 };
-    HDC htest;
-    htest.set_data(1, shape, test);
-    tree["aaa/bbb/ccc"] = htest;
-    tree["aaa/bbb/ccc"].dump();
-
-    HDC lst, ch, ch2;
-    ch.set_data(5);
-    ch2.set_data(7);
-    lst.append(ch);
-    lst[0].dump();
-    lst.dump();
-    lst[0] = ch2;
-    lst.dump();
-    lst[0] = 3.14;
-    lst.dump();
-    lst[0] = 3;
-    lst.dump();
-    lst[0] = "lalalala";
-    lst.dump();
-    lst[0] = HDC("lalalala");
-    lst.dump();
-//     lst[0] = {1,2,3,4}; //TODO
-//     lst.dump();
-    std::cout << "---------------------------- overloaded operators end --------------------------------\n";
 
     HDC::destroy();
 
