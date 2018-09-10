@@ -852,6 +852,10 @@ public:
             return oss.str();
         }
     }
+    const char* as_cstring() const
+    {
+        return as_string().c_str();
+    }
     /**
     * @brief Returns pointer to itself.
     *
