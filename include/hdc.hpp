@@ -842,8 +842,8 @@ public:
     {
         hdc_header_t header = get_header();
         if (header.type == HDC_STRING) {
-           std::string str(storage->get(uuid)+sizeof(hdc_header_t));
-           return str;
+            std::string str(storage->get(uuid)+sizeof(hdc_header_t));
+            return str;
 
         } else {
             std::cout << header.type << std::endl;
@@ -854,7 +854,17 @@ public:
     }
     const char* as_cstring() const
     {
-        return as_string().c_str();
+        hdc_header_t header = get_header();
+        if (header.type == HDC_STRING) {
+            auto cstring = new char[header.data_size];
+            memcpy(cstring, get_buffer()+sizeof(hdc_header_t),header.data_size+1);
+            return cstring;
+        } else {
+            std::cout << header.type << std::endl;
+            std::ostringstream oss;
+            oss << to_json(0) << "\n";
+            return oss.str().c_str();
+        }
     }
     /**
     * @brief Returns pointer to itself.
