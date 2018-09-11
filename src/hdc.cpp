@@ -1029,57 +1029,26 @@ void HDC::set_type(hdc_type_t type)
     memcpy(&header, old_buffer, sizeof(hdc_header_t)); //sync header
     if (header.type == type) return; // Nothing to do
     header.type = type;
-    char* new_buffer = old_buffer;
-    vector<char>nb(HDC_NODE_SIZE_DEFAULT); //TODO: Move this to proper block
     memcpy(old_buffer, &header, sizeof(hdc_header_t)); //sync header back
     if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
         if (header.data_size < HDC_NODE_SIZE_DEFAULT) {
-            new_buffer = nb.data();
+            vector<char> new_buffer(HDC_NODE_SIZE_DEFAULT);
             header.data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
             header.buffer_size = HDC_NODE_SIZE_DEFAULT;
-            memcpy(new_buffer, &header, sizeof(hdc_header_t));
+            memcpy(new_buffer.data(), &header, sizeof(hdc_header_t));
+            bip::managed_external_buffer segment(bip::create_only, new_buffer.data() + sizeof(hdc_header_t), header.data_size);
+            auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
+            if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
+            storage->set(uuid, new_buffer.data(), header.buffer_size);
+        } else {
+            bip::managed_external_buffer segment(bip::create_only, old_buffer + sizeof(hdc_header_t), header.data_size);
+            auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
+            if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
+            storage->set(uuid, old_buffer, header.buffer_size);
         }
-        bip::managed_external_buffer segment(bip::create_only, new_buffer + sizeof(hdc_header_t), header.data_size);
-        auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
-        if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
     }
-    // else there is nothing to do...
-    storage->set(uuid, new_buffer, header.buffer_size);
     return;
 }
-
-// // // void HDC::set_type(hdc_type_t type)
-// // // {
-// // //     DEBUG_STDOUT("set_type(" + to_string(header.type) + " -> " + to_string(type) + ")\n");
-// // //     char* old_buffer = storage->get(uuid);
-// // //     hdc_header_t* header = (hdc_header_t*) old_buffer;
-// // //     if (header->type == type) return; // Nothing to do
-// // //     header->type = type;
-// // //     if (header->type != HDC_STRUCT && header->type != HDC_LIST) {
-// // //         storage->set(uuid, old_buffer, header->buffer_size);
-// // //         return;
-// // //     }
-// // //     // header->type == HDC_STRUCT || header->type == HDC_LIST
-// // //     if (header->data_size >= HDC_NODE_SIZE_DEFAULT) { // The node buffer is large enough.
-// // //         bip::managed_external_buffer segment(bip::create_only, old_buffer + sizeof(hdc_header_t), header->data_size);
-// // //         auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
-// // //         if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
-// // //         storage->set(uuid, old_buffer, header->buffer_size);
-// // //     } else { // first we have to enlarge the buffer (but without copying any data)
-// // //         std::vector<char> new_buffer(HDC_NODE_SIZE_DEFAULT);
-// // //         hdc_header_t* new_header = (hdc_header_t*)new_buffer.data();
-// // //         memset(new_header,0,sizeof(hdc_header_t));
-// // //         new_header->data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
-// // //         new_header->buffer_size = HDC_NODE_SIZE_DEFAULT;
-// // //         new_header->type = type;
-// // //         bip::managed_external_buffer segment(bip::create_only, new_buffer.data() + sizeof(hdc_header_t), new_header->data_size);
-// // //         auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
-// // //         if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
-// // //         storage->set(uuid, new_buffer.data(), new_header->buffer_size);
-// // //     }
-// // //     return;
-// // // }
-
 
 intptr_t HDC::as_void_ptr() const
 {
