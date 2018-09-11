@@ -86,14 +86,15 @@ TEST_CASE("NodeManipulation", "[HDC]")
     HDC n3 = HDC();
     tree.add_child("aaa/list[0]/ddd", n3);
     CHECK(tree.exists("aaa/list[0]/ddd") == true);
-    tree.add_child("aaa/list[1]", new HDC());
-    tree.add_child("aaa/list[0]/eee", new HDC());
+    HDC dummy1, dummy2, dummy3;
+    tree.add_child("aaa/list[1]", dummy1);
+    tree.add_child("aaa/list[0]/eee", dummy2);
     HDC list = tree.get("aaa/list");
     CHECK(HDC_LIST == list.get_type());
     HDC h = tree.get("aaa/list[0]/ddd");
     CHECK(true == tree.exists("aaa/list[0]/ddd"));
     CHECK(true == tree.exists("aaa/list[0]/eee"));
-    tree.get("aaa/list").get(0).add_child("kkk", new HDC()); // Remove this - unnecessary
+    tree.get("aaa/list").get(0).add_child("kkk", dummy3); // Remove this - unnecessary
     CHECK(2LU == tree.get("aaa/list").get_shape()[0]);
     CHECK(true == tree.get("aaa/list").get(0).exists("ddd"));
     CHECK(true == tree.get("aaa/list").get(0).exists("eee"));
@@ -417,8 +418,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
 
     // Test empty
-    CHECK(HDC_EMPTY == tree2.get_ptr("aaa/bbb/empty")->get_type());
-
+    CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
     // Test list
     s = tree2.get("aaa/list");
     CHECK(1 == s.get_rank());
@@ -428,9 +428,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get(i).get_type());
 
     // Test string
-    CHECK(strcmp(tree.get("aaa/string").as_cstring(), tree2.get("aaa/string").as_cstring()) ==
-          0);
-
+    CHECK(strcmp(tree.get("aaa/string").as_cstring(), tree2.get("aaa/string").as_cstring()) == 0);
     HDC j = HDC::load("json://tree2.txt|aaa/string");
     CHECK(strcmp(j.as_cstring(), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
 }

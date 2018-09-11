@@ -476,11 +476,10 @@ public:
             header.flags = flags;
             header.type = to_typeid(data[0]);
             header.rank = rank;
-            char* buffer = new char[header.buffer_size];
+            char buffer[header.buffer_size];
             memcpy(buffer,&header,sizeof(hdc_header_t));
             memcpy(buffer+sizeof(hdc_header_t),data,header.data_size);
             storage->set(uuid,buffer,header.buffer_size);
-            if (!storage->usesBuffersDirectly()) delete[] buffer;
             return;
         }
     }
@@ -545,11 +544,10 @@ public:
         header.rank = 1;
         header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        auto buffer = new char[header.buffer_size];
+        char buffer[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
         memcpy(buffer+sizeof(hdc_header_t),str.c_str(),header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
-        if (!storage->usesBuffersDirectly()) delete[] buffer;
     };
     /**
     * @brief ...
@@ -585,11 +583,10 @@ public:
         header.type = to_typeid(data);
         header.data_size = sizeof(T);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        char* buffer = new char[header.buffer_size];
+        char buffer[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
         memcpy(buffer+sizeof(hdc_header_t),&data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
-        if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /**
     * @brief Sets scalar data to given node - UDA version.
@@ -603,11 +600,10 @@ public:
         header.type = _type;
         header.data_size = hdc_sizeof(_type);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        char* buffer = new char[header.buffer_size];
+        char buffer[header.buffer_size];
         memcpy(buffer,&header,sizeof(hdc_header_t));
         memcpy(buffer+sizeof(hdc_header_t),data,header.data_size);
         storage->set(uuid,buffer,header.buffer_size);
-        if (!storage->usesBuffersDirectly()) delete[] buffer;
     }
     /**
     * @brief Sets scalar data to given node - UDA version.
@@ -856,9 +852,7 @@ public:
     {
         hdc_header_t header = get_header();
         if (header.type == HDC_STRING) {
-            auto cstring = new char[header.data_size];
-            memcpy(cstring, get_buffer()+sizeof(hdc_header_t),header.data_size+1);
-            return cstring;
+            return static_cast<const char*>(get_buffer()+sizeof(hdc_header_t));
         } else {
             std::cout << header.type << std::endl;
             std::ostringstream oss;
@@ -1034,7 +1028,7 @@ public:
     * @param extra_size p_extra_size:...
     * @return char*
     */
-    static char* buffer_grow(char* old_buffer, size_t extra_size);
+    static std::vector<char> buffer_grow(char* old_buffer, size_t extra_size);
     /**
     * @brief ...
     *
