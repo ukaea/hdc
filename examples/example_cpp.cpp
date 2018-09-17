@@ -71,7 +71,6 @@ int main(int argc, const char* argv[])
     HDC hhh = HDC::from_hdf5("tree.h5","/data");
     hhh.dump();
 #endif
-
     HDC::destroy();
 
     return 0;

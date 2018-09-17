@@ -7,41 +7,50 @@ void manipulate(struct hdc_t* data);
 
 int main() {
     hdc_init("","");
-    // init data
-    struct hdc_t* tree = init_hdc_data();
+// // // // // // // // // //     // init data
+// // // // // // // // // //     struct hdc_t* tree = init_hdc_data();
+// // // // // // // // // //
+// // // // // // // // // //     // Modify the data
+// // // // // // // // // //     manipulate(tree);
+// // // // // // // // // //
+// // // // // // // // // //     //Serialize data to JSON
+// // // // // // // // // //     hdc_to_json(tree,"tree.txt",0);
+// // // // // // // // // //
+// // // // // // // // // //     // Dump to screen
+// // // // // // // // // //     printf("Final dump:\n");
+// // // // // // // // // //     hdc_dump(tree);
 
-    // Modify the data
-    manipulate(tree);
+    struct hdc_obj_t h = hdc_new_obj();
+    struct hdc_obj_t ch = hdc_new_obj();
+    hdc_set_double_obj(ch,3.141592);
+    hdc_add_child_obj(h,"aaa/bbb/ccc",ch);
+    hdc_add_child_obj(h,"aaa/bbb/ddd",hdc_new_obj());
+    hdc_dump_obj(h);
+    struct hdc_obj_t l = hdc_get_obj(h,"aaa/bbb/ccc");
+    hdc_set_double_obj(l,2.7818);
+    hdc_dump_obj(h);
+// // //     struct hdc_t* h = hdc_new_empty();
+// // //
+// // //     double array_in[4] = {1.1,2.2,3.3,4.4};
+// // //
+// // //     hdc_data_t data_in;
+// // //     memset(&data_in, 0, sizeof(hdc_data_t));
+// // //     data_in.rank = 1;
+// // //     data_in.shape[0] = 4;
+// // //     data_in.type = HDC_DOUBLE;
+// // //     data_in.flags = HDCDefault;
+// // //     data_in.data = (char*)(&array_in);
+// // //     hdc_set_data(h, "", data_in);
+// // //     hdc_dump(h);
+// // //     hdc_data_t data_out = hdc_get_data(h, "");
+// // //     for (size_t i=0; i<HDC_MAX_DIMS; i++) printf("%d == %d\n",data_in.shape[i] == data_out.shape[i]);
+// // //
+// // //     double* array_out = (double*)(data_out.data);
+// // //     for (size_t i=0; i<4; i++) CHECK(array_in[i] == array_out[i]);
+// // //
+// // //
 
-    //Serialize data to JSON
-    hdc_to_json(tree,"tree.txt",0);
-
-    // Dump to screen
-    printf("Final dump:\n");
-    hdc_dump(tree);
-
-// // // //     struct hdc_t* h = hdc_new_empty();
-// // // //
-// // // //     double array_in[4] = {1.1,2.2,3.3,4.4};
-// // // //
-// // // //     hdc_data_t data_in;
-// // // //     memset(&data_in, 0, sizeof(hdc_data_t));
-// // // //     data_in.rank = 1;
-// // // //     data_in.shape[0] = 4;
-// // // //     data_in.type = HDC_DOUBLE;
-// // // //     data_in.flags = HDCDefault;
-// // // //     data_in.data = (char*)(&array_in);
-// // // //     hdc_set_data(h, "", data_in);
-// // // //     hdc_dump(h);
-// // // //     hdc_data_t data_out = hdc_get_data(h, "");
-// // // //     for (size_t i=0; i<HDC_MAX_DIMS; i++) printf("%d == %d\n",data_in.shape[i] == data_out.shape[i]);
-// // // //
-// // // //     double* array_out = (double*)(data_out.data);
-// // // //     for (size_t i=0; i<4; i++) CHECK(array_in[i] == array_out[i]);
-// // // //
-// // // //
-// // // //
-
+HDC_destroy_c();
     return 0;
 }
 

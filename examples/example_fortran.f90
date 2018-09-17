@@ -5,76 +5,89 @@ program test_hdc_fortran
     call f_main()
 contains
 
+! ! !     subroutine f_main()
+! ! !         type(hdc_t), pointer :: tree, subtree, data, node, node2
+! ! !         integer(kind=4) :: array(4)
+! ! !         integer(kind=4), pointer:: array2(:)
+! ! !         integer(kind=c_long) :: shape2(1)
+! ! !         integer(kind=8) :: rank2
+! ! !         character(len=:), allocatable :: str
+! ! !         integer, parameter :: nx = 2, ny = 3
+! ! !         real(kind=DP) :: array2d(nx,ny)
+! ! !         ! init array first
+! ! !         array2d(:,:) = 2.22_dp
+! ! ! !         array2d(:,3) = 0.0_dp
+! ! !         array2d(2,:) = 3.14159_dp
+! ! !         allocate(tree)
+! ! !         allocate(subtree)
+! ! !         allocate(data)
+! ! !         allocate(node)
+! ! !         allocate(node2)
+! ! !         call hdc_init()
+! ! !         ! Create new HDC tree
+! ! !         tree = hdc_new()
+! ! !
+! ! !         ! Add some children
+! ! !         call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new())
+! ! !         call hdc_add_child(tree,"aaa/bbb/eee",hdc_new())
+! ! !         call hdc_add_child(tree,"bbb/eee/aaa",hdc_new())
+! ! !         call hdc_set_data(tree,"aaa/bbb/ccc","pokus")
+! ! !         call hdc_set(tree,"scalar",3.14159_dp)
+! ! !         str = hdc_as_string(tree,"aaa/bbb/ccc")
+! ! !         ! Get subtree
+! ! !         subtree = hdc_get_child(tree,"aaa/bbb")
+! ! !         ! Get node
+! ! !         node = hdc_get_child(subtree,"ccc")
+! ! ! !
+! ! !         ! Ask whether child exists
+! ! !         print *,"exists: ", hdc_exists(tree,"aaa/bbb/ccc")
+! ! !
+! ! !         ! Delete subtree
+! ! !         call hdc_delete_child(tree,"aaa/eee")
+! ! !
+! ! !         node2 = hdc_new()
+! ! !         call hdc_set_data(node2,array2d)
+! ! !         call hdc_add_child(tree,"2ddata",node2)
+! ! !
+! ! !         call hdc_dump(tree)
+! ! !
+! ! !         ! Prepare some data
+! ! !         array = [7,20,3,4]
+! ! !         ! Add data to a single node
+! ! !         data = hdc_new()
+! ! !         call hdc_set_data(data,array)
+! ! !         ! Add data to subtree
+! ! !         call hdc_dump(node)
+! ! !         call hdc_set_data(tree,"aaa/bbb/ccc",array)
+! ! !
+! ! !         call hdc_dump(node)
+! ! !         ! Ask on some data details, use subtree to shorten path
+! ! !         rank2 = hdc_get_rank(node)
+! ! !         shape2 = hdc_get_shape(node)
+! ! !         print *,"Dimension: ", rank2
+! ! !         print *,"Shape: ", shape2
+! ! !         call hdc_get(node,array2)
+! ! !         print *,array2
+! ! !         call hdc_set_data(node,3*array2(:))
+! ! !         call hdc_get(node,array2)
+! ! !         print *,array2
+! ! !         ! Serialize data to JSON
+! ! !         call hdc_to_json(tree,"tree.txt",0)
+! ! !         ! test dump
+! ! !         call hdc_dump(tree)
+! ! !     end subroutine f_main
+
     subroutine f_main()
-        type(hdc_t), pointer :: tree, subtree, data, node, node2
-        integer(kind=4) :: array(4)
-        integer(kind=4), pointer:: array2(:)
-        integer(kind=c_long) :: shape2(1)
-        integer(kind=8) :: rank2
-        character(len=:), allocatable :: str
-        integer, parameter :: nx = 2, ny = 3
-        real(kind=DP) :: array2d(nx,ny)
-        ! init array first
-        array2d(:,:) = 2.22_dp
-!         array2d(:,3) = 0.0_dp
-        array2d(2,:) = 3.14159_dp
-        allocate(tree)
-        allocate(subtree)
-        allocate(data)
-        allocate(node)
-        allocate(node2)
-        call hdc_init()
-        ! Create new HDC tree
-        tree = hdc_new()
-
-        ! Add some children
-        call hdc_add_child(tree,"aaa/bbb/ccc",hdc_new())
-        call hdc_add_child(tree,"aaa/bbb/eee",hdc_new())
-        call hdc_add_child(tree,"bbb/eee/aaa",hdc_new())
-        call hdc_set_data(tree,"aaa/bbb/ccc","pokus")
-        call hdc_set(tree,"scalar",3.14159_dp)
-        str = hdc_as_string(tree,"aaa/bbb/ccc")
-        ! Get subtree
-        subtree = hdc_get_child(tree,"aaa/bbb")
-        ! Get node
-        node = hdc_get_child(subtree,"ccc")
-!
-        ! Ask whether child exists
-        print *,"exists: ", hdc_exists(tree,"aaa/bbb/ccc")
-
-        ! Delete subtree
-        call hdc_delete_child(tree,"aaa/eee")
-
-        node2 = hdc_new()
-        call hdc_set_data(node2,array2d)
-        call hdc_add_child(tree,"2ddata",node2)
-
-        call hdc_dump(tree)
-
-        ! Prepare some data
-        array = [7,20,3,4]
-        ! Add data to a single node
-        data = hdc_new()
-        call hdc_set_data(data,array)
-        ! Add data to subtree
-        call hdc_dump(node)
-        call hdc_set_data(tree,"aaa/bbb/ccc",array)
-
-        call hdc_dump(node)
-        ! Ask on some data details, use subtree to shorten path
-        rank2 = hdc_get_rank(node)
-        shape2 = hdc_get_shape(node)
-        print *,"Dimension: ", rank2
-        print *,"Shape: ", shape2
-        call hdc_get(node,array2)
-        print *,array2
-        call hdc_set_data(node,3*array2(:))
-        call hdc_get(node,array2)
-        print *,array2
-        ! Serialize data to JSON
-        call hdc_to_json(tree,"tree.txt",0)
-        ! test dump
-        call hdc_dump(tree)
+        type(hdc_obj_t) :: tree, child, l
+        tree = hdc_new_obj()
+        child = hdc_new_obj()
+        call hdc_set_double_obj(child,3.14159_dp)
+        call hdc_add_child_obj(tree,"aaa/bbb/ccc",child)
+        call hdc_add_child_obj(tree,"aaa/bbb/ddd",hdc_new_obj())
+        call hdc_dump_obj(tree)
+        l = hdc_get_obj(tree,"aaa/bbb/ccc")
+        call hdc_set_double_obj(l,2.7818_dp)
+        call hdc_dump_obj(tree)
     end subroutine f_main
 
 end program test_hdc_fortran

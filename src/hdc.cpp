@@ -302,6 +302,11 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
     storage = _storage;
 }
 
+HDC::HDC(hdc_obj_t& obj) {
+    storage = (HDCStorage*)obj.storage;
+    uuid = obj.uuid;
+}
+
 /** Destructor */
 HDC::~HDC()
 {
@@ -1149,6 +1154,13 @@ void HDC::set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, 
         storage->set(uuid, buffer, header.buffer_size);
         return;
     }
+}
+
+hdc_obj_t HDC::as_obj() {
+    hdc_obj_t res;
+    res.storage = storage;
+    strcpy(res.uuid,uuid.c_str());
+    return res;
 }
 
 void HDC::insert(size_t i, HDC* h)

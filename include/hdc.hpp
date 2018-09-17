@@ -211,6 +211,13 @@ public:
     * @param _uuid p__uuid:...
     */
     HDC(HDCStorage* _storage, const std::string& _uuid);
+
+    /**
+    * @brief Constructs object from hdc_obj_t struct - C/FORTRAN interoperability
+    *
+    * @param obj p_obj:...
+    */
+    HDC(hdc_obj_t& obj);
     /**
     * @brief constructor from object buffer -- this should be void* as we want cha* to be used for strings
     *
@@ -677,6 +684,12 @@ public:
     * @param n p_n: HDC node
     */
     void set_child(const std::string& path, HDC* n);
+    /**
+    * @brief ...
+    *
+    * @return hdc_obj_t
+    */
+    hdc_obj_t as_obj();
     /**
     * @brief ...
     *

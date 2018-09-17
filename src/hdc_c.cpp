@@ -7,7 +7,33 @@ struct hdc_t {
 };
 
 extern "C" {
+// --------------------------------- pokus ------------------------------------ //
+struct hdc_obj_t hdc_new_obj()
+{
+    return HDC().as_obj();
+}
 
+struct hdc_obj_t hdc_get_obj(hdc_obj_t obj, const char* path)
+{
+    return HDC(obj).get(path).as_obj();
+}
+
+void hdc_set_double_obj(struct hdc_obj_t obj, double data)
+{
+    HDC(obj).set_data(data);
+}
+void hdc_dump_obj(struct hdc_obj_t obj)
+{
+    HDC(obj).dump();
+}
+
+void hdc_add_child_obj(struct hdc_obj_t obj, const char* path, struct hdc_obj_t n)
+{
+    HDC node = HDC(n);
+    HDC(obj).add_child(path,node);
+}
+
+// --------------------------------- pokus ------------------------------------ //
 hdc_t* hdc_new_empty()
 {
     HDC* node = new HDC();

@@ -10,6 +10,11 @@ module hdc_fortran
         type(c_ptr) :: obj !< void pointer to HDC container
     end type hdc_t
 
+    type, bind(c) :: hdc_obj_t
+        character(kind=c_char,len=37) :: uuid
+        type(c_ptr) :: storage
+    end type hdc_obj_t
+
     integer, parameter :: HDC_MAX_DIMS = 10
 
     type, bind(c) :: hdc_data_t
@@ -51,6 +56,40 @@ module hdc_fortran
         subroutine hello() bind(c,name="hello")
             use iso_c_binding
         end subroutine hello
+
+        ! ================================= pokus =====================================
+        function hdc_new_obj() result(obj) bind(c,name="hdc_new_obj")
+            import
+            type(hdc_obj_t) :: obj
+        end function
+
+        subroutine hdc_dump_obj(obj) bind(c,name="hdc_dump_obj")
+            import
+            type(hdc_obj_t), value :: obj
+        end subroutine hdc_dump_obj
+
+        subroutine c_hdc_add_child_obj(obj, path, node) bind(c,name="hdc_add_child_obj")
+            import
+            type(hdc_obj_t), value :: obj
+            character(kind=c_char), intent(in) :: path(*)
+            type(hdc_obj_t), value :: node
+        end subroutine c_hdc_add_child_obj
+
+        subroutine c_hdc_set_double_obj(obj, data) bind(c,name="hdc_set_double_obj")
+            import
+            type(hdc_obj_t), value :: obj
+            real(kind=c_double), value :: data
+        end subroutine c_hdc_set_double_obj
+
+        !> Returns HDC subtree by given path. This is interface to C.
+        function c_hdc_get_obj(obj, path) result(res) bind(c,name="hdc_get_obj")
+            import
+            type(hdc_obj_t), value :: obj
+            character(kind=c_char), intent(in) :: path(*)
+            type(hdc_obj_t) :: res
+        end function c_hdc_get_obj
+
+        ! ================================= pokus =====================================
 
         !> Default constructor. This is interface to C.
         function c_hdc_new_empty() result( obj) bind(c,name="hdc_new_empty")
@@ -706,7 +745,13 @@ module hdc_fortran
                 hdc_as_double_5d, &
                 hdc_as_double_6d, &
                 hdc_as_double_7d, &
-                hello
+                hello, &
+                hdc_add_child_obj, &
+                hdc_set_double_obj, &
+                hdc_obj_t, &
+                hdc_new_obj, &
+                hdc_get_obj, &
+                hdc_dump_obj
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -717,6 +762,15 @@ contains
         if (.not.present(path)) path = ""
         call c_hdc_add_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_add_child
+
+    subroutine hdc_add_child_obj(this, path, node)
+        use iso_c_binding
+        type(hdc_obj_t) :: this
+        character(len=*), optional :: path
+        type(hdc_obj_t) :: node
+        if (.not.present(path)) path = ""
+        call c_hdc_add_child_obj(this, trim(path)//c_null_char, node)
+    end subroutine hdc_add_child_obj
 
     subroutine hdc_delete_child(this, path)
         use iso_c_binding
@@ -809,6 +863,15 @@ contains
         if (.not.present(path)) path = ""
         res = c_hdc_get_child(this, trim(path)//c_null_char)
     end function hdc_get_child
+
+    function hdc_get_obj(this, path) result(res)
+        use iso_c_binding
+        type(hdc_obj_t) :: this
+        character(len=*), optional :: path
+        type(hdc_obj_t) :: res
+        if (.not.present(path)) path = ""
+        res = c_hdc_get_obj(this, trim(path)//c_null_char)
+    end function hdc_get_obj
 
     subroutine hdc_get_child_sub(this, path, res)
         use iso_c_binding
@@ -4018,6 +4081,15 @@ contains
         real(kind=dp), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_DOUBLE)
     end subroutine hdc_set_double_scalar
+
+
+    subroutine hdc_set_double_obj(this, data)
+        use iso_c_binding
+        type(hdc_obj_t) :: this
+        real(kind=dp), intent(in), target :: data
+        call c_hdc_set_double_obj(this, data)
+    end subroutine hdc_set_double_obj
+
 
     subroutine hdc_set_double_scalar_path(this, path, data)
         use iso_c_binding

@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 #include "hdc_types.h"
+// ----------- pokus ------------ //
+struct hdc_obj_t hdc_new_obj(); /** Default constructor, hopefully non leaking version */
+struct hdc_obj_t hdc_get_obj(struct hdc_obj_t obj, const char* path);
+void hdc_set_double_obj(struct hdc_obj_t obj, double data);
+void hdc_dump_obj(struct hdc_obj_t obj);
+void hdc_add_child_obj(struct hdc_obj_t obj, const char* path, struct hdc_obj_t n);
 // ------------------------ Constructors --------------------------- //
 struct hdc_t* hdc_new_empty(); /** Default constructor. Creates empty HDC  */
 struct hdc_t* hdc_new_string(const char* str); /** Creates HDC from string/uri */
