@@ -65,11 +65,11 @@ struct hdc_data_t {
     char*       data;
 };
 
-struct hdc_t;
-
-struct hdc_obj_t {
+struct hdc_t {
     char        uuid[HDC_UUID_LENGTH];
     void*       storage;
 };
+
+typedef struct hdc_t hdc_t;
 
 #endif

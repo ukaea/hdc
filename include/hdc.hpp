@@ -217,7 +217,7 @@ public:
     *
     * @param obj p_obj:...
     */
-    HDC(hdc_obj_t& obj);
+    HDC(hdc_t& obj);
     /**
     * @brief constructor from object buffer -- this should be void* as we want cha* to be used for strings
     *
@@ -689,7 +689,7 @@ public:
     *
     * @return hdc_obj_t
     */
-    hdc_obj_t as_obj();
+    hdc_t as_obj();
     /**
     * @brief ...
     *
@@ -756,9 +756,9 @@ public:
     * @brief Returns copy of current object.
     *
     * @param copy_arrays p_copy_arrays:...
-    * @return HDC*
+    * @return HDC
     */
-    HDC* copy(int copy_arrays = 1);
+    HDC copy(int copy_arrays = 1);
     /**
     * @brief Inserts node to i-th slice of current node.
     *
@@ -873,12 +873,6 @@ public:
             return oss.str().c_str();
         }
     }
-    /**
-    * @brief Returns pointer to itself.
-    *
-    * @return hdc_t*
-    */
-    hdc_t* as_hdc_ptr() const;
     /**
     * @brief Serialization to JSON file.
     *
@@ -998,27 +992,27 @@ public:
     * @return HDC*
     */
     static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
-    /**
-    * @brief "static contructor" from hdc_t*
-    *
-    * @param c_ptr p_c_ptr:...
-    * @return HDC*
-    */
-    static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
-    /**
-    * @brief deserialize from storage
-    *
-    * @param filename p_filename:...
-    * @return HDC*
-    */
-    static HDC* deserialize_HDC_file(const std::string& filename);
+//     /**
+//     * @brief "static contructor" from hdc_t*
+//     *
+//     * @param c_ptr p_c_ptr:...
+//     * @return HDC*
+//     */
+//     static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
     /**
     * @brief deserialize from storage
     *
     * @param filename p_filename:...
     * @return HDC*
     */
-    static HDC* deserialize_HDC_string(const std::string& filename);
+    static HDC deserialize_HDC_file(const std::string& filename);
+    /**
+    * @brief deserialize from storage
+    *
+    * @param filename p_filename:...
+    * @return HDC*
+    */
+    static HDC deserialize_HDC_string(const std::string& filename);
     /**
     * @brief ...
     *

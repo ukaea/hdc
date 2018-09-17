@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-07-30 15:35:34.638920 by generate_fortran_api.py
+! This file was generated on 2018-09-17 15:23:20.790420 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -7,13 +7,9 @@ module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        type(c_ptr) :: obj !< void pointer to HDC container
-    end type hdc_t
-
-    type, bind(c) :: hdc_obj_t
         character(kind=c_char,len=37) :: uuid
         type(c_ptr) :: storage
-    end type hdc_obj_t
+    end type hdc_t
 
     integer, parameter :: HDC_MAX_DIMS = 10
 
@@ -57,42 +53,8 @@ module hdc_fortran
             use iso_c_binding
         end subroutine hello
 
-        ! ================================= pokus =====================================
-        function hdc_new_obj() result(obj) bind(c,name="hdc_new_obj")
-            import
-            type(hdc_obj_t) :: obj
-        end function
-
-        subroutine hdc_dump_obj(obj) bind(c,name="hdc_dump_obj")
-            import
-            type(hdc_obj_t), value :: obj
-        end subroutine hdc_dump_obj
-
-        subroutine c_hdc_add_child_obj(obj, path, node) bind(c,name="hdc_add_child_obj")
-            import
-            type(hdc_obj_t), value :: obj
-            character(kind=c_char), intent(in) :: path(*)
-            type(hdc_obj_t), value :: node
-        end subroutine c_hdc_add_child_obj
-
-        subroutine c_hdc_set_double_obj(obj, data) bind(c,name="hdc_set_double_obj")
-            import
-            type(hdc_obj_t), value :: obj
-            real(kind=c_double), value :: data
-        end subroutine c_hdc_set_double_obj
-
-        !> Returns HDC subtree by given path. This is interface to C.
-        function c_hdc_get_obj(obj, path) result(res) bind(c,name="hdc_get_obj")
-            import
-            type(hdc_obj_t), value :: obj
-            character(kind=c_char), intent(in) :: path(*)
-            type(hdc_obj_t) :: res
-        end function c_hdc_get_obj
-
-        ! ================================= pokus =====================================
-
         !> Default constructor. This is interface to C.
-        function c_hdc_new_empty() result( obj) bind(c,name="hdc_new_empty")
+        function c_hdc_new_empty() result(obj) bind(c,name="hdc_new_empty")
             import
             type(hdc_t) :: obj
         end function c_hdc_new_empty
@@ -112,12 +74,6 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             character(kind=c_char), intent(in) :: type_str(*)
         end function c_hdc_new_array
-
-
-        function c_hdc_new_void_ptr() result(obj) bind(c, name="hdc_new_void_ptr")
-            import
-            type(c_ptr) :: obj
-        end function c_hdc_new_void_ptr
 
         function hdc_get_ptr(tree) result(ptr) bind(c, name="hdc_get_ptr")
             import
@@ -680,7 +636,6 @@ module hdc_fortran
                 hdc_get, &
                 hdc_copy, &
                 hdc_dump, &
-                hdc_new_ptr, &
                 hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
@@ -745,13 +700,7 @@ module hdc_fortran
                 hdc_as_double_5d, &
                 hdc_as_double_6d, &
                 hdc_as_double_7d, &
-                hello, &
-                hdc_add_child_obj, &
-                hdc_set_double_obj, &
-                hdc_obj_t, &
-                hdc_new_obj, &
-                hdc_get_obj, &
-                hdc_dump_obj
+                hello
 contains
 
     subroutine hdc_add_child(this, path, node)
@@ -762,15 +711,6 @@ contains
         if (.not.present(path)) path = ""
         call c_hdc_add_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_add_child
-
-    subroutine hdc_add_child_obj(this, path, node)
-        use iso_c_binding
-        type(hdc_obj_t) :: this
-        character(len=*), optional :: path
-        type(hdc_obj_t) :: node
-        if (.not.present(path)) path = ""
-        call c_hdc_add_child_obj(this, trim(path)//c_null_char, node)
-    end subroutine hdc_add_child_obj
 
     subroutine hdc_delete_child(this, path)
         use iso_c_binding
@@ -863,15 +803,6 @@ contains
         if (.not.present(path)) path = ""
         res = c_hdc_get_child(this, trim(path)//c_null_char)
     end function hdc_get_child
-
-    function hdc_get_obj(this, path) result(res)
-        use iso_c_binding
-        type(hdc_obj_t) :: this
-        character(len=*), optional :: path
-        type(hdc_obj_t) :: res
-        if (.not.present(path)) path = ""
-        res = c_hdc_get_obj(this, trim(path)//c_null_char)
-    end function hdc_get_obj
 
     subroutine hdc_get_child_sub(this, path, res)
         use iso_c_binding
@@ -1002,15 +933,6 @@ contains
         if (.not.present(path)) path = ""
         call c_hdc_to_json(this,trim(path)//c_null_char, mode)
     end subroutine hdc_to_json
-
-    function hdc_new_ptr() result(res)
-        use iso_c_binding
-        type(hdc_t), pointer :: struct
-        type(c_ptr) :: res
-        allocate(struct)
-        struct%obj = c_hdc_new_void_ptr()
-        res = c_loc(struct)
-    end function hdc_new_ptr
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding
@@ -4081,15 +4003,6 @@ contains
         real(kind=dp), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_DOUBLE)
     end subroutine hdc_set_double_scalar
-
-
-    subroutine hdc_set_double_obj(this, data)
-        use iso_c_binding
-        type(hdc_obj_t) :: this
-        real(kind=dp), intent(in), target :: data
-        call c_hdc_set_double_obj(this, data)
-    end subroutine hdc_set_double_obj
-
 
     subroutine hdc_set_double_scalar_path(this, path, data)
         use iso_c_binding

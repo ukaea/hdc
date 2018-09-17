@@ -2,39 +2,29 @@
 #include "hdc_types.h"
 #include "hdc_c.h"
 
-struct hdc_t* init_hdc_data();
-void manipulate(struct hdc_t* data);
+hdc_t init_hdc_data();
+void manipulate(hdc_t data);
 
 int main() {
     hdc_init("","");
-// // // // // // // // // //     // init data
-// // // // // // // // // //     struct hdc_t* tree = init_hdc_data();
-// // // // // // // // // //
-// // // // // // // // // //     // Modify the data
-// // // // // // // // // //     manipulate(tree);
-// // // // // // // // // //
-// // // // // // // // // //     //Serialize data to JSON
-// // // // // // // // // //     hdc_to_json(tree,"tree.txt",0);
-// // // // // // // // // //
-// // // // // // // // // //     // Dump to screen
-// // // // // // // // // //     printf("Final dump:\n");
-// // // // // // // // // //     hdc_dump(tree);
+    // init data
+    hdc_t tree = init_hdc_data();
 
-    struct hdc_obj_t h = hdc_new_obj();
-    struct hdc_obj_t ch = hdc_new_obj();
-    hdc_set_double_obj(ch,3.141592);
-    hdc_add_child_obj(h,"aaa/bbb/ccc",ch);
-    hdc_add_child_obj(h,"aaa/bbb/ddd",hdc_new_obj());
-    hdc_dump_obj(h);
-    struct hdc_obj_t l = hdc_get_obj(h,"aaa/bbb/ccc");
-    hdc_set_double_obj(l,2.7818);
-    hdc_dump_obj(h);
-// // //     struct hdc_t* h = hdc_new_empty();
-// // //
-// // //     double array_in[4] = {1.1,2.2,3.3,4.4};
-// // //
-// // //     hdc_data_t data_in;
-// // //     memset(&data_in, 0, sizeof(hdc_data_t));
+    // Modify the data
+    manipulate(tree);
+
+    //Serialize data to JSON
+    hdc_to_json(tree,"tree.txt",0);
+
+    // Dump to screen
+    printf("Final dump:\n");
+    hdc_dump(tree);
+    hdc_t h = hdc_new_empty();
+
+    double array_in[4] = {1.1,2.2,3.3,4.4};
+
+// // //     struct hdc_data_t data_in;
+// // //     memset(&data_in, 0, sizeof(struct hdc_data_t));
 // // //     data_in.rank = 1;
 // // //     data_in.shape[0] = 4;
 // // //     data_in.type = HDC_DOUBLE;
@@ -42,21 +32,21 @@ int main() {
 // // //     data_in.data = (char*)(&array_in);
 // // //     hdc_set_data(h, "", data_in);
 // // //     hdc_dump(h);
-// // //     hdc_data_t data_out = hdc_get_data(h, "");
+// // //     struct hdc_data_t data_out = hdc_get_data(h, "");
 // // //     for (size_t i=0; i<HDC_MAX_DIMS; i++) printf("%d == %d\n",data_in.shape[i] == data_out.shape[i]);
 // // //
 // // //     double* array_out = (double*)(data_out.data);
 // // //     for (size_t i=0; i<4; i++) CHECK(array_in[i] == array_out[i]);
-// // //
-// // //
+
+
 
 HDC_destroy_c();
     return 0;
 }
 
-struct hdc_t* init_hdc_data() {
+ hdc_t init_hdc_data() {
     // Create new HDC tree
-    struct hdc_t* tree = hdc_new_empty();
+    hdc_t tree = hdc_new_empty();
 
     // Add some children
     hdc_add_child(tree,"groupA/data/int_array",hdc_new_empty());
@@ -70,9 +60,9 @@ struct hdc_t* init_hdc_data() {
     printf("\n");
     */
     // Get subtree
-    struct hdc_t* subtree = hdc_get(tree,"groupA/data");
+    hdc_t subtree = hdc_get(tree,"groupA/data");
     // Get node
-    struct hdc_t* node = hdc_get(subtree,"int_array");
+    hdc_t node = hdc_get(subtree,"int_array");
 
     // Ask whether child exists
     printf("exists: %d (should be true)\n", hdc_exists(tree, "groupA/data/int_array"));
@@ -89,7 +79,7 @@ struct hdc_t* init_hdc_data() {
     shape[0] = 4;
 
     // Add data to a single node
-    struct hdc_t* data = hdc_new_empty();
+    hdc_t data = hdc_new_empty();
     hdc_set_int32(data,"",1,shape,(void*)array,0);
 
     // Add data to a subtree
@@ -113,13 +103,13 @@ struct hdc_t* init_hdc_data() {
 
 }
 
-void manipulate(struct hdc_t* data) {
+void manipulate(hdc_t data) {
     printf("-------------------\n");
     printf("Entering manipulate\n");
     printf("Input data:\n");
     hdc_dump(data);
     // Get the HDC node
-    struct hdc_t* node = hdc_get(data, "groupA/data/int_array");
+    hdc_t node = hdc_get(data, "groupA/data/int_array");
     // Get the pointer to the data
     int32_t* array2 = hdc_as_int32_array(node,"");
     // and shape (assime rank = 1)

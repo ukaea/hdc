@@ -8,9 +8,6 @@
 #include <boost/type.hpp>
 
 //#define DEBUG
-struct hdc_t {
-    void* obj;
-};
 
 using namespace std;
 
@@ -302,7 +299,7 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
     storage = _storage;
 }
 
-HDC::HDC(hdc_obj_t& obj) {
+HDC::HDC(hdc_t& obj) {
     storage = (HDCStorage*)obj.storage;
     uuid = obj.uuid;
 }
@@ -1087,9 +1084,9 @@ void HDC::resize(HDC* h UNUSED, int recursively UNUSED)
     throw HDCException("resize(): not implemented yet...\n");
 }
 
-HDC* HDC::copy(int copy_arrays UNUSED)
+HDC HDC::copy(int copy_arrays UNUSED)
 {
-    return new HDC(this);
+    return HDC(this);
 }
 
 void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
@@ -1156,8 +1153,8 @@ void HDC::set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, 
     }
 }
 
-hdc_obj_t HDC::as_obj() {
-    hdc_obj_t res;
+hdc_t HDC::as_obj() {
+    hdc_t res;
     res.storage = storage;
     strcpy(res.uuid,uuid.c_str());
     return res;
@@ -1232,13 +1229,6 @@ void HDC::append(HDC& h)
 {
     insert(get_header().shape[0], h);
     return;
-}
-
-hdc_t* HDC::as_hdc_ptr() const
-{
-    hdc_t* wrap = new struct hdc_t;
-    wrap->obj = (void*)this;
-    return wrap;
 }
 
 const std::string HDC::get_type_str() const
@@ -1456,15 +1446,15 @@ HDC* HDC::new_HDC_from_cpp_ptr(intptr_t cpp_ptr)
 }
 
 // "static constructor" from hdc_t*
-HDC* HDC::new_HDC_from_c_ptr(intptr_t c_ptr)
-{
-    HDC* tree;
-    hdc_t* c_wrap = (hdc_t*)c_ptr;
-    tree = (HDC*)c_wrap->obj;
-    return tree;
-}
+// HDC* HDC::new_HDC_from_c_ptr(intptr_t c_ptr)
+// {
+//     HDC* tree;
+//     hdc_t* c_wrap = (hdc_t*)c_ptr;
+//     tree = (HDC*)c_wrap->obj;
+//     return tree;
+// }
 
-HDC* HDC::deserialize_HDC_file(const std::string& filename)
+HDC HDC::deserialize_HDC_file(const std::string& filename)
 {
     try {
         std::ifstream t(filename);
@@ -1474,14 +1464,12 @@ HDC* HDC::deserialize_HDC_file(const std::string& filename)
     }
     catch (const ifstream::failure& e) {
         std::cout << "deserialize_HDC_file(): Error reading / opening file." << endl;
-        //TODO: what here???
     }
-    return NULL;
 }
 
-HDC* HDC::deserialize_HDC_string(const std::string& str)
+HDC HDC::deserialize_HDC_string(const std::string& str)
 {
-    HDC* tree;
+    HDC tree;
     pt::ptree root;
 
     stringstream ss;
@@ -1500,8 +1488,7 @@ HDC* HDC::deserialize_HDC_string(const std::string& str)
     HDC::set_storage(storage_str);
     string uuid = root.get<std::string>("uuid");
 
-    tree = new HDC(global_storage, uuid);
-    return tree;
+    return HDC(global_storage, uuid);
 }
 
 

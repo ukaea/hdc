@@ -4,7 +4,8 @@ module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        type(c_ptr) :: obj !< void pointer to HDC container
+        character(kind=c_char,len=37) :: uuid
+        type(c_ptr) :: storage
     end type hdc_t
 
     integer, parameter :: HDC_MAX_DIMS = 10
@@ -50,7 +51,7 @@ module hdc_fortran
         end subroutine hello
 
         !> Default constructor. This is interface to C.
-        function c_hdc_new_empty() result( obj) bind(c,name="hdc_new_empty")
+        function c_hdc_new_empty() result(obj) bind(c,name="hdc_new_empty")
             import
             type(hdc_t) :: obj
         end function c_hdc_new_empty
@@ -70,12 +71,6 @@ module hdc_fortran
             type(c_ptr), value :: shape_
             character(kind=c_char), intent(in) :: type_str(*)
         end function c_hdc_new_array
-
-
-        function c_hdc_new_void_ptr() result(obj) bind(c, name="hdc_new_void_ptr")
-            import
-            type(c_ptr) :: obj
-        end function c_hdc_new_void_ptr
 
         function hdc_get_ptr(tree) result(ptr) bind(c, name="hdc_get_ptr")
             import
@@ -374,7 +369,6 @@ module hdc_fortran
                 hdc_get, &
                 hdc_copy, &
                 hdc_dump, &
-                hdc_new_ptr, &
                 hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
@@ -630,15 +624,6 @@ contains
         if (.not.present(path)) path = ""
         call c_hdc_to_json(this,trim(path)//c_null_char, mode)
     end subroutine hdc_to_json
-
-    function hdc_new_ptr() result(res)
-        use iso_c_binding
-        type(hdc_t), pointer :: struct
-        type(c_ptr) :: res
-        allocate(struct)
-        struct%obj = c_hdc_new_void_ptr()
-        res = c_loc(struct)
-    end function hdc_new_ptr
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding
