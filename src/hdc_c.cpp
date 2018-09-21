@@ -25,19 +25,19 @@ hdc_t hdc_new_array2(size_t rank, size_t* shape_in, hdc_type_t type, size_t flag
     return HDC(rank,shape,type,flags).as_obj();
 }
 
-void hdc_delete(hdc_t tree)
+void hdc_delete(hdc_t tree UNUSED)
 {
     std::cerr << "hdc_delete(): I do nothing TODO: remove me...\n";
     return;
 }
 
-void hdc_print_info(hdc_t tree)
+void hdc_print_info(hdc_t tree UNUSED)
 {
     HDC(tree).print_info();
     return;
 }
 
-void hdc_delete_ptr(void* tree)
+void hdc_delete_ptr(void* tree UNUSED)
 {
     std::cerr << "hdc_delete_ptr(): I do nothing TODO: remove me...\n";
     return;
