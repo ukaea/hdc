@@ -91,7 +91,7 @@ void hdc_set_scalar(hdc_t tree, const char* path, void* data, hdc_type_t _type);
 // ----------------------------- Static methods wrappers ----------------------------------------//
 
 void hdc_init(char* pluginFileName, char* pluginSettingsFileName);
-void HDC_destroy_c();
+void hdc_destroy();
 
 #ifdef __cplusplus
 }

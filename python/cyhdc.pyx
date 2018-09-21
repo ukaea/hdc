@@ -48,8 +48,13 @@ cdef extern from "hdc_types.h":
     cdef size_t HDCDefault
     cdef size_t HDCFortranOrder
     cdef size_t HDC_MAX_DIMS
-cdef struct hdc_t:
-    voidptr obj
+    cdef size_t HDC_UUID_LENGTH
+    ctypedef struct hdc_t:
+        char uuid[37]
+        voidptr storage
+class hdc_t_(ctypes.Structure):
+    _fields_ = [("uuid", ctypes.c_char * 37),
+                ("storage", ctypes.c_void_p)]
 
 cdef extern from "hdc.hpp":
     cdef cppclass HDCStorage:
@@ -58,6 +63,7 @@ cdef extern from "hdc.hpp":
         CppHDC() except +
         CppHDC(string str) except +
         CppHDC(HDCStorage* _storage, const string& _uuid) except +
+        CppHDC(hdc_t h) except +
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
@@ -86,7 +92,7 @@ cdef extern from "hdc.hpp":
         vector[string] keys() except +
         size_t childs_count() except +
         # hdc_t* caused casting errors with except +
-        void* as_hdc_ptr()  except +
+        #void* as_hdc_ptr()  except +
         bool is_fortranorder() except +
         vector[size_t] get_strides() except +
         @staticmethod
@@ -308,13 +314,11 @@ cdef class HDC:
         return deref(self._thisptr).print_info()
 
     @property
-    def c_ptr(self):
-        return ctypes.c_void_p(<intptr_t>deref(self._thisptr).as_hdc_ptr())
-
-    @property
     def _as_parameter_(self):
         # used by ctypes automatic conversion
-        return self.c_ptr
+        uuid = deref(self._thisptr).get_uuid()
+        cdef voidptr storage = deref(self._thisptr).get_storage()
+        return hdc_t_(uuid,<intptr_t>storage)
 
     def get_type_str(self):
         return deref(self._thisptr).get_type_str().decode()
@@ -420,13 +424,6 @@ cdef class HDC:
         # strides can be NULL if contiguity is not explicitely requested
         buffer.strides = NULL  # strides
         buffer.strides = strides_buf
-        #if HDCFortranOrder & flags:
-            #buffer.strides = np.cumprod(np.hstack([np.array([1]),buffer.shape[:-1]]))*itemsize
-        #else:
-            #buffer.strides = np.cumprod(np.hstack([buffer.shape[1:],np.array([1])])[::-1])[::-1]*itemsize
-        # wont work here: TODO: move this to C++
-        # for pointer arrays only
-
         buffer.suboffsets = NULL
 
     @property
@@ -443,21 +440,6 @@ cdef class HDC:
         """
         keys = deref(self._thisptr).keys()
         return (k.decode() for k in keys)
-
-    @staticmethod
-    cdef HDC _from_c_ptr(intptr_t h):
-        """Working horse for method below
-        """
-        res = HDC()
-        hh = <hdc_t*> h
-        res._thisptr = <CppHDC*> hh.obj
-        return res
-
-    @staticmethod
-    def from_c_ptr(h):
-        """Unwraps hdc_t created by C or FORTRAN function called by ctypes.
-        """
-        return HDC._from_c_ptr(h)
 
     def to_hdf5(self, filename, dataset_name="data"):
         deref(self._thisptr).to_hdf5(filename.encode(), dataset_name.encode())

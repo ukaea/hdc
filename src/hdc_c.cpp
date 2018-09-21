@@ -68,15 +68,6 @@ hdc_t hdc_get(hdc_t tree, const char* path)
     return HDC(tree).get(path).as_obj();
 }
 
-const char* hdc_get_uuid(hdc_t tree)
-{
-    //TODO: fix this leak
-    auto t = HDC(tree);
-    char* a = new char[t.get_uuid().size()];
-    strcpy(a, t.get_uuid().c_str());
-    return a;
-}
-
 hdc_t hdc_get_slice(hdc_t tree, const char* path, size_t i)
 {
     return HDC(tree).get(path).get(i).as_obj();
@@ -140,6 +131,8 @@ size_t hdc_get_rank(hdc_t tree, const char* path)
 
 size_t* hdc_get_shape(hdc_t tree, const char* path)
 {
+    std::cerr << "FIXME: hdc_get_shape()\n";
+    exit(0);
     auto shape = HDC(tree).get(path).get_shape();
     auto cshape = new size_t[HDC_MAX_DIMS];
     memset(cshape,0,sizeof(size_t)*HDC_MAX_DIMS);
@@ -290,7 +283,7 @@ int32_t hdc_as_int32_scalar(hdc_t tree, const char* path)
 
 const char* hdc_get_type_str(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).get_type_str().c_str());
+    return (HDC(tree).get(path).get_type_str());
 }
 
 void hdc_to_json(hdc_t tree, const char* filename, int mode)
@@ -352,7 +345,7 @@ void hdc_init(char* pluginFileName, char* pluginSettingsString)
     }
 }
 
-void HDC_destroy_c()
+void hdc_destroy()
 {
     if (global_storage != nullptr) HDC::destroy();
 }

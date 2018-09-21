@@ -27,7 +27,7 @@ TEST_CASE("EmptyNode", "[HDC]")
     CHECK(0 == h.get_shape()[0]);
     CHECK(1 == h.get_rank());
     CHECK(HDC_EMPTY == h.get_type());
-    CHECK(strcmp("null", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("null", h.get_type_str()) == 0);
     CHECK(false == h.exists("aaa"));
 }
 
@@ -37,7 +37,7 @@ TEST_CASE("EmptyNodePtr", "[HDC]")
     CHECK(0 == h.get_shape()[0]);
     CHECK(1 == h.get_rank());
     CHECK(HDC_EMPTY == h.get_type());
-    CHECK(strcmp("null", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("null", h.get_type_str()) == 0);
     CHECK(false == h.exists("aaa"));
 }
 
@@ -49,19 +49,19 @@ TEST_CASE("EmptyArrayNode", "[HDC]")
     CHECK(1 == hi8.get_rank());
     CHECK(4 == hi8.get_shape()[0]);
     CHECK(HDC_INT8 == hi8.get_type());
-    CHECK(strcmp("int8", hi8.get_type_str().c_str()) == 0);
+    CHECK(strcmp("int8", hi8.get_type_str()) == 0);
 
     HDC hi32(rank, shape, HDC_INT32);
     CHECK(1 == hi32.get_rank());
     CHECK(4 == hi32.get_shape()[0]);
     CHECK(HDC_INT32 == hi32.get_type());
-    CHECK(strcmp("int32", hi32.get_type_str().c_str()) == 0);
+    CHECK(strcmp("int32", hi32.get_type_str()) == 0);
 
     HDC hd = HDC(rank, shape, HDC_DOUBLE);
     CHECK(1 == hd.get_rank());
     CHECK(4 == hd.get_shape()[0]);
     CHECK(HDC_DOUBLE == hd.get_type());
-    CHECK(strcmp("float64", hd.get_type_str().c_str()) == 0);
+    CHECK(strcmp("float64", hd.get_type_str()) == 0);
 }
 
 TEST_CASE("NodeManipulation", "[HDC]")
@@ -77,7 +77,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     // Try add
     tree.add_child("aaa/bbb", n1);
     CHECK(HDC_STRUCT == tree.get_type());
-    CHECK(strcmp("struct", tree.get_type_str().c_str()) == 0);
+    CHECK(strcmp("struct", tree.get_type_str()) == 0);
     CHECK(true == tree.exists("aaa/bbb"));
     CHECK(true == tree.exists("aaa"));
     CHECK(strcmp(n1.get_uuid().c_str(), tree.get("aaa/bbb").get_uuid().c_str()) == 0);
@@ -155,7 +155,7 @@ TEST_CASE("Int8DataManipulation", "[HDC]")
     CHECK(HDC_INT8 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
-    CHECK(strcmp("int8", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("int8", h.get_type_str()) == 0);
     int8_t* data2 = h.as<int8_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
     // This is no longer possible as for some storages data have to be copied (all for now, maybe we can enable specifically for umap storage in future)
@@ -176,7 +176,7 @@ TEST_CASE("Int16DataManipulation", "[HDC]")
     CHECK(HDC_INT16 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
-    CHECK(strcmp("int16", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("int16", h.get_type_str()) == 0);
     int16_t* data2 = h.as<int16_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
@@ -192,7 +192,7 @@ TEST_CASE("Int32DataManipulation", "[HDC]")
     CHECK(HDC_INT32 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
-    CHECK(strcmp("int32", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("int32", h.get_type_str()) == 0);
     int32_t* data2 = h.as<int32_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
@@ -208,7 +208,7 @@ TEST_CASE("Int64DataManipulation", "[HDC]")
     CHECK(HDC_INT64 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
-    CHECK(strcmp("int64", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("int64", h.get_type_str()) == 0);
     int64_t* data2 = h.as<int64_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
@@ -225,7 +225,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     CHECK(HDC_DOUBLE == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
-    CHECK(strcmp("float64", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("float64", h.get_type_str()) == 0);
     double* data2 = h.as<double*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
@@ -270,7 +270,7 @@ TEST_CASE("SliceManipulation", "[HDC]")
     h.append(sl);
     h.append(sl2);
     CHECK(HDC_LIST == h.get_type());
-    CHECK(strcmp("list", h.get_type_str().c_str()) == 0);
+    CHECK(strcmp("list", h.get_type_str()) == 0);
     CHECK(1 == h.get_rank());
     CHECK(2 == h.get_shape()[0]);
     CHECK(strcmp("1", h[0].as_cstring()) == 0);
@@ -404,7 +404,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(1 == s.get_rank());
     CHECK(4 == s.get_shape()[0]);
     CHECK(HDC_DOUBLE == s.get_type());
-    CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str().c_str(), s.get_type_str().c_str()) == 0);
+    CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
     double* data_double_in = s.as<double*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
 
@@ -413,7 +413,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(1 == s.get_rank());
     CHECK(4 == s.get_shape()[0]);
     CHECK(HDC_INT32 == s.get_type());
-    CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str().c_str(), tree2.get("aaa/bbb/int").get_type_str().c_str()) == 0);
+    CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str(), tree2.get("aaa/bbb/int").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
 
@@ -424,7 +424,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(1 == s.get_rank());
     CHECK(5 == s.get_shape()[0]);
     CHECK(HDC_LIST == s.get_type());
-    CHECK(strcmp(tree.get("aaa/list").get_type_str().c_str(), tree2.get("aaa/list").get_type_str().c_str()) == 0);
+    CHECK(strcmp(tree.get("aaa/list").get_type_str(), tree2.get("aaa/list").get_type_str()) == 0);
     for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get(i).get_type());
 
     // Test string
@@ -442,7 +442,7 @@ TEST_CASE("CopyConstructor", "[HDC]")
     CHECK(1 == d.get_rank());
     CHECK(4 == d.get_shape()[0]);
     CHECK(HDC_DOUBLE == d.get_type());
-    CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str().c_str(), d.get_type_str().c_str()) == 0);
+    CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), d.get_type_str()) == 0);
 }
 
 TEST_CASE("load", "[HDC]")

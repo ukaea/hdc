@@ -377,7 +377,6 @@ char* transpose_buffer(char* buffer) {
     return new_buffer;
 }
 
-
 /**
  * Check if a file exists
  * @return true if and only if the file exists, false else

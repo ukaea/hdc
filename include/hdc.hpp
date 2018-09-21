@@ -219,12 +219,6 @@ public:
     */
     HDC(hdc_t& obj);
     /**
-    * @brief constructor from object buffer -- this should be void* as we want cha* to be used for strings
-    *
-    * @param src_buffer p_src_buffer:...
-    */
-    HDC(byte* src_buffer);
-    /**
     * @brief Destructor
     *
     */
@@ -920,9 +914,9 @@ public:
     /**
     * @brief Returns string representing data/node type.
     *
-    * @return const std::__cxx11::string
+    * @return const char*
     */
-    const std::string get_type_str() const;
+    const char* get_type_str() const;
     /**
     * @brief Returns void pointer to data
     *

@@ -256,11 +256,13 @@ HDC::HDC(const std::string str) : HDC()
     this->set_string(str);
 }
 
-HDC::HDC(byte* src_buffer)
+/** Copy constructor */
+HDC::HDC(HDC* h)
 {
     hdc_header_t header;
     storage = global_storage;
     uuid = generate_uuid_str();
+    auto src_buffer = h->get_buffer();
     memcpy(&header, src_buffer, sizeof(hdc_header_t));
     char buffer[header.buffer_size];
 
@@ -286,11 +288,7 @@ HDC::HDC(byte* src_buffer)
     }
 
     storage->set(uuid, buffer, header.buffer_size);
-}
-
-/** Copy constructor */
-HDC::HDC(HDC* h) : HDC(h->get_buffer())
-{};
+};
 
 /** Deserializing constructor */
 HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
@@ -1231,7 +1229,7 @@ void HDC::append(HDC& h)
     return;
 }
 
-const std::string HDC::get_type_str() const
+const char* HDC::get_type_str() const
 {
     switch (get_type()) {
         case HDC_EMPTY:

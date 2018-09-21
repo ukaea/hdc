@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
+#include <string.h>
 
 #define HDC_MAX_DIMS           10
 #define HDC_LIST_INIT_CAPACITY 10

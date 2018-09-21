@@ -19,9 +19,9 @@ int main() {
     // Dump to screen
     printf("Final dump:\n");
     hdc_dump(tree);
-    hdc_t h = hdc_new_empty();
+//     hdc_t h = hdc_new_empty();
 
-    double array_in[4] = {1.1,2.2,3.3,4.4};
+//     double array_in[4] = {1.1,2.2,3.3,4.4};
 
 // // //     struct hdc_data_t data_in;
 // // //     memset(&data_in, 0, sizeof(struct hdc_data_t));
@@ -38,9 +38,7 @@ int main() {
 // // //     double* array_out = (double*)(data_out.data);
 // // //     for (size_t i=0; i<4; i++) CHECK(array_in[i] == array_out[i]);
 
-
-
-HDC_destroy_c();
+    hdc_destroy();
     return 0;
 }
 
@@ -86,17 +84,18 @@ HDC_destroy_c();
     hdc_set_int32(tree,"groupA/data/int_array",1,shape,(void*)array,HDCDefault);
 
     // Ask on some data details, use subtree to shorten the path
-    int8_t rank2 = hdc_get_rank(node,"");
-    size_t* shape2 = hdc_get_shape(node,"");
-    printf("Dimension: %d\nShape: ", rank2);
-    for (int8_t i=0; i<rank2; i++) printf("%ld ",shape2[i]);
+    struct hdc_data_t data2 = hdc_get_data(node,"");
+    printf("Dimension: %ld\nShape: ", data2.rank);
+    for (size_t i=0; i<data2.rank; i++) printf("%ld ",data2.shape[i]);
     printf("\n");
     printf("dtype: %s\n",hdc_get_type_str(node,""));
 
     // Get data back from tree
     int32_t* array2 = hdc_as_int32_array(node,"");
+    // Or you can use this:
+    array2 = (int32_t*)data2.data;
     printf("Data: ");
-    for (size_t i=0; i<shape2[0]; i++) printf("%d ",array2[i]);
+    for (size_t i=0; i<data2.shape[0]; i++) printf("%d ",array2[i]);
     printf("\n");
 
     return tree;
@@ -112,10 +111,9 @@ void manipulate(hdc_t data) {
     hdc_t node = hdc_get(data, "groupA/data/int_array");
     // Get the pointer to the data
     int32_t* array2 = hdc_as_int32_array(node,"");
-    // and shape (assime rank = 1)
-    size_t* shape2 = hdc_get_shape(node,"");
+    struct hdc_data_t data2 = hdc_get_data(node,"");
     // Multiply by 2
-    for (size_t i=0; i<shape2[0]; i++)
+    for (size_t i=0; i<data2.shape[0]; i++)
         array2[i] *= 2;
     printf("Output data:\n");
     hdc_dump(data);

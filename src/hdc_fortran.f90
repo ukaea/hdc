@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-09-17 15:23:20.790420 by generate_fortran_api.py
+! This file was generated on 2018-09-20 11:41:05.792037 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -66,7 +66,7 @@ module hdc_fortran
             character(kind=c_char), intent(in) :: str(*)
         end function c_hdc_new_string
 
-        !> Construct empty arra of type given by string.
+        !> Construct empty array of type given by string.
         function c_hdc_new_array(rank, shape_, type_str) result(obj) bind(c,name="hdc_new_array")
             import
             type(hdc_t) :: obj
@@ -247,22 +247,6 @@ module hdc_fortran
             type(c_ptr) :: res
         end function c_hdc_as_voidptr_path
 
-        !> Returns array dimension at give path. This is interface to C.
-        function c_hdc_get_rank(obj, path) result(res) bind(c,name="hdc_get_rank")
-            import
-            type(hdc_t), value:: obj
-            character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int8_t) :: res
-        end function c_hdc_get_rank
-
-        !> Returns array shape at given path.This is interface to C.
-        function c_hdc_get_shape(obj, path) result(res) bind(c,name="hdc_get_shape")
-            import
-            type(hdc_t), value:: obj
-            character(kind=c_char), intent(in) :: path(*)
-            type(c_ptr) :: res
-        end function c_hdc_get_shape
-
         subroutine hdc_dump(obj) bind(c,name="hdc_dump")
             import
             type(hdc_t), value:: obj
@@ -272,12 +256,6 @@ module hdc_fortran
             import
             type(hdc_t), value:: obj
         end subroutine hdc_print_info
-
-        function hdc_get_type(obj) bind(c,name="hdc_get_type") result(res)
-            import
-            type(hdc_t), value:: obj
-            integer(kind=c_int8_t) :: res
-        end function hdc_get_type
 
         !> Sets scalar. This is interface to C.
         subroutine c_hdc_set_scalar(obj, path, data, type_) bind(c,name="hdc_set_scalar")
@@ -733,9 +711,11 @@ contains
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*), optional :: path
-        integer(kind=c_int8_t) :: res
+        integer(kind=c_size_t) :: res
+        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        res = c_hdc_get_rank(this, trim(path)//c_null_char)
+        data = hdc_get_data(this,path)
+        res = data%rank
     end function hdc_get_rank
 
     function hdc_get_shape_path(this,path) result(res)
@@ -743,27 +723,33 @@ contains
         type(hdc_t) :: this
         integer(kind=c_size_t) :: rank
         character(len=*), optional :: path
-        integer(kind=c_long), dimension(:),pointer :: res
-        type(c_ptr) :: shape_ptr
+        integer(kind=c_long), allocatable :: res(:)
+        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        rank = c_hdc_get_rank(this,trim(path)//c_null_char)
-        shape_ptr = c_hdc_get_shape(this,trim(path)//c_null_char)
-        call c_f_pointer(shape_ptr, res, [ rank ])
+        data = hdc_get_data(this,trim(path)//c_null_char)
+        rank = data%rank
+        allocate(res(data%rank))
+        res(1:data%rank) = data%dshape(1:data%rank)
     end function hdc_get_shape_path
 
     function hdc_get_shape_pos(this, pos) result(res)
         use iso_c_binding
         type(hdc_t) :: this
         integer(kind=c_int32_t) :: pos
-        integer(kind=c_size_t) :: rank
-        integer(kind=c_long), dimension(:),pointer :: shape_
         integer(kind=c_long) :: res
-        type(c_ptr) :: shape_ptr
-        rank = hdc_get_rank(this)
-        shape_ptr = c_hdc_get_shape(this,c_null_char)
-        call c_f_pointer(shape_ptr, shape_, [ rank ])
-        res = shape_(pos)
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this,c_null_char)
+        res = data%dshape(pos)
     end function hdc_get_shape_pos
+
+    function hdc_get_type(this) result(res)
+        use iso_c_binding
+        type(hdc_t) :: this
+        integer(kind=c_size_t) :: res
+        type(hdc_data_t) :: data
+        data = hdc_get_data(this,c_null_char)
+        res = data%dtype
+    end function hdc_get_type
 
     subroutine hdc_set_child(this, path, node)
         use iso_c_binding
