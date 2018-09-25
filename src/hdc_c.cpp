@@ -129,17 +129,6 @@ size_t hdc_get_rank(hdc_t tree, const char* path)
     return HDC(tree).get(path).get_rank();
 }
 
-size_t* hdc_get_shape(hdc_t tree, const char* path)
-{
-    std::cerr << "FIXME: hdc_get_shape()\n";
-    exit(0);
-    auto shape = HDC(tree).get(path).get_shape();
-    auto cshape = new size_t[HDC_MAX_DIMS];
-    memset(cshape,0,sizeof(size_t)*HDC_MAX_DIMS);
-    for (size_t i=0;i<HDC(tree).get_rank();i++) cshape[i] = shape[i];
-    return cshape;
-}
-
 size_t hdc_get_type(hdc_t tree, const char* path)
 {
     return HDC(tree).get(path).get_type();
@@ -296,26 +285,17 @@ void hdc_dump(hdc_t tree)
     HDC(tree).dump();
 }
 
-char** hdc_keys(hdc_t tree)
+void hdc_keys(hdc_t tree, char** keys, size_t* nkeys)
 {
-    vector<string> keys = HDC(tree).keys();
-    char** arr;
-    size_t size = keys.size();
-    arr = (char**)malloc(sizeof(char) * size);
-    for (size_t i = 0; i < size; i++) {
-        size_t len = strlen(keys[i].c_str()) + 1;
-        arr[i] = (char*)malloc(sizeof(char) * len);
-        strcpy(arr[i], keys[i].c_str());
+    HDC t = HDC(tree);
+    if (t.get_type() != HDC_STRUCT) {
+        *nkeys = 0;
+        return;
     }
-    return arr;
-}
-
-void hdc_keys_py(hdc_t tree, char** arr)
-{
-    vector<string> keys = HDC(tree).keys();
-    size_t size = keys.size();
-    for (size_t i = 0; i < size; i++) {
-        strcpy(arr[i], keys[i].c_str());
+    vector<string> cppkeys = HDC(tree).keys();
+    *nkeys = cppkeys.size();
+    for (size_t i = 0; i < *nkeys; i++) {
+        strcpy(keys[i], cppkeys[i].c_str());
     }
 }
 
@@ -350,24 +330,20 @@ void hdc_destroy()
     if (global_storage != nullptr) HDC::destroy();
 }
 
-char** HDC_get_available_plugins_c()
+void hdc_get_available_plugins(char** keys, int* num)
 {
     std::vector<std::string> cppkeys = HDC::get_available_plugins();
-    const char** keys = new const char* [cppkeys.size() + 1];
     for (size_t i = 0; i < cppkeys.size(); i++) {
-        keys[i] = cppkeys[i].c_str();
+        strcpy(keys[i],cppkeys[i].c_str());
     }
-    keys[cppkeys.size()] = NULL;
-    return NULL;
+    *num = cppkeys.size();
 }
 
-const char* hdc_serialize(hdc_t tree)
+void hdc_serialize(hdc_t tree, char* buffer)
 {
     stringstream tmp;
     tmp << HDC(tree).serialize();
-    string dump_str = tmp.str();
-    return strdup(dump_str.c_str());
-
+    strcpy(buffer,tmp.str().c_str());
 }
 
 hdc_t hdc_deserialize(const char* str)

@@ -31,10 +31,8 @@ bool hdc_exists(hdc_t tree, const char* path);  /**  */
 void hdc_print_info(hdc_t tree);
 const char* hdc_get_uuid(hdc_t tree);  /**  */
 size_t hdc_get_rank(hdc_t tree, const char* path);  /**  */
-size_t* hdc_get_shape(hdc_t tree, const char* path);  /** Returns shape of array at given path. */
 size_t hdc_get_type(hdc_t tree, const char* path);  /**  */
-char** hdc_keys(hdc_t tree);
-void hdc_keys_py(hdc_t tree, char** keys);
+void hdc_keys(hdc_t tree, char** keys, size_t* nkeys);
 hdc_t hdc_copy(hdc_t src); /** Makes deep copy of HDC tree. */
 void hdc_to_json(hdc_t tree, const char* filename, int mode); /** Performs serialization of tree to JSON*/
 void hdc_dump(hdc_t tree);
@@ -43,10 +41,10 @@ const char* hdc_get_datashape_str(hdc_t tree);
 const char* hdc_get_type_str(hdc_t tree, const char* path); /**  */
 size_t hdc_childs_count(hdc_t tree); /** */
 void test_str(char* str);
-const char* hdc_serialize(hdc_t tree);
+void hdc_serialize(hdc_t tree, char* buffer);
 hdc_t hdc_deserialize(const char* str);
 size_t hdc_get_size(hdc_t tree);
-char** HDC_get_available_plugins_c();
+void hdc_get_available_plugins(char** keys, int* num);
 
 // ----------------------- Data setters --------------------------- //
 
