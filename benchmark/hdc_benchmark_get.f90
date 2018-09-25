@@ -6,13 +6,13 @@ program hdc_benchmark_get
 contains
     subroutine f_main()
 
-        type(hdc_t), pointer :: magnetics
-        integer              :: idx, shot, run, refshot, refrun, status, i
-        integer              :: j, k, n, k2, SIGNAL_LENGTH, NSTATS
+        type(hdc_t) :: magnetics
+        integer              :: i
+        integer              :: k, k2, SIGNAL_LENGTH, NSTATS
         integer(kind=8)      :: t1,t2
         real(4), pointer     :: data(:), flux_data(:), field_data(:)
         real(4)              :: time
-        integer, parameter   :: out_unit=20
+!         integer, parameter   :: out_unit=20
         CHARACTER(LEN=30)    :: Format
 
         NSTATS = 10000
@@ -23,8 +23,7 @@ contains
             do i = 1,SIGNAL_LENGTH
                 data(i) = float(2*i)
             end do
-            allocate(magnetics)
-            magnetics = hdc_new_empty()
+            magnetics = hdc_new()
             call hdc_set(magnetics,"flux_loop(1)/flux/data",data)
             call hdc_set(magnetics,"bpol_probe(1)/field",data)
             call hdc_set(magnetics,"time",10.0)
@@ -36,11 +35,11 @@ contains
             end do
             call c_getMillis(t2)
             Format = "(I8.8, EN15.5)"
-    ! 	    write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
-            write (*,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
+!            write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
+            write (*,Format) SIGNAL_LENGTH, (dble(t2)-dble(t1))*1e-3/float(NSTATS)
             call hdc_delete(magnetics)
             deallocate(data)
 
-	    end do
+        end do
     end subroutine f_main
 end program hdc_benchmark_get

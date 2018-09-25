@@ -484,10 +484,10 @@ public:
             header.flags = flags;
             header.type = to_typeid(data[0]);
             header.rank = rank;
-            char buffer[header.buffer_size];
-            memcpy(buffer,&header,sizeof(hdc_header_t));
-            memcpy(buffer+sizeof(hdc_header_t),data,header.data_size);
-            storage->set(uuid,buffer,header.buffer_size);
+            std::vector<char> buffer(header.buffer_size);
+            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
+            memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
+            storage->set(uuid,buffer.data(),header.buffer_size);
             return;
         }
     }
@@ -552,10 +552,10 @@ public:
         header.rank = 1;
         header.shape[0] = str.length();
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        char buffer[header.buffer_size];
-        memcpy(buffer,&header,sizeof(hdc_header_t));
-        memcpy(buffer+sizeof(hdc_header_t),str.c_str(),header.data_size);
-        storage->set(uuid,buffer,header.buffer_size);
+        std::vector<char> buffer(header.buffer_size);
+        memcpy(buffer.data(),&header,sizeof(hdc_header_t));
+        memcpy(buffer.data()+sizeof(hdc_header_t),str.c_str(),header.data_size);
+        storage->set(uuid,buffer.data(),header.buffer_size);
     };
     /**
     * @brief ...
@@ -591,10 +591,10 @@ public:
         header.type = to_typeid(data);
         header.data_size = sizeof(T);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        char buffer[header.buffer_size];
-        memcpy(buffer,&header,sizeof(hdc_header_t));
-        memcpy(buffer+sizeof(hdc_header_t),&data,header.data_size);
-        storage->set(uuid,buffer,header.buffer_size);
+        std::vector<char> buffer(header.buffer_size);
+        memcpy(buffer.data(),&header,sizeof(hdc_header_t));
+        memcpy(buffer.data()+sizeof(hdc_header_t),&data,header.data_size);
+        storage->set(uuid,buffer.data(),header.buffer_size);
     }
     /**
     * @brief Sets scalar data to given node - UDA version.
@@ -608,10 +608,10 @@ public:
         header.type = _type;
         header.data_size = hdc_sizeof(_type);
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        char buffer[header.buffer_size];
-        memcpy(buffer,&header,sizeof(hdc_header_t));
-        memcpy(buffer+sizeof(hdc_header_t),data,header.data_size);
-        storage->set(uuid,buffer,header.buffer_size);
+        std::vector<char> buffer(header.buffer_size);
+        memcpy(buffer.data(),&header,sizeof(hdc_header_t));
+        memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
+        storage->set(uuid,buffer.data(),header.buffer_size);
     }
     /**
     * @brief Sets scalar data to given node - UDA version.
@@ -993,13 +993,6 @@ public:
     * @return HDC*
     */
     static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
-//     /**
-//     * @brief "static contructor" from hdc_t*
-//     *
-//     * @param c_ptr p_c_ptr:...
-//     * @return HDC*
-//     */
-//     static HDC* new_HDC_from_c_ptr(intptr_t c_ptr);
     /**
     * @brief deserialize from storage
     *

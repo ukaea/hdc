@@ -465,17 +465,17 @@ TEST_CASE("HDF5", "[HDC]")
 
 #endif
 
-#ifdef _USE_UDA
-TEST_CASE("StringConstructor", "[HDC]")
-{
-    HDC h = HDC::load("uda://HELP::help()");
-    std::string expected =
-            "\nHelp\tList of HELP plugin functions:\n"
-            "\n"
-            "services()\tReturns a list of available services with descriptions\n"
-            "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
-            "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
-    CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
-}
-
-#endif
+// // // #ifdef _USE_UDA
+// // // TEST_CASE("StringConstructor", "[HDC]")
+// // // {
+// // //     HDC h = HDC::load("uda://HELP::help()");
+// // //     std::string expected =
+// // //             "\nHelp\tList of HELP plugin functions:\n"
+// // //             "\n"
+// // //             "services()\tReturns a list of available services with descriptions\n"
+// // //             "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
+// // //             "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
+// // //     CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
+// // // }
+// // //
+// // // #endif

@@ -209,15 +209,15 @@ HDC::HDC(size_t data_size)
     }
 
     // Start by creating segment
-    char buffer[header.buffer_size];
+    std::vector<char> buffer(header.buffer_size);
 
     // copy header there -- we need that, hopefully it will be optimized out
-    memcpy(&buffer, &header, sizeof(hdc_header_t));
+    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
 
     //Store to some storage
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer, header.buffer_size);
+    storage->set(uuid, buffer.data(), header.buffer_size);
 }
 
 
@@ -243,11 +243,11 @@ HDC::HDC(size_t  rank, std::vector<size_t>& shape, hdc_type_t type, long flags)
     header.rank = rank;
     header.data_size = elem_size * hdc_sizeof(type);
     header.buffer_size = header.data_size + sizeof(hdc_header_t);
-    char buffer[header.buffer_size];
-    memcpy(&buffer, &header, sizeof(hdc_header_t));
+    std::vector<char> buffer(header.buffer_size);
+    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer, header.buffer_size);
+    storage->set(uuid, buffer.data(), header.buffer_size);
 }
 
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
@@ -264,7 +264,7 @@ HDC::HDC(HDC* h)
     uuid = generate_uuid_str();
     auto src_buffer = h->get_buffer();
     memcpy(&header, src_buffer, sizeof(hdc_header_t));
-    char buffer[header.buffer_size];
+    std::vector<char> buffer(header.buffer_size);
 
     if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
         bip::managed_external_buffer src_segment(bip::open_only, src_buffer + sizeof(hdc_header_t),
@@ -273,7 +273,7 @@ HDC::HDC(HDC* h)
         if (src_children == nullptr) {
             throw HDCException("HDC(): The node has no children.\n");
         }
-        bip::managed_external_buffer segment(bip::create_only, buffer + sizeof(hdc_header_t),
+        bip::managed_external_buffer segment(bip::create_only, buffer.data() + sizeof(hdc_header_t),
                                              header.buffer_size - sizeof(hdc_header_t));
         auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),
                                                       hdc_map_t::allocator_type(segment.get_segment_manager()));
@@ -282,12 +282,12 @@ HDC::HDC(HDC* h)
             record rec(it->key.c_str(), n.get_uuid().c_str(), segment.get_segment_manager());
             children->insert(rec);
         }
-        memcpy(&buffer, &header, sizeof(hdc_header_t));
+        memcpy(buffer.data(), &header, sizeof(hdc_header_t));
     } else {
-        memcpy(&buffer, src_buffer, header.buffer_size);
+        memcpy(buffer.data(), src_buffer, header.buffer_size);
     }
 
-    storage->set(uuid, buffer, header.buffer_size);
+    storage->set(uuid, buffer.data(), header.buffer_size);
 };
 
 /** Deserializing constructor */
@@ -516,7 +516,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
     // load new buffer
     buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
-
+    vector<char> new_buffer;
     auto segment = get_segment();
     auto children = segment.find<hdc_map_t>("d").first;
     if (children == nullptr) throw HDCException("add_child_single(): Could not get the children.\n");
@@ -540,17 +540,17 @@ void HDC::add_child_single(const std::string& path, HDC& n)
                 redo = 0;
             }
             catch (HDCBadAllocException e) {
-                vector<char> new_buffer = buffer_grow(buffer, max(header.buffer_size, 4 * path.size()));
-                if (new_buffer.data() == buffer) {
-                    throw HDCException("grow called, but buffer == new_buffer.\n");
-                }
-                //if (!storage->usesBuffersDirectly()) delete[] buffer;
-                storage->remove(uuid);
-                buffer = new_buffer.data();
-                memcpy(&header, buffer, sizeof(hdc_header_t));
-                segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
-                children = segment.find<hdc_map_t>("d").first;
-                redo = 1;
+               new_buffer = buffer_grow(buffer, max(header.buffer_size, 4 * path.size()));
+               if (new_buffer.data() == buffer) {
+                   throw HDCException("grow called, but buffer == new_buffer.\n");
+               }
+               //if (!storage->usesBuffersDirectly()) delete[] buffer;
+               storage->remove(uuid);
+               buffer = new_buffer.data();
+               memcpy(&header, buffer, sizeof(hdc_header_t));
+               segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
+               children = segment.find<hdc_map_t>("d").first;
+               redo = 1;
             }
             if (redo == 1 && i == HDC_MAX_RESIZE_ATTEMPTS - 1) {
                 throw HDCBadAllocException("add_child_single(): Could not allocate enough memory.\n");
@@ -1123,10 +1123,10 @@ void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_t
         for (size_t i = 0; i < rank; i++) header.shape[i] = shape[i];
         header.type = type;
         header.rank = rank;
-        char buffer[header.buffer_size];
-        memcpy(buffer, &header, sizeof(hdc_header_t));
-        memcpy(buffer + sizeof(hdc_header_t), data, header.data_size);
-        storage->set(uuid, buffer, header.buffer_size);
+        std::vector<char> buffer(header.buffer_size);
+        memcpy(buffer.data(), &header, sizeof(hdc_header_t));
+        memcpy(buffer.data() + sizeof(hdc_header_t), data, header.data_size);
+        storage->set(uuid, buffer.data(), header.buffer_size);
     }
     return;
 }
@@ -1156,10 +1156,10 @@ void HDC::set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, 
         for (size_t i = 0; i < rank; i++) header.shape[i] = shape[i];
         header.type = type;
         header.rank = rank;
-        char buffer[header.buffer_size];
-        memcpy(buffer, &header, sizeof(hdc_header_t));
-        memcpy(buffer + sizeof(hdc_header_t), data, header.data_size);
-        storage->set(uuid, buffer, header.buffer_size);
+        std::vector<char> buffer(header.buffer_size);
+        memcpy(buffer.data(), &header, sizeof(hdc_header_t));
+        memcpy(buffer.data() + sizeof(hdc_header_t), data, header.data_size);
+        storage->set(uuid, buffer.data(), header.buffer_size);
         return;
     }
 }
@@ -1203,6 +1203,7 @@ void HDC::insert(size_t i, HDC& h)
 
     int k = 0;
     int redo = 1;
+    vector<char> new_buffer;
     for (k = 0; k < HDC_MAX_RESIZE_ATTEMPTS - 1; k++) {
         if (redo == 0) break;
         try {
@@ -1211,7 +1212,7 @@ void HDC::insert(size_t i, HDC& h)
                       record(to_string(i).c_str(), h.get_uuid().c_str(), segment.get_segment_manager()));
             redo = 0;
         } catch (exception e) {
-            vector<char> new_buffer = buffer_grow(buffer, header.buffer_size);
+            new_buffer = buffer_grow(buffer, header.buffer_size);
             //if (!storage->usesBuffersDirectly()) delete[] buffer;
             storage->remove(uuid);
             buffer = new_buffer.data();
@@ -1418,6 +1419,7 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
     auto newdata_size = header.data_size + extra_size;
     auto new_buffer_size = newdata_size + sizeof(hdc_header_t);
     std::vector<char> new_buffer(new_buffer_size);
+//     auto new_buffer = new std::vector<char>(new_buffer_size);
     // if there were children, resize the segment
     if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
         // try to open old children
@@ -1456,15 +1458,6 @@ HDC* HDC::new_HDC_from_cpp_ptr(intptr_t cpp_ptr)
     return tree;
 }
 
-// "static constructor" from hdc_t*
-// HDC* HDC::new_HDC_from_c_ptr(intptr_t c_ptr)
-// {
-//     HDC* tree;
-//     hdc_t* c_wrap = (hdc_t*)c_ptr;
-//     tree = (HDC*)c_wrap->obj;
-//     return tree;
-// }
-
 HDC HDC::deserialize_HDC_file(const std::string& filename)
 {
     try {
@@ -1475,6 +1468,7 @@ HDC HDC::deserialize_HDC_file(const std::string& filename)
     }
     catch (const ifstream::failure& e) {
         std::cout << "deserialize_HDC_file(): Error reading / opening file." << endl;
+        return HDC();
     }
 }
 
@@ -1579,9 +1573,9 @@ void HDC::set_data(hdc_data_t obj)
                 header.data_size *= obj.shape[i];
             }
             header.buffer_size = header.data_size + sizeof(hdc_header_t);
-            char buffer[header.buffer_size];
-            memcpy(buffer,&header,sizeof(hdc_header_t));
-            memcpy(buffer+sizeof(hdc_header_t),obj.data,header.data_size);
-            storage->set(uuid, buffer, header.buffer_size);
+            std::vector<char> buffer(header.buffer_size);
+            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
+            memcpy(buffer.data()+sizeof(hdc_header_t),obj.data,header.data_size);
+            storage->set(uuid, buffer.data(), header.buffer_size);
         }
 };

@@ -27,7 +27,7 @@ public:
     ~MDBMStorage() {
         DEBUG_STDOUT("~MDBMStorage()\n");
         if(!persistent) {
-            cout << "Calling cleanup()\n";
+//             cout << "Calling cleanup()\n";
             cleanup();
         } else cout << "persistent!!!\n";
     };

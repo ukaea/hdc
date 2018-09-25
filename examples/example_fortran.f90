@@ -6,7 +6,7 @@ program test_hdc_fortran
 contains
 
     subroutine f_main()
-        type(hdc_t), pointer :: tree, subtree, data, node, node2
+        type(hdc_t) :: tree, subtree, data, node, node2
         integer(kind=4) :: array(4)
         integer(kind=4), pointer:: array2(:)
         integer(kind=c_long) :: shape2(1)
@@ -18,11 +18,6 @@ contains
         array2d(:,:) = 2.22_dp
 !         array2d(:,3) = 0.0_dp
         array2d(2,:) = 3.14159_dp
-        allocate(tree)
-        allocate(subtree)
-        allocate(data)
-        allocate(node)
-        allocate(node2)
         call hdc_init()
         ! Create new HDC tree
         tree = hdc_new()

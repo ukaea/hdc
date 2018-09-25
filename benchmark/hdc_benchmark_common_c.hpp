@@ -6,7 +6,7 @@
 #include <unistd.h>
 using namespace std;
 static void StorageReset() {
-    HDC_destroy_c();
+    hdc_destroy();
     hdc_init("mdbm","{\"filename\": \"/tmp/db1.mdbm\", \"persistent\": false}");
 }
 #endif

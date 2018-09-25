@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-09-20 11:41:05.792037 by generate_fortran_api.py
+! This file was generated on 2018-09-25 17:18:10.153676 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -58,6 +58,13 @@ module hdc_fortran
             import
             type(hdc_t) :: obj
         end function c_hdc_new_empty
+
+        !> Default constructor. This is interface to C.
+        function c_hdc_new_size(size) result(obj) bind(c,name="hdc_new_size")
+            import
+            integer(kind=c_size_t),value :: size
+            type(hdc_t) :: obj
+        end function c_hdc_new_size
 
         !> Constructs HDC from string/uri
         function c_hdc_new_string(str) result(obj) bind(c,name="hdc_new_string")
@@ -276,6 +283,7 @@ module hdc_fortran
 
     interface hdc_new
         module procedure hdc_new_dt
+        module procedure hdc_new_size
     end interface hdc_new
 
 
@@ -955,6 +963,12 @@ contains
             res = c_hdc_new_empty()
         end if
     end function hdc_new_dt
+
+    function hdc_new_size(size) result(res)
+        integer(kind=c_size_t), value :: size
+        type(hdc_t) :: res
+        res = c_hdc_new_size(size)
+    end function hdc_new_size
 
     function hdc_as_int8_1d(this, path) result(res)
         use iso_c_binding

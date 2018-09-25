@@ -56,6 +56,13 @@ module hdc_fortran
             type(hdc_t) :: obj
         end function c_hdc_new_empty
 
+        !> Default constructor. This is interface to C.
+        function c_hdc_new_size(size) result(obj) bind(c,name="hdc_new_size")
+            import
+            integer(kind=c_size_t),value :: size
+            type(hdc_t) :: obj
+        end function c_hdc_new_size
+
         !> Constructs HDC from string/uri
         function c_hdc_new_string(str) result(obj) bind(c,name="hdc_new_string")
             import
@@ -273,6 +280,7 @@ module hdc_fortran
 
     interface hdc_new
         module procedure hdc_new_dt
+        module procedure hdc_new_size
     end interface hdc_new
 
 
@@ -646,6 +654,12 @@ contains
             res = c_hdc_new_empty()
         end if
     end function hdc_new_dt
+
+    function hdc_new_size(size) result(res)
+        integer(kind=c_size_t), value :: size
+        type(hdc_t) :: res
+        res = c_hdc_new_size(size)
+    end function hdc_new_size
 
 {% for type_ in types %}
     {% for rank in ranks %}

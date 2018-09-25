@@ -6,21 +6,17 @@ program hdc_benchmark_put_all
 contains
     subroutine f_main()
 
-        type(hdc_t), pointer :: magnetics
-        integer              :: idx, shot, run, refshot, refrun, status, i
-        integer              :: j, k, n, k2, SIGNAL_LENGTH, NSTATS
+        type(hdc_t) :: magnetics
+        integer              :: i
+        integer              :: k, k2, SIGNAL_LENGTH, NSTATS
         integer(kind=8)      :: t1,t2
         real(4), pointer     :: data_in(:), data_out(:)
         CHARACTER(len=132)   :: string_in
-        CHARACTER(len=255)   :: string_out
-        integer, parameter   :: out_unit=20
+!         integer, parameter   :: out_unit=20
         CHARACTER(LEN=30)    :: Format
         integer(kind=c_int32_t), dimension(1:1) :: int0array_in
         real(8), dimension(1:1) :: float0array_in
-        complex(8), dimension(1:1) :: complex0array_in
-        integer(kind=c_int32_t), pointer :: int0array_out(:)
-        real(8), pointer :: float0array_out(:)
-        complex(8), pointer :: complex0array_out(:)
+
         NSTATS = 1000
 
         do k = 10, 100001, 1000
@@ -29,8 +25,7 @@ contains
             do i = 1,SIGNAL_LENGTH
                 data_in(i) = float(2*i)
             end do
-            allocate(magnetics)
-            magnetics = hdc_new_empty()
+            magnetics = hdc_new()
 
             call c_getMillis(t1)
             do k2 = 1,NSTATS
@@ -95,10 +90,9 @@ contains
             call c_getMillis(t2)
             Format = "(I8.8, EN15.5)"
     ! 	    write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
-            write (*,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
+            write (*,Format) SIGNAL_LENGTH, (dble(t2)-dble(t1))*1e-3/float(NSTATS)
             call hdc_delete(magnetics)
             deallocate(data_in)
-
-	    end do
+        end do
     end subroutine f_main
 end program hdc_benchmark_put_all

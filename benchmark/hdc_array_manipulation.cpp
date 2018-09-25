@@ -17,7 +17,7 @@ BENCHMARK(BM_memcpy)->RangeMultiplier(2)->Range(2<<20,2<<25);
 
 static void BM_HDC_SetData(benchmark::State& state) {
     HDC* node = new HDC();
-    size_t shape[1];
+    std::vector<size_t> shape(1);
     shape[0] = state.range(0);
     int32_t* data = new int32_t[state.range(0)];
     memset(data,1,sizeof(int32_t)*state.range(0));
@@ -33,7 +33,7 @@ BENCHMARK(BM_HDC_SetData)->RangeMultiplier(2)->Range(2<<20,2<<25);
 
 static void BM_HDC_GetData(benchmark::State& state) {
     HDC* node = new HDC();
-    size_t shape[1];
+    std::vector<size_t> shape(1);
     shape[0] = state.range(0);
     int32_t* data = new int32_t[state.range(0)];
     int32_t* data_copy = new int32_t[state.range(0)];
@@ -53,7 +53,7 @@ BENCHMARK(BM_HDC_GetData)->RangeMultiplier(2)->Range(2<<20,2<<25);
 
 static void BM_HDC_ZeroCopyDataRead(benchmark::State& state) {
     HDC* node = new HDC();
-    size_t shape[1];
+    std::vector<size_t> shape(1);
     shape[0] = state.range(0);
     double* data = new double[state.range(0)];
     for (size_t i=0;i<state.range(0);i++) data[i] = 1.0;
@@ -76,7 +76,7 @@ BENCHMARK(BM_HDC_ZeroCopyDataRead)->RangeMultiplier(2)->Range(2<<20,2<<25);
 
 static void BM_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     HDC* node = new HDC();
-    size_t shape[1];
+    std::vector<size_t> shape(1);
     shape[0] = state.range(0);
     double* data = new double[state.range(0)];
     for (size_t i=0;i<state.range(0);i++) data[i] = 1.0;

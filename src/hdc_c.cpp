@@ -8,6 +8,11 @@ hdc_t hdc_new_empty()
     return HDC().as_obj();
 }
 
+hdc_t hdc_new_size(size_t size)
+{
+    return HDC(size).as_obj();
+}
+
 hdc_t hdc_new_string(const char* str)
 {
     return HDC(str).as_obj();
@@ -312,13 +317,13 @@ size_t hdc_childs_count(hdc_t tree)
     return HDC(tree).childs_count();
 }
 
-void hdc_init(char* pluginFileName, char* pluginSettingsString)
+void hdc_init(const char* pluginFileName, const char* pluginSettingsFileName)
 {
     if (strlen(pluginFileName) != 0) {
-        if (strlen(pluginSettingsString) == 0) {
+        if (strlen(pluginSettingsFileName) == 0) {
             HDC::init(std::string(pluginFileName));
         } else {
-            HDC::init(std::string(pluginFileName), std::string(pluginSettingsString));
+            HDC::init(std::string(pluginFileName), std::string(pluginSettingsFileName));
         }
     } else {
         HDC::init();
