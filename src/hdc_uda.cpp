@@ -10,7 +10,7 @@
 #include <boost/variant.hpp>
 #include <typeinfo>
 
-size_t UdaType2HDCType(int data_type)
+hdc_type_t UdaType2HDCType(size_t data_type)
 {
     switch (data_type) {
         case UDA_TYPE_UNKNOWN:
@@ -47,9 +47,9 @@ size_t UdaType2HDCType(int data_type)
 }
 
 
-std::vector<boost::variant<size_t, std::string>> split_uda(const std::string& s)
+hdc_path_t split_uda(const std::string& s)
 {
-    std::vector<boost::variant<size_t, std::string>> parts;
+    hdc_path_t parts;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     boost::char_separator<char> sep("/", "");
     tokenizer tok{ s, sep };
@@ -96,15 +96,16 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
         if (item.rank > 1) throw HDCException("uda2HDC(): Rank > 1 is not supported yet");
 
         //TODO: more types, rank > 1, integer keys -> list (not struct)
+        HDC empty;
         switch (item.data_type) {
             case UDA_TYPE_UNKNOWN:
                 std::cerr << "Warning: UDA has returned UDA_TYPE_UNKNOWN at node " << path << " size = " << item.data_n
                           << std::endl;
-                tree.add_child(split_path, new HDC());
+                tree.add_child(split_path, empty);
                 break;
             case UDA_TYPE_STRING: {
                 std::string str = item.data;
-                tree.set_string(split_path, str);
+                tree.get_or_create(split_path) = str;
                 break;
             }
             case UDA_TYPE_CHAR:
@@ -120,9 +121,9 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
             case UDA_TYPE_LONG64:
             case UDA_TYPE_UNSIGNED_LONG64: {
                 auto type_ = UdaType2HDCType(item.data_type);
-                size_t shp[item.rank];
+                std::vector<size_t> shp(item.rank);
                 shp[0] = item.data_n;
-                tree.set_data_c(split_path, item.rank, (size_t*)shp, item.data, type_);
+                tree.get_or_create(split_path).set_data_c(item.rank, shp, item.data, type_);
                 break;
             }
             default:
@@ -155,7 +156,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
             for (size_t i = 0; i < dims[1].size(); i++) {
                 HDC n;
                 n.set_string(std::string(vec.data() + i * dims[0].size(), strlen(vec.data() + i * dims[0].size())));
-                result.append_slice(n);
+                result.append(n);
             }
         } else {
             throw HDCException("UDA string rank too high, not implemented yet\n");
@@ -167,7 +168,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
         for (size_t i = 0; i < strings.size(); i++) {
             HDC n;
             n.set_string(strings[i]);
-            result.append_slice(n);
+            result.append(n);
         }
     } else if (type_name == typeid(short).name() || type_name == typeid(int).name() ||
                type_name == typeid(float).name() || type_name == typeid(double).name()) {
@@ -181,7 +182,7 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
             uda::Array* value = dynamic_cast<uda::Array*>(uda_data);
             auto shape = value->shape();
             size_t rank = shape.size();
-            size_t myshape[rank];
+            vector<size_t> myshape(rank);
             for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
 //             result.set_data(rank,myshape,value->byte_data(),static_cast<size_t>(to_typeid(type)));
             if (type_name == typeid(short).name()) result.set_data(rank, myshape, &(value->as<short>())[0]);
@@ -237,9 +238,9 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                 if (ch.name().length()) {
                     HDC nn;
                     nn.add_child(ch.name(), n);
-                    result.append_slice(nn);
+                    result.append(nn);
                 } else {
-                    result.append_slice(n);
+                    result.append(n);
                 }
             }
         }
@@ -286,7 +287,7 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
             if (type_name == "STRING") {
                 if (a_rank[i] <= 1) {
                     uda::Scalar value = tree.atomicScalar(name);
-                    result.set_string(name, value.as<char*>());
+                    result[name].set_string(value.as<char*>());
                 } else {
                     uda::Vector value = tree.atomicVector(name);
                     std::vector<char*> vec = value.as<char*>();
@@ -294,7 +295,7 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     for (auto& v: vec) {
                         HDC ch;
                         ch.set_string(v);
-                        list.append_slice(ch);
+                        list.append(ch);
                     }
                     result.add_child(name, list);
                 }
@@ -305,23 +306,25 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                 for (auto& v: vec) {
                     HDC ch;
                     ch.set_string(v);
-                    list.append_slice(ch);
+                    list.append(ch);
                 }
                 result.add_child(name, list);
             } else if (type_name == "double" || type_name == "float" || type_name == "short" || type_name == "int" ||
                        type_name == "char") {
                 if (a_rank[i] == 0) {
                     uda::Scalar value = tree.atomicScalar(name);
-                    if (type_name == "short") result.set_data(name, value.as<short>());
-                    if (type_name == "int") result.set_data(name, value.as<int>());
-                    if (type_name == "float") result.set_data(name, value.as<float>());
-                    if (type_name == "double") result.set_data(name, value.as<double>());
+                    if (type_name == "short") result[name] = value.as<short>();
+                    if (type_name == "int") result[name] = value.as<int>();
+                    if (type_name == "float") result[name] = value.as<float>();
+                    if (type_name == "double") result[name] = value.as<double>();
+
+
 //                     if (type_name == "char") result.set_data(name,value.as<char>());
                 } else {
                     uda::Array value = tree.atomicArray(name);
                     auto shape = value.shape();
                     auto rank = shape.size();
-                    size_t myshape[rank];
+                    vector<size_t> myshape(rank);
                     for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
                     if (type_name == "short") result.set_data(rank, myshape, &(value.as<short>())[0]);
                     if (type_name == "int") result.set_data(rank, myshape, &(value.as<int>())[0]);
@@ -341,7 +344,7 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     }
                 } else {
                     uda::Array value = tree.atomicArray(name);
-                    size_t myshape[HDC_MAX_DIMS];
+                    vector<size_t> myshape(HDC_MAX_DIMS);
                     int rank = a_rank[i];
                     std::vector<size_t> shape = value.shape();
                     for (int i = 0; i < rank; i++) myshape[i] = shape[i];
@@ -395,9 +398,9 @@ HDC udaResult2HDC(const uda::Result& uda_result, bool withMetadata = false)
     }
     if (withMetadata) {
         result.add_child("data", tmp);
-        result.set_string("@label", uda_result.label());
-        result.set_string("@units", uda_result.units());
-        result.set_string("@description", uda_result.description());
+        result["@label"].set_string(uda_result.label());
+        result["@units"].set_string(uda_result.units());
+        result["@description"].set_string(uda_result.description());
     } else {
         result = tmp;
     }

@@ -823,6 +823,19 @@ const HDC HDC::get(size_t index) const
     return get_single(index);
 }
 
+
+HDC HDC::get_or_create(hdc_path_t& path)
+{
+    if (path.empty()) return *this;
+    if (!exists(path)) {
+        HDC h;
+        add_child(path,h);
+        return h;
+    } else {
+        return get(path);
+    }
+}
+
 HDC HDC::get_or_create(const std::string& path)
 {
     if (path.empty()) return *this;

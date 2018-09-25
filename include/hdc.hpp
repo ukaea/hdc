@@ -362,6 +362,13 @@ public:
     * @param path p_path: path in the subtree of this node
     * @return HDC
     */
+    HDC get_or_create(hdc_path_t& path);
+    /**
+    * @brief ...
+    *
+    * @param path p_path: path in the subtree of this node
+    * @return HDC
+    */
     HDC get_or_create(const std::string& path);
     /**
     * @brief ...
