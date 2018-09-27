@@ -19,13 +19,13 @@ static void BM_C_HDC_SetData(benchmark::State& state) {
     hdc_t node = hdc_new_empty();
     size_t shape[1];
     shape[0] = state.range(0);
-    int32_t data[state.range(0)];
-// !!! Tohle chcipne
+    int32_t* data = new int32_t[state.range(0)];
     memset(data,1,sizeof(int32_t)*state.range(0));
     while (state.KeepRunning()) {
         hdc_set_int32(node,"",1,shape,data,HDCDefault);
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(int32_t)));
+    delete[] data;
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_SetData)->RangeMultiplier(2)->Range(2<<20,2<<25);
