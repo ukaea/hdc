@@ -22,7 +22,7 @@ static void BM_HDC_SetData(benchmark::State& state) {
     int32_t* data = new int32_t[state.range(0)];
     memset(data,1,sizeof(int32_t)*state.range(0));
     while (state.KeepRunning()) {
-        node->set_data(1,shape,data);
+        node->set_data(shape,data);
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(int32_t)));
     delete node;
@@ -38,7 +38,7 @@ static void BM_HDC_GetData(benchmark::State& state) {
     int32_t* data = new int32_t[state.range(0)];
     int32_t* data_copy = new int32_t[state.range(0)];
     memset(data,1,sizeof(int32_t)*state.range(0));
-    node->set_data(1,shape,data);
+    node->set_data(shape,data);
     while (state.KeepRunning()) {
         int32_t* data2 = node->as<int32_t*>();
         memcpy(data_copy,data2,state.range(0)*sizeof(int32_t));
@@ -56,13 +56,13 @@ static void BM_HDC_ZeroCopyDataRead(benchmark::State& state) {
     std::vector<size_t> shape(1);
     shape[0] = state.range(0);
     double* data = new double[state.range(0)];
-    for (size_t i=0;i<state.range(0);i++) data[i] = 1.0;
+    for (auto i=0;i<state.range(0);i++) data[i] = 1.0;
     double* data_copy = new double[state.range(0)];
-    node->set_data(1,shape,data);
+    node->set_data(shape,data);
     double s=0.0;
     while (state.KeepRunning()) {
         double* data2 = node->as<double*>();
-        for (size_t i=0;i<state.range(0);i++) {
+        for (auto i=0;i<state.range(0);i++) {
             s = data2[i];}
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
@@ -79,13 +79,13 @@ static void BM_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     std::vector<size_t> shape(1);
     shape[0] = state.range(0);
     double* data = new double[state.range(0)];
-    for (size_t i=0;i<state.range(0);i++) data[i] = 1.0;
+    for (auto i=0;i<state.range(0);i++) data[i] = 1.0;
     double* data_copy = new double[state.range(0)];
-    node->set_data(1,shape,data);
+    node->set_data(shape,data);
     double s=0.0;
     while (state.KeepRunning()) {
         double* data2 = node->as<double*>();
-        for (size_t i=0;i<state.range(0);i++) data2[i] = s;
+        for (auto i=0;i<state.range(0);i++) data2[i] = s;
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
     delete node;

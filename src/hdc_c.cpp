@@ -21,13 +21,13 @@ hdc_t hdc_new_string(const char* str)
 hdc_t hdc_new_array(size_t rank, size_t* shape_in, hdc_type_t type)
 {
     std::vector<size_t> shape(&shape_in[0],&shape_in[0]+rank);
-    return HDC(rank,shape,type).as_obj();
+    return HDC(shape,type).as_obj();
 }
 
 hdc_t hdc_new_array2(size_t rank, size_t* shape_in, hdc_type_t type, size_t flags)
 {
     std::vector<size_t> shape(&shape_in[0],&shape_in[0]+rank);
-    return HDC(rank,shape,type,flags).as_obj();
+    return HDC(shape,type,flags).as_obj();
 }
 
 void hdc_delete(hdc_t tree UNUSED)
@@ -105,28 +105,28 @@ bool hdc_exists(hdc_t tree, const char* path)
 void hdc_set_int8(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);
-    HDC(tree).get_or_create(path).set_data_c(rank, shape, data, HDC_INT8, _flags);
+    HDC(tree).get_or_create(path).set_data_c(shape, data, HDC_INT8, _flags);
     return;
 }
 
 void hdc_set_int16(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);
-    HDC(tree).get_or_create(path).set_data_c(rank, shape, data, HDC_INT16, _flags);
+    HDC(tree).get_or_create(path).set_data_c(shape, data, HDC_INT16, _flags);
     return;
 }
 
 void hdc_set_int32(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);
-    HDC(tree).get_or_create(path).set_data_c(rank, shape, data, HDC_INT32, _flags);
+    HDC(tree).get_or_create(path).set_data_c(shape, data, HDC_INT32, _flags);
     return;
 }
 
 void hdc_set_int64(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);
-    HDC(tree).get_or_create(path).set_data_c(rank, shape, data, HDC_INT64, _flags);
+    HDC(tree).get_or_create(path).set_data_c(shape, data, HDC_INT64, _flags);
     return;
 }
 
@@ -210,7 +210,7 @@ void hello()
 void hdc_set_double(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);
-    HDC(tree).get_or_create(path).set_data_c(rank, shape, data, HDC_DOUBLE, _flags);
+    HDC(tree).get_or_create(path).set_data_c(shape, data, HDC_DOUBLE, _flags);
     return;
 }
 
@@ -224,7 +224,7 @@ void hdc_set_float(hdc_t tree, const char* path, int rank, size_t* shape_in, voi
                         hdc_flags_t _flags UNUSED)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);
-    HDC(tree).get_or_create(path).set_data_c(rank, shape, data, HDC_FLOAT);
+    HDC(tree).get_or_create(path).set_data_c(shape, data, HDC_FLOAT);
     return;
 }
 

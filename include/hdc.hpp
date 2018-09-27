@@ -186,12 +186,11 @@ public:
     /**
     * @brief Creates empty HDC with specified type and shape
     *
-    * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
-    HDC(size_t rank, std::vector<size_t>& shape, hdc_type_t type,long flags = HDCDefault);
+    HDC(std::vector<size_t>& shape, hdc_type_t type,long flags = HDCDefault);
     /**
     * @brief Constructor from string
     *
@@ -458,7 +457,48 @@ public:
     * @brief ...
     *
     * @param T p_T: Desired data type.
-    * @param rank p_rank: Rank of the data
+    * @param shape p_shape: Shape of the data
+    * @param data p_data: Pointer to data
+    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    */
+    template<typename T> void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
+        auto rank = shape.size();
+        std::cerr << "RANK: " << rank << " " << shape[0] << std::endl;
+
+        hdc_header_t header = get_header();
+        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
+        auto buffer = storage->get(uuid);
+        memcpy(&header,buffer,sizeof(hdc_header_t));
+        // Start with determining of the buffer size
+        size_t data_size = sizeof(T);
+        for (size_t i=0;i<rank;i++) data_size *= shape[i];
+        size_t buffer_size = data_size + sizeof(hdc_header_t);
+        if (header.buffer_size == buffer_size) {
+            storage->lock(uuid);
+            memcpy(buffer+sizeof(hdc_header_t),data,data_size);
+            storage->unlock(uuid);
+            return;
+        } else {
+            header.buffer_size = buffer_size;
+            header.data_size = data_size;
+            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            for (size_t i=0;i<rank;i++) header.shape[i] = shape[i];
+            header.flags = flags;
+            header.type = to_typeid(data[0]);
+            header.rank = rank;
+            std::vector<char> buffer(header.buffer_size);
+            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
+            memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
+            storage->set(uuid,buffer.data(),header.buffer_size);
+            return;
+        }
+    }
+
+    /**
+    * @brief ...
+    *
+    * @param T size_t: Desired rank.
+    * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
@@ -492,18 +532,16 @@ public:
             return;
         }
     }
-
     /**
     * @brief ...
     *
     * @param T p_T: Desired data type.
-    * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
-    template<typename T> void set_data(size_t rank, initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
-        set_data(rank,shape,data,flags);
+    template<typename T> void set_data(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
+        set_data(shape,data,flags);
     };
 
     /**
@@ -561,23 +599,21 @@ public:
     /**
     * @brief ...
     *
-    * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
-    void set_data_c(size_t rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /**
     * @brief ...
     *
-    * @param rank p_rank: Rank of the data
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
     */
-    void set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
     template <typename T>
     /**

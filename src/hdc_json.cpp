@@ -176,7 +176,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 if (is_double(root)) { dt = HDC_DOUBLE; }
                 else if (is_int(root)) { dt = HDC_INT32; }
                 else { dt = HDC_BOOL; }
-                HDC d(rank, shape, dt);
+                HDC d(shape, dt);
                 tree = d;
                 void* data_ptr = tree.as<void*>();
                 if (dt == HDC_DOUBLE) {

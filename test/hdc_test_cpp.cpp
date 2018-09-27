@@ -43,21 +43,20 @@ TEST_CASE("EmptyNodePtr", "[HDC]")
 
 TEST_CASE("EmptyArrayNode", "[HDC]")
 {
-    int8_t rank = 1;
     std::vector<size_t> shape = { 4 };
-    HDC hi8(rank, shape, HDC_INT8);
+    HDC hi8(shape, HDC_INT8);
     CHECK(1 == hi8.get_rank());
     CHECK(4 == hi8.get_shape()[0]);
     CHECK(HDC_INT8 == hi8.get_type());
     CHECK(strcmp("int8", hi8.get_type_str()) == 0);
 
-    HDC hi32(rank, shape, HDC_INT32);
+    HDC hi32(shape, HDC_INT32);
     CHECK(1 == hi32.get_rank());
     CHECK(4 == hi32.get_shape()[0]);
     CHECK(HDC_INT32 == hi32.get_type());
     CHECK(strcmp("int32", hi32.get_type_str()) == 0);
 
-    HDC hd = HDC(rank, shape, HDC_DOUBLE);
+    HDC hd = HDC(shape, HDC_DOUBLE);
     CHECK(1 == hd.get_rank());
     CHECK(4 == hd.get_shape()[0]);
     CHECK(HDC_DOUBLE == hd.get_type());
@@ -147,11 +146,10 @@ TEST_CASE("ListManipulation", "[HDC]")
 
 TEST_CASE("Int8DataManipulation", "[HDC]")
 {
-    int rank = 1;
     std::vector<size_t> shape = { 4 };
     int8_t data[] = { 7, 20, 3, 5 };
     HDC h = HDC();
-    h.set_data(rank, shape, data);
+    h.set_data(shape, data);
     CHECK(HDC_INT8 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
@@ -161,18 +159,17 @@ TEST_CASE("Int8DataManipulation", "[HDC]")
     // This is no longer possible as for some storages data have to be copied (all for now, maybe we can enable specifically for umap storage in future)
     // All further occurencies will be removed.
     data[3] = 120;
-    h.set_data(rank, shape, data);
+    h.set_data(shape, data);
     data2 = h.as<int8_t*>();
     CHECK(120 == data2[3]);
 }
 
 TEST_CASE("Int16DataManipulation", "[HDC]")
 {
-    int8_t rank = 1;
     std::vector<size_t> shape = { 4 };
     int16_t data[] = { 777, 30000, 3333, 22222 };
     HDC h;
-    h.set_data<int16_t>(rank, shape, data);
+    h.set_data<int16_t>(shape, data);
     CHECK(HDC_INT16 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
@@ -184,11 +181,10 @@ TEST_CASE("Int16DataManipulation", "[HDC]")
 
 TEST_CASE("Int32DataManipulation", "[HDC]")
 {
-    int8_t rank = 1;
     std::vector<size_t> shape = { 4 };
     int32_t data[] = { 777, 20202020, 3333, 555555 };
     HDC h;
-    h.set_data<int32_t>(rank, shape, data);
+    h.set_data<int32_t>(shape, data);
     CHECK(HDC_INT32 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
@@ -200,11 +196,10 @@ TEST_CASE("Int32DataManipulation", "[HDC]")
 
 TEST_CASE("Int64DataManipulation", "[HDC]")
 {
-    int8_t rank = 1;
     std::vector<size_t> shape = { 4 };
     int64_t data[] = { 777, 20202020, 3333, 2000000000 };
     HDC h;
-    h.set_data<int64_t>(rank, shape, data);
+    h.set_data<int64_t>(shape, data);
     CHECK(HDC_INT64 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
@@ -217,11 +212,10 @@ TEST_CASE("Int64DataManipulation", "[HDC]")
 
 TEST_CASE("DoubleDataManipulation", "[HDC]")
 {
-    int8_t rank = 1;
     std::vector<size_t> shape = { 4 };
     double data[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
     HDC h;
-    h.set_data<double>(rank, shape, data);
+    h.set_data<double>(shape, data);
     CHECK(HDC_DOUBLE == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
@@ -246,13 +240,13 @@ TEST_CASE("GetStrides", "[HDC]")
     int32_t array3d[24] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24 };
     std::vector<size_t> shape3d = { 2, 3, 4 };
     HDC threed_f;
-    threed_f.set_data<int32_t>(3, shape3d, array3d, HDCFortranOrder);
+    threed_f.set_data<int32_t>(shape3d, array3d, HDCFortranOrder);
     auto strides_f = threed_f.get_strides();
     CHECK(4 == strides_f[0]);
     CHECK(8 == strides_f[1]);
     CHECK(24 == strides_f[2]);
     HDC threed_c;
-    threed_c.set_data<int32_t>(3, shape3d, array3d);
+    threed_c.set_data<int32_t>(shape3d, array3d);
     auto strides_c = threed_c.get_strides();
     CHECK(48 == strides_c[0]);
     CHECK(16 == strides_c[1]);
@@ -366,7 +360,6 @@ TEST_CASE("BracketOperators", "[HDC]")
 }
 
 #define PREPARE_TREE()                                                                              \
-    int rank = 1;                                                                                   \
     std::vector<size_t> shape = {4};                                                                \
     double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
     int32_t data_int[] = {777,20202020,3333,555555};                                                \
@@ -374,9 +367,9 @@ TEST_CASE("BracketOperators", "[HDC]")
     HDC scalar;                                                                                     \
     scalar.set_data(333.333);                                                                       \
     tree.add_child("aaa/bbb/_scalar", scalar);                                                      \
-    tree["aaa/bbb/double"].set_data<double>(rank,shape,data_double);                                \
-    tree["aaa/bbb/double2"].set_data<double>(rank,shape,data_double);                               \
-    tree["aaa/bbb/int"].set_data<int>(rank,shape,data_int);                                         \
+    tree["aaa/bbb/double"].set_data<double>(shape,data_double);                                     \
+    tree["aaa/bbb/double2"].set_data<double>(shape,data_double);                                    \
+    tree["aaa/bbb/int"].set_data<int>(shape,data_int);                                              \
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \

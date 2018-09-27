@@ -226,8 +226,9 @@ HDC::HDC() : HDC(0lu)
 {};
 
 /** Creates empty HDC with specified type and shape */
-HDC::HDC(size_t  rank, std::vector<size_t>& shape, hdc_type_t type, long flags)
+HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
 {
+    auto rank = shape.size();
     hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
         throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
@@ -1117,10 +1118,11 @@ HDC HDC::copy(int copy_arrays UNUSED)
     return HDC(this);
 }
 
-void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
+    auto rank = shape.size();
     hdc_header_t header;
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
@@ -1149,10 +1151,11 @@ void HDC::set_data_c(size_t  rank, std::vector<size_t>& shape, void* data, hdc_t
 }
 
 
-void HDC::set_data_c(size_t rank, std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
+void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
+    auto rank = shape.size();
     hdc_header_t header;
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));

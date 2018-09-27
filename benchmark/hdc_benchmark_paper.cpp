@@ -19,7 +19,7 @@ static void BM_HDC_SetData(benchmark::State& state) {
     std::vector<double> data(state.range(0));
     memset(data.data(),1,sizeof(double)*state.range(0));
     while (state.KeepRunning()) {
-        node.set_data(1,shape,data.data());
+        node.set_data(shape,data.data());
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
     StorageReset();
@@ -33,7 +33,7 @@ static void BM_HDC_GetData(benchmark::State& state) {
     std::vector<double>  data(state.range(0));
     std::vector<double>  data_copy(state.range(0));
     memset(data.data(),1,sizeof(double)*state.range(0));
-    node.set_data(1,shape,data.data());
+    node.set_data(shape,data.data());
     while (state.KeepRunning()) {
         double* data2 = node.as<double*>();
         memcpy(data_copy.data(),data2,state.range(0)*sizeof(double));
@@ -50,7 +50,7 @@ static void BM_HDC_ZeroCopyDataRead(benchmark::State& state) {
     std::vector<double> data(state.range(0));
     for (auto i=0;i<state.range(0);i++) data[i] = 1.0;
     std::vector<double>  data_copy(state.range(0));
-    node.set_data(1,shape,data.data());
+    node.set_data(shape,data.data());
     double s=0.0;
     while (state.KeepRunning()) {
         double* data2 = node.as<double*>();
@@ -70,7 +70,7 @@ static void BM_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     std::vector<double> data(state.range(0));
     for (auto i=0;i<state.range(0);i++) data[i] = 1.0;
     std::vector<double>  data_copy(state.range(0));
-    node.set_data(1,shape,data.data());
+    node.set_data(shape,data.data());
     double s=0.0;
     while (state.KeepRunning()) {
         double* data2 = node.as<double*>();

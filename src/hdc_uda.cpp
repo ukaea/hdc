@@ -123,7 +123,7 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
                 auto type_ = UdaType2HDCType(item.data_type);
                 std::vector<size_t> shp(item.rank);
                 shp[0] = item.data_n;
-                tree.get_or_create(split_path).set_data_c(item.rank, shp, item.data, type_);
+                tree.get_or_create(split_path).set_data_c(shp, item.data, type_);
                 break;
             }
             default:
@@ -185,10 +185,10 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
             vector<size_t> myshape(rank);
             for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
 //             result.set_data(rank,myshape,value->byte_data(),static_cast<size_t>(to_typeid(type)));
-            if (type_name == typeid(short).name()) result.set_data(rank, myshape, &(value->as<short>())[0]);
-            if (type_name == typeid(int).name()) result.set_data(rank, myshape, &(value->as<int>())[0]);
-            if (type_name == typeid(float).name()) result.set_data(rank, myshape, &(value->as<float>())[0]);
-            if (type_name == typeid(double).name()) result.set_data(rank, myshape, &(value->as<double>())[0]);
+            if (type_name == typeid(short).name()) result.set_data(myshape, &(value->as<short>())[0]);
+            if (type_name == typeid(int).name()) result.set_data(myshape, &(value->as<int>())[0]);
+            if (type_name == typeid(float).name()) result.set_data(myshape, &(value->as<float>())[0]);
+            if (type_name == typeid(double).name()) result.set_data(myshape, &(value->as<double>())[0]);
         }
     } else if (type_name == typeid(char).name()) {
         if (rank == 0) {
@@ -326,10 +326,10 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     auto rank = shape.size();
                     vector<size_t> myshape(rank);
                     for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
-                    if (type_name == "short") result.set_data(rank, myshape, &(value.as<short>())[0]);
-                    if (type_name == "int") result.set_data(rank, myshape, &(value.as<int>())[0]);
-                    if (type_name == "float") result.set_data(rank, myshape, &(value.as<float>())[0]);
-                    if (type_name == "double") result.set_data(rank, myshape, &(value.as<double>())[0]);
+                    if (type_name == "short") result.set_data(myshape, &(value.as<short>())[0]);
+                    if (type_name == "int") result.set_data(myshape, &(value.as<int>())[0]);
+                    if (type_name == "float") result.set_data(myshape, &(value.as<float>())[0]);
+                    if (type_name == "double") result.set_data(myshape, &(value.as<double>())[0]);
                 }
             } else {
                 if (a_rank[i] == 0) {
@@ -349,13 +349,13 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     std::vector<size_t> shape = value.shape();
                     for (int i = 0; i < rank; i++) myshape[i] = shape[i];
                     auto& type = value.type();
-                    if (type.name() == typeid(int).name()) { result.set_data(rank, myshape, &(value.as<int>())[0]); }
+                    if (type.name() == typeid(int).name()) { result.set_data(myshape, &(value.as<int>())[0]); }
                     else if (type.name() == typeid(short).name()) {
-                        result.set_data(rank, myshape, &(value.as<short>()[0]));
+                        result.set_data(myshape, &(value.as<short>()[0]));
                     } else if (type.name() == typeid(double).name()) {
-                        result.set_data(rank, myshape, &(value.as<double>()[0]));
+                        result.set_data(myshape, &(value.as<double>()[0]));
                     } else if (type.name() == typeid(float).name()) {
-                        result.set_data(rank, myshape, &(value.as<float>()[0]));
+                        result.set_data(myshape, &(value.as<float>()[0]));
                     } else {
                         throw HDCException("udaTreeNode2HDC(): Unsupported type: " + std::string(type.name()) + "\n");
                     }

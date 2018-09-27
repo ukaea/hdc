@@ -301,7 +301,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
         for (size_t i = 0; i < rank; i++) shape[i] = hshape[i];
         if (dt == HDC_STRING) {
             dest.set_string(buffer);
-        } else { dest.set_data_c(rank, shape, buffer, dt); } //TODO: do something more inteligent here
+        } else { dest.set_data_c(shape, buffer, dt); } //TODO: do something more inteligent here
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                       ref_path,
                                       "Error reading HDF5 Dataset: "
