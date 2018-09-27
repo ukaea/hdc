@@ -279,6 +279,7 @@ public:
     * @param storage_options p_storage_options:...
     */
     static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
+    void clean();
     /**
     * @brief Cleans up the global_storage  -- mainly due to C and Fortran
     *

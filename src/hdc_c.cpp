@@ -32,7 +32,8 @@ hdc_t hdc_new_array2(size_t rank, size_t* shape_in, hdc_type_t type, size_t flag
 
 void hdc_delete(hdc_t tree UNUSED)
 {
-    std::cerr << "hdc_delete(): I do nothing TODO: remove me...\n";
+    //std::cerr << "hdc_delete(): I do nothing TODO: remove me...\n";
+    HDC(tree).clean();
     return;
 }
 

@@ -597,6 +597,23 @@ void HDC::add_child(const std::string& path, HDC& n)
     return;
 }
 
+void HDC::clean() {
+    auto t = get_type();
+    if (t == HDC_LIST || t == HDC_STRUCT) {
+        try {
+            hdc_map_t* children = get_children_ptr();
+            if (children == nullptr) return;
+            for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
+                //HDC(this->storage,it->key.c_str()).clean();
+                storage->remove(it->address.c_str());
+            }
+        } catch(...) {
+            return;
+        }
+    }
+    storage->remove(uuid); // This is responsibility of storage from now
+}
+
 void HDC::delete_child(hdc_path_t& path)
 {
     hdc_header_t header = get_header();
@@ -1579,3 +1596,5 @@ void HDC::set_data(hdc_data_t obj)
             storage->set(uuid, buffer.data(), header.buffer_size);
         }
 };
+
+
