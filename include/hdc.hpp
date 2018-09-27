@@ -495,7 +495,7 @@ public:
     }
 
     /**
-    * @brief ...
+    * @brief This function is workaround for cython, used simplie
     *
     * @param T size_t: Desired rank.
     * @param T p_T: Desired data type.
