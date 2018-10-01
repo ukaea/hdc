@@ -463,8 +463,6 @@ public:
     */
     template<typename T> void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
-        std::cerr << "RANK: " << rank << " " << shape[0] << std::endl;
-
         hdc_header_t header = get_header();
         D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
         auto buffer = storage->get(uuid);

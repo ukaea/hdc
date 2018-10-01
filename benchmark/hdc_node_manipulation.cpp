@@ -124,6 +124,7 @@ static void BM_HDC_HasChildMultipleItems(benchmark::State& state) {
         // measure
         for (int i=0;i<100;i++) {
             bool exists = tree.exists(std::to_string(i*n/100));
+            if (!exists) std::cout << "Nope.\n"; //This should just trick compiler
         }
     }
     state.SetItemsProcessed(100 * state.iterations());
