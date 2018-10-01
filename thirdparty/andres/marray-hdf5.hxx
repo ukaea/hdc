@@ -221,7 +221,7 @@ void load(
         H5Sclose(filespace);
         throw std::runtime_error("Data types not equal error.");
     }
-    int dimension = H5Sget_simple_extent_ndims(filespace);
+    int dimension = H5Sget_simple_extent_ranks(filespace);
     std::vector<hsize_t> shape(dimension);
     herr_t status = H5Sget_simple_extent_dims(filespace, &shape[0], NULL);
     if(status < 0) {
@@ -277,7 +277,7 @@ void loadShape(
         throw std::runtime_error("Marray cannot open dataset.");
     }
     hid_t filespace = H5Dget_space(dataset);
-    hsize_t dimension = H5Sget_simple_extent_ndims(filespace);
+    hsize_t dimension = H5Sget_simple_extent_ranks(filespace);
     hsize_t* shape = new hsize_t[(std::size_t)(dimension)];
     herr_t status = H5Sget_simple_extent_dims(filespace, shape, NULL);
     if(status < 0) {

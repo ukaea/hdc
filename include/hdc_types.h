@@ -1,79 +1,76 @@
-#include <stddef.h>
 #ifndef HDC_TYPES_H
 #define HDC_TYPES_H
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
+#include <string.h>
 
-#define    HDC_MAX_DIMS  10
-#define    HDC_LIST_INIT_CAPACITY 10
-#define    HDC_LIST_RESIZE_STEP 10
-
-#define    HDC_EMPTY      0
-#define    HDC_STRUCT     1
-#define    HDC_LIST       2
-#define    HDC_INT8       3
-#define    HDC_INT16      4
-#define    HDC_INT32      5
-#define    HDC_INT64      6
-#define    HDC_UINT8      7
-#define    HDC_UINT16     8
-#define    HDC_UINT32     9
-#define    HDC_UINT64    11
-#define    HDC_FLOAT     12
-#define    HDC_DOUBLE    13
-#define    HDC_STRING    14
-#define    HDC_BOOL      15
-#define    HDC_ERROR     16
+#define HDC_MAX_DIMS           10
+#define HDC_LIST_INIT_CAPACITY 10
+#define HDC_LIST_RESIZE_STEP   10
+#define HDC_UUID_LENGTH        37
 
 typedef enum {
-    EMPTY_ID    = HDC_EMPTY,
-    STRUCT_ID   = HDC_STRUCT,
-    LIST_ID     = HDC_LIST,
-    INT8_ID     = HDC_INT8,
-    INT16_ID    = HDC_INT16,
-    INT32_ID    = HDC_INT32,
-    INT64_ID    = HDC_INT64,
-    UINT8_ID    = HDC_UINT8,
-    UINT16_ID   = HDC_UINT16,
-    UINT32_ID   = HDC_UINT32,
-    UINT64_ID   = HDC_UINT64,
-    FLOAT_ID    = HDC_FLOAT,
-    DOUBLE_ID   = HDC_DOUBLE,
-    STRING_ID   = HDC_STRING,
-    BOOL_ID     = HDC_BOOL,
-    ERROR_ID    = HDC_ERROR,
+    HDC_EMPTY  =  0,
+    HDC_STRUCT =  1,
+    HDC_LIST   =  2,
+    HDC_INT8   =  3,
+    HDC_INT16  =  4,
+    HDC_INT32  =  5,
+    HDC_INT64  =  6,
+    HDC_UINT8  =  7,
+    HDC_UINT16 =  8,
+    HDC_UINT32 =  9,
+    HDC_UINT64 = 10,
+    HDC_FLOAT  = 11,
+    HDC_DOUBLE = 12,
+    HDC_STRING = 13,
+    HDC_BOOL   = 14,
+    HDC_ERROR  = 15,
     Internal_ForceMyEnumIntSize = ULONG_MAX // enum : unsigned int is not compatible with C, so we will do this and hope that it will be ok.
-} TypeID;
+} hdc_type_t;
 
-#define HDCDefault        0lu
-#define HDCFortranOrder   1lu
-#define HDCReadOnly       2lu
-#define HDCExternal       4lu
+#define HDCDefault             0lu
+#define HDCFortranOrder        1lu
+#define HDCReadOnly            2lu
+#define HDCExternal            4lu
 #define HDCChildrenInitialized 8lu
 
-typedef unsigned long Flags;
+typedef size_t hdc_flags_t;
 
-struct header_t {
-    size_t buffer_size;
-    size_t data_size;
-    size_t type;
-    size_t flags;
-    size_t shape[10];
-    size_t ndim;
-    size_t pad; // Padding
+struct hdc_header_t {
+    size_t      buffer_size;
+    size_t      data_size;
+    hdc_type_t  type;
+    hdc_flags_t flags;
+    size_t      shape[HDC_MAX_DIMS];
+    size_t      rank;
+    size_t      pad; // Padding
 };
 //} __attribute__((packed));
 
-#define HDC_NODE_SIZE_DEFAULT 4096 // we can try less here 3072 works, 2048 does not
-#define HDC_MAX_RESIZE_ATTEMPTS 5 // how many times to try increasing buffer
+#define HDC_NODE_SIZE_DEFAULT   4096 // we can try less here 3072 works, 2048 does not
+#define HDC_MAX_RESIZE_ATTEMPTS    5 // how many times to try increasing buffer
 
 //TODO Specify offsets in header, possibly make header of dynamic length.
 //TODO support external data
-//TODO HDF5 1) as serialization, 2) as backend
 
-struct hdc_t;
+struct hdc_data_t {
+    hdc_type_t  type;
+    hdc_flags_t flags;
+    size_t      rank;
+    size_t      shape[HDC_MAX_DIMS];
+    char*       data;
+};
+
+struct hdc_t {
+    char        uuid[HDC_UUID_LENGTH];
+    void*       storage;
+};
+
+typedef struct hdc_t hdc_t;
 
 #endif

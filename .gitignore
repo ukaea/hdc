@@ -11,3 +11,6 @@ src/__pycache__
 
 \.cache/
 \.ipynb_checkpoints/
+
+*.rendered
+*.kate-swp

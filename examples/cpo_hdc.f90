@@ -4,15 +4,16 @@ program cpo_hdc
     implicit none
 
     type(hdc_t) :: equilibrium, distsource
-    equilibrium = hdc_new_empty()
+    equilibrium = hdc_new()
     call hdc_set(equilibrium, 'time', 1.1d0)
     call hdc_set(equilibrium, 'profiles_1d/psi', (/0.1d0, 0.2d0, 0.3d0/))
+    call hdc_dump(equilibrium)
     call test_cpos(equilibrium, distsource)
 contains
 
     subroutine test_cpos(equilibriumin, distsourceout)
-        integer(kind=8) :: i
-        !UAL ! Always describe cpo as array 
+        integer(kind=c_size_t) :: i
+        !UAL ! Always describe cpo as array
         !UAL ! In case of time slice, the size of the input cpo is 1
         !UAL type (type_equilibrium),pointer :: equilibriumin(:)
         !UAL type (type_distsource),pointer :: distsourceout(:)
@@ -28,14 +29,14 @@ contains
 
         !UAL allocate(distsourceout(size(equilibriumin)))
         !HDC we explicitely create a new container
-        distsourceout = hdc_new_empty()
+        distsourceout = hdc_new()
         !HDC resize will create empty containers
         !call hdc_resize(distsourceout, source=equilibriumin) resize is not in dynd
 
         call hdc_copy(equilibriumin, distsourceout)
 
         !UAL do i=1,size(equilibriumin)
-        !HDC we assume here that ndim = 1
+        !HDC we assume here that rank = 1
 
         equilibrium_i = equilibriumin
         distsource_i = distsourceout

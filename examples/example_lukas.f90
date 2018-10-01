@@ -9,7 +9,7 @@ contains
     subroutine test_hdc(hdc_out)
         use hdc_fortran
         implicit none
-        
+
         type(hdc_t), intent(out) :: hdc_out
         type(hdc_t) :: hdc
 
@@ -18,10 +18,10 @@ contains
         ! allocate(hdc)
         !  allocate(hdc2)
 
-        hdc = hdc_new_empty()
+        hdc = hdc_new()
 
-        call hdc_add_child(hdc, "in", hdc_new_empty())
-        call hdc_add_child(hdc, "in/arrays", hdc_new_empty())
+        call hdc_add_child(hdc, "in", hdc_new())
+        call hdc_add_child(hdc, "in/arrays", hdc_new())
 
         call hdc_dump(hdc)
 
@@ -33,14 +33,14 @@ contains
         call hdc_set_data(hdc, "in/arr2", array2)
         call hdc_set(hdc, "in/param_d", 3.14d0)
         call hdc_set(hdc, "in/param_i", 333)
-        
+
         call hdc_set_data(hdc, "in/arrays/A1", array3)
 
         call hdc_dump(hdc)
 
-        write(*,*) "--- Copy to hdc_out ---" 
-        call hdc_copy(hdc, hdc_out) 
-        
+        write(*,*) "--- Copy to hdc_out ---"
+        call hdc_copy(hdc, hdc_out)
+
     end subroutine test_hdc
 
 
@@ -49,18 +49,18 @@ contains
         !    subroutine hdc_as_double_1d_path_sub(this,path,res)
         !         type(hdc_t) :: this
         !         character(len=*), intent(in) :: path
-        !         integer(kind=c_int8_t) :: ndim
+        !         integer(kind=c_int8_t) :: rank
         !         integer(kind=c_long), dimension(:), pointer :: shape_
         !         type(c_ptr) :: shape_ptr, data_ptr
         !         real(kind=dp), dimension(:), pointer, intent(inout) :: res
         !     end subroutine hdc_as_double_1d_path_sub
         ! end interface
 
-        
+
         type(hdc_t) :: hdc_test
 
-        integer    :: i 
-        
+        integer    :: i
+
         integer, dimension(5) :: arr
         integer, dimension(:), pointer  :: arr_p
         !  integer, dimension(:), pointer  :: arr3
@@ -74,21 +74,21 @@ contains
 
         i = -1
         !  ii = -1
-        if (hdc_has_child(hdc_test, "in/param_i")) then
+        if (hdc_exists(hdc_test, "in/param_i")) then
             call hdc_get(hdc_test, "in/param_i", i) ! doesn't work for some reason
             ! call hdc_as_int32_path_sub(hdc_test, "in/param_i", i) ! does work
             i = hdc_as_int32(hdc_test, "in/param_i") ! NO
 !             print *, hdc_as_double(hdc_test, "in/param_d")
         end if
 
-        if (hdc_has_child(hdc_test, "in/arrays/A1")) then
+        if (hdc_exists(hdc_test, "in/arrays/A1")) then
             call hdc_get(hdc_test, "in/arrays/A1", arr_p)
-            ! arr_p = hdc_as_int32_1d(hdc_test, "in/arrays/A1") ! doesn't work ether, even for pointer... 
+            ! arr_p = hdc_as_int32_1d(hdc_test, "in/arrays/A1") ! doesn't work ether, even for pointer...
             ! call hdc_as_double_1d
 
         !     arr_p = hdc_as_double_1d_path(hdc_test, "in/arrays/A1")
         !     call hdc_as_double_1d_path_sub(hdc_test, "in/arrays/A1", arr)
-            
+
             arr = arr_p
 
             print *

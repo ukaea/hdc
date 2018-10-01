@@ -17,8 +17,7 @@ void imasdd_plugin() {
 }
 
 void mdsplus_plugin() {
-//     HDC h = HDC::load ("uda://_a=1+41|MDSPLUS::localhost");
-
+    //HDC h = HDC::load ("uda://_a=1+41|MDSPLUS::localhost");
     std::vector<std::string> paths = {
         "uda://\\magnetics::vloop[*,\"001\"]|MDSPLUS::localhost:8001/tcv_shot/60950",
         "uda://\\magnetics::flux[*,\"001\"]|MDSPLUS::localhost:8001/tcv_shot/60950",
@@ -197,8 +196,8 @@ void netcdf_plugin(int argc, const char *argv[]) {
 
 
 int main(int argc UNUSED, const char *argv[] UNUSED) {
-    mdsplus_plugin();
-//     imasdd_plugin();
+//    mdsplus_plugin();
+     imasdd_plugin();
 //     imas_plugin();
 //     test_plugin();
 //     netcdf_plugin(argc, argv);

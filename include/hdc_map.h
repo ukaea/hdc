@@ -46,13 +46,11 @@ struct shared_string_hash {
     std::size_t operator ()(const shared_string& str) const {
         boost::hash<std::string> hasher;
         size_t hashed = hasher(str.c_str());
-//         std::cout << "shared_string: " << str  << hashed << "\n";getchar();
         return hashed;
     }
     std::size_t operator ()(const char* str) const {
         boost::hash<std::string> hasher;
         size_t hashed = hasher(str);
-//         std::cout << "char*: " << str  << hasher(str) << "\n";getchar();
         return hashed;
     }
 };
@@ -125,6 +123,6 @@ typedef multi_index_container<
         >
     >,
     bip::managed_external_buffer::allocator<record>::type // our allocator
-> map_t;
+> hdc_map_t;
 
 #endif

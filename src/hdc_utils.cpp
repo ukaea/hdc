@@ -36,8 +36,8 @@ std::string generate_uuid_str() {
 
 /* -------------------------  String manipulation ----------------------------- */
 
-std::vector <boost::variant<size_t,std::string>> split(const std::string& s) {
-    std::vector<boost::variant<size_t,std::string>> parts;
+hdc_path_t split(const std::string& s) {
+    hdc_path_t parts;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     boost::char_separator<char> sep("/]", "[");
     tokenizer tok{s, sep};
@@ -58,8 +58,8 @@ std::vector <boost::variant<size_t,std::string>> split(const std::string& s) {
     return parts;
 }
 
-std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::string& s) {
-    std::vector<boost::variant<size_t,std::string>> parts;
+hdc_path_t split_no_brackets(const std::string& s) {
+    hdc_path_t parts;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     boost::char_separator<char> sep("/", "");
     tokenizer tok{s, sep};
@@ -78,96 +78,96 @@ std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::st
 /* -------------------------  Types Definitions  ------------------------- */
 
 
-size_t hdc_sizeof (TypeID type) {
+size_t hdc_sizeof (hdc_type_t type) {
     switch(type) {
-        case EMPTY_ID:
-        case LIST_ID:
-        case STRUCT_ID:
-        case ERROR_ID:
+        case HDC_EMPTY:
+        case HDC_LIST:
+        case HDC_STRUCT:
+        case HDC_ERROR:
             return 0;
-        case STRING_ID:
+        case HDC_STRING:
             return sizeof(char);
-        case UINT8_ID:
-        case INT8_ID:
+        case HDC_UINT8:
+        case HDC_INT8:
             return sizeof(int8_t);
-        case UINT16_ID:
-        case INT16_ID:
+        case HDC_UINT16:
+        case HDC_INT16:
             return sizeof(int16_t);
-        case UINT32_ID:
-        case INT32_ID:
+        case HDC_UINT32:
+        case HDC_INT32:
             return sizeof(int32_t);
-        case UINT64_ID:
-        case INT64_ID:
+        case HDC_UINT64:
+        case HDC_INT64:
             return sizeof(int64_t);
-        case FLOAT_ID:
+        case HDC_FLOAT:
             return sizeof(float);
-        case DOUBLE_ID:
+        case HDC_DOUBLE:
             return sizeof(double);
-        case BOOL_ID:
+        case HDC_BOOL:
             return sizeof(bool);
         default:
             throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
     }
 };
 
-bool hdc_is_primitive_type(TypeID type) {
+bool hdc_is_primitive_type(hdc_type_t type) {
     switch(type) {
-        case EMPTY_ID:
-        case LIST_ID:
-        case STRUCT_ID:
-        case ERROR_ID:
+        case HDC_EMPTY:
+        case HDC_LIST:
+        case HDC_STRUCT:
+        case HDC_ERROR:
             return false;
-        case STRING_ID:
-        case UINT8_ID:
-        case INT8_ID:
-        case UINT16_ID:
-        case INT16_ID:
-        case UINT32_ID:
-        case INT32_ID:
-        case UINT64_ID:
-        case INT64_ID:
-        case FLOAT_ID:
-        case DOUBLE_ID:
-        case BOOL_ID:
+        case HDC_STRING:
+        case HDC_UINT8:
+        case HDC_INT8:
+        case HDC_UINT16:
+        case HDC_INT16:
+        case HDC_UINT32:
+        case HDC_INT32:
+        case HDC_UINT64:
+        case HDC_INT64:
+        case HDC_FLOAT:
+        case HDC_DOUBLE:
+        case HDC_BOOL:
             return true;
         default:
             throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
     }
 }
 
-std::string hdc_type_str(TypeID _type) {
+std::string hdc_type_str(hdc_type_t _type) {
     switch(_type) {
-        case EMPTY_ID:
+        case HDC_EMPTY:
             return "null";
-        case LIST_ID:
+        case HDC_LIST:
             return "list";
-        case STRUCT_ID:
+        case HDC_STRUCT:
             return "hdc";
-        case ERROR_ID:
+        case HDC_ERROR:
             return "error";
-        case STRING_ID:
+        case HDC_STRING:
             return "string";
-        case UINT8_ID:
+        case HDC_UINT8:
             return "uint8";
-        case INT8_ID:
+        case HDC_INT8:
             return "int8";
-        case UINT16_ID:
+        case HDC_UINT16:
             return "uint16";
-        case INT16_ID:
+        case HDC_INT16:
             return "int16";
-        case UINT32_ID:
+        case HDC_UINT32:
             return "uint32";
-        case INT32_ID:
+        case HDC_INT32:
             return "int32";
-        case UINT64_ID:
+        case HDC_UINT64:
             return "uint64";
-        case INT64_ID:
+        case HDC_INT64:
             return "int64";
-        case FLOAT_ID:
+        case HDC_FLOAT:
             return "float32";
-        case DOUBLE_ID:
+        case HDC_DOUBLE:
             return "float64";
-        case BOOL_ID:
+        case HDC_BOOL:
             return "bool";
         default:
             return "unknown";
@@ -175,88 +175,87 @@ std::string hdc_type_str(TypeID _type) {
 }
 
 template <typename T>
-TypeID to_typeid(T a) {
+hdc_type_t to_typeid(T a) {
     throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(a)+"\n");
 };
-TypeID to_typeid(double a UNUSED) {return DOUBLE_ID;};
-TypeID to_typeid(float a UNUSED) {return FLOAT_ID;};
-TypeID to_typeid(int64_t a UNUSED) {return INT64_ID;};
-TypeID to_typeid(int32_t a UNUSED) {return INT32_ID;};
-TypeID to_typeid(int16_t a UNUSED) {return INT16_ID;};
-TypeID to_typeid(int8_t a UNUSED) {return INT8_ID;};
-TypeID to_typeid(char a UNUSED) {return INT8_ID;};
-TypeID to_typeid(uint64_t a UNUSED) {return UINT64_ID;};
-TypeID to_typeid(uint32_t a UNUSED) {return UINT32_ID;};
-TypeID to_typeid(uint16_t a UNUSED) {return UINT16_ID;};
-TypeID to_typeid(uint8_t a UNUSED) {return UINT8_ID;};
-TypeID to_typeid(std::string a UNUSED) {return STRING_ID;};
-TypeID to_typeid(char* a UNUSED) {return STRING_ID;};
-TypeID to_typeid(char const* a UNUSED) {return STRING_ID;};
-TypeID to_typeid(bool a UNUSED) {return BOOL_ID;};
-TypeID numpy_format_to_typeid(std::string format, size_t itemsize UNUSED) {
+hdc_type_t to_typeid(double a UNUSED) {return HDC_DOUBLE;};
+hdc_type_t to_typeid(float a UNUSED) {return HDC_FLOAT;};
+hdc_type_t to_typeid(int64_t a UNUSED) {return HDC_INT64;};
+hdc_type_t to_typeid(int32_t a UNUSED) {return HDC_INT32;};
+hdc_type_t to_typeid(int16_t a UNUSED) {return HDC_INT16;};
+hdc_type_t to_typeid(int8_t a UNUSED) {return HDC_INT8;};
+hdc_type_t to_typeid(char a UNUSED) {return HDC_INT8;};
+hdc_type_t to_typeid(uint64_t a UNUSED) {return HDC_UINT64;};
+hdc_type_t to_typeid(uint32_t a UNUSED) {return HDC_UINT32;};
+hdc_type_t to_typeid(uint16_t a UNUSED) {return HDC_UINT16;};
+hdc_type_t to_typeid(uint8_t a UNUSED) {return HDC_UINT8;};
+hdc_type_t to_typeid(std::string a UNUSED) {return HDC_STRING;};
+hdc_type_t to_typeid(char* a UNUSED) {return HDC_STRING;};
+hdc_type_t to_typeid(char const* a UNUSED) {return HDC_STRING;};
+hdc_type_t to_typeid(bool a UNUSED) {return HDC_BOOL;};
+hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize UNUSED) {
     if (format == "i") {
-        return INT32_ID;
+        return HDC_INT32;
     } else if (format == "d") {
-        return DOUBLE_ID;
+        return HDC_DOUBLE;
     } else if (format == "f") {
-        return FLOAT_ID;
+        return HDC_FLOAT;
     } else if (format == "l") {
-        return INT64_ID;
+        return HDC_INT64;
     } else if (format == "h") {
-        return INT16_ID;
+        return HDC_INT16;
     // TODO crashed - bool binary compatible?
     // } else if (format == "?") {
-    //     return BOOL_ID;
+    //     return HDC_BOOL;
     } else if (format == "b") {
-        return INT8_ID;
+        return HDC_INT8;
     }
     // return error by default
-    return ERROR_ID;
+    return HDC_ERROR;
 };
 
 
-TypeID to_typeid(const std::type_info& t) {
+hdc_type_t to_typeid(const std::type_info& t) {
     const std::string type_str = t.name();
     if (t == typeid(std::string) || t == typeid(char) || t == typeid(char*)) {
-        return STRING_ID;
+        return HDC_STRING;
     } else if (t == typeid(double)) {
-        return DOUBLE_ID;
+        return HDC_DOUBLE;
     } else if (t == typeid(int)) {
-        return INT64_ID;
+        return HDC_INT64;
     } else if (t == typeid(short)) {
-        return INT64_ID;
+        return HDC_INT64;
     } else {
-        return ERROR_ID;
+        return HDC_ERROR;
     }
 }
 
-TypeID uda_str_to_typeid(std::string& str) {
+hdc_type_t uda_str_to_typeid(std::string& str) {
     if (str == "STRING") {
-        return STRING_ID;
+        return HDC_STRING;
     } else if (str =="STRING *") {
         std::cerr << "Warning: STRING * type is not supported!\n";
-        return LIST_ID;
+        return HDC_LIST;
     } else if (str =="int") {
-        return INT64_ID;
+        return HDC_INT64;
     } else if (str =="short") {
-        return INT64_ID;
+        return HDC_INT64;
     } else if (str =="double") {
-        return DOUBLE_ID;
+        return HDC_DOUBLE;
     }
-    return ERROR_ID;
+    return HDC_ERROR;
 }
 
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
-char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, bool fortranOrder) {
+char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder) {
     //TODO: remove these ugly switch - cases and use something better (if possible)
     auto item_size = hdc_sizeof(type_);
     auto n_items = 1lu;
-    size_t new_shape[HDC_MAX_DIMS];
-    memset(new_shape, 0, sizeof(size_t)*HDC_MAX_DIMS);
-    for (int i=0; i<ndim;i++) {
+    std::vector<size_t> new_shape(rank);
+    for (int i=0; i<rank;i++) {
         n_items *= shape[i];
-        new_shape[i] = shape[ndim-i-1];
+        new_shape[i] = shape[rank-i-1];
     }
     andres::CoordinateOrder order;
     andres::CoordinateOrder new_order;
@@ -271,94 +270,94 @@ char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, b
     char* new_buffer = new char[item_size*n_items];
 
     switch(type_) {
-        case(INT8_ID):
+        case(HDC_INT8):
         {
-            andres::View<int8_t> view(shape, shape+ndim, (int8_t*)buffer,order);
-            andres::View<int8_t> new_view((size_t*)new_shape, new_shape+ndim, (int8_t*)new_buffer,new_order);
+            andres::View<int8_t> view(&shape[0], &shape[0]+rank, (int8_t*)buffer,order);
+            andres::View<int8_t> new_view(&new_shape[0], &new_shape[0]+rank, (int8_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(INT16_ID):
+        case(HDC_INT16):
         {
-            andres::View<int16_t> view(shape, shape+ndim, (int16_t*)buffer,order);
-            andres::View<int16_t> new_view((size_t*)new_shape, new_shape+ndim, (int16_t*)new_buffer,new_order);
+            andres::View<int16_t> view(&shape[0], &shape[0]+rank, (int16_t*)buffer,order);
+            andres::View<int16_t> new_view(&new_shape[0], &new_shape[0]+rank, (int16_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(INT32_ID):
+        case(HDC_INT32):
         {
-            andres::View<int32_t> view(shape, shape+ndim, (int32_t*)buffer,order);
-            andres::View<int32_t> new_view((size_t*)new_shape, new_shape+ndim, (int32_t*)new_buffer,new_order);
+            andres::View<int32_t> view(&shape[0], &shape[0]+rank, (int32_t*)buffer,order);
+            andres::View<int32_t> new_view(&new_shape[0], &new_shape[0]+rank, (int32_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
 //             std::cout << view.asString() << std::endl;
-//             andres::View<int32_t> transposed_view(shape, shape+ndim, (int32_t*)new_buffer,order);
+//             andres::View<int32_t> transposed_view(&shape[0], &shape[0]+rank, (int32_t*)new_buffer,order);
 //             std::cout << transposed_view.asString() << std::endl;
             break;
         }
-        case(INT64_ID):
+        case(HDC_INT64):
         {
-            andres::View<int64_t> view(shape, shape+ndim, (int64_t*)buffer,order);
-            andres::View<int64_t> new_view((size_t*)new_shape, new_shape+ndim, (int64_t*)new_buffer,new_order);
+            andres::View<int64_t> view(&shape[0], &shape[0]+rank, (int64_t*)buffer,order);
+            andres::View<int64_t> new_view(&new_shape[0], &new_shape[0]+rank, (int64_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(UINT8_ID):
+        case(HDC_UINT8):
         {
-            andres::View<uint8_t> view(shape, shape+ndim, (uint8_t*)buffer,order);
-            andres::View<uint8_t> new_view((size_t*)new_shape, new_shape+ndim, (uint8_t*)new_buffer,new_order);
+            andres::View<uint8_t> view(&shape[0], &shape[0]+rank, (uint8_t*)buffer,order);
+            andres::View<uint8_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint8_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(UINT16_ID):
+        case(HDC_UINT16):
         {
-            andres::View<uint16_t> view(shape, shape+ndim, (uint16_t*)buffer,order);
-            andres::View<uint16_t> new_view((size_t*)new_shape, new_shape+ndim, (uint16_t*)new_buffer,new_order);
+            andres::View<uint16_t> view(&shape[0], &shape[0]+rank, (uint16_t*)buffer,order);
+            andres::View<uint16_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint16_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(UINT32_ID):
+        case(HDC_UINT32):
         {
-            andres::View<uint32_t> view(shape, shape+ndim, (uint32_t*)buffer,order);
-            andres::View<uint32_t> new_view((size_t*)new_shape, new_shape+ndim, (uint32_t*)new_buffer,new_order);
+            andres::View<uint32_t> view(&shape[0], &shape[0]+rank, (uint32_t*)buffer,order);
+            andres::View<uint32_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint32_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(UINT64_ID):
+        case(HDC_UINT64):
         {
-            andres::View<uint64_t> view(shape, shape+ndim, (uint64_t*)buffer,order);
-            andres::View<uint64_t> new_view((size_t*)new_shape, new_shape+ndim, (uint64_t*)new_buffer,new_order);
+            andres::View<uint64_t> view(&shape[0], &shape[0]+rank, (uint64_t*)buffer,order);
+            andres::View<uint64_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint64_t*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(FLOAT_ID):
+        case(HDC_FLOAT):
         {
-            andres::View<float> view(shape, shape+ndim, (float*)buffer,order);
-            andres::View<float> new_view((size_t*)new_shape, new_shape+ndim, (float*)new_buffer,new_order);
+            andres::View<float> view(&shape[0], &shape[0]+rank, (float*)buffer,order);
+            andres::View<float> new_view(&new_shape[0], &new_shape[0]+rank, (float*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(DOUBLE_ID):
+        case(HDC_DOUBLE):
         {
-            andres::View<double> view(shape, shape+ndim, (double*)buffer,order);
-            andres::View<double> new_view((size_t*)new_shape, new_shape+ndim, (double*)new_buffer,new_order);
+            andres::View<double> view(&shape[0], &shape[0]+rank, (double*)buffer,order);
+            andres::View<double> new_view(&new_shape[0], &new_shape[0]+rank, (double*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(BOOL_ID):
+        case(HDC_BOOL):
         {
-            andres::View<bool> view(shape, shape+ndim, (bool*)buffer,order);
-            andres::View<bool> new_view((size_t*)new_shape, new_shape+ndim, (bool*)new_buffer,new_order);
+            andres::View<bool> view(&shape[0], &shape[0]+rank, (bool*)buffer,order);
+            andres::View<bool> new_view(&new_shape[0], &new_shape[0]+rank, (bool*)new_buffer,new_order);
             for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
             break;
         }
-        case(STRUCT_ID):
-        case(LIST_ID):
-        case(EMPTY_ID):
-        case(STRING_ID):
-            throw HDCException("transpose_buffer(): TypeID = "+std::to_string((size_t)type_)+" cannot be transposed.");
+        case(HDC_STRUCT):
+        case(HDC_LIST):
+        case(HDC_EMPTY):
+        case(HDC_STRING):
+            throw HDCException("transpose_buffer(): hdc_type_t = "+std::to_string((size_t)type_)+" cannot be transposed.");
         default:
         {
-            throw HDCException("transpose_buffer(): TypeID = "+std::to_string((size_t)type_)+" not supported yet.");
+            throw HDCException("transpose_buffer(): hdc_type_t = "+std::to_string((size_t)type_)+" not supported yet.");
         }
     }
 
@@ -366,18 +365,17 @@ char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, b
 }
 
 char* transpose_buffer(char* buffer) {
-    header_t header;
-    memcpy(&header,buffer,sizeof(header_t));
-    auto data = buffer+sizeof(header_t);
+    hdc_header_t header;
+    memcpy(&header,buffer,sizeof(hdc_header_t));
+    auto data = buffer+sizeof(hdc_header_t);
     char* new_buffer = new char[header.buffer_size];
     bool fortranOrder = (header.flags & HDCFortranOrder) == HDCFortranOrder;
-    std::cout << "fortranOrder" << (int)fortranOrder<< std::endl;
-    auto transposed_data = transpose_buffer(data, header.ndim, header.shape, (TypeID)header.type, fortranOrder);
-    memcpy(new_buffer,&header,sizeof(header_t));
+    std::vector<size_t> shape(&header.shape[0],&header.shape[0]+header.rank);
+    auto transposed_data = transpose_buffer(data, header.rank, shape, (hdc_type_t)header.type, fortranOrder);
+    memcpy(new_buffer,&header,sizeof(hdc_header_t));
     memcpy(new_buffer,transposed_data,header.data_size);
     return new_buffer;
 }
-
 
 /**
  * Check if a file exists
