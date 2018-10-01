@@ -6,7 +6,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string_regex.hpp>
 #include <boost/type.hpp>
-
+#include <CLI/CLI.hpp>
 //#define DEBUG
 
 using namespace std;
@@ -17,33 +17,27 @@ unordered_map<string, string> avail_stores;
 
 pt::ptree* options;
 
+CLI::App app; // This is for command line parsing
+
 void HDC::parse_cmdline(int argc, const char* argv[])
 {
-    namespace po = boost::program_options;
-    po::options_description desc("Allowed options:");
-    desc.add_options()
-            ("help", "produce help message")
-            ("list-plugins", "list available storage plugins")
-            ("storage", po::value<std::string>(), "use given storage plugin");
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
+    bool _list_plugins = false;
+    app.add_flag("--list-plugins", _list_plugins, "lists available storage plugins");
+    std::string _storage = "umap";
+    app.add_option("--storage", _storage, "storage name (e.g. \"umap\", or \"mdbm\")");
+//     app.set_config("--config"); // TODO
+    try {
+        app.parse(argc, argv);
 
-    if (vm.count("help")) {
-        std::cout << desc << "\n";
-        exit(0);
+    } catch (const CLI::ParseError &e) {
+        exit(app.exit(e));
     }
-
-    if (vm.count("list-plugins")) {
+    if (_list_plugins) {
         HDC::search_plugins();
         HDC::list_plugins();
         exit(0);
     }
-
-    if (vm.count("storage")) {
-        string plugin_name = vm["storage"].as<std::string>();
-        options->put("storage_cmdline", plugin_name.c_str());
-    }
+    options->put("storage_cmdline", _storage);
 }
 
 void HDC::load_config(std::string configPath)
