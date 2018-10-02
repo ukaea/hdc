@@ -37,11 +37,22 @@ endif()
 
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fmax-errors=1 -fPIC")
-
+if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+endif()
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+endif()
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+# -diag-enable=remark
+    set(CMAKE_Fortran_FLAGS "-O2 -free -diag-enable=warn -fPIC")
+else()
+    set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+endif()
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system regex)
@@ -120,20 +131,25 @@ if(ENABLE_HDF5)
     find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
     if(HDF5_FOUND AND NOT BUILD_OWN_HDF5)
         include_directories(${HDF5_INCLUDE_DIR})
-        set(_hdf5_libs hdf5 hdf5_cpp)
         message("HDF5 library found: ${HDF5_INCLUDE_DIR}")
         message("HDF5 CXX library found: ${HDF5_CXX_LIBRARIES}")
+        set(_hdf5_libs ${HDF5_HL_LIBRARIES} ${HDF5_LIBRARIES})
     else()
         message("HDF5 library not found or wanted, trying to build it...")
         include(ExternalProject)
         set(ExternalProjectCMakeArgs
             -DHDF5_BUILD_CPP_LIB=ON
             )
-        set(_hdf5_version "1.10.0-patch1")
+        set(_hdf5_version "1.10.3")
+        set(_hdf5_version_short "1.10")
+#         set(_hdf5_version "1.8.21")
+#         set(_hdf5_version_short "1.8")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
 	ExternalProject_Add(hdf5_local
-            DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_hdf5_version}.tar.gz | tar xvz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
+            DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${_hdf5_version_short}/hdf5-${_hdf5_version}/src/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
+            #DOWNLOAD_COMMAND cat ${hdc_SOURCE_DIR}/../tmp/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             CMAKE_ARGS ${ExternalProjectCMakeArgs}
+            CMAKE_CACHE_ARGS "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}" "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}" "-DCMAKE_Fortran_COMPILER:FILEPATH=${CMAKE_Fortran_COMPILER}" # Forward compiler
             SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_hdf5_version}
             BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
             STAMP_DIR  ${PROJECT_BINARY_DIR}/hdf5_local/stamp
