@@ -14,3 +14,6 @@ src/__pycache__
 
 *.rendered
 *.kate-swp
+*.gcda
+*.gcno
+*.html
