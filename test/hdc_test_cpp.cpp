@@ -1,5 +1,31 @@
 #include "catch.hpp"
 #include "hdc.hpp"
+#include <cstdio>
+
+
+#define PREPARE_TREE()                                                                              \
+    std::vector<size_t> shape = {4};                                                                \
+    double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
+    int32_t data_int[] = {777,20202020,3333,555555};                                                \
+    HDC tree;                                                                                       \
+    HDC scalar;                                                                                     \
+    scalar.set_data(333.333);                                                                       \
+    tree.add_child("aaa/bbb/_scalar", scalar);                                                      \
+    tree["aaa/bbb/double"].set_data<double>(shape,data_double);                                     \
+    tree["aaa/bbb/double2"].set_data<double>(shape,data_double);                                    \
+    tree["aaa/bbb/int"].set_data<int>(shape,data_int);                                              \
+    HDC ch;                                                                                         \
+    tree.add_child("aaa/bbb/empty", ch);                                                            \
+    HDC list;                                                                                       \
+    HDC lch;                                                                                        \
+    for (int i=0;i<5;i++) {                                                                         \
+        HDC lch;                                                                                    \
+        list.append(lch);                                                                           \
+    }                                                                                               \
+    tree.add_child("aaa/list", list);                                                               \
+    HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
+    tree.add_child("aaa/string",str);                                                               \
+
 
 TEST_CASE("StringParsing", "[HDCUtils]")
 {
@@ -20,6 +46,19 @@ TEST_CASE("StringParsing", "[HDCUtils]")
     }
 }
 
+TEST_CASE("GetPlugins","[HDC]")
+{
+    auto plugins = HDC::get_available_plugins();
+    // "umap" should be always present
+    auto it_umap = std::find(plugins.begin(), plugins.end(), "umap");
+    CHECK(it_umap != plugins.end());
+#ifdef _USE_MDBM
+    // "mdbm" has been built and  should be found
+    auto it_mdbm = std::find(plugins.begin(), plugins.end(), "mdbm");
+    CHECK(it_mdbm != plugins.end());
+#endif // _USE_MDBM
+}
+
 
 TEST_CASE("EmptyNode", "[HDC]")
 {
@@ -29,6 +68,14 @@ TEST_CASE("EmptyNode", "[HDC]")
     CHECK(HDC_EMPTY == h.get_type());
     CHECK(strcmp("null", h.get_type_str()) == 0);
     CHECK(false == h.exists("aaa"));
+    CHECK(h.get_datasize() == 0);
+    CHECK(h.get_size() == sizeof(hdc_header_t));
+    CHECK(h.get_flags() == HDCDefault);
+    CHECK(h.is_external() == false);
+    CHECK(h.is_readonly() == false);
+    std::cerr << h.as_cstring()<<std::endl;
+    CHECK(strcmp(h.as_cstring(),"null\n") == 0);
+    CHECK(strcmp(h.as_string().c_str(),"null\n") == 0);
 }
 
 TEST_CASE("EmptyNodePtr", "[HDC]")
@@ -143,7 +190,6 @@ TEST_CASE("ListManipulation", "[HDC]")
 #endif // _USE_HDF5
 }
 
-
 TEST_CASE("Int8DataManipulation", "[HDC]")
 {
     std::vector<size_t> shape = { 4 };
@@ -153,6 +199,7 @@ TEST_CASE("Int8DataManipulation", "[HDC]")
     CHECK(HDC_INT8 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
+    CHECK(h.get_itemsize() == sizeof(int8_t));
     CHECK(strcmp("int8", h.get_type_str()) == 0);
     int8_t* data2 = h.as<int8_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
@@ -173,6 +220,7 @@ TEST_CASE("Int16DataManipulation", "[HDC]")
     CHECK(HDC_INT16 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
+    CHECK(h.get_itemsize() == sizeof(int16_t));
     CHECK(strcmp("int16", h.get_type_str()) == 0);
     int16_t* data2 = h.as<int16_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
@@ -188,6 +236,7 @@ TEST_CASE("Int32DataManipulation", "[HDC]")
     CHECK(HDC_INT32 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
+    CHECK(h.get_itemsize() == sizeof(int32_t));
     CHECK(strcmp("int32", h.get_type_str()) == 0);
     int32_t* data2 = h.as<int32_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
@@ -203,6 +252,7 @@ TEST_CASE("Int64DataManipulation", "[HDC]")
     CHECK(HDC_INT64 == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
+    CHECK(h.get_itemsize() == sizeof(int64_t));
     CHECK(strcmp("int64", h.get_type_str()) == 0);
     int64_t* data2 = h.as<int64_t*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
@@ -219,10 +269,10 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     CHECK(HDC_DOUBLE == h.get_type());
     CHECK(1 == h.get_rank());
     CHECK(4 == h.get_shape()[0]);
+    CHECK(h.get_itemsize() == sizeof(double));
     CHECK(strcmp("float64", h.get_type_str()) == 0);
     double* data2 = h.as<double*>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
-
 }
 
 TEST_CASE("StringDataManipulation", "[HDC]")
@@ -359,28 +409,6 @@ TEST_CASE("BracketOperators", "[HDC]")
 
 }
 
-#define PREPARE_TREE()                                                                              \
-    std::vector<size_t> shape = {4};                                                                \
-    double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
-    int32_t data_int[] = {777,20202020,3333,555555};                                                \
-    HDC tree;                                                                                       \
-    HDC scalar;                                                                                     \
-    scalar.set_data(333.333);                                                                       \
-    tree.add_child("aaa/bbb/_scalar", scalar);                                                      \
-    tree["aaa/bbb/double"].set_data<double>(shape,data_double);                                     \
-    tree["aaa/bbb/double2"].set_data<double>(shape,data_double);                                    \
-    tree["aaa/bbb/int"].set_data<int>(shape,data_int);                                              \
-    HDC ch;                                                                                         \
-    tree.add_child("aaa/bbb/empty", ch);                                                            \
-    HDC list;                                                                                       \
-    HDC lch;                                                                                        \
-    for (int i=0;i<5;i++) {                                                                         \
-        HDC lch;                                                                                    \
-        list.append(lch);                                                                           \
-    }                                                                                               \
-    tree.add_child("aaa/list", list);                                                               \
-    HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
-    tree.add_child("aaa/string",str);                                                               \
 
 TEST_CASE("JsonComplete", "[HDC]")
 {
@@ -431,11 +459,11 @@ TEST_CASE("CopyConstructor", "[HDC]")
     PREPARE_TREE()
     // test copy c-tor
     HDC copy(tree);
-    HDC d = copy.get("aaa/bbb/double");
-    CHECK(1 == d.get_rank());
-    CHECK(4 == d.get_shape()[0]);
-    CHECK(HDC_DOUBLE == d.get_type());
-    CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), d.get_type_str()) == 0);
+    auto tree_dump = tree.serialize();
+    auto copy_dump = copy.serialize();
+    CHECK(strcmp(tree_dump.c_str(), copy_dump.c_str()) == 0);
+    // Check also that UUIDs are the same - this behaviour can be changed later
+    CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), copy["aaa/bbb/double"].get_uuid().c_str()) == 0);
 }
 
 TEST_CASE("load", "[HDC]")

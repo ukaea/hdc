@@ -173,6 +173,25 @@ TEST_CASE("C_DoubleDataManipulation", "[CHDC]")
     CHECK(666.666 == data2[3]);
 }
 
+TEST_CASE("C_SetDataObj", "[CHDC]")
+{
+    double data[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
+    hdc_data_t d;
+    d.data = (char*)&data;
+    d.type = HDC_DOUBLE;
+    d.flags = HDCDefault;
+    d.rank = 1;
+    d.shape[0] = 4;
+    hdc_t h = hdc_new_size(4*sizeof(double));
+    hdc_set_data(h,"",d);
+    double* gdata = hdc_as_double_array(h,"");
+    CHECK(hdc_get_type(h,"") == HDC_DOUBLE);
+    for (auto i = 0;i<1;i++) {
+        CHECK(gdata[i] == data[i]);
+    }
+}
+
+
 TEST_CASE("C_StringDataManipulation", "[CHDC]")
 {
     hdc_t h = hdc_new_empty();
@@ -226,6 +245,34 @@ TEST_CASE("C_get_data", "[CHDC]")
     CHECK(data_in.type == data_out.type);
     CHECK(data_in.flags == data_out.flags);
     for (size_t i=0; i<HDC_MAX_DIMS; i++) CHECK(data_in.shape[i] == data_out.shape[i]);
+}
+
+TEST_CASE("C_SetDataScalar","[CHDC]")
+{
+    hdc_t hd = hdc_new_empty();
+    double d = 3.14;
+    hdc_set_scalar(hd,"",(void*)(&d),HDC_DOUBLE);
+    CHECK(hdc_as_double_scalar(hd,"") == d);
+
+    hdc_t hi8 = hdc_new_empty();
+    int8_t i8 = 8;
+    hdc_set_scalar(hi8,"",(void*)(&i8),HDC_INT8);
+    CHECK(hdc_as_int8_scalar(hi8,"") == i8);
+
+    hdc_t hi16 = hdc_new_empty();
+    int16_t i16 = 16;
+    hdc_set_scalar(hi16,"",(void*)(&i16),HDC_INT16);
+    CHECK(hdc_as_int16_scalar(hi16,"") == i16);
+
+    hdc_t hi32 = hdc_new_empty();
+    int32_t i32 = 32;
+    hdc_set_scalar(hi32,"",(void*)(&i32),HDC_INT32);
+    CHECK(hdc_as_int32_scalar(hi32,"") == i32);
+
+    hdc_t hi64 = hdc_new_empty();
+    int64_t i64 = 64;
+    hdc_set_scalar(hi64,"",(void*)(&i64),HDC_INT64);
+    CHECK(hdc_as_int64_scalar(hi64,"") == i64);
 }
 
 //-----------------------------------------------------------------------------------------

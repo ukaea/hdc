@@ -199,7 +199,7 @@ public:
     /**
     * @brief Copy contructor
     *
-    * @param h p_h:...
+    * @param h p_h: pointer to HDC object
     */
     HDC(HDC* h);
     /**
@@ -348,6 +348,12 @@ public:
     * @return size_t
     */
     size_t get_flags() const;
+    /**
+    * @brief returns pointer on itself
+    *
+    * @return HDC*
+    */
+    const HDC* get_this_ptr() const;
     /**
     * @brief ...
     *
@@ -890,7 +896,6 @@ public:
             return str;
 
         } else {
-            std::cout << header.type << std::endl;
             std::ostringstream oss;
             oss << to_json(0) << "\n";
             return oss.str();
@@ -902,7 +907,6 @@ public:
         if (header.type == HDC_STRING) {
             return static_cast<const char*>(get_buffer()+sizeof(hdc_header_t));
         } else {
-            std::cout << header.type << std::endl;
             std::ostringstream oss;
             oss << to_json(0) << "\n";
             return oss.str().c_str();

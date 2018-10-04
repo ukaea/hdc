@@ -723,6 +723,11 @@ const HDC HDC::get(hdc_path_t& path) const
     return get_single(first).get(path);
 }
 
+const HDC* HDC::get_this_ptr() const
+{
+    return this;
+}
+
 HDC HDC::get_single(hdc_index_t index)
 {
     DEBUG_STDOUT("get_single(" + to_string(index) + ")\n");
