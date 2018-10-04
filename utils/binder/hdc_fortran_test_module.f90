@@ -58,7 +58,7 @@ subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out)
     write(0, *) '-- hdc_copy done ---'
 
     !UAL do i=1,size(equilibriumin)
-    !HDC we assume here that ndim = 1
+    !HDC we assume here that rank = 1
 
     equilibrium_i = equilibriumin
     distsource_i = distsourceout

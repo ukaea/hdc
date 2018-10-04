@@ -12,3 +12,9 @@ src/__pycache__
 \.cache/
 *.mexa64
 \.ipynb_checkpoints/
+
+*.rendered
+*.kate-swp
+*.gcda
+*.gcno
+*.html

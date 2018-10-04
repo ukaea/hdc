@@ -7,6 +7,7 @@
 #include "storage_interface.hpp"
 #include <hdc_helpers.h>
 #include <exception>
+#include <vector>
 
 // Stolen from MDBM:
 struct datum {
@@ -16,9 +17,10 @@ struct datum {
 
 using namespace std;
 
+
 class UnorderedMapStorage : public Storage {
 private:
-    unordered_map<string,datum> _map;
+    unordered_map<string,vector<char>> _map;
 public:
     UnorderedMapStorage() {
         DEBUG_STDOUT("UnorderedMapStorage()\n");
@@ -40,24 +42,24 @@ public:
         return "This is unordered_map based storage.";
     };
     void set(string key, char* data, size_t size) {
-        if (_map.find(key) != _map.end() && _map[key].dptr != data) {
-            delete[] _map[key].dptr;
+        if (_map.find(key) != _map.end() && &(_map[key])[0] != data) {
             _map.erase(key);
         }
-        _map[key] = {data,size};
+        //_map[key] = {data,size};
+        _map.emplace(key,vector<char>(data,data+size));
         return;
     };
     char* get(string key) {
         if (_map.find(key) == _map.end()) {
             throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
-        return (char*)_map[key].dptr;
+        return &(_map[key])[0];
     };
     size_t get_size(string key) {
         if (_map.find(key) == _map.end()) {
             throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
-        return _map[key].dsize;
+        return _map[key].size();
     };
     bool has(string key) {
         return (_map.find(key) != _map.end());
@@ -68,7 +70,6 @@ public:
     };
     void remove(string key) {
         if (has(key)) {
-            delete[] _map[key].dptr;
             _map.erase(key);
         }
         return;

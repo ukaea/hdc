@@ -11,12 +11,12 @@
 #include <boost/filesystem.hpp>
 #include <hdc_helpers.h>
 #include <exception>
-
+#include <hdc_utils.h>
 using namespace std;
 
 class MDBMStorage : public Storage {
 private:
-    MDBM* db;
+    MDBM* db = NULL;
     bool initialized = false;
     bool persistent = false;
     string filename;
@@ -26,9 +26,8 @@ public:
     };
     ~MDBMStorage() {
         DEBUG_STDOUT("~MDBMStorage()\n");
-        cout << "in destructor\n";
         if(!persistent) {
-            cout << "Calling cleanup()\n";
+//             cout << "Calling cleanup()\n";
             cleanup();
         } else cout << "persistent!!!\n";
     };
@@ -70,10 +69,13 @@ public:
     };
     void cleanup () {
         DEBUG_STDOUT("MDBMStorage::cleanup()\n");
-        mdbm_close(this->db);
-        mdbm_delete_lockfiles(this->filename.c_str());
+        if (this->db != NULL) {
+            mdbm_close(this->db);
+            mdbm_delete_lockfiles(this->filename.c_str());
+            this->db = NULL;
+        }
         // Remove db file if the data persistence is not required
-        if (!this->persistent) {
+        if (!this->persistent && fileExists(filename)) {
             if (::remove(filename.c_str()) != 0) {
                 throw std::runtime_error("MDBMStorage::cleanup(): Error deleting file\n");
             };

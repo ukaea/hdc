@@ -12,12 +12,15 @@ target_link_libraries(hdc_example_c chdc)
 
 add_executable(hdc_example_fortran example_fortran.f90)
 target_link_libraries(hdc_example_fortran fhdc)
+set_target_properties(hdc_example_fortran PROPERTIES LINKER_LANGUAGE Fortran)
 
 add_executable(hdc_example_cpo cpo_hdc.f90)
 target_link_libraries(hdc_example_cpo fhdc)
+set_target_properties(hdc_example_cpo PROPERTIES LINKER_LANGUAGE Fortran)
 
 add_executable(hdc_example_lukas example_lukas.f90)
 target_link_libraries(hdc_example_lukas fhdc)
+set_target_properties(hdc_example_lukas PROPERTIES LINKER_LANGUAGE Fortran)
 
 add_executable(hdc_example_interprocess example_interprocess.cpp)
 if( MACOS )

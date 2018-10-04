@@ -62,7 +62,7 @@ struct h5_read_opdata
 void write_node(H5File* file, std::string path);
 void to_hdf5(std::string filename, std::string dataset_name);
 HDC hdf_dataset_to_node();
-TypeID hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path);
+hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path);
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string &ref_path, HDC& dest);
 int h5_group_check(h5_read_opdata *od, haddr_t target_addr);
 herr_t h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5L_info_t *, void *hdf5_operator_data);
@@ -70,6 +70,9 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string  &ref_path, HDC& d
 void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string  &ref_path, HDC& dest);
 void hdf5_read(hid_t hdf5_id, std::string hdf5_path, HDC& dest);
 void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& node);
+HDC from_hdf5(hid_t file, const std::string& dataset_name);
+HDC from_hdf5(const std::string& filename, const std::string& dataset_name);
+HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name);
 
 #endif // _USE_HDF5
 

@@ -19,6 +19,10 @@
 #include "hdc_types.h"
 #include "hdc_errors.hpp"
 #include <andres/marray.hxx>
+#include <sys/stat.h>
+
+using hdc_index_t = boost::variant<size_t,std::string>;
+using hdc_path_t = std::list<hdc_index_t>;
 
 //typedef std::vector<char,mexAllocator<char>> buffer_t;
 typedef std::vector<char,std::allocator<char>> buffer_t;
@@ -29,39 +33,41 @@ void print_uuid(std::vector<char> uuid);
 std::vector<char> generate_uuid();
 std::string generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
-std::vector <boost::variant<size_t,std::string>> split(const std::string& s);
-std::vector <boost::variant<size_t,std::string>> split_no_brackets(const std::string& s);
+hdc_path_t split(const std::string& s);
+hdc_path_t split_no_brackets(const std::string& s);
 /* -------------------------  Types Definitions  ------------------------- */
-size_t hdc_sizeof (TypeID type);
-bool hdc_is_primitive_type(TypeID type);
-std::string hdc_type_str(TypeID type);
+size_t hdc_sizeof (hdc_type_t type);
+bool hdc_is_primitive_type(hdc_type_t type);
+std::string hdc_type_str(hdc_type_t type);
 
 template <typename T>
-TypeID to_typeid(T a);
-TypeID to_typeid(double a);
-TypeID to_typeid(float a);
-TypeID to_typeid(int64_t a);
-TypeID to_typeid(int32_t a);
-TypeID to_typeid(int16_t a);
-TypeID to_typeid(int8_t a);
-TypeID to_typeid(uint64_t a);
-TypeID to_typeid(uint32_t a);
-TypeID to_typeid(uint16_t a);
-TypeID to_typeid(uint8_t a);
-TypeID to_typeid(char a);
-TypeID to_typeid(std::string a);
-TypeID to_typeid(char* a);
-TypeID to_typeid(bool a);
-TypeID numpy_format_to_typeid(std::string format, size_t itemsize);
-TypeID to_typeid(const std::type_info& t);
-TypeID uda_str_to_typeid(std::string& str);
+hdc_type_t to_typeid(T a);
+hdc_type_t to_typeid(double a);
+hdc_type_t to_typeid(float a);
+hdc_type_t to_typeid(int64_t a);
+hdc_type_t to_typeid(int32_t a);
+hdc_type_t to_typeid(int16_t a);
+hdc_type_t to_typeid(int8_t a);
+hdc_type_t to_typeid(uint64_t a);
+hdc_type_t to_typeid(uint32_t a);
+hdc_type_t to_typeid(uint16_t a);
+hdc_type_t to_typeid(uint8_t a);
+hdc_type_t to_typeid(char a);
+hdc_type_t to_typeid(std::string a);
+hdc_type_t to_typeid(char* a);
+hdc_type_t to_typeid(bool a);
+hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize);
+hdc_type_t to_typeid(const std::type_info& t);
+hdc_type_t uda_str_to_typeid(std::string& str);
 /* -------------------------  Other stuff ----------------------------- */
 
 void hello__();
 
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
-char* transpose_buffer(char* buffer, int8_t ndim, size_t* shape, TypeID type_, bool fortranOrder = false);
+char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder = false);
 char* transpose_buffer(char* buffer);
+
+bool fileExists(const std::string& file);
 
 #endif

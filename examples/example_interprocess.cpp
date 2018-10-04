@@ -50,17 +50,16 @@ int main(int argc, char *argv[]) {
 
         // Prepare some data
         int32_t array[4] = {7,2,3,4};
-        size_t shape[1];
-        shape[0] = 4;
+        std::vector<size_t> shape = {4};
 
         // Add data to a single node
         HDC data;
-        data.set_data(1,shape,array);
+        data.set_data(shape,array);
         // Add data to a subtree
-        tree.set_data("aaa/bbb/ccc",1,shape,array);
+        tree["aaa/bbb/ccc"].set_data(shape,array);
 
         // Ask for some data details, use subtree to shorten the path
-//        int32_t ndim2 = node.get_ndim();
+//        int32_t rank2 = node.get_rank();
 //        size_t* shape2 = node.get_shape();
         // Get data back from tree
 //        int32_t* array2 = node.as<int32_t*>();
@@ -83,8 +82,8 @@ int main(int argc, char *argv[]) {
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
         std::string str(mem);
-        HDC* tree = HDC::deserialize_HDC_string(str);
-        tree->dump();
+        HDC tree = HDC::deserialize_HDC_string(str);
+        tree.dump();
     }
     return 0;
 }

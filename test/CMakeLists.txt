@@ -4,7 +4,16 @@ file(GLOB SRCS *.cpp)
 add_executable(hdc_test ${SRCS})
 target_link_libraries(hdc_test hdc chdc ${Boost_LIBRARIES})
 add_test(NAME hdc_test COMMAND hdc_test WORKING_DIRECTORY "${hdc_BINARY_DIR}")
+if (_BUILD_MDBM)
+    target_compile_definitions(hdc_test PRIVATE -D_USE_MDBM=1)
+endif()
+
 install(TARGETS hdc_test DESTINATION bin)
+
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "DEBUG" AND ENABLE_COVERAGE)
+    set(COVERAGE_GCOVR_EXCLUDES '../build/*' '../thirdparty/*' '../examples/*' '../test/*')
+    SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML(NAME test_coverage EXECUTABLE hdc_test DEPENDENCIES hdc_test)
+endif()
 
 # Just to make CTest happy:
 configure_file("${CMAKE_SOURCE_DIR}/python/pyhdc.py" "${hdc_BINARY_DIR}/python/pyhdc.py" COPYONLY)

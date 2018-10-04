@@ -16,6 +16,14 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 include( CTest )
 include( FileCopyTargets )
 
+# Set the possible values of build type for cmake-gui
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE")
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'RELEASE' as none was specified.")
+    set(CMAKE_BUILD_TYPE RELEASE CACHE STRING "Choose the type of build." FORCE)
+endif()
+
 ########################################################################################################################
 # Compiler configuration
 
@@ -37,10 +45,28 @@ endif()
 
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-set(CMAKE_Fortran_FLAGS "-O2 -ffree-line-length-none -Wall -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fmax-errors=1 -fPIC")
+if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+else()
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+endif()
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+endif()
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+# -diag-enable=remark
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -free -diag-enable=warn -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -free -diag-enable=warn -fPIC")
+else()
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+endif()
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
 set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
@@ -82,6 +108,7 @@ option(BUILD_EXAMPLES "Build and install examples" ON)
 option(BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF)
 option(ENABLE_HDF5 "Enable HDF5 support" ON)
 option(ENABLE_UDA "Enable UDA support" OFF)
+option(ENABLE_COVERAGE "Enable coverage testing (using gcovr)" ON)
 option(BUILD_OWN_HDF5 "Build own HDF5" OFF)
 option(DEBUG "Turns some debug output on or off." OFF)
 option(GOPTION "adds -g to compiler flags" ON)
@@ -123,20 +150,25 @@ if(ENABLE_HDF5)
     find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
     if(HDF5_FOUND AND NOT BUILD_OWN_HDF5)
         include_directories(${HDF5_INCLUDE_DIR})
-        set(_hdf5_libs hdf5 hdf5_cpp)
         message("HDF5 library found: ${HDF5_INCLUDE_DIR}")
         message("HDF5 CXX library found: ${HDF5_CXX_LIBRARIES}")
+        set(_hdf5_libs ${HDF5_HL_LIBRARIES} ${HDF5_LIBRARIES})
     else()
         message("HDF5 library not found or wanted, trying to build it...")
         include(ExternalProject)
         set(ExternalProjectCMakeArgs
             -DHDF5_BUILD_CPP_LIB=ON
             )
-        set(_hdf5_version "1.10.0-patch1")
+        set(_hdf5_version "1.10.3")
+        set(_hdf5_version_short "1.10")
+#         set(_hdf5_version "1.8.21")
+#         set(_hdf5_version_short "1.8")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
 	ExternalProject_Add(hdf5_local
-            DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_hdf5_version}.tar.gz | tar xvz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
+            DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${_hdf5_version_short}/hdf5-${_hdf5_version}/src/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
+            #DOWNLOAD_COMMAND cat ${hdc_SOURCE_DIR}/../tmp/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             CMAKE_ARGS ${ExternalProjectCMakeArgs}
+            CMAKE_CACHE_ARGS "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}" "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}" "-DCMAKE_Fortran_COMPILER:FILEPATH=${CMAKE_Fortran_COMPILER}" # Forward compiler
             SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_hdf5_version}
             BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
             STAMP_DIR  ${PROJECT_BINARY_DIR}/hdf5_local/stamp
@@ -157,6 +189,27 @@ if(ENABLE_HDF5)
     add_definitions(-D_USE_HDF5=1)
 endif() # ENABLE_HDF5
 
+if (BUILD_MDBM_PLUGIN)
+    find_path(
+        MDBM_INCLUDE_DIR
+        NAMES mdbm.h
+        HINTS "/usr/include" "/usr/local/include" "/sw/mdbm/include"
+    )
+    find_library(MDBM_LIBRARY
+        NAMES libmdbm mdbm
+        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/sw/mdbm/lib64"
+    )
+    if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+        message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
+        message("Found MDBM library: ${MDBM_LIBRARY}")
+        set(_BUILD_MDBM TRUE)
+    else()
+        message("libmdbm not found. Skipping build of MDBM plugin...")
+    endif()
+else() # BUILD_MDBM_PLUGIN
+    message("MDBM plugin disabled. Skipping...")
+endif() # BUILD_MDBM_PLUGIN
+
 if(ENABLE_UDA)
 #    find_package( PkgConfig QUIET)
 #    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
@@ -171,6 +224,11 @@ endif() # ENABLE_UDA
 if(DEBUG)
     add_definitions(-DDEBUG)
 endif() # DEBUG
+
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "DEBUG" AND ENABLE_COVERAGE)
+    include(CodeCoverage)
+    APPEND_COVERAGE_COMPILER_FLAGS()
+endif()
 
 message("Binary dir is: ${hdc_BINARY_DIR}")
 message("Source dir is: ${hdc_SOURCE_DIR}")
