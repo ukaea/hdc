@@ -1,4 +1,4 @@
-if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+if (_BUILD_MDBM)
     add_library(hdc_plugin_mdbm SHARED mdbm_plugin.cpp storage_interface.cpp)
     target_include_directories(hdc_plugin_mdbm PRIVATE ${MDBM_INCLUDE_DIR})
     target_link_libraries(hdc_plugin_mdbm ${MDBM_LIBRARY} Pluma dl ${Boost_LIBRARIES})

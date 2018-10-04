@@ -4,7 +4,7 @@ file(GLOB SRCS *.cpp)
 add_executable(hdc_test ${SRCS})
 target_link_libraries(hdc_test hdc chdc ${Boost_LIBRARIES})
 add_test(NAME hdc_test COMMAND hdc_test WORKING_DIRECTORY "${hdc_BINARY_DIR}")
-if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+if (_BUILD_MDBM)
     target_compile_definitions(hdc_test PRIVATE -D_USE_MDBM=1)
 endif()
 
