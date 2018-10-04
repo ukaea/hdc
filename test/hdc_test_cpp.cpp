@@ -3,6 +3,11 @@
 #include <cstdio>
 
 
+bool in_vector(std::string str, const std::vector<std::string>& vector)
+{
+    return (std::find(vector.begin(), vector.end(), str) != vector.end());
+}
+
 #define PREPARE_TREE()                                                                              \
     std::vector<size_t> shape = {4};                                                                \
     double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
@@ -48,14 +53,13 @@ TEST_CASE("StringParsing", "[HDCUtils]")
 
 TEST_CASE("GetPlugins","[HDC]")
 {
+    HDC::search_plugins();
     auto plugins = HDC::get_available_plugins();
     // "umap" should be always present
-    auto it_umap = std::find(plugins.begin(), plugins.end(), "umap");
-    CHECK(it_umap != plugins.end());
+    CHECK(in_vector("umap",plugins));
 #ifdef _USE_MDBM
     // "mdbm" has been built and  should be found
-    auto it_mdbm = std::find(plugins.begin(), plugins.end(), "mdbm");
-    CHECK(it_mdbm != plugins.end());
+    CHECK(in_vector("mdbm",plugins));
 #endif // _USE_MDBM
 }
 
@@ -73,7 +77,6 @@ TEST_CASE("EmptyNode", "[HDC]")
     CHECK(h.get_flags() == HDCDefault);
     CHECK(h.is_external() == false);
     CHECK(h.is_readonly() == false);
-    std::cerr << h.as_cstring()<<std::endl;
     CHECK(strcmp(h.as_cstring(),"null\n") == 0);
     CHECK(strcmp(h.as_string().c_str(),"null\n") == 0);
 }
