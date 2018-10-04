@@ -276,6 +276,12 @@ int32_t hdc_as_int32_scalar(hdc_t tree, const char* path)
     return (HDC(tree).get(path).as<int32_t*>())[0];
 }
 
+int64_t hdc_as_int64_scalar(hdc_t tree, const char* path)
+{
+    return (HDC(tree).get(path).as<int64_t*>())[0];
+}
+
+
 const char* hdc_get_type_str(hdc_t tree, const char* path)
 {
     return (HDC(tree).get(path).get_type_str());

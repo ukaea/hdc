@@ -16,12 +16,12 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 include( CTest )
 include( FileCopyTargets )
 
+# Set the possible values of build type for cmake-gui
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE")
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to 'RELEASE' as none was specified.")
     set(CMAKE_BUILD_TYPE RELEASE CACHE STRING "Choose the type of build." FORCE)
-    # Set the possible values of build type for cmake-gui
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE")
 endif()
 
 ########################################################################################################################
@@ -46,26 +46,26 @@ endif()
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
 else()
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
 else()
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
 endif()
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
 # -diag-enable=remark
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O2 -free -diag-enable=warn -fPIC")
-    set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -free -diag-enable=warn -fPIC")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -free -diag-enable=warn -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -free -diag-enable=warn -fPIC")
 else()
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
-    set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
 endif()
 
 set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
@@ -185,6 +185,26 @@ if(ENABLE_HDF5)
     endif() # BUILD_OWN_HDF5
     add_definitions(-D_USE_HDF5=1)
 endif() # ENABLE_HDF5
+
+if (BUILD_MDBM_PLUGIN)
+    find_path(
+        MDBM_INCLUDE_DIR
+        NAMES mdbm.h
+        HINTS "/usr/include" "/usr/local/include" "/sw/mdbm/include"
+    )
+    find_library(MDBM_LIBRARY
+        NAMES libmdbm mdbm
+        HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/sw/mdbm/lib64"
+    )
+    if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+        message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
+        message("Found MDBM library: ${MDBM_LIBRARY}")
+    else()
+        message("libmdbm not found. Skipping build of MDBM plugin...")
+    endif()
+else() # BUILD_MDBM_PLUGIN
+    message("MDBM plugin disabled. Skipping...")
+endif() # BUILD_MDBM_PLUGIN
 
 if(ENABLE_UDA)
 #    find_package( PkgConfig QUIET)
