@@ -19,7 +19,7 @@ private:
     MDBM* db = NULL;
     bool initialized = false;
     bool persistent = false;
-    string filename;
+    std::string filename;
 public:
     MDBMStorage() {
         DEBUG_STDOUT("MDBMStorage()\n");
@@ -29,7 +29,7 @@ public:
         if(!persistent) {
 //             cout << "Calling cleanup()\n";
             cleanup();
-        } else cout << "persistent!!!\n";
+        } else std::cout << "Storage has been set persistent. The File database has been stored in file \"" << filename << "\""<< std::endl;
     };
     bool usesBuffersDirectly() {
         return false;

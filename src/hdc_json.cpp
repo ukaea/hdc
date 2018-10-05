@@ -337,13 +337,14 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
         }
         case (Json::objectValue): {
             DEBUG_STDOUT("root is object, children:\n");
-            for (Json::ValueConstIterator it = root.begin(); it != root.end(); ++it) {
+            for (auto it = root.begin(); it != root.end(); ++it) {
                 DEBUG_STDOUT("KEY: " + it.key().asString());
                 HDC h = json_to_HDC(*it);
                 tree.add_child(it.key().asCString(), h);
             }
             break;
         }
+        default: throw HDCException("Bad JSON type");
     }
     return tree;
 }
@@ -585,9 +586,9 @@ HDC HDC::from_json(const string& filename, const string& datapath)
     HDC tree;
     ifstream file;
     file.exceptions(ifstream::failbit | ifstream::badbit);
+    Json::Value root;
     try {
         file.open(filename);
-        Json::Value root;
         file >> root;
         if (datapath != "") {
             auto split_path = split(datapath);

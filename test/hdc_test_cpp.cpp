@@ -1,11 +1,19 @@
 #include "catch.hpp"
 #include "hdc.hpp"
-#include <cstdio>
+#include <boost/filesystem.hpp>
 
 
 bool in_vector(std::string str, const std::vector<std::string>& vector)
 {
     return (std::find(vector.begin(), vector.end(), str) != vector.end());
+}
+
+const std::string make_tmp_name(const std::string& suffix = "h5")
+{
+    boost::filesystem::path temp = boost::filesystem::unique_path();
+    temp += std::string(".")+suffix;
+    const std::string tempstr = temp.native();
+    return tempstr;
 }
 
 #define PREPARE_TREE()                                                                              \
@@ -53,7 +61,7 @@ TEST_CASE("StringParsing", "[HDCUtils]")
 
 TEST_CASE("GetPlugins","[HDC]")
 {
-    HDC::search_plugins();
+    //HDC::search_plugins(); // This is called in main.cpp
     auto plugins = HDC::get_available_plugins();
     // "umap" should be always present
     CHECK(in_vector("umap",plugins));
@@ -188,9 +196,6 @@ TEST_CASE("ListManipulation", "[HDC]")
 
     CHECK(h.get("k[1]").as_string() == "data1");
     CHECK(h.get("l[1]").as_string() == "data10");
-#ifdef _USE_HDF5
-    h.to_hdf5("aaa.hdf5", "data");
-#endif // _USE_HDF5
 }
 
 TEST_CASE("Int8DataManipulation", "[HDC]")
@@ -325,15 +330,15 @@ TEST_CASE("SliceManipulation", "[HDC]")
     HDC sl3;
     sl3.set_string("3");
     h.insert(1, sl3);
-    vector<string> keys = h.keys();
+    auto keys = h.keys();
     CHECK(strcmp("3", h[1].as_cstring()) == 0);
     CHECK(strcmp("2", h[2].as_cstring()) == 0);
     HDC sl4;
     sl4.set_string("4");
     h.set_child(1, sl4);
     CHECK(strcmp("4", h[1].as_cstring()) == 0);
-
     HDC n;
+    n.set_type(HDC_LIST);
     HDC ch;
     n.insert(10, ch);
     CHECK(11 == n.get_shape()[0]);
@@ -408,20 +413,20 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree["f"].as_scalar<float>() == f);
     CHECK(tree["d"].as_scalar<double>() == d);
     CHECK(strcmp(tree["str"].as_cstring(),str.c_str()) == 0);
-    tree.to_json("dump.txt");
-
 }
 
 
 TEST_CASE("JsonComplete", "[HDC]")
 {
     PREPARE_TREE()
-
+    // create temporary file name
+    auto fname = make_tmp_name("txt");
+    auto fname2 = make_tmp_name("txt");
     // Save JSON
-    tree.to_json("tree.txt");
+    tree.to_json(fname);
     // Load JSON
-    HDC tree2 = HDC::from_json("tree.txt");
-    tree2.to_json("tree2.txt");
+    HDC tree2 = HDC::from_json(fname);
+    tree2.to_json(fname2);
     // test tree
     HDC s = tree2.get("aaa/bbb/double");
     // Test double
@@ -431,7 +436,6 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
     double* data_double_in = s.as<double*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
-
     // Test int
     s = tree2.get("aaa/bbb/int");
     CHECK(1 == s.get_rank());
@@ -440,7 +444,6 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str(), tree2.get("aaa/bbb/int").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
-
     // Test empty
     CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
     // Test list
@@ -450,11 +453,13 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(HDC_LIST == s.get_type());
     CHECK(strcmp(tree.get("aaa/list").get_type_str(), tree2.get("aaa/list").get_type_str()) == 0);
     for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get(i).get_type());
-
     // Test string
     CHECK(strcmp(tree.get("aaa/string").as_cstring(), tree2.get("aaa/string").as_cstring()) == 0);
-    HDC j = HDC::load("json://tree2.txt|aaa/string");
+    auto __path = std::string("json://") + fname2;
+    HDC j = HDC::load(__path,"aaa/string");
     CHECK(strcmp(j.as_cstring(), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
+    if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    if(remove(fname2.c_str()) != 0) std::cerr << "Error removing file " << fname2 << std::endl;
 }
 
 TEST_CASE("CopyConstructor", "[HDC]")
@@ -478,13 +483,17 @@ TEST_CASE("load", "[HDC]")
 TEST_CASE("HDF5", "[HDC]")
 {
     PREPARE_TREE()
-    tree.to_hdf5("tree.h5");
-    HDC tree2 = HDC::from_hdf5("tree.h5");
+    // create temporary file name
+    auto fname = make_tmp_name("h5");
+    tree.to_hdf5(fname);
+    HDC tree2 = HDC::from_hdf5(fname);
     double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
     CHECK(data == 333.333);
-    HDC h5 = HDC::load("hdf5://tree.h5|/data/aaa/bbb/_scalar");
+    auto path = std::string("hdf5://")+fname+"|/data/aaa/bbb/_scalar";
+    HDC h5 = HDC::load(path);
     data = h5.as<double*>()[0];
     CHECK(data == 333.333);
+    if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
 }
 
 #endif

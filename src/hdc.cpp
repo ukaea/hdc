@@ -902,9 +902,10 @@ HDC* HDC::get_or_create_ptr(size_t index)
 HDC& HDC::operator=(const HDC& other)
 {
     if (this != &other && uuid != other.get_uuid()) {
-        //TODO: this copies the buffer, AFAIK we would need parrent pointer to make this zero-copy - it can have some performance hit...
-        storage->set(uuid, other.get_buffer(), other.get_header().buffer_size);
+        //remove unused (orphaned) buffer here?
     }
+    uuid = other.get_uuid();
+    storage = other.get_storage();
     return *this;
 }
 
@@ -1196,42 +1197,56 @@ void HDC::insert(size_t i, HDC* h)
     return;
 }
 
-void HDC::insert(size_t i, HDC& h)
+void HDC::insert(size_t index, HDC& h)
 {
     DEBUG_STDOUT("insert(" + to_string(i) + ")\n");
+    //sync buffer
     hdc_header_t header;
-    memcpy(&header, storage->get(uuid), sizeof(hdc_header_t));
-    size_t old_size = header.buffer_size;
-    if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
-        throw HDCException("insert(): Wrong type to call insert.\n");
-    }
-    if (header.type == HDC_EMPTY) set_type(HDC_LIST);
-
     auto buffer = storage->get(uuid);
     memcpy(&header, buffer, sizeof(hdc_header_t));
-    if (get_shape()[0] < i) {
+    size_t old_size = header.buffer_size;
+    if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
+        throw HDCException("insert(): Cannot add child to this node. Data assigned???\n");
+    }
+    if (header.type == HDC_EMPTY) set_type(HDC_LIST);
+    buffer = storage->get(uuid);
+    memcpy(&header, buffer, sizeof(hdc_header_t));
+    if (get_shape()[0] < index) {
         std::cout << "Warning: insert():: inserting behind current list length, filling with empty containers\n";
-        for (size_t k = get_shape()[0]; k < i; k++) {
+        for (size_t i = header.shape[0]; i < index; i++) {
             HDC ch;
             append(ch);
         }
     }
 
-    bip::managed_external_buffer segment(bip::open_only, buffer + sizeof(hdc_header_t), 0);
-    auto children = segment.find<hdc_map_t>("d").first;
-
-    int k = 0;
-    int redo = 1;
+    // load new buffer
+    buffer = storage->get(uuid);
+    memcpy(&header, buffer, sizeof(hdc_header_t));
     vector<char> new_buffer;
-    for (k = 0; k < HDC_MAX_RESIZE_ATTEMPTS - 1; k++) {
+    auto segment = get_segment();
+    auto children = segment.find<hdc_map_t>("d").first;
+    if (children == nullptr) throw HDCException("insert(): Could not get the children.\n");
+
+// Try to grow buffer HDC_MAX_RESIZE_ATTEMPTS times, die if it does not help
+    int redo = 1;
+    for (size_t i = 0; i < HDC_MAX_RESIZE_ATTEMPTS - 1; i++) {
         if (redo == 0) break;
         try {
             hdc_map_t::nth_index<1>::type& ri = children->get<1>();
-            ri.insert(ri.begin() + i,
-                      record(to_string(i).c_str(), h.get_uuid().c_str(), segment.get_segment_manager()));
+            record rec(to_string(index).c_str(), h.get_uuid().c_str(), segment.get_segment_manager());
+            try {
+                ri.insert(ri.begin() + index, rec);
+            }
+            catch (boost::interprocess::bad_alloc e) {
+                throw (HDCBadAllocException());
+            }
             redo = 0;
-        } catch (exception e) {
+        }
+        catch (HDCBadAllocException e) {
             new_buffer = buffer_grow(buffer, header.buffer_size);
+            if (new_buffer.data() == buffer) {
+                throw HDCException("grow called, but buffer == new_buffer.\n");
+            }
             //if (!storage->usesBuffersDirectly()) delete[] buffer;
             storage->remove(uuid);
             buffer = new_buffer.data();
@@ -1240,13 +1255,15 @@ void HDC::insert(size_t i, HDC& h)
             children = segment.find<hdc_map_t>("d").first;
             redo = 1;
         }
-    }
-    if (redo == 1 && k >= HDC_MAX_RESIZE_ATTEMPTS - 1) {
-        throw HDCBadAllocException("insert(): Could not allocate enough memory.\n");
+        if (redo == 1 && i == HDC_MAX_RESIZE_ATTEMPTS - 1) {
+            throw HDCBadAllocException("insert(): Could not allocate enough memory.\n");
+        }
     }
     header.shape[0] = children->size();
     memcpy(buffer, &header, sizeof(hdc_header_t));
-    if (header.buffer_size != old_size) storage->set(uuid, buffer, header.buffer_size);
+    if (header.buffer_size != old_size) {
+        storage->set(uuid, buffer, header.buffer_size);
+    }
     return;
 }
 
@@ -1395,7 +1412,7 @@ void HDC::grow(size_t extra_size)
     vector<char> new_buffer = buffer_grow(old_buffer, extra_size);
     memcpy(&header, new_buffer.data(), sizeof(hdc_header_t));
     storage->set(uuid, new_buffer.data(), new_size);
-    if (!storage->usesBuffersDirectly()) delete[] old_buffer;
+//     if (!storage->usesBuffersDirectly()) delete[] old_buffer;
 //     if (!storage->usesBuffersDirectly()) delete[] new_buffer;
     return;
 }
