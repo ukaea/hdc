@@ -9,8 +9,8 @@ test-xenial:
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
     - make -j
+    - make test
     - make install
-    - ../install/bin/hdc_test
     - cd python
     - python3 setup.py build
     - python3 setup.py test
