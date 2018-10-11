@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <vector>
 #include <list>
+#include <map>
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
@@ -201,7 +202,7 @@ public:
     *
     * @param h p_h: pointer to HDC object
     */
-    HDC(HDC* h);
+    HDC(const HDC& h);
     /**
     * @brief Deserializing constructor
     *
@@ -277,6 +278,29 @@ public:
     * @param storage_options p_storage_options:...
     */
     static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
+    /**
+    * @brief Returns map of children if there are any, otherwise it returns empty map
+    *
+    * @return std::map< HDC >
+    */
+    const std::map<std::string,HDC> get_children() const;
+    /**
+    * @brief Returns map of children if there are any, otherwise it returns empty map
+    *
+    * @return int
+    */
+    const std::vector<HDC> get_slices() const;
+    /**
+    * @brief Makes copy of object. Copies at least node buffer. If deep_copy specified, it also copies all children nodes.
+    *
+    * @param deep_copy p_deep_copy:...
+    * @return HDC
+    */
+    HDC copy(bool deep_copy = true);
+    /**
+    * @brief removes node's children
+    *
+    */
     void clean();
     /**
     * @brief Cleans up the global_storage  -- mainly due to C and Fortran
@@ -348,6 +372,12 @@ public:
     * @return size_t
     */
     size_t get_flags() const;
+    /**
+    * @brief Returns true if type is not one of HDC_LIST or HDC_STRUCT
+    *
+    * @return bool
+    */
+    bool is_terminal() const;
     /**
     * @brief returns pointer on itself
     *
@@ -787,20 +817,6 @@ public:
     */
     void set_list(deque<HDC*>* list);
     /**
-    * @brief Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise.
-    *
-    * @param h p_h:...
-    * @param recursively p_recursively:...
-    */
-    void resize(HDC* h, int recursively = 0);
-    /**
-    * @brief Returns copy of current object.
-    *
-    * @param copy_arrays p_copy_arrays:...
-    * @return HDC
-    */
-    HDC copy(int copy_arrays = 1);
-    /**
     * @brief Inserts node to i-th slice of current node.
     *
     * @param i p_i:...
@@ -979,7 +995,7 @@ public:
     *
     * @return size_t
     */
-    size_t childs_count() const;
+    size_t children_count() const;
     /**
     * @brief ...
     *
@@ -1121,6 +1137,14 @@ public:
     * @return HDC
     */
     static HDC load(const std::string& str, const std::string& datapath="");
+    /**
+    * @brief Returns copy of HDC object, if deep_copy == true provides deep copy (i.e. copy of current node and also all children)
+    *
+    * @param h p_h:...
+    * @param deep_copy p_deep_copy:...
+    * @return HDC
+    */
+    static HDC copy(const HDC& h, bool deep_copy = false);
     /**
     * @brief ...
     *

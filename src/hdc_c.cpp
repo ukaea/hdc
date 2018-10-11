@@ -236,7 +236,8 @@ void hdc_set_float_scalar(hdc_t tree, const char* path, float data)
 
 hdc_t hdc_copy(hdc_t src)
 {
-    return HDC(src).copy().as_obj();
+    HDC h(src);
+    return HDC(h).copy().as_obj();
 }
 
 void hdc_set_string(hdc_t tree, const char* path, const char* str)
@@ -321,7 +322,7 @@ const char* hdc_dumps(hdc_t tree)
 
 size_t hdc_childs_count(hdc_t tree)
 {
-    return HDC(tree).childs_count();
+    return HDC(tree).children_count();
 }
 
 void hdc_init(const char* pluginFileName, const char* pluginSettingsFileName)

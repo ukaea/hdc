@@ -102,10 +102,10 @@ private:
 };
 
 // Finally, our children nodes storage
-typedef multi_index_container<
+using hdc_map_t = multi_index_container<
     record,
     indexed_by<
-        hashed_non_unique<
+        hashed_non_unique< // TODO unique here??
             tag<by_key>,
             member<
                 record, shared_string, &record::key
@@ -118,11 +118,11 @@ typedef multi_index_container<
         random_access<
             tag<by_index>
         >,
-        sequenced<
+        sequenced< // TODO remove this??
             tag<by_sequence>
         >
     >,
     bip::managed_external_buffer::allocator<record>::type // our allocator
-> hdc_map_t;
+>;
 
 #endif

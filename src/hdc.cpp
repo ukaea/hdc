@@ -252,37 +252,10 @@ HDC::HDC(const std::string str) : HDC()
 }
 
 /** Copy constructor */
-HDC::HDC(HDC* h)
+HDC::HDC(const HDC& h)
 {
-    hdc_header_t header;
-    storage = global_storage;
-    uuid = generate_uuid_str();
-    auto src_buffer = h->get_buffer();
-    memcpy(&header, src_buffer, sizeof(hdc_header_t));
-    std::vector<char> buffer(header.buffer_size);
-
-    if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
-        bip::managed_external_buffer src_segment(bip::open_only, src_buffer + sizeof(hdc_header_t),
-                                                 header.buffer_size - sizeof(hdc_header_t));
-        hdc_map_t* src_children = src_segment.find<hdc_map_t>("d").first;
-        if (src_children == nullptr) {
-            throw HDCException("HDC(): The node has no children.\n");
-        }
-        bip::managed_external_buffer segment(bip::create_only, buffer.data() + sizeof(hdc_header_t),
-                                             header.buffer_size - sizeof(hdc_header_t));
-        auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),
-                                                      hdc_map_t::allocator_type(segment.get_segment_manager()));
-        for (hdc_map_t::iterator it = src_children->get<by_key>().begin(); it != src_children->get<by_key>().end(); ++it) {
-            HDC n(storage, it->address.c_str());
-            record rec(it->key.c_str(), n.get_uuid().c_str(), segment.get_segment_manager());
-            children->insert(rec);
-        }
-        memcpy(buffer.data(), &header, sizeof(hdc_header_t));
-    } else {
-        memcpy(buffer.data(), src_buffer, header.buffer_size);
-    }
-
-    storage->set(uuid, buffer.data(), header.buffer_size);
+    storage = h.storage;
+    uuid = h.uuid;
 };
 
 /** Deserializing constructor */
@@ -302,7 +275,7 @@ HDC::~HDC()
 {
     /*
     auto t = get_type();
-    if (t == HDC_LIST || t == HDC_STRUCT) {
+    if (!is_terminal()) {
         try {
             hdc_map_t* children = get_children_ptr();
             for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
@@ -407,7 +380,6 @@ bool HDC::exists(size_t index) const
 
 bool HDC::exists(hdc_path_t& path) const
 {
-    hdc_header_t header = get_header();
     D(
         std::cout << "exists(";
         for {auto str : path} std::cout << str;
@@ -416,7 +388,7 @@ bool HDC::exists(hdc_path_t& path) const
     if (path.empty()) {
         return false; //TODO: re-do this!!!
     }
-    if (header.type != HDC_STRUCT && header.type != HDC_LIST) {
+    if (is_terminal()) {
         return false;
     }
     auto first = path.front();
@@ -593,8 +565,7 @@ void HDC::add_child(const std::string& path, HDC& n)
 }
 
 void HDC::clean() {
-    auto t = get_type();
-    if (t == HDC_LIST || t == HDC_STRUCT) {
+    if (!is_terminal()) {
         try {
             hdc_map_t* children = get_children_ptr();
             if (children == nullptr) return;
@@ -1061,7 +1032,7 @@ void HDC::set_type(hdc_type_t type)
     if (header.type == type) return; // Nothing to do
     header.type = type;
     memcpy(old_buffer, &header, sizeof(hdc_header_t)); //sync header back
-    if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+    if (!is_terminal()) {
         if (header.data_size < HDC_NODE_SIZE_DEFAULT) {
             vector<char> new_buffer(HDC_NODE_SIZE_DEFAULT);
             header.data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
@@ -1106,16 +1077,6 @@ const std::string HDC::serialize() const
     std::stringstream ss;
     write_json(ss, root);
     return ss.str();
-}
-
-void HDC::resize(HDC* h UNUSED, int recursively UNUSED)
-{
-    throw HDCException("resize(): not implemented yet...\n");
-}
-
-HDC HDC::copy(int copy_arrays UNUSED)
-{
-    return HDC(this);
 }
 
 void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
@@ -1369,9 +1330,12 @@ size_t HDC::get_rank() const
     return get_header().rank;
 }
 
-size_t HDC::childs_count() const
+size_t HDC::children_count() const
 {
-    return get_children_ptr()->size();
+    auto children = get_children_ptr();
+    if (children != nullptr)
+        return get_children_ptr()->size();
+    else return 0;
 }
 
 char* HDC::get_buffer() const
@@ -1394,10 +1358,34 @@ bip::managed_external_buffer HDC::get_segment() const
 
 hdc_map_t* HDC::get_children_ptr() const
 {
-    auto t = get_type();
-    if (t != HDC_STRUCT && t != HDC_LIST) return nullptr;
+    if (is_terminal()) return nullptr;
     auto segment = get_segment();
     return segment.find<hdc_map_t>("d").first;
+}
+
+const std::map<std::string,HDC> HDC::get_children() const
+{
+    auto children = get_children_ptr();
+    std::map<std::string,HDC> ch;
+    if (children != nullptr) {
+        for (auto it = children->begin(); it != children->end(); ++it) {
+            ch[it->key.c_str()] = HDC(storage,it->address.c_str());
+        }
+    }
+    return ch;
+}
+
+const std::vector<HDC> HDC::get_slices() const
+{
+    auto children = get_children_ptr();
+    std::vector<HDC> ch;
+    if (children != nullptr) {
+        ch.reserve(children->size());
+        for (auto it = children->begin(); it != children->end(); ++it) {
+            ch.push_back(HDC(storage,it->address.c_str()));
+        }
+    }
+    return ch;
 }
 
 /* Grows underlying storage by given extra size, it does nothing if extra_size <= 0.*/
@@ -1430,7 +1418,7 @@ void HDC::delete_data()
     hdc_header_t header;
     auto buffer = storage->get(uuid);
     memcpy(&header,buffer,sizeof(hdc_header_t));
-    if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
+    if (!is_terminal() && header.data_size > 0) {
         auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
         hdc_map_t* children = segment.find<hdc_map_t>("d").first;
         hdc_map_t::nth_index<1>::type& ri = children->get<1>();
@@ -1616,4 +1604,54 @@ void HDC::set_data(hdc_data_t obj)
         }
 };
 
+bool HDC::is_terminal() const
+{
+    auto t = get_type();
+    return (t != HDC_STRUCT && t != HDC_LIST);
+}
 
+HDC HDC::copy(bool deep_copy)
+{
+    return copy(*this,deep_copy);
+}
+
+HDC HDC::copy(const HDC& h, bool deep_copy) {
+    auto storage = h.get_storage();
+    auto h_buffer = h.get_buffer();
+    hdc_header_t h_header;
+    memcpy(&h_header,h_buffer,sizeof(hdc_header_t));
+
+    std::vector<char> c_buffer(h_header.buffer_size);
+    hdc_header_t c_header;
+    memcpy(&c_header,h_buffer,sizeof(hdc_header_t));
+
+    auto c_uuid = generate_uuid_str();
+
+    if ((h_header.type != HDC_STRUCT && h_header.type != HDC_LIST) || !deep_copy) {
+        memcpy(c_buffer.data(),h_buffer,h_header.buffer_size);
+    } else {
+        memcpy(c_buffer.data(),h_buffer,sizeof(hdc_header_t));
+        bip::managed_external_buffer h_segment(bip::open_only, h_buffer + sizeof(hdc_header_t),
+                                                 h_header.data_size);
+        hdc_map_t* h_children = h_segment.find<hdc_map_t>("d").first;
+
+
+        bip::managed_external_buffer c_segment(bip::create_only, c_buffer.data() + sizeof(hdc_header_t),
+                                             h_header.data_size);
+        hdc_map_t* c_children = c_segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),
+                                                         hdc_map_t::allocator_type(c_segment.get_segment_manager()));
+        // The children seem to have to be copied before iterating over them, otherwise the recursion fails and we get multiple instances of deepest terminal nodes spreaded all over the tree copy..
+        std::vector<std::pair<std::string,std::string>> children_list;
+        for (hdc_map_t::iterator it = h_children->get<by_key>().begin(); it != h_children->get<by_key>().end(); ++it) {
+            children_list.push_back({it->key.c_str(),it->address.c_str()});
+        }
+        for (auto it: children_list) {
+            HDC n(storage, it.second);
+            HDC cpy = copy(n,deep_copy);
+            record rec(it.first, cpy.get_uuid().c_str(), c_segment.get_segment_manager());
+            c_children->insert(rec);
+        }
+    }
+    storage->set(c_uuid,c_buffer.data(),h_header.buffer_size);
+    return HDC(storage,c_uuid);
+}

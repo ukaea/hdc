@@ -462,17 +462,22 @@ TEST_CASE("JsonComplete", "[HDC]")
     if(remove(fname2.c_str()) != 0) std::cerr << "Error removing file " << fname2 << std::endl;
 }
 
-TEST_CASE("CopyConstructor", "[HDC]")
+TEST_CASE("Copy", "[HDC]")
 {
     PREPARE_TREE()
-    // test copy c-tor
-    HDC copy(tree);
-    auto tree_dump = tree.serialize();
-    auto copy_dump = copy.serialize();
+    HDC _copy = tree.copy();
+    INFO("here");
+    auto tree_dump = tree.to_json_string();
+    INFO("here");
+    auto copy_dump = _copy.to_json_string();
+    INFO("here");
+    INFO(tree_dump);
+    INFO(copy_dump);
     CHECK(strcmp(tree_dump.c_str(), copy_dump.c_str()) == 0);
     // Check also that UUIDs are the same - this behaviour can be changed later
-    CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), copy["aaa/bbb/double"].get_uuid().c_str()) == 0);
+    CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), _copy["aaa/bbb/double"].get_uuid().c_str()) != 0);
 }
+
 
 TEST_CASE("load", "[HDC]")
 {
@@ -498,17 +503,18 @@ TEST_CASE("HDF5", "[HDC]")
 
 #endif
 
-// // // #ifdef _USE_UDA
-// // // TEST_CASE("StringConstructor", "[HDC]")
-// // // {
-// // //     HDC h = HDC::load("uda://HELP::help()");
-// // //     std::string expected =
-// // //             "\nHelp\tList of HELP plugin functions:\n"
-// // //             "\n"
-// // //             "services()\tReturns a list of available services with descriptions\n"
-// // //             "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
-// // //             "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
-// // //     CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
-// // // }
-// // //
-// // // #endif
+#ifdef _USE_UDA
+TEST_CASE("UDA", "[HDC]")
+{
+    HDC h = HDC::load("uda://HELP::help()");
+    h.dump();
+    std::string expected =
+            "\nHelp\tList of HELP plugin functions:\n"
+            "\n"
+            "services()\tReturns a list of available services with descriptions\n"
+            "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
+            "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
+    CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
+}
+
+#endif
