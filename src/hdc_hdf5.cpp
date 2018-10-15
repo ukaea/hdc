@@ -80,7 +80,7 @@ void write_node(HDC h, H5File* file, std::string path)
                     try {
                         Exception::dontPrint(); //TODO: Do this just temporarily???
                         ref_group = file->openGroup(ref_group_name);
-                    } catch (FileIException) {
+                    } catch (FileIException& e) {
                         ref_group = file->createGroup(ref_group_name);
                     }
                     hdc_map_t::nth_index<1>::type& ri = children->get<1>();
@@ -168,7 +168,7 @@ void write_node(HDC h, H5File* file, std::string path)
         if (transposed_data != NULL) delete[] transposed_data;
     }  // end of try block
         // catch failure caused by the H5File operations
-    catch (FileIException error) {
+    catch (FileIException& error) {
         #if H5_VERSION_GE(1,8,13)
             error.printErrorStack();
         #else
@@ -177,7 +177,7 @@ void write_node(HDC h, H5File* file, std::string path)
         exit(-1);
     }
         // catch failure caused by the DataSet operations
-    catch (DataSetIException error) {
+    catch (DataSetIException& error) {
         #if H5_VERSION_GE(1,8,13)
             error.printErrorStack();
         #else
@@ -186,7 +186,7 @@ void write_node(HDC h, H5File* file, std::string path)
         exit(-1);
     }
         // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException error) {
+    catch (DataSpaceIException& error) {
         #if H5_VERSION_GE(1,8,13)
             error.printErrorStack();
         #else
@@ -195,7 +195,7 @@ void write_node(HDC h, H5File* file, std::string path)
         exit(-1);
     }
         // catch failure caused by the DataSpace operations
-    catch (DataTypeIException error) {
+    catch (DataTypeIException& error) {
         #if H5_VERSION_GE(1,8,13)
             error.printErrorStack();
         #else
@@ -213,7 +213,7 @@ void HDC::to_hdf5(std::string filename, std::string dataset_name UNUSED)
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
         write_node(HDC(this->storage, this->uuid), &file, "data");
     }  // end of try block
-    catch (FileIException error) {
+    catch (FileIException& error) {
         #if H5_VERSION_GE(1,8,13)
             error.printErrorStack();
         #else
