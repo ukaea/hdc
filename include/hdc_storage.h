@@ -38,7 +38,7 @@ public:
                 stringstream ss(settings_str);
                 boost::property_tree::read_json(ss,settings);
             }
-            catch (ifstream::failure e) {
+            catch (ifstream::failure& e) {
                 cout << "Error reading / opening file." << endl;
             }
         }
