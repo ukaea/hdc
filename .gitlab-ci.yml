@@ -29,7 +29,8 @@ test-centos7:
   script:
     - export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
     - mkdir build
-    - cmake3 -DENABLE_HDF5=OFF -DCMAKE_INSTALL_PREFIX=../install ..
+    - cd build
+    - cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
     - make -j
     - make test
     #TODO re-enable this after fixing build with HDF5
