@@ -24,17 +24,16 @@
     #- python3 setup.py build
     #- python3 setup.py test
 
-###test-centos7:
-  ###image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
-  ###script:
-    ###- export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
-    ###- mkdir build
-    ###- cd build
-    ###- cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
-    ###- make -j
-    ###- make test
-    #TODO re-enable this after fixing build with HDF5
-    #- make install
-    #- cd python
-    #- python3 setup.py build
-    #- python3 setup.py test
+test-centos7:
+  image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
+  script:
+    - export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
+    - mkdir build
+    - cd build
+    - cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 setup.py build
+    - python3 setup.py test

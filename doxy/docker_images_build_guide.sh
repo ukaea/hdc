@@ -20,11 +20,11 @@ yum -y install epel-release.noarch
 yum update
 yum -y install centos-release-scl
 yum update
-yum -y  groupinstall "Development Tools"
-yum -y install boost boost-devel cppunit-devel openssl-devel git nano hdf5-devel python36-numpy readline-devel centos-release-scl devtoolset-7-gcc*
+yum -y groupinstall "Development Tools"
+yum -y install boost boost-devel cppunit-devel openssl-devel git nano hdf5-devel readline-devel centos-release-scl devtoolset-7-gcc*
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python3.6 get-pip.py
-pip install pytest h5py cython
+pip install pytest h5py cython numpy
 cd /tmp/
 git clone https://github.com/yahoo/mdbm
 cd mdbm/
