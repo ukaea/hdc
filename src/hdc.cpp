@@ -539,8 +539,8 @@ std::vector<std::string> HDC::keys() const
     children = get_children_ptr();
     if (children == nullptr) return k;
     k.reserve(children->size());
-
-    for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
+    auto& ri = children->get<by_index>();
+    for (auto it = ri.begin(); it != ri.end(); ++it) {
         k.push_back(it->key.c_str());
     }
     return k;
