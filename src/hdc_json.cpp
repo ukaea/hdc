@@ -560,7 +560,7 @@ HDC HDC::from_json_string(const std::string& json_string)
         file >> root;
         tree = HDC::json_to_HDC(root);
     }
-    catch (ifstream::failure e) {
+    catch (ifstream::failure& e) {
         cout << "Error reading JSON string." << endl;
     }
     return tree;
@@ -602,7 +602,7 @@ HDC HDC::from_json(const string& filename, const string& datapath)
         }
         tree = HDC::json_to_HDC(root);
     }
-    catch (ifstream::failure e) {
+    catch (ifstream::failure& e) {
         cout << "Error reading / opening file." << endl;
     }
     file.close();

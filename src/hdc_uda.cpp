@@ -57,7 +57,7 @@ hdc_path_t split_uda(const std::string& s)
     for (const auto& t : tok) {
         try {
             var = boost::lexical_cast<size_t>(t) - 1;
-        } catch (boost::bad_lexical_cast) {
+        } catch (boost::bad_lexical_cast& e) {
             var = t;
         }
         parts.push_back(var);

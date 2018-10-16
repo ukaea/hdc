@@ -409,7 +409,7 @@ bool HDC::exists(hdc_path_t& path) const
                 auto it = children->get<by_index>()[index];
                 HDC child(storage, it.address.c_str());
                 return child.exists(path);
-            } catch (std::exception e) {
+            } catch (std::exception& e) {
                 std::cerr << "exists(): Caught exception: index" << "\n";
                 std::cerr << e.what() << std::endl;
                 return false;
@@ -501,12 +501,12 @@ void HDC::add_child_single(const std::string& path, HDC& n)
                 try {
                     children->insert(rec);
                 }
-                catch (boost::interprocess::bad_alloc e) {
+                catch (boost::interprocess::bad_alloc& e) {
                     throw (HDCBadAllocException());
                 }
                 redo = 0;
             }
-            catch (HDCBadAllocException e) {
+            catch (HDCBadAllocException& e) {
                new_buffer = buffer_grow(buffer, max(header.buffer_size, 4 * path.size()));
                if (new_buffer.data() == buffer) {
                    throw HDCException("grow called, but buffer == new_buffer.\n");
@@ -539,8 +539,8 @@ std::vector<std::string> HDC::keys() const
     children = get_children_ptr();
     if (children == nullptr) return k;
     k.reserve(children->size());
-
-    for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
+    auto& ri = children->get<by_index>();
+    for (auto it = ri.begin(); it != ri.end(); ++it) {
         k.push_back(it->key.c_str());
     }
     return k;
@@ -1198,12 +1198,12 @@ void HDC::insert(size_t index, HDC& h)
             try {
                 ri.insert(ri.begin() + index, rec);
             }
-            catch (boost::interprocess::bad_alloc e) {
+            catch (boost::interprocess::bad_alloc& e) {
                 throw (HDCBadAllocException());
             }
             redo = 0;
         }
-        catch (HDCBadAllocException e) {
+        catch (HDCBadAllocException& e) {
             new_buffer = buffer_grow(buffer, header.buffer_size);
             if (new_buffer.data() == buffer) {
                 throw HDCException("grow called, but buffer == new_buffer.\n");
