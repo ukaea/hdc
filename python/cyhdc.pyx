@@ -85,7 +85,7 @@ cdef extern from "hdc.hpp":
         string get_uuid() except +
 
         # typedef unsigned long hdc_flags_t;
-        void set_data[T](int _rank, vector[size_t] _shape, T* _data, unsigned long _flags) except +
+        void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         # void set_data_c(int _rank, vector[size_t] _shape, void* _data, hdc_type_t _type)
         T as[T]() except +
         string as_string() except +
@@ -232,25 +232,24 @@ cdef class HDC:
                 flags |= HDCFortranOrder
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
-        cdef vector[size_t] _shape
-        _shape.reserve(data_view.ndim)
+        cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
         # TODO support other types
         if np.issubdtype(data.dtype, np.bool_):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <bool*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <bool*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int8_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int16_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <int16_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int32_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <int32_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int64_t*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <int64_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float32):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <float*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <float*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float64):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <double*> data_view.data, flags)
+            deref(self._thisptr).set_data(_shape, <double*> data_view.data, flags)
 
         else:
             NotImplementedError('Type not supported')
