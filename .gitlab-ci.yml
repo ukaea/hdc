@@ -24,16 +24,29 @@
     #- python3 setup.py build
     #- python3 setup.py test
 
-test-centos7:
-  image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
+#test-centos7:
+  #image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
+  #script:
+    #- export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
+    #- mkdir build
+    #- cd build
+    #- cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    #- make -j
+    #- make test
+    #- make install
+    #- cd python
+    #- python3.6 setup.py build
+    #- python3.6 setup.py test
+
+test-fedora-28:
+  image: dockerhub.tok.ipp.cas.cz:5000/fedora-28-hdc-prereq
   script:
-    - export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
     - mkdir build
     - cd build
-    - cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    - cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
     - make -j
     - make test
     - make install
     - cd python
-    - python3.6 setup.py build
-    - python3.6 setup.py test
+    - python3 setup.py build
+    - python3 setup.py test
