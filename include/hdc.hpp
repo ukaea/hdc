@@ -154,13 +154,6 @@ private:
     * @brief ...
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC*
-    */
-    HDC* get_single_ptr(hdc_index_t index);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
     */
     HDC get_single(hdc_index_t index);
@@ -325,13 +318,6 @@ public:
     * @brief ...
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC*
-    */
-    HDC* get_ptr(size_t index);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
     */
     HDC get(size_t index);
@@ -379,12 +365,6 @@ public:
     */
     bool is_terminal() const;
     /**
-    * @brief returns pointer on itself
-    *
-    * @return HDC*
-    */
-    const HDC* get_this_ptr() const;
-    /**
     * @brief ...
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
@@ -405,20 +385,6 @@ public:
     * @return HDC
     */
     HDC get_or_create(const std::string& path);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC*
-    */
-    HDC* get_or_create_ptr(size_t index);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC*
-    */
-    HDC* get_or_create_ptr(const std::string& path);
     /**
     * @brief Returns the data, the pointer is just casted => there is no conversion for now.
     *
@@ -744,13 +710,6 @@ public:
     */
     void delete_child(const std::string& path);
     /**
-    * @brief Returns subtree by path.
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC*
-    */
-    HDC* get_ptr(const std::string& path);
-    /**
     * @brief ...
     *
     * @param path p_path: path in the subtree of this node
@@ -1002,13 +961,6 @@ public:
     * @return HDC
     */
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
-    /**
-    * @brief "static contructor" from void* HDC
-    *
-    * @param cpp_ptr p_cpp_ptr:...
-    * @return HDC*
-    */
-    static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
     /**
     * @brief deserialize from storage
     *

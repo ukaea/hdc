@@ -626,28 +626,6 @@ void HDC::delete_child(const std::string& path)
     return;
 }
 
-HDC* HDC::get_ptr(hdc_path_t& path)
-{
-    D(
-        std::cout << "get_ptr(";
-        for {auto str: path} std::cout << str;
-        std::cout << ")\n";
-    )
-    // Return itself when empty list
-    if (path.empty()) {
-        return this;
-    }
-    // else do lookup
-    auto first = path.front();
-    path.pop_front();
-    hdc_map_t* children = get_children_ptr();
-    if (children == nullptr) {
-        throw HDCException("get_ptr(): This node has no children.");
-    }
-
-    return get_single_ptr(first)->get_ptr(path);
-}
-
 HDC HDC::get(hdc_path_t& path)
 {
     D(
@@ -692,11 +670,6 @@ const HDC HDC::get(hdc_path_t& path) const
     }
 
     return get_single(first).get(path);
-}
-
-const HDC* HDC::get_this_ptr() const
-{
-    return this;
 }
 
 HDC HDC::get_single(hdc_index_t index)
@@ -745,38 +718,6 @@ const HDC HDC::get_single(hdc_index_t index) const
     }
 }
 
-HDC* HDC::get_single_ptr(hdc_index_t index)
-{
-    DEBUG_STDOUT("get_single_ptr(" + to_string(index) + ")\n");
-
-    hdc_map_t* children = get_children_ptr();
-
-    if (index.type() == typeid(std::string)) {
-        auto str = boost::get<std::string>(index).c_str();
-        if (strlen(str) == 0) return this;
-        if (children->count(str)) {
-            return new HDC(storage, children->find(str)->address.c_str());
-        } else {
-            throw HDCException("get(std::string): Not found\n");
-        }
-    } else {
-        size_t i = boost::get<size_t>(index);
-        if (i >= children->size()) {
-            throw HDCException("get(index): index > size()\n");
-        }
-        return new HDC(storage, children->get<by_index>()[i].address.c_str());
-    }
-}
-
-HDC* HDC::get_ptr(const std::string& path)
-{
-    if (path.empty()) return this;
-    else {
-        auto pth = split(path);
-        return new HDC(get(pth));
-    }
-}
-
 HDC HDC::get(const std::string& path)
 {
     if (path.empty()) return *this;
@@ -793,11 +734,6 @@ const HDC HDC::get(const std::string& path) const
         auto pth = split(path);
         return get(pth);
     }
-}
-
-HDC* HDC::get_ptr(size_t index)
-{
-    return get_single_ptr(index);
 }
 
 HDC HDC::get(size_t index)
@@ -844,29 +780,6 @@ HDC HDC::get_or_create(size_t index)
         return h;
     } else {
         return get(index);
-    }
-}
-
-HDC* HDC::get_or_create_ptr(const std::string& path)
-{
-    if (path.empty()) return this;
-    if (!exists(path)) {
-        auto h = new HDC();
-        add_child(path,h);
-        return h;
-    } else {
-        return get_ptr(path);
-    }
-}
-
-HDC* HDC::get_or_create_ptr(size_t index)
-{
-    if (!exists(index)) {
-        auto h = new HDC();
-        insert(index,h);
-        return h;
-    } else {
-        return get_single_ptr(index);
     }
 }
 
@@ -1464,22 +1377,13 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
             throw HDCException("buffer_grow(): children not found\n");
         };
     } else {
-        // copy old data to new buffer or something like this here, throw warning now
-        DEBUG_STDOUT("Warning: buffer size increased, but no data copied!!!\n");
+        memcpy(new_buffer.data()+sizeof(hdc_header_t), old_buffer+sizeof(hdc_header_t), sizeof(hdc_header_t));
     }
     // finalize header and copy it to the new buffer
     header.data_size = newdata_size;
     header.buffer_size = new_buffer_size;
     memcpy(new_buffer.data(), &header, sizeof(hdc_header_t));
     return new_buffer;
-}
-
-// "static constructor" from void* HDC
-HDC* HDC::new_HDC_from_cpp_ptr(intptr_t cpp_ptr)
-{
-    HDC* tree;
-    tree = (HDC*)cpp_ptr;
-    return tree;
 }
 
 HDC HDC::deserialize_HDC_file(const std::string& filename)

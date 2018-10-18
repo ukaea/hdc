@@ -119,6 +119,11 @@ TEST_CASE("EmptyArrayNode", "[HDC]")
     CHECK(4 == hd.get_shape()[0]);
     CHECK(HDC_DOUBLE == hd.get_type());
     CHECK(strcmp("float64", hd.get_type_str()) == 0);
+
+    //check throws if more dimensions
+    std::vector<size_t> sh(HDC_MAX_DIMS+1);
+    for (size_t i=0; i<HDC_MAX_DIMS+1;i++) sh[i] = 1;
+    CHECK_THROWS(HDC{sh,HDC_DOUBLE});
 }
 
 TEST_CASE("NodeManipulation", "[HDC]")
@@ -478,6 +483,49 @@ TEST_CASE("Copy", "[HDC]")
     CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), _copy["aaa/bbb/double"].get_uuid().c_str()) != 0);
 }
 
+TEST_CASE("BufferGrowArray", "[HDC]")
+{
+    std::vector<size_t> shape = { 4 };
+    double data[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
+    HDC h;
+    h.set_data<double>(shape, data);
+    h.grow(4096);
+    double* data2 = h.as<double*>();
+    CHECK(h.get_datasize() == 4*sizeof(double) + 4096);
+    CHECK(h.get_shape()[0] == 4);
+    CHECK(h.get_type() == HDC_DOUBLE);
+    for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
+}
+
+TEST_CASE("BufferGrowStruct", "[HDC]")
+{
+    std::vector<std::string> keys = {"aaa","bbb","ccc","ddd"};
+    HDC h;
+    for (auto k : keys) {
+        HDC ch;
+        h.add_child(k,ch);
+    };
+    h.grow(4096);
+    auto keys2 = h.keys();
+    CHECK(keys2.size() == keys.size());
+    for (size_t i=0; i<keys.size(); i++) {
+        CHECK(keys[i] == keys2[i]);
+    }
+}
+
+TEST_CASE("BufferGrowList", "[HDC]")
+{
+    HDC h;
+    size_t n = 4;
+    for (size_t i=0; i<n; i++) {
+        HDC ch(std::to_string(i));
+        h.append(ch);
+    }
+    h.grow(4096);
+    for (size_t i=0; i<n; i++) {
+        CHECK(strcmp(h[i].as_string().c_str(), std::to_string(i).c_str()) == 0);
+    }
+}
 
 TEST_CASE("load", "[HDC]")
 {
