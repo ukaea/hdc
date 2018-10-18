@@ -471,13 +471,8 @@ TEST_CASE("Copy", "[HDC]")
 {
     PREPARE_TREE()
     HDC _copy = tree.copy();
-    INFO("here");
     auto tree_dump = tree.to_json_string();
-    INFO("here");
     auto copy_dump = _copy.to_json_string();
-    INFO("here");
-    INFO(tree_dump);
-    INFO(copy_dump);
     CHECK(strcmp(tree_dump.c_str(), copy_dump.c_str()) == 0);
     // Check also that UUIDs are the same - this behaviour can be changed later
     CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), _copy["aaa/bbb/double"].get_uuid().c_str()) != 0);
@@ -526,6 +521,50 @@ TEST_CASE("BufferGrowList", "[HDC]")
         CHECK(strcmp(h[i].as_string().c_str(), std::to_string(i).c_str()) == 0);
     }
 }
+
+TEST_CASE("Serialize", "[HDC]")
+{
+    // This does not makes sense for umap storage
+    if (global_storage->name() == "mdbm") {
+        PREPARE_TREE();
+        std::string ser = tree.serialize();
+        HDC tree2 = HDC::deserialize_HDC_string(ser);
+        auto tree_dump = tree.to_json_string();
+        auto tree2_dump = tree2.to_json_string();
+        CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
+    }
+}
+
+TEST_CASE("GetChildren", "[HDC]")
+{
+    std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
+    HDC h;
+    for (auto& str: lst) {
+        HDC ch(str);
+        h.add_child(str,ch);
+    }
+    auto children = h.get_children();
+    CHECK(children.size() == lst.size());
+    for (size_t i=0;i<children.size();i++) {
+        CHECK(strcmp(h[lst[i]].as_string().c_str(),lst[i].c_str()) == 0);
+    }
+}
+
+TEST_CASE("GetSlices", "[HDC]")
+{
+    size_t n = 5;
+    HDC h;
+    for (size_t i=0;i<n;i++) {
+        HDC ch(std::to_string(i));
+        h.append(ch);
+    }
+    auto slices = h.get_slices();
+    CHECK(slices.size() == n);
+    for (size_t i=0;i<slices.size();i++) {
+        CHECK(strcmp(h[i].as_string().c_str(),slices[i].as_string().c_str()) == 0);
+    }
+}
+
 
 TEST_CASE("load", "[HDC]")
 {

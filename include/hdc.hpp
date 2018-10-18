@@ -67,13 +67,6 @@ private:
     * @param path p_path: path under which to add node
     * @param n p_n: node
     */
-    void add_child(hdc_path_t& path, HDC* n);
-    /**
-    * @brief Adds node as child under the path
-    *
-    * @param path p_path: path under which to add node
-    * @param n p_n: node
-    */
     void add_child(hdc_path_t& path, HDC& n);
     /**
     * @brief Sets child under the path
@@ -83,25 +76,11 @@ private:
     */
     void set_child(hdc_path_t& path, HDC& n);
     /**
-    * @brief Sets child under the path
-    *
-    * @param path p_path: path uder which to set node
-    * @param n p_n: node
-    */
-    void set_child(hdc_path_t& path, HDC* n);
-    /**
     * @brief ...
     *
     * @param path p_path: path in the subtree of this node
     */
     void delete_child(hdc_path_t& path);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC*
-    */
-    HDC* get_ptr(hdc_path_t& path);
     /**
     * @brief ...
     *
@@ -143,13 +122,6 @@ private:
     * @param n p_n: HDC node
     */
     void set_child_single(hdc_index_t path, HDC& n);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @param n p_n: HDC node
-    */
-    void set_child_single(hdc_index_t path, HDC* n);
     /**
     * @brief ...
     *
@@ -656,13 +628,6 @@ public:
     */
     void print_info() const;
     /**
-    * @brief Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version.
-    *
-    * @param path p_path: path in the subtree of this node
-    * @param n p_n: HDC node
-    */
-    void add_child(const std::string& path, HDC* n);
-    /**
     * @brief Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version.
     *
     * @param path p_path: path in the subtree of this node
@@ -677,25 +642,11 @@ public:
     */
     void set_child(const std::string& path, HDC& n);
     /**
-    * @brief Sets HDC subtree to given path.
-    *
-    * @param path p_path: path in the subtree of this node
-    * @param n p_n: HDC node
-    */
-    void set_child(const std::string& path, HDC* n);
-    /**
     * @brief ...
     *
     * @return hdc_obj_t
     */
     hdc_t as_obj();
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @param n p_n: HDC node
-    */
-    void set_child(size_t index, HDC* n);
     /**
     * @brief ...
     *
@@ -730,20 +681,6 @@ public:
     * @return bool
     */
     bool exists(const std::string& path) const;
-    /** Sets HDC_LIST from std::deque<HDC*> data.*/
-    /**
-    * @brief ...
-    *
-    * @param list p_list:...
-    */
-    void set_list(deque<HDC*>* list);
-    /**
-    * @brief Inserts node to i-th slice of current node.
-    *
-    * @param i p_i:...
-    * @param h p_h:...
-    */
-    void insert(size_t i, HDC* h);
     /**
     * @brief Inserts node to i-th slice of current node.
     *
@@ -751,12 +688,6 @@ public:
     * @param h p_h:...
     */
     void insert(size_t i, HDC& h);
-    /**
-    * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
-    *
-    * @param h p_h:...
-    */
-    void append(HDC* h);
     /**
     * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
     *
@@ -965,14 +896,14 @@ public:
     * @brief deserialize from storage
     *
     * @param filename p_filename:...
-    * @return HDC*
+    * @return HDC
     */
     static HDC deserialize_HDC_file(const std::string& filename);
     /**
     * @brief deserialize from storage
     *
     * @param filename p_filename:...
-    * @return HDC*
+    * @return HDC
     */
     static HDC deserialize_HDC_string(const std::string& filename);
     /**
@@ -1027,14 +958,6 @@ public:
     * @return HDC
     */
     static HDC from_hdf5(const std::string& filename, const std::string& dataset_name = "/data");
-    /**
-    * @brief ...
-    *
-    * @param filename p_filename:...
-    * @param dataset_name p_dataset_name:...
-    * @return HDC*
-    */
-    static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
     /**
     * @brief ...
     *

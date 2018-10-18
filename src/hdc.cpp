@@ -430,12 +430,6 @@ bool HDC::exists(hdc_path_t& path) const
     return false; // never goes here
 }
 
-void HDC::add_child(hdc_path_t& path, HDC* n)
-{
-    add_child(path, *n);
-    return;
-}
-
 void HDC::add_child(hdc_path_t& path, HDC& n)
 {
     auto first = path.front();
@@ -544,15 +538,6 @@ std::vector<std::string> HDC::keys() const
         k.push_back(it->key.c_str());
     }
     return k;
-}
-
-void HDC::add_child(const std::string& path, HDC* n)
-{
-    DEBUG_STDOUT("add_child(" + path + ")\n");
-    if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
-    auto pth = split(path);
-    add_child(pth, n);
-    return;
 }
 
 void HDC::add_child(const std::string& path, HDC& n)
@@ -860,41 +845,9 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
     return;
 }
 
-void HDC::set_child_single(hdc_index_t path, HDC* n)
-{
-    set_child_single(path,*n);
-}
-
-void HDC::set_child(size_t index, HDC* n)
-{
-    set_child_single(index,*n);
-}
-
 void HDC::set_child(size_t index, HDC& n)
 {
     set_child_single(index,n);
-}
-
-void HDC::set_child(hdc_path_t& path, HDC* n)
-{
-    D(
-        std::cout << "set_child(";
-        for {auto str: path} std::cout << str;
-        std::cout << ")\n";
-    )
-    auto path2 = path;
-    if (!exists(path2)) { // Nothing to set
-        std::cout << "Nothing to set, maybe you want to add..." << endl;
-        return;
-    }
-    auto first = path.front();
-    path.pop_front();
-    if (path.empty()) {
-        set_child_single(first, n);
-    } else {
-        get(boost::get<std::string>(first)).set_child(path, n);
-    }
-    return;
 }
 
 void HDC::set_child(hdc_path_t& path, HDC& n)
@@ -916,13 +869,6 @@ void HDC::set_child(hdc_path_t& path, HDC& n)
     } else {
         get(boost::get<std::string>(first)).set_child(path, n);
     }
-    return;
-}
-
-void HDC::set_child(const std::string& path, HDC* n)
-{
-    auto pth = split(path);
-    set_child(pth, n);
     return;
 }
 
@@ -1065,12 +1011,6 @@ hdc_t HDC::as_obj() {
     return res;
 }
 
-void HDC::insert(size_t i, HDC* h)
-{
-    insert(i, *h);
-    return;
-}
-
 void HDC::insert(size_t index, HDC& h)
 {
     DEBUG_STDOUT("insert(" + to_string(i) + ")\n");
@@ -1138,12 +1078,6 @@ void HDC::insert(size_t index, HDC& h)
     if (header.buffer_size != old_size) {
         storage->set(uuid, buffer, header.buffer_size);
     }
-    return;
-}
-
-void HDC::append(HDC* h)
-{
-    append(*h);
     return;
 }
 

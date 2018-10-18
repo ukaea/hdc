@@ -615,25 +615,11 @@ HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name)
     return h;
 };
 
-HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name)
-{
-    DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
-    HDC* h = new HDC();
-    if (dataset_name != "") {
-        hdf5_read(filename, dataset_name, *h);
-    } else {
-        hdf5_read(filename, "/data", *h);
-    }
-    return h;
-};
 #else // _USE_HDF5
 void to_hdf5(std::string filename, std::string dataset_name) {
     throw HDCException("HDC has not been compiled with HDF5 support!\n");
 }
 HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name) {
-    throw HDCException("HDC has not been compiled with HDF5 support!\n");
-}
-HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name) {
     throw HDCException("HDC has not been compiled with HDF5 support!\n");
 }
 #endif // _USE_HDF5
