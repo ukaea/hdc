@@ -180,6 +180,11 @@ TEST_CASE("NodeManipulation", "[HDC]")
     HDC t;
     HDC d;
     CHECK_THROWS_AS(t.add_child("", d), HDCException);
+
+    // check set_type wher already allocated
+    HDC a(HDC_NODE_SIZE_DEFAULT);
+    a.set_type(HDC_STRUCT);
+    CHECK(a.get_type() == HDC_STRUCT);
 }
 
 TEST_CASE("ListManipulation", "[HDC]")
@@ -378,11 +383,6 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree.exists("aaa/bbb/ccc"));
     CHECK(tree["aaa/bbb/ccc"].get_type() == HDC_EMPTY);
 
-    HDC list;
-    list[0] = HDC();
-    CHECK(list.get_type() == HDC_LIST);
-    CHECK(list.exists(0));
-
     int8_t i8 = 8;
     int16_t i16 = 16;
     int32_t i32 = 32;
@@ -397,6 +397,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     tree["f"] = f;
     tree["d"] = d;
     tree["str"] = str;
+    tree["empty"] = HDC();
     CHECK(tree.exists("i8"));
     CHECK(tree.exists("i16"));
     CHECK(tree.exists("i32"));
@@ -404,6 +405,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree.exists("f"));
     CHECK(tree.exists("d"));
     CHECK(tree.exists("str"));
+    CHECK(tree.exists("empty"));
     CHECK(tree["i8"].get_type() == HDC_INT8);
     CHECK(tree["i16"].get_type() == HDC_INT16);
     CHECK(tree["i32"].get_type() == HDC_INT32);
@@ -411,6 +413,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree["f"].get_type() == HDC_FLOAT);
     CHECK(tree["d"].get_type() == HDC_DOUBLE);
     CHECK(tree["str"].get_type() == HDC_STRING);
+    CHECK(tree["empty"].get_type() == HDC_EMPTY);
     CHECK(tree["i8"].as_scalar<int8_t>() == i8);
     CHECK(tree["i16"].as_scalar<int16_t>() == i16);
     CHECK(tree["i32"].as_scalar<int32_t>() == i32);
@@ -418,6 +421,19 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree["f"].as_scalar<float>() == f);
     CHECK(tree["d"].as_scalar<double>() == d);
     CHECK(strcmp(tree["str"].as_cstring(),str.c_str()) == 0);
+    //test replace
+    tree["i8"] = static_cast<int8_t>(9);
+    CHECK(tree["i8"].as_scalar<int8_t>() == 9);
+
+    HDC list;
+    list[0] = HDC();
+    list[1] = i8;
+    CHECK(list[0].get_type() == HDC_EMPTY);
+    CHECK(list[1].as_scalar<int8_t>() == i8);
+    // test replace
+    list[1] = i32;
+    CHECK(list[0].get_type() == HDC_EMPTY);
+    CHECK(list[1].as_scalar<int32_t>() == i32);
 }
 
 
@@ -522,7 +538,7 @@ TEST_CASE("BufferGrowList", "[HDC]")
     }
 }
 
-TEST_CASE("Serialize", "[HDC]")
+TEST_CASE("SerializeString", "[HDC]")
 {
     // This does not makes sense for umap storage
     if (global_storage->name() == "mdbm") {
@@ -532,6 +548,22 @@ TEST_CASE("Serialize", "[HDC]")
         auto tree_dump = tree.to_json_string();
         auto tree2_dump = tree2.to_json_string();
         CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
+    }
+}
+
+TEST_CASE("SerializeFile", "[HDC]")
+{
+    // This does not makes sense for umap storage
+    if (global_storage->name() == "mdbm") {
+        // the same thing to/from file
+        auto fname = make_tmp_name("h5");
+        PREPARE_TREE();
+        tree.serialize(fname);
+        auto tree_dump = tree.to_json_string();
+        HDC from_file = HDC::deserialize_HDC_file(fname);
+        auto file_dump = from_file.to_json_string();
+        CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
+        if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
     }
 }
 
@@ -563,6 +595,17 @@ TEST_CASE("GetSlices", "[HDC]")
     for (size_t i=0;i<slices.size();i++) {
         CHECK(strcmp(h[i].as_string().c_str(),slices[i].as_string().c_str()) == 0);
     }
+}
+
+TEST_CASE("clean", "[HDC]")
+{
+    HDC tree;
+    auto uuid = tree.get_uuid();
+    tree["ch"] = HDC();
+    auto ch_uuid = tree["ch"].get_uuid();
+    tree.clean();
+    CHECK(global_storage->has(uuid) == false);
+    CHECK(global_storage->has(ch_uuid) == false);
 }
 
 
