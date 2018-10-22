@@ -144,7 +144,7 @@ void HDC::set_storage(std::string storage)
     }
 }
 
-void HDC::set_default_storage_options(std::string storage, std::string storage_options)
+void HDC::set_default_storage_options(const std::string& storage, const std::string& storage_options)
 {
     options->put("storage", storage);
     if (!storage_options.empty()) {
@@ -163,7 +163,7 @@ std::string HDC::get_library_dir(void)
     return boost::filesystem::canonical(p.parent_path()).string();
 }
 
-void HDC::init(std::string storage_str, std::string storage_options)
+void HDC::init(const std::string& storage_str, const std::string& storage_options)
 {
     options = new pt::ptree();
     HDC::set_default_storage_options(storage_str, storage_options);
@@ -1260,24 +1260,6 @@ char* HDC::get_data_ptr() const
     return (char*)(storage->get(uuid) + sizeof(hdc_header_t));
 }
 
-void HDC::delete_data()
-{
-    hdc_header_t header;
-    auto buffer = storage->get(uuid);
-    memcpy(&header,buffer,sizeof(hdc_header_t));
-    if (!is_terminal() && header.data_size > 0) {
-        auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
-        hdc_map_t* children = segment.find<hdc_map_t>("d").first;
-        hdc_map_t::nth_index<1>::type& ri = children->get<1>();
-        for (auto it = ri.begin(); it != ri.end(); ++it) {
-            HDC h(storage, it->address.c_str());
-            h.delete_data();
-        }
-    }
-    storage->remove(uuid);
-    uuid = "";
-}
-
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
 {
@@ -1345,7 +1327,7 @@ HDC HDC::deserialize_HDC_string(const std::string& str)
 
     string storage_str = root.get<std::string>("storage");
     options = new pt::ptree();
-    HDC::set_default_storage_options(storage_str);
+    HDC::set_default_storage_options(storage_str,"");
     auto storage_options = root.get_child("settings");
     for (const auto& kv : storage_options) {
         options->add_child("storage-options/" + kv.first, kv.second);

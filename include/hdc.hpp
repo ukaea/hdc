@@ -235,14 +235,14 @@ public:
     * @param storage p_storage:...
     * @param storage_options p_storage_options:...
     */
-    static void init(std::string storage="umap",std::string storage_options="");
+    static void init(const std::string& storage="umap", const std::string& storage_options="");
     /**
     * @brief Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions.
     *
     * @param storage p_storage:...
     * @param storage_options p_storage_options:...
     */
-    static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
+    static void set_default_storage_options(const std::string& storage, const std::string& storage_options = "");
     /**
     * @brief Returns map of children if there are any, otherwise it returns empty map
     *
@@ -878,11 +878,6 @@ public:
     * @return hdc_map_t*
     */
     hdc_map_t* get_children_ptr() const;
-    /**
-    * @brief ...
-    *
-    */
-    void delete_data();
     /**
     * @brief ...
     *
