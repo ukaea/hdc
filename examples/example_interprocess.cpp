@@ -64,6 +64,9 @@ int main(int argc, char *argv[]) {
         // Get data back from tree
 //        int32_t* array2 = node.as<int32_t*>();
         // get settings string
+        cout << "-------------- Master tree dump start --------------" << endl;
+        tree.dump();
+        cout << "--------------  Master tree dump end  --------------" << endl;
         std::string settings = tree.serialize();
         boost::algorithm::erase_all(settings,"\\"); // hack to remove wrongly escaped path
 
@@ -78,12 +81,15 @@ int main(int argc, char *argv[]) {
         if(0 != std::system(s.c_str()))
             return 1;
     } else {
+        cout << "Slave" << endl;
         shared_memory_object shm (open_only, "MySharedMemory", read_only);
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
         std::string str(mem);
         HDC tree = HDC::deserialize_HDC_string(str);
+        cout << "-------------- Slave tree dump start --------------" << endl;
         tree.dump();
+        cout << "--------------  Slave tree dump end  --------------" << endl;
     }
     return 0;
 }

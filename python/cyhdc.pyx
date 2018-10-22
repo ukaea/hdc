@@ -68,11 +68,11 @@ cdef extern from "hdc.hpp":
         size_t get_itemsize() except +
         size_t get_datasize() except +
         string to_json_string(int mode) except +
-        void set_child(string path, CppHDC* n) except +
-        void append(CppHDC* h) except +
-        void add_child(string path, CppHDC* n) except +
-        CppHDC* get_ptr(size_t i) except +
-        CppHDC* get_ptr(string path) except +
+        void set_child(string path, CppHDC& n) except +
+        void append(CppHDC& h) except +
+        void add_child(string path, CppHDC& n) except +
+        CppHDC get(size_t i) except +
+        CppHDC get(string path) except +
         bool exists(string path) except +
         void set_string(string data) except +
         void print_info() except +
@@ -83,23 +83,17 @@ cdef extern from "hdc.hpp":
         vector[size_t] get_shape() except +
         HDCStorage* get_storage() except +
         string get_uuid() except +
-
         # typedef unsigned long hdc_flags_t;
-        void set_data[T](int _rank, vector[size_t] _shape, T* _data, unsigned long _flags) except +
-        # void set_data_c(int _rank, vector[size_t] _shape, void* _data, hdc_type_t _type)
+        void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         T as[T]() except +
         string as_string() except +
         vector[string] keys() except +
         size_t childs_count() except +
-        # hdc_t* caused casting errors with except +
-        #void* as_hdc_ptr()  except +
         bool is_fortranorder() except +
         vector[size_t] get_strides() except +
-        @staticmethod
-        CppHDC* new_HDC_from_c_ptr(intptr_t c_ptr) except +
         void to_hdf5(string filename, string dataset_name) except +
         @staticmethod
-        CppHDC* from_hdf5_ptr(const string& filename, const string& dataset_name) except +
+        CppHDC from_hdf5(const string& filename, const string& dataset_name) except +
         @staticmethod
         CppHDC from_json(const string& filename, const string& datapath) except +
         void to_json(string filename, int mode) except +
@@ -111,26 +105,26 @@ cdef extern from "hdc.hpp":
 
 cdef class HDC:
     # data handle
-    cdef CppHDC* _thisptr
+    cdef CppHDC _this
 
     def __init__(self, data=None):
 
         if data is None:
             # create the cpp obeject
-            self._thisptr = new CppHDC()
+            self._this = CppHDC()
         elif isinstance(data, self.__class__):
             #  copy constructor
-            self._thisptr = (<HDC> data)._thisptr
+            self._this = (<HDC> data)._this
         elif isinstance(data, six.string_types):
-            self._thisptr = new CppHDC(bytes(data, 'utf-8'))
+            self._this = CppHDC(bytes(data, 'utf-8'))
         else:
             # assert NotImplementedError()
-            self._thisptr = new CppHDC()
+            self._this = CppHDC()
             self.set_data(data)
 
     def __contains__(self, key):
         if isinstance(key, six.string_types):
-            return deref(self._thisptr).exists(key.encode())
+            return self._this.exists(key.encode())
         else:
             raise ValueError('key must be a string')
 
@@ -140,7 +134,7 @@ cdef class HDC:
                 # cdef CppHDC* new_hdc = new CppHDC()
                 # deref(new_hdc).set_data(value)
                 new_hdc = HDC(value)
-                deref(self._thisptr).add_child(key.encode(), new_hdc._thisptr)
+                self._this.add_child(key.encode(), new_hdc._this)
             else:
                 self[key].set_data(value)
 
@@ -151,17 +145,17 @@ cdef class HDC:
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
             ckey = key.encode()
-            if not deref(self._thisptr).exists(ckey):
+            if not self._this.exists(ckey):
                 raise KeyError('{} key not found'.format(key))
             res = <HDC> self.__class__()
             # TODO move to constructor
-            res._thisptr = deref(self._thisptr).get_ptr(<string> ckey)
-            # deref(self._thisptr).get_ptr(ckey)
+            res._this = self._this.get(<string> ckey)
+            # self._this.get_ptr(ckey)
             return res
         elif isinstance(key, numbers.Integral):
             res = <HDC> self.__class__()
             # TODO move to constructor
-            res._thisptr = deref(self._thisptr).get_ptr(<size_t> key)
+            res._this = self._this.get(<size_t> key)
             return res
         else:
             raise ValueError("key must be either string or integer")
@@ -232,25 +226,24 @@ cdef class HDC:
                 flags |= HDCFortranOrder
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
-        cdef vector[size_t] _shape
-        _shape.reserve(data_view.ndim)
+        cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
         # TODO support other types
         if np.issubdtype(data.dtype, np.bool_):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <bool*> data_view.data, flags)
+            self._this.set_data(_shape, <bool*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int8):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int8_t*> data_view.data, flags)
+            self._this.set_data(_shape, <int8_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int16):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int16_t*> data_view.data, flags)
+            self._this.set_data(_shape, <int16_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int32):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int32_t*> data_view.data, flags)
+            self._this.set_data(_shape, <int32_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.int64):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <int64_t*> data_view.data, flags)
+            self._this.set_data(_shape, <int64_t*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float32):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <float*> data_view.data, flags)
+            self._this.set_data(_shape, <float*> data_view.data, flags)
         elif np.issubdtype(data.dtype, np.float64):
-            deref(self._thisptr).set_data(data_view.ndim,_shape, <double*> data_view.data, flags)
+            self._this.set_data(_shape, <double*> data_view.data, flags)
 
         else:
             NotImplementedError('Type not supported')
@@ -258,7 +251,7 @@ cdef class HDC:
     def set_data(self, data):
 
         if isinstance(data, six.string_types):
-            deref(self._thisptr).set_string(data.encode())
+            self._this.set_string(data.encode())
         elif isinstance(data, np.ndarray):
             self._set_data(data)
         elif isinstance(data, numbers.Number):
@@ -277,18 +270,18 @@ cdef class HDC:
 
     def append(self, data):
         new_hdc = HDC(data)
-        deref(self._thisptr).append(new_hdc._thisptr)
+        self._this.append(new_hdc._this)
 
     def dumps(self, mode=0):
         """Dump to JSON string"""
-        return deref(self._thisptr).to_json_string(mode).decode()
+        return self._this.to_json_string(mode).decode()
 
     @staticmethod
     def loads(s):
         """Load from JSON string"""
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
-        res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
         return res
 
     def dump(self, filename, mode=0):
@@ -299,7 +292,7 @@ cdef class HDC:
         fp : .write supporting object (open file)
             target to write to
         """
-        deref(self._thisptr).to_json(filename.encode(), mode)
+        self._this.to_json(filename.encode(), mode)
         # with open(filename, 'w') as fp:
         #     fp.write(self.dumps())
 
@@ -307,24 +300,24 @@ cdef class HDC:
     def load(uri, datapath=''):
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
-        res._thisptr = new CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
         return res
 
     def print_info(self):
-        return deref(self._thisptr).print_info()
+        return self._this.print_info()
 
     @property
     def _as_parameter_(self):
         # used by ctypes automatic conversion
-        uuid = deref(self._thisptr).get_uuid()
-        cdef voidptr storage = deref(self._thisptr).get_storage()
+        uuid = self._this.get_uuid()
+        cdef voidptr storage = self._this.get_storage()
         return hdc_t_(uuid,<intptr_t>storage)
 
     def get_type_str(self):
-        return deref(self._thisptr).get_type_str().decode()
+        return self._this.get_type_str().decode()
 
     cdef get_type(self):
-        return deref(self._thisptr).get_type()
+        return self._this.get_type()
 
     cdef is_array(self):
         type_id = self.get_type()
@@ -337,7 +330,7 @@ cdef class HDC:
         # return string representation
         # TODO
         if self.get_type() == HDC_STRING:
-            return deref(self._thisptr).as_string().decode()
+            return self._this.as_string().decode()
 
         if self.is_array():
             return(str(np.asarray(self)))
@@ -355,11 +348,11 @@ cdef class HDC:
         assert flags & PyBUF_C_CONTIGUOUS
 
         # TODO generalize
-        cdef Py_ssize_t itemsize = deref(self._thisptr).get_itemsize()
+        cdef Py_ssize_t itemsize = self._this.get_itemsize()
 
-        cdef vector[size_t] shape = deref(self._thisptr).get_shape()
-        cdef vector[size_t] strides = deref(self._thisptr).get_strides()
-        cdef int rank = deref(self._thisptr).get_rank()
+        cdef vector[size_t] shape = self._this.get_shape()
+        cdef vector[size_t] strides = self._this.get_strides()
+        cdef int rank = self._this.get_rank()
         cdef Py_ssize_t shape_buf[10]
         for i in range(rank):
             shape_buf[i] = shape[i]
@@ -368,7 +361,7 @@ cdef class HDC:
         cdef Py_ssize_t strides_buf[10]
         for i in range(rank):
             strides_buf[i] = strides[i]
-        buffer.buf = <char *> deref(self._thisptr).as[voidptr]()
+        buffer.buf = <char *> self._this.as[voidptr]()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
 
         # Set buffer format here:
@@ -413,7 +406,7 @@ cdef class HDC:
         # Item size in bytes of a single element
         buffer.itemsize = itemsize
         # product(shape) * itemsize
-        buffer.len = deref(self._thisptr).get_datasize()
+        buffer.len = self._this.get_datasize()
         buffer.ndim = rank
         # A new reference to the exporting object - for reference counting
         buffer.obj = self
@@ -428,8 +421,8 @@ cdef class HDC:
 
     @property
     def shape(self):
-        cdef int rank = deref(self._thisptr).get_rank()
-        cdef vector[size_t] shape = deref(self._thisptr).get_shape()
+        cdef int rank = self._this.get_rank()
+        cdef vector[size_t] shape = self._this.get_shape()
         return tuple((shape[i] for i in range(rank)))
 
     def __releasebuffer__(self, Py_buffer *buffer):
@@ -438,14 +431,14 @@ cdef class HDC:
     def keys(self):
         """Get access keys of containers' children
         """
-        keys = deref(self._thisptr).keys()
+        keys = self._this.keys()
         return (k.decode() for k in keys)
 
     def to_hdf5(self, filename, dataset_name="data"):
-        deref(self._thisptr).to_hdf5(filename.encode(), dataset_name.encode())
+        self._this.to_hdf5(filename.encode(), dataset_name.encode())
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
         res = HDC()
-        res._thisptr = CppHDC.from_hdf5_ptr(filename.encode(), dataset_name.encode())
+        res._this = CppHDC.from_hdf5(filename.encode(), dataset_name.encode())
         return res

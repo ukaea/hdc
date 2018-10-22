@@ -80,7 +80,7 @@ void write_node(HDC h, H5File* file, std::string path)
                     try {
                         Exception::dontPrint(); //TODO: Do this just temporarily???
                         ref_group = file->openGroup(ref_group_name);
-                    } catch (FileIException) {
+                    } catch (FileIException& e) {
                         ref_group = file->createGroup(ref_group_name);
                     }
                     hdc_map_t::nth_index<1>::type& ri = children->get<1>();
@@ -168,23 +168,39 @@ void write_node(HDC h, H5File* file, std::string path)
         if (transposed_data != NULL) delete[] transposed_data;
     }  // end of try block
         // catch failure caused by the H5File operations
-    catch (FileIException error) {
-        error.printErrorStack();
+    catch (FileIException& error) {
+        #if H5_VERSION_GE(1,8,13)
+            error.printErrorStack();
+        #else
+            std::cerr << "write_node(): " << "FileIException" << std::endl;
+        #endif
         exit(-1);
     }
         // catch failure caused by the DataSet operations
-    catch (DataSetIException error) {
-        error.printErrorStack();
+    catch (DataSetIException& error) {
+        #if H5_VERSION_GE(1,8,13)
+            error.printErrorStack();
+        #else
+            std::cerr << "write_node(): " << "DataSetIException" << std::endl;
+        #endif
         exit(-1);
     }
         // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException error) {
-        error.printErrorStack();
+    catch (DataSpaceIException& error) {
+        #if H5_VERSION_GE(1,8,13)
+            error.printErrorStack();
+        #else
+            std::cerr << "write_node(): " << "DataSpaceIException" << std::endl;
+        #endif
         exit(-1);
     }
         // catch failure caused by the DataSpace operations
-    catch (DataTypeIException error) {
-        error.printErrorStack();
+    catch (DataTypeIException& error) {
+        #if H5_VERSION_GE(1,8,13)
+            error.printErrorStack();
+        #else
+            std::cerr << "write_node(): " << "DataTypeIException" << std::endl;
+        #endif
         exit(-1);
     }
     return;
@@ -197,8 +213,12 @@ void HDC::to_hdf5(std::string filename, std::string dataset_name UNUSED)
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
         write_node(HDC(this->storage, this->uuid), &file, "data");
     }  // end of try block
-    catch (FileIException error) {
-        error.printErrorStack();
+    catch (FileIException& error) {
+        #if H5_VERSION_GE(1,8,13)
+            error.printErrorStack();
+        #else
+            std::cerr << "to_hdf5(): " << "FileIException" << std::endl;
+        #endif
         exit(-1);
     }
     return;
@@ -595,25 +615,11 @@ HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name)
     return h;
 };
 
-HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name)
-{
-    DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& dataset_name)");
-    HDC* h = new HDC();
-    if (dataset_name != "") {
-        hdf5_read(filename, dataset_name, *h);
-    } else {
-        hdf5_read(filename, "/data", *h);
-    }
-    return h;
-};
 #else // _USE_HDF5
 void to_hdf5(std::string filename, std::string dataset_name) {
     throw HDCException("HDC has not been compiled with HDF5 support!\n");
 }
 HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name) {
-    throw HDCException("HDC has not been compiled with HDF5 support!\n");
-}
-HDC* HDC::from_hdf5_ptr(const std::string& filename, const std::string& dataset_name) {
     throw HDCException("HDC has not been compiled with HDF5 support!\n");
 }
 #endif // _USE_HDF5

@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <vector>
 #include <list>
+#include <map>
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
@@ -68,13 +69,6 @@ private:
     * @param path p_path: path under which to add node
     * @param n p_n: node
     */
-    void add_child(hdc_path_t& path, HDC* n);
-    /**
-    * @brief Adds node as child under the path
-    *
-    * @param path p_path: path under which to add node
-    * @param n p_n: node
-    */
     void add_child(hdc_path_t& path, HDC& n);
     /**
     * @brief Sets child under the path
@@ -84,25 +78,11 @@ private:
     */
     void set_child(hdc_path_t& path, HDC& n);
     /**
-    * @brief Sets child under the path
-    *
-    * @param path p_path: path uder which to set node
-    * @param n p_n: node
-    */
-    void set_child(hdc_path_t& path, HDC* n);
-    /**
     * @brief ...
     *
     * @param path p_path: path in the subtree of this node
     */
     void delete_child(hdc_path_t& path);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC*
-    */
-    HDC* get_ptr(hdc_path_t& path);
     /**
     * @brief ...
     *
@@ -144,20 +124,6 @@ private:
     * @param n p_n: HDC node
     */
     void set_child_single(hdc_index_t path, HDC& n);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @param n p_n: HDC node
-    */
-    void set_child_single(hdc_index_t path, HDC* n);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC*
-    */
-    HDC* get_single_ptr(hdc_index_t index);
     /**
     * @brief ...
     *
@@ -203,7 +169,7 @@ public:
     *
     * @param h p_h: pointer to HDC object
     */
-    HDC(HDC* h);
+    HDC(const HDC& h);
     /**
     * @brief Deserializing constructor
     *
@@ -271,14 +237,37 @@ public:
     * @param storage p_storage:...
     * @param storage_options p_storage_options:...
     */
-    static void init(std::string storage="umap",std::string storage_options="");
+    static void init(const std::string& storage="umap", const std::string& storage_options="");
     /**
     * @brief Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions.
     *
     * @param storage p_storage:...
     * @param storage_options p_storage_options:...
     */
-    static void set_default_storage_options(std::string storage="umap", std::string storage_options="");
+    static void set_default_storage_options(const std::string& storage, const std::string& storage_options = "");
+    /**
+    * @brief Returns map of children if there are any, otherwise it returns empty map
+    *
+    * @return std::map< HDC >
+    */
+    const std::map<std::string,HDC> get_children() const;
+    /**
+    * @brief Returns map of children if there are any, otherwise it returns empty map
+    *
+    * @return int
+    */
+    const std::vector<HDC> get_slices() const;
+    /**
+    * @brief Makes copy of object. Copies at least node buffer. If deep_copy specified, it also copies all children nodes.
+    *
+    * @param deep_copy p_deep_copy:...
+    * @return HDC
+    */
+    HDC copy(bool deep_copy = true);
+    /**
+    * @brief removes node's children
+    *
+    */
     void clean();
     /**
     * @brief Cleans up the global_storage  -- mainly due to C and Fortran
@@ -299,13 +288,6 @@ public:
     * @return bool
     */
     bool exists(size_t index) const;
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC*
-    */
-    HDC* get_ptr(size_t index);
     /**
     * @brief ...
     *
@@ -351,11 +333,11 @@ public:
     */
     size_t get_flags() const;
     /**
-    * @brief returns pointer on itself
+    * @brief Returns true if type is not one of HDC_LIST or HDC_STRUCT
     *
-    * @return HDC*
+    * @return bool
     */
-    const HDC* get_this_ptr() const;
+    bool is_terminal() const;
     /**
     * @brief ...
     *
@@ -377,20 +359,6 @@ public:
     * @return HDC
     */
     HDC get_or_create(const std::string& path);
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @return HDC*
-    */
-    HDC* get_or_create_ptr(size_t index);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC*
-    */
-    HDC* get_or_create_ptr(const std::string& path);
     /**
     * @brief Returns the data, the pointer is just casted => there is no conversion for now.
     *
@@ -499,44 +467,6 @@ public:
         }
     }
 
-    /**
-    * @brief This function is workaround for cython, used simplie
-    *
-    * @param T size_t: Desired rank.
-    * @param T p_T: Desired data type.
-    * @param shape p_shape: Shape of the data
-    * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
-    */
-    template<typename T> void set_data(size_t rank, std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
-        hdc_header_t header = get_header();
-        D(printf("set_data(%d, {%d,%d,%d}, %f)\n",rank,shape[0],shape[1],shape[2],((double*)data)[0]);)
-        auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(hdc_header_t));
-        // Start with determining of the buffer size
-        size_t data_size = sizeof(T);
-        for (size_t i=0;i<rank;i++) data_size *= shape[i];
-        size_t buffer_size = data_size + sizeof(hdc_header_t);
-        if (header.buffer_size == buffer_size) {
-            storage->lock(uuid);
-            memcpy(buffer+sizeof(hdc_header_t),data,data_size);
-            storage->unlock(uuid);
-            return;
-        } else {
-            header.buffer_size = buffer_size;
-            header.data_size = data_size;
-            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            for (size_t i=0;i<rank;i++) header.shape[i] = shape[i];
-            header.flags = flags;
-            header.type = to_typeid(data[0]);
-            header.rank = rank;
-            std::vector<char> buffer(header.buffer_size);
-            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-            memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
-            storage->set(uuid,buffer.data(),header.buffer_size);
-            return;
-        }
-    }
     /**
     * @brief ...
     *
@@ -700,13 +630,6 @@ public:
     */
     void print_info() const;
     /**
-    * @brief Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Pointer version.
-    *
-    * @param path p_path: path in the subtree of this node
-    * @param n p_n: HDC node
-    */
-    void add_child(const std::string& path, HDC* n);
-    /**
     * @brief Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. Reference version.
     *
     * @param path p_path: path in the subtree of this node
@@ -721,25 +644,11 @@ public:
     */
     void set_child(const std::string& path, HDC& n);
     /**
-    * @brief Sets HDC subtree to given path.
-    *
-    * @param path p_path: path in the subtree of this node
-    * @param n p_n: HDC node
-    */
-    void set_child(const std::string& path, HDC* n);
-    /**
     * @brief ...
     *
     * @return hdc_obj_t
     */
     hdc_t as_obj();
-    /**
-    * @brief ...
-    *
-    * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
-    * @param n p_n: HDC node
-    */
-    void set_child(size_t index, HDC* n);
     /**
     * @brief ...
     *
@@ -753,13 +662,6 @@ public:
     * @param path p_path: path in the subtree of this node
     */
     void delete_child(const std::string& path);
-    /**
-    * @brief Returns subtree by path.
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC*
-    */
-    HDC* get_ptr(const std::string& path);
     /**
     * @brief ...
     *
@@ -781,34 +683,6 @@ public:
     * @return bool
     */
     bool exists(const std::string& path) const;
-    /** Sets HDC_LIST from std::deque<HDC*> data.*/
-    /**
-    * @brief ...
-    *
-    * @param list p_list:...
-    */
-    void set_list(deque<HDC*>* list);
-    /**
-    * @brief Performs deep copy of current node if recursively = 1. Performs shallow copy otherwise.
-    *
-    * @param h p_h:...
-    * @param recursively p_recursively:...
-    */
-    void resize(HDC* h, int recursively = 0);
-    /**
-    * @brief Returns copy of current object.
-    *
-    * @param copy_arrays p_copy_arrays:...
-    * @return HDC
-    */
-    HDC copy(int copy_arrays = 1);
-    /**
-    * @brief Inserts node to i-th slice of current node.
-    *
-    * @param i p_i:...
-    * @param h p_h:...
-    */
-    void insert(size_t i, HDC* h);
     /**
     * @brief Inserts node to i-th slice of current node.
     *
@@ -816,12 +690,6 @@ public:
     * @param h p_h:...
     */
     void insert(size_t i, HDC& h);
-    /**
-    * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
-    *
-    * @param h p_h:...
-    */
-    void append(HDC* h);
     /**
     * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
     *
@@ -981,7 +849,7 @@ public:
     *
     * @return size_t
     */
-    size_t childs_count() const;
+    size_t children_count() const;
     /**
     * @brief ...
     *
@@ -1015,11 +883,6 @@ public:
     /**
     * @brief ...
     *
-    */
-    void delete_data();
-    /**
-    * @brief ...
-    *
     * @param signalName p_signalName:...
     * @param dataSource p_dataSource:...
     * @param withMetadata p_withMetadata:...
@@ -1027,24 +890,17 @@ public:
     */
     static HDC from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata = false);
     /**
-    * @brief "static contructor" from void* HDC
-    *
-    * @param cpp_ptr p_cpp_ptr:...
-    * @return HDC*
-    */
-    static HDC* new_HDC_from_cpp_ptr(intptr_t cpp_ptr);
-    /**
     * @brief deserialize from storage
     *
     * @param filename p_filename:...
-    * @return HDC*
+    * @return HDC
     */
     static HDC deserialize_HDC_file(const std::string& filename);
     /**
     * @brief deserialize from storage
     *
     * @param filename p_filename:...
-    * @return HDC*
+    * @return HDC
     */
     static HDC deserialize_HDC_string(const std::string& filename);
     /**
@@ -1102,14 +958,6 @@ public:
     /**
     * @brief ...
     *
-    * @param filename p_filename:...
-    * @param dataset_name p_dataset_name:...
-    * @return HDC*
-    */
-    static HDC* from_hdf5_ptr(const std::string& filename, const std::string& dataset_name = "/data");
-    /**
-    * @brief ...
-    *
     * @param data_object p_data_object:...
     * @param data_source p_data_source:...
     * @return HDC
@@ -1123,6 +971,14 @@ public:
     * @return HDC
     */
     static HDC load(const std::string& str, const std::string& datapath="");
+    /**
+    * @brief Returns copy of HDC object, if deep_copy == true provides deep copy (i.e. copy of current node and also all children)
+    *
+    * @param h p_h:...
+    * @param deep_copy p_deep_copy:...
+    * @return HDC
+    */
+    static HDC copy(const HDC& h, bool deep_copy = false);
     /**
     * @brief ...
     *

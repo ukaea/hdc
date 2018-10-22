@@ -1,11 +1,19 @@
 #include "catch.hpp"
 #include "hdc.hpp"
-#include <cstdio>
+#include <boost/filesystem.hpp>
 
 
 bool in_vector(std::string str, const std::vector<std::string>& vector)
 {
     return (std::find(vector.begin(), vector.end(), str) != vector.end());
+}
+
+const std::string make_tmp_name(const std::string& suffix = "h5")
+{
+    boost::filesystem::path temp = boost::filesystem::unique_path();
+    temp += std::string(".")+suffix;
+    const std::string tempstr = temp.native();
+    return tempstr;
 }
 
 #define PREPARE_TREE()                                                                              \
@@ -53,7 +61,7 @@ TEST_CASE("StringParsing", "[HDCUtils]")
 
 TEST_CASE("GetPlugins","[HDC]")
 {
-    HDC::search_plugins();
+    //HDC::search_plugins(); // This is called in main.cpp
     auto plugins = HDC::get_available_plugins();
     // "umap" should be always present
     CHECK(in_vector("umap",plugins));
@@ -111,6 +119,11 @@ TEST_CASE("EmptyArrayNode", "[HDC]")
     CHECK(4 == hd.get_shape()[0]);
     CHECK(HDC_DOUBLE == hd.get_type());
     CHECK(strcmp("float64", hd.get_type_str()) == 0);
+
+    //check throws if more dimensions
+    std::vector<size_t> sh(HDC_MAX_DIMS+1);
+    for (size_t i=0; i<HDC_MAX_DIMS+1;i++) sh[i] = 1;
+    CHECK_THROWS(HDC{sh,HDC_DOUBLE});
 }
 
 TEST_CASE("NodeManipulation", "[HDC]")
@@ -167,6 +180,11 @@ TEST_CASE("NodeManipulation", "[HDC]")
     HDC t;
     HDC d;
     CHECK_THROWS_AS(t.add_child("", d), HDCException);
+
+    // check set_type wher already allocated
+    HDC a(HDC_NODE_SIZE_DEFAULT);
+    a.set_type(HDC_STRUCT);
+    CHECK(a.get_type() == HDC_STRUCT);
 }
 
 TEST_CASE("ListManipulation", "[HDC]")
@@ -188,9 +206,6 @@ TEST_CASE("ListManipulation", "[HDC]")
 
     CHECK(h.get("k[1]").as_string() == "data1");
     CHECK(h.get("l[1]").as_string() == "data10");
-#ifdef _USE_HDF5
-    h.to_hdf5("aaa.hdf5", "data");
-#endif // _USE_HDF5
 }
 
 TEST_CASE("Int8DataManipulation", "[HDC]")
@@ -325,15 +340,15 @@ TEST_CASE("SliceManipulation", "[HDC]")
     HDC sl3;
     sl3.set_string("3");
     h.insert(1, sl3);
-    vector<string> keys = h.keys();
+    auto keys = h.keys();
     CHECK(strcmp("3", h[1].as_cstring()) == 0);
     CHECK(strcmp("2", h[2].as_cstring()) == 0);
     HDC sl4;
     sl4.set_string("4");
     h.set_child(1, sl4);
     CHECK(strcmp("4", h[1].as_cstring()) == 0);
-
     HDC n;
+    n.set_type(HDC_LIST);
     HDC ch;
     n.insert(10, ch);
     CHECK(11 == n.get_shape()[0]);
@@ -368,11 +383,6 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree.exists("aaa/bbb/ccc"));
     CHECK(tree["aaa/bbb/ccc"].get_type() == HDC_EMPTY);
 
-    HDC list;
-    list[0] = HDC();
-    CHECK(list.get_type() == HDC_LIST);
-    CHECK(list.exists(0));
-
     int8_t i8 = 8;
     int16_t i16 = 16;
     int32_t i32 = 32;
@@ -387,6 +397,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     tree["f"] = f;
     tree["d"] = d;
     tree["str"] = str;
+    tree["empty"] = HDC();
     CHECK(tree.exists("i8"));
     CHECK(tree.exists("i16"));
     CHECK(tree.exists("i32"));
@@ -394,6 +405,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree.exists("f"));
     CHECK(tree.exists("d"));
     CHECK(tree.exists("str"));
+    CHECK(tree.exists("empty"));
     CHECK(tree["i8"].get_type() == HDC_INT8);
     CHECK(tree["i16"].get_type() == HDC_INT16);
     CHECK(tree["i32"].get_type() == HDC_INT32);
@@ -401,6 +413,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree["f"].get_type() == HDC_FLOAT);
     CHECK(tree["d"].get_type() == HDC_DOUBLE);
     CHECK(tree["str"].get_type() == HDC_STRING);
+    CHECK(tree["empty"].get_type() == HDC_EMPTY);
     CHECK(tree["i8"].as_scalar<int8_t>() == i8);
     CHECK(tree["i16"].as_scalar<int16_t>() == i16);
     CHECK(tree["i32"].as_scalar<int32_t>() == i32);
@@ -408,20 +421,33 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree["f"].as_scalar<float>() == f);
     CHECK(tree["d"].as_scalar<double>() == d);
     CHECK(strcmp(tree["str"].as_cstring(),str.c_str()) == 0);
-    tree.to_json("dump.txt");
+    //test replace
+    tree["i8"] = static_cast<int8_t>(9);
+    CHECK(tree["i8"].as_scalar<int8_t>() == 9);
 
+    HDC list;
+    list[0] = HDC();
+    list[1] = i8;
+    CHECK(list[0].get_type() == HDC_EMPTY);
+    CHECK(list[1].as_scalar<int8_t>() == i8);
+    // test replace
+    list[1] = i32;
+    CHECK(list[0].get_type() == HDC_EMPTY);
+    CHECK(list[1].as_scalar<int32_t>() == i32);
 }
 
 
 TEST_CASE("JsonComplete", "[HDC]")
 {
     PREPARE_TREE()
-
+    // create temporary file name
+    auto fname = make_tmp_name("txt");
+    auto fname2 = make_tmp_name("txt");
     // Save JSON
-    tree.to_json("tree.txt");
+    tree.to_json(fname);
     // Load JSON
-    HDC tree2 = HDC::from_json("tree.txt");
-    tree2.to_json("tree2.txt");
+    HDC tree2 = HDC::from_json(fname);
+    tree2.to_json(fname2);
     // test tree
     HDC s = tree2.get("aaa/bbb/double");
     // Test double
@@ -431,7 +457,6 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
     double* data_double_in = s.as<double*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
-
     // Test int
     s = tree2.get("aaa/bbb/int");
     CHECK(1 == s.get_rank());
@@ -440,7 +465,6 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str(), tree2.get("aaa/bbb/int").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t*>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
-
     // Test empty
     CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
     // Test list
@@ -450,24 +474,140 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(HDC_LIST == s.get_type());
     CHECK(strcmp(tree.get("aaa/list").get_type_str(), tree2.get("aaa/list").get_type_str()) == 0);
     for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get(i).get_type());
-
     // Test string
     CHECK(strcmp(tree.get("aaa/string").as_cstring(), tree2.get("aaa/string").as_cstring()) == 0);
-    HDC j = HDC::load("json://tree2.txt|aaa/string");
+    auto __path = std::string("json://") + fname2;
+    HDC j = HDC::load(__path,"aaa/string");
     CHECK(strcmp(j.as_cstring(), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
+    if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    if(remove(fname2.c_str()) != 0) std::cerr << "Error removing file " << fname2 << std::endl;
 }
 
-TEST_CASE("CopyConstructor", "[HDC]")
+TEST_CASE("Copy", "[HDC]")
 {
     PREPARE_TREE()
-    // test copy c-tor
-    HDC copy(tree);
-    auto tree_dump = tree.serialize();
-    auto copy_dump = copy.serialize();
+    HDC _copy = tree.copy();
+    auto tree_dump = tree.to_json_string();
+    auto copy_dump = _copy.to_json_string();
     CHECK(strcmp(tree_dump.c_str(), copy_dump.c_str()) == 0);
     // Check also that UUIDs are the same - this behaviour can be changed later
-    CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), copy["aaa/bbb/double"].get_uuid().c_str()) == 0);
+    CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), _copy["aaa/bbb/double"].get_uuid().c_str()) != 0);
 }
+
+TEST_CASE("BufferGrowArray", "[HDC]")
+{
+    std::vector<size_t> shape = { 4 };
+    double data[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
+    HDC h;
+    h.set_data<double>(shape, data);
+    h.grow(4096);
+    double* data2 = h.as<double*>();
+    CHECK(h.get_datasize() == 4*sizeof(double) + 4096);
+    CHECK(h.get_shape()[0] == 4);
+    CHECK(h.get_type() == HDC_DOUBLE);
+    for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
+}
+
+TEST_CASE("BufferGrowStruct", "[HDC]")
+{
+    std::vector<std::string> keys = {"aaa","bbb","ccc","ddd"};
+    HDC h;
+    for (auto k : keys) {
+        HDC ch;
+        h.add_child(k,ch);
+    };
+    h.grow(4096);
+    auto keys2 = h.keys();
+    CHECK(keys2.size() == keys.size());
+    for (size_t i=0; i<keys.size(); i++) {
+        CHECK(keys[i] == keys2[i]);
+    }
+}
+
+TEST_CASE("BufferGrowList", "[HDC]")
+{
+    HDC h;
+    size_t n = 4;
+    for (size_t i=0; i<n; i++) {
+        HDC ch(std::to_string(i));
+        h.append(ch);
+    }
+    h.grow(4096);
+    for (size_t i=0; i<n; i++) {
+        CHECK(strcmp(h[i].as_string().c_str(), std::to_string(i).c_str()) == 0);
+    }
+}
+
+TEST_CASE("SerializeString", "[HDC]")
+{
+    // This does not makes sense for umap storage
+    if (global_storage->name() == "mdbm") {
+        PREPARE_TREE();
+        std::string ser = tree.serialize();
+        HDC tree2 = HDC::deserialize_HDC_string(ser);
+        auto tree_dump = tree.to_json_string();
+        auto tree2_dump = tree2.to_json_string();
+        CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
+    }
+}
+
+TEST_CASE("SerializeFile", "[HDC]")
+{
+    // This does not makes sense for umap storage
+    if (global_storage->name() == "mdbm") {
+        // the same thing to/from file
+        auto fname = make_tmp_name("h5");
+        PREPARE_TREE();
+        tree.serialize(fname);
+        auto tree_dump = tree.to_json_string();
+        HDC from_file = HDC::deserialize_HDC_file(fname);
+        auto file_dump = from_file.to_json_string();
+        CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
+        if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    }
+}
+
+TEST_CASE("GetChildren", "[HDC]")
+{
+    std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
+    HDC h;
+    for (auto& str: lst) {
+        HDC ch(str);
+        h.add_child(str,ch);
+    }
+    auto children = h.get_children();
+    CHECK(children.size() == lst.size());
+    for (size_t i=0;i<children.size();i++) {
+        CHECK(strcmp(h[lst[i]].as_string().c_str(),lst[i].c_str()) == 0);
+    }
+}
+
+TEST_CASE("GetSlices", "[HDC]")
+{
+    size_t n = 5;
+    HDC h;
+    for (size_t i=0;i<n;i++) {
+        HDC ch(std::to_string(i));
+        h.append(ch);
+    }
+    auto slices = h.get_slices();
+    CHECK(slices.size() == n);
+    for (size_t i=0;i<slices.size();i++) {
+        CHECK(strcmp(h[i].as_string().c_str(),slices[i].as_string().c_str()) == 0);
+    }
+}
+
+TEST_CASE("clean", "[HDC]")
+{
+    HDC tree;
+    auto uuid = tree.get_uuid();
+    tree["ch"] = HDC();
+    auto ch_uuid = tree["ch"].get_uuid();
+    tree.clean();
+    CHECK(global_storage->has(uuid) == false);
+    CHECK(global_storage->has(ch_uuid) == false);
+}
+
 
 TEST_CASE("load", "[HDC]")
 {
@@ -478,28 +618,33 @@ TEST_CASE("load", "[HDC]")
 TEST_CASE("HDF5", "[HDC]")
 {
     PREPARE_TREE()
-    tree.to_hdf5("tree.h5");
-    HDC tree2 = HDC::from_hdf5("tree.h5");
+    // create temporary file name
+    auto fname = make_tmp_name("h5");
+    tree.to_hdf5(fname);
+    HDC tree2 = HDC::from_hdf5(fname);
     double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
     CHECK(data == 333.333);
-    HDC h5 = HDC::load("hdf5://tree.h5|/data/aaa/bbb/_scalar");
+    auto path = std::string("hdf5://")+fname+"|/data/aaa/bbb/_scalar";
+    HDC h5 = HDC::load(path);
     data = h5.as<double*>()[0];
     CHECK(data == 333.333);
+    if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
 }
 
 #endif
 
-// // // #ifdef _USE_UDA
-// // // TEST_CASE("StringConstructor", "[HDC]")
-// // // {
-// // //     HDC h = HDC::load("uda://HELP::help()");
-// // //     std::string expected =
-// // //             "\nHelp\tList of HELP plugin functions:\n"
-// // //             "\n"
-// // //             "services()\tReturns a list of available services with descriptions\n"
-// // //             "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
-// // //             "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
-// // //     CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
-// // // }
-// // //
-// // // #endif
+#ifdef _USE_UDA
+TEST_CASE("UDA", "[HDC]")
+{
+    HDC h = HDC::load("uda://HELP::help()");
+    h.dump();
+    std::string expected =
+            "\nHelp\tList of HELP plugin functions:\n"
+            "\n"
+            "services()\tReturns a list of available services with descriptions\n"
+            "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
+            "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
+    CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
+}
+
+#endif

@@ -1,16 +1,52 @@
-test-xenial:
-  image: matrim/cmake-examples:3.5.1
+test-bionic:
+  image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-bionic-hdc-prereq
   script:
-    - sudo apt-get update -y
-    - sudo apt-get install -y libboost-all-dev gfortran libhdf5-dev
-    - sudo apt-get install -y python3-numpy python3-pytest python3-pip python3-h5py
-    - sudo pip3 install cython
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
     - make -j
+    - make test
     - make install
-    - ../install/bin/hdc_test
+    - cd python
+    - python3 setup.py build
+    - python3 setup.py test
+
+test-xenial:
+  image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-xenial-hdc-prereq
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 setup.py build
+    - python3 setup.py test
+
+test-centos7:
+  image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
+  script:
+    - export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
+    - mkdir build
+    - cd build
+    - cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3.6 setup.py build
+    - python3.6 setup.py test
+
+test-fedora-28:
+  image: dockerhub.tok.ipp.cas.cz:5000/fedora-28-hdc-prereq
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    - make -j
+    - make test
+    - make install
     - cd python
     - python3 setup.py build
     - python3 setup.py test

@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-09-25 17:18:10.153676 by generate_fortran_api.py
+! This file was generated on 2018-10-15 17:54:49.801755 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -7,7 +7,7 @@ module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        character(kind=c_char,len=37) :: uuid
+        character(kind=c_char) :: uuid(37)
         type(c_ptr) :: storage
     end type hdc_t
 
