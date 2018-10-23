@@ -76,7 +76,9 @@ link_directories(${Boost_LIBRARY_DIRS})
 message("Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message("Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 find_package(Matlab)
-include_directories(${Matlab_INCLUDE_DIRS})
+# if (Matlab_FOUND)
+#     include_directories(${Matlab_INCLUDE_DIRS})
+# endif()
 
 ########################################################################################################################
 # RPATH options
