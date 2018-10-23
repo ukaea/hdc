@@ -11,8 +11,8 @@ classdef HDC < handle
 
         %% Destructor - Destroy the C++ class instance
         function delete(this)
-            % hdc_mex('delete', this.objectHandle);
-            disp('do not destroy HDC >:-(')
+            hdc_mex('delete', this.objectHandle);
+            % disp('do not destroy HDC >:-(')
         end
 
         function varargout = set_data(this, data)
@@ -23,6 +23,20 @@ classdef HDC < handle
         function varargout = get_data(this)
             inp = {};
             [varargout{1:nargout}] = hdc_mex('get_data', this.objectHandle, inp{:});
+        end
+
+        function varargout = add_child(this, path, child)
+            inp = {char(path), child.objectHandle};
+            [varargout{1:nargout}] = hdc_mex('add_child', this.objectHandle, inp{:});
+        end
+
+        function this = set_obj_handle(this, obj_handle)
+            this.objectHandle = obj_handle;
+        end
+
+        function child = get_child(this, path)
+            inp = {char(path)};
+            child = HDC(1,hdc_mex('get_child', this.objectHandle, inp{:}));
         end
 
         function varargout = dump(this)

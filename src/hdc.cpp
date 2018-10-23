@@ -3,8 +3,8 @@
 #include <memory>
 #include <glob.h>
 #include <dlfcn.h>
-// #include <boost/regex.hpp>
-// #include <boost/algorithm/string_regex.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string_regex.hpp>
 #include <boost/type.hpp>
 #include <CLI/CLI.hpp>
 //#define DEBUG
@@ -49,15 +49,16 @@ void HDC::load_config(std::string configPath)
     pt::ptree settings_read;
     bool config_found = false;
     for (auto path : parts) {
-//         if (boost::filesystem::exists(path)) {
         if (fileExists(path)) {
             try {
                 pt::read_json(path, settings_read);
                 config_found = true;
                 break;
             }
-            catch (...) {
+            catch (std::exception &e) {
+                std::cout << e.what() << std::endl;
                 std::cout << "HDC::load_config(): something bad happened" << endl;
+                exit(1);
             }
         }
     }
@@ -128,7 +129,7 @@ void HDC::list_plugins()
 
 void HDC::set_storage(std::string storage)
 {
-    /*boost::optional<std::string> storage_cmd = options->get_optional<std::string>("storage_cmdline");
+    boost::optional<std::string> storage_cmd = options->get_optional<std::string>("storage_cmdline");
     if (storage_cmd) {
         while (options->count("storage") > 0) options->erase("storage");
         options->put("storage", *storage_cmd);
@@ -138,11 +139,11 @@ void HDC::set_storage(std::string storage)
     //cout << "Selected storage: " << selected_store_name <<endl;
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
         //cout << avail_stores[selected_store_name] << endl;
-        if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());*/
-        global_storage = new HDCStorage("","");
-//     } else {
-//         throw HDCException("Unable to select the store.\n");
-//     }
+        if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());
+        global_storage = new HDCStorage(avail_stores[selected_store_name], options->get_child("storage_options"));
+    } else {
+        throw HDCException("Unable to select the store.\n");
+    }
 }
 
 void HDC::set_default_storage_options(const std::string& storage, const std::string& storage_options)
@@ -163,17 +164,15 @@ std::string HDC::get_library_dir(void)
     std::string path = dl_info.dli_fname;
     size_t found=path.find_last_of("/\\");
     return path.substr(0,found);
-//     boost::filesystem::path p(dl_info.dli_fname);
-//     return boost::filesystem::canonical(p.parent_path()).string();
 }
 
 void HDC::init(const std::string& storage_str, const std::string& storage_options)
 {
     options = new pt::ptree();
-//     HDC::set_default_storage_options(storage_str, storage_options);
-//     HDC::search_plugins();
+    HDC::set_default_storage_options(storage_str, storage_options);
+    HDC::search_plugins();
     //HDC::load_config();
-    HDC::set_storage("umap");
+    HDC::set_storage(storage_str);
 }
 
 
@@ -1290,7 +1289,7 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
                                                                     new_segment.get_segment_manager());
             hdc_map_t::nth_index<1>::type& ri = old_children->get<1>();
             for (auto it = ri.begin(); it != ri.end(); ++it) {
-                record rec(it->key.c_str(),it->address.c_str(),new_segment.get_segment_manager());
+                record rec(it->key.c_str(), it->address.c_str(), new_segment.get_segment_manager());
                 new_children->insert(rec);
             }
         } else {
@@ -1349,14 +1348,10 @@ HDC HDC::deserialize_HDC_string(const std::string& str)
 HDC HDC::load(const std::string& uri, const std::string& datapath)
 {
     HDC h;
-    /*
     // start by parsing the string
     std::vector<std::string> result;
-    //boost::algorithm::split_regex(result, uri, boost::regex("://"));
-    std::string delimiter = "://";
-    auto pos = s.find(delimiter);
-    TODO: do this
-    if (pos != std::string::npos) {
+    boost::algorithm::split_regex(result, uri, boost::regex("://"));
+    if (result.size() > 1) {
         std::vector<std::string> split_res;
         boost::split(split_res, result[1], boost::is_any_of("|"), boost::token_compress_on);
         if (split_res.size() > 1 && datapath != "") {
@@ -1379,7 +1374,6 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
     } else {
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
     }
-    */
     return h;
 }
 

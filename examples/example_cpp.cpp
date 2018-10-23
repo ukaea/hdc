@@ -10,8 +10,8 @@ int main(int argc, const char* argv[])
     HDC::init();
     HDC::parse_cmdline(argc, argv);
     // Create new HDC tree
-    // Add some children - one can use either bracket operator or add_child() method
     HDC tree;
+    // Add some children - one can use either bracket operator or add_child() method
     HDC dummy1;
     tree["aaa/bbb/ccc"] = dummy1;
     HDC dummy2;
@@ -64,8 +64,8 @@ int main(int argc, const char* argv[])
     // On screen
     tree.dump();
     tree.serialize("pokus.json");
-//Serialize data to HDF5
 
+//Serialize data to HDF5
 #ifdef _USE_HDF5
     tree.to_hdf5("tree.h5");
     HDC hhh = HDC::from_hdf5("tree.h5","/data");

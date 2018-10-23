@@ -9,6 +9,7 @@
 
 #include "class_handle.hpp"
 
+#define HDC_STR_LEN 1024
 
 using namespace std;
 
@@ -25,9 +26,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // Check parameters
         if (nlhs != 1)
             mexErrMsgTxt("New: One output expected.");
+        if (nrhs > 1) {
+            int32_t constructor_variant = (int32_t)mxGetScalar(prhs[1]);
+            std::cout << "Constructor variant: " << constructor_variant << std::endl;
+            switch (constructor_variant) {
+                case 1: // Copy constructor
+                    plhs[0] = convertPtr2Mat<HDC>(new HDC(*convertMat2Ptr<HDC>(prhs[2])));
+                    return;
+                default:
+                    mexErrMsgTxt("new(): Supplied variant of constructor not known");
+            }
+        }
         // Return a handle to a new C++ instance
-        plhs[0] = convertPtr2Mat<HDC>(new HDC);
-
+        // plain constructor here
+        plhs[0] = convertPtr2Mat<HDC>(new HDC());
         return;
     }
 
@@ -54,7 +66,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         double* data = mxGetPr(prhs[2]);
         // matlab::data::TypedArray<double> in = std::move(inputs[1]);
         int ndim = *mxGetDimensions(prhs[2]);
-        size_t shape[ndim];
+        std::vector<size_t> shape(ndim);
         const mwSize *mat_shape = mxGetDimensions(prhs[2]);
         for (size_t i = 0; i < ndim; i++) {
           shape[i] = mat_shape[i];
@@ -62,7 +74,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         size_t flags = HDCDefault;
         flags |= HDCFortranOrder;
 
-        hdc_instance->set_data(ndim, shape, data, flags);
+        hdc_instance->set_data(shape, data, flags);
 
         return;
     }
@@ -71,8 +83,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         mxArray *result = nullptr;
         // matlab::data::TypedArray<double> in = std::move(inputs[1]);
-        int ndim = hdc_instance->get_ndim();
-        size_t *shape = hdc_instance->get_shape();
+        auto shape = hdc_instance->get_shape();
+        auto ndim = shape.size();
         assert (0 < ndim < 3);
         mwSize m, n;
         m = shape[0];
@@ -81,26 +93,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         } else {
           n = shape[1];
         }
-std::cout <<"here1\n";
+
         mwSize my_ndim = ndim;
-        void *my_shape = mxMalloc(ndim*sizeof(mwSize));
-        for (int i = 0; i < ndim; i++) ((mwSize*)my_shape)[i] = shape[i];
-std::cout <<"here2\n";
+        std::vector<size_t> my_shape(ndim);
+        size_t n_elem = 1;
+        for (int i = 0; i < ndim; i++) {
+            my_shape[i] = shape[i];
+            n_elem *= shape[i];
+        }
         // create output matlab matrix and copy data
-        //result = mxCreateDoubleMatrix(m, n, mxREAL);
-        //memcpy(mxGetPr(result), hdc_instance->as<void*>(), m * n * sizeof(double));
+        result = mxCreateDoubleMatrix(m, n, mxREAL);
+        memcpy(mxGetPr(result), hdc_instance->as<void*>(), m * n * sizeof(double));
 
         // zero-copy -- so far results into segfaults
         // most likely because matlab deallocates the memory
 //         result = mxCreateUninitNumericArray(ndim, shape, mxDOUBLE_CLASS, mxREAL);
 //         mxSetData(result, hdc_instance->as<void*>());
-        result = mxCreateDoubleMatrix(0,0,mxREAL);
-std::cout <<"here3\n";
-        double *dset_data = (double *)malloc(sizeof(double) * shape[0] * shape[1]);
-std::cout <<"here4\n";
-        mxSetData(result, dset_data);
-        mxSetDimensions(result, shape, ndim);
-std::cout <<"here5\n";
+// // //         result = mxCreateDoubleMatrix(0,0,mxREAL);
+// // // std::cout <<"here3\n";
+// // //         double *dset_data = (double *)mxMalloc(sizeof(double) * shape[0] * shape[1]);
+// // //         memcpy(dset_data,hdc_instance->as<void*>(),sizeof(double) * shape[0] * shape[1]);
+// // // std::cout <<"here4\n";
+// // //         mxSetPr(result, hdc_instance->as<double*>());
+// // //
+// // //         mxSetDimensions(result, shape.data(), ndim);
+// // // std::cout <<"here5\n";
         plhs[0] = result;
         return;
     }
@@ -112,7 +129,29 @@ std::cout <<"here5\n";
         return;
     }
 
+    if (!strcmp("add_child", cmd)) {
+        char path[HDC_STR_LEN];
+        if (mxGetString(prhs[2], path, sizeof(path))) {
+            std::cout << "path: " << path << std::endl;
+            mexErrMsgTxt("Second input should be a command string less than 1024 characters long.");
+        }
+        HDC* child = convertMat2Ptr<HDC>(prhs[3]);
+        hdc_instance->add_child(path,*child);
+        return;
+    }
 
+    if (!strcmp("get_child", cmd)) {
+        if (nlhs != 1)
+            mexErrMsgTxt("get_child: One output expected.");
+        char path[HDC_STR_LEN];
+        if (mxGetString(prhs[2], path, sizeof(path))) {
+            std::cout << "path: " << path << std::endl;
+            mexErrMsgTxt("Second input should be a command string less than 1024 characters long.");
+        }
+        auto ch = new HDC(hdc_instance->get(path));
+        plhs[0] = convertPtr2Mat<HDC>(ch);
+        return;
+    }
 
     // Got here, so command not recognized
     mexErrMsgTxt("Command not recognized.");

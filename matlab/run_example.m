@@ -1,3 +1,4 @@
+%{
 disp("constructor");
 obj = HDC();
 disp("constructor done");
@@ -14,3 +15,12 @@ disp("dump done");
 y = obj.get_data()
 disp("get data done");
 % clear obj
+%}
+
+tree = HDC();
+child = HDC();
+child.set_data(1.23456);
+tree.add_child("aaa/bbb",child);
+tree.dump()
+child2 = tree.get_child("aaa/bbb");
+child2.dump()

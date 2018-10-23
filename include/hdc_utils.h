@@ -24,9 +24,6 @@
 using hdc_index_t = boost::variant<size_t,std::string>;
 using hdc_path_t = std::list<hdc_index_t>;
 
-//typedef std::vector<char,mexAllocator<char>> buffer_t;
-typedef std::vector<char,std::allocator<char>> buffer_t;
-
 /* ------------------------- UUID generation ----------------------------- */
 
 void print_uuid(std::vector<char> uuid);
