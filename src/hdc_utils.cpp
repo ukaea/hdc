@@ -110,6 +110,31 @@ size_t hdc_sizeof (hdc_type_t type) {
     }
 };
 
+bool hdc_is_numeric (hdc_type_t type) {
+    switch(type) {
+        case HDC_UINT8:
+        case HDC_INT8:
+        case HDC_UINT16:
+        case HDC_INT16:
+        case HDC_UINT32:
+        case HDC_INT32:
+        case HDC_UINT64:
+        case HDC_INT64:
+        case HDC_FLOAT:
+        case HDC_DOUBLE:
+        case HDC_BOOL:
+            return true;
+        case HDC_EMPTY:
+        case HDC_LIST:
+        case HDC_STRUCT:
+        case HDC_ERROR:
+        case HDC_STRING:
+            return false;
+        default:
+            throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
+    }
+}
+
 bool hdc_is_primitive_type(hdc_type_t type) {
     switch(type) {
         case HDC_EMPTY:

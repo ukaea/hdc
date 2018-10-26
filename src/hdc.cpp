@@ -248,6 +248,32 @@ HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
     storage->set(uuid, buffer.data(), header.buffer_size);
 }
 
+HDC::HDC(hdc_data_t obj)
+{
+    auto rank = obj.rank;
+    hdc_header_t header;
+    if (rank >= HDC_MAX_DIMS) {
+        throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
+    }
+    size_t elem_size = 1;
+    memset(&header, 0, sizeof(hdc_header_t));
+    for (size_t i = 0; i < rank; i++) {
+        header.shape[i] = obj.shape[i];
+        elem_size *= obj.shape[i];
+    }
+    header.type = obj.type;
+    header.flags = obj.flags;
+    header.rank = rank;
+    header.data_size = elem_size * hdc_sizeof(obj.type);
+    header.buffer_size = header.data_size + sizeof(hdc_header_t);
+    std::vector<char> buffer(header.buffer_size);
+    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
+    memcpy(buffer.data()+sizeof(hdc_header_t), obj.data, header.data_size);
+    uuid = generate_uuid_str();
+    storage = global_storage;
+    storage->set(uuid, buffer.data(), header.buffer_size);
+}
+
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
 HDC::HDC(const std::string str) : HDC()
 {
@@ -272,6 +298,12 @@ HDC::HDC(hdc_t& obj) {
     storage = (HDCStorage*)obj.storage;
     uuid = obj.uuid;
 }
+
+HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
+{
+    set_data(data,t);
+}
+
 
 /** Destructor */
 HDC::~HDC()
@@ -1375,6 +1407,55 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
     }
     return h;
+}
+
+HDC HDC::make_scalar(void* data, hdc_type_t t)
+{
+    return HDC(data,t);
+}
+
+HDC HDC::make_scalar(float data) {
+    return HDC((void*)&data,HDC_FLOAT);
+}
+
+HDC HDC::make_scalar(double data) {
+    return HDC((void*)&data,HDC_DOUBLE);
+}
+
+HDC HDC::make_scalar(bool data) {
+    return HDC((void*)&data,HDC_BOOL);
+}
+
+HDC HDC::make_scalar(int8_t data) {
+    return HDC((void*)&data,HDC_INT8);
+}
+
+HDC HDC::make_scalar(int16_t data) {
+    return HDC((void*)&data,HDC_INT16);
+}
+
+HDC HDC::make_scalar(int32_t data) {
+    return HDC((void*)&data,HDC_INT32);
+}
+
+HDC HDC::make_scalar(int64_t data) {
+    return HDC((void*)&data,HDC_INT64);
+}
+
+HDC HDC::make_scalar(uint8_t data) {
+    return HDC((void*)&data,HDC_UINT8);
+}
+
+HDC HDC::make_scalar(uint16_t data) {
+    return HDC((void*)&data,HDC_UINT16);
+}
+
+HDC HDC::make_scalar(uint32_t data) {
+    return HDC((void*)&data,HDC_UINT32);
+}
+
+HDC HDC::make_scalar(uint64_t data) {
+    return HDC((void*)&data,HDC_UINT64);
 }
 
 hdc_data_t HDC::get_data() const

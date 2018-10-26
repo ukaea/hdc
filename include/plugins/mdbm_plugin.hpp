@@ -11,8 +11,6 @@
 #include <hdc_helpers.h>
 #include <exception>
 #include <sys/stat.h>
-
-// #include <hdc_utils.h>
 using namespace std;
 
 /**
