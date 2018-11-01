@@ -61,5 +61,5 @@ str.dump()
 a = str.get_data()
 str.get_storage()
 %}
-
-
+l = HDC.load_json("tree.json","");
+l.dump()

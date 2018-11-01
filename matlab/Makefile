@@ -2,8 +2,6 @@ INC = -I/home/david/projects/hdc/install/include -I/home/david/projects/hdc/inst
 LIB = -L/home/david/projects/hdc/install/lib -lhdc -lboost_system
 RPATH = LD_RUN_PATH=/home/david/projects/hdc/install/lib
 MEX = mex -v
-# this is needed is using mxSetDoubles (zero copy)
-# MEX = mex -R2018a
 
 all: hdc_mex.mexa64
 

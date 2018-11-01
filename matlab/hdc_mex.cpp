@@ -79,6 +79,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if (nrhs < 1 || mxGetString(prhs[0], cmd, sizeof(cmd)))
                 mexErrMsgTxt("First input should be a command string less than 64 characters long.");
 
+    if (!strcmp("init", cmd)) {
+        std::string options = "";
+        std::string storage = "umap";
+        if (nrhs > 2)
+            options = mxArrayToUTF8String(prhs[2]);
+        if (nrhs >= 2)
+            storage = mxArrayToUTF8String(prhs[1]);
+        HDC::init(storage,options);
+        return;
+    }
+
+    if(!strcmp("destroy",cmd)) {
+        HDC::destroy();
+        return;
+    }
+
     // New
     if (!strcmp("new", cmd)) {
         // Check parameters
@@ -319,17 +335,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
-    if (!strcmp("get_uuid", cmd)) {
-        mxArray* str = mxCreateString((char*) hdc_instance->get_uuid().c_str());
-        plhs[0] = str;
-        return;
-    }
+    if (!strcmp("as_hdc_t", cmd)) {
+        const char* fnames[] = {"storage_id","uuid"};
+        plhs[0] = mxCreateStructMatrix(1,1,2,fnames);
 
-    if (!strcmp("get_storage", cmd)) {
-        auto storage = hdc_instance->get_storage();
-        mxArray *out = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-        *((uint64_t *)mxGetData(out)) = reinterpret_cast<uint64_t>(storage);
-        plhs[0] = out;
+        mxArray* storage_ = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+        size_t storage_id = hdc_instance->get_storage_id();
+        memcpy(mxGetPr(storage_), &storage_id, sizeof(size_t));
+        //mxArray* uuid_ = mxCreateString((char*) hdc_instance->get_uuid().c_str());
+        mxArray* uuid_ = mxCreateNumericMatrix(1,HDC_UUID_LENGTH, mxINT8_CLASS, mxREAL);
+        strcpy((char*) mxGetPr(uuid_), (char*) hdc_instance->get_uuid().c_str());
+        mxSetFieldByNumber(plhs[0],0,0,storage_);
+        mxSetFieldByNumber(plhs[0],0,1,uuid_);
         return;
     }
 

@@ -6,10 +6,17 @@ classdef HDC < handle
     methods
         %% Constructor - Create a new C++ class instance
         function this = HDC(varargin)
-            for i = 1:length(varargin)
-                data = varargin{i};
-                if (class(data) == "string")
-                    varargin(i) = {char(data)};
+            if (length(varargin) >= 0)
+                for i = 1:length(varargin)
+                    data = varargin{i};
+                    if (class(data) == "string")
+                        varargin(i) = {char(data)};
+                    end
+                end
+                if (class(varargin{1}) == "char")
+                    if (varargin{1} == "__noinit")
+                        return;
+                    end
                 end
             end
             this.objectHandle = hdc_mex('new', varargin{:});
@@ -19,6 +26,10 @@ classdef HDC < handle
         function delete(this)
             hdc_mex('delete', this.objectHandle);
             % disp('do not destroy HDC >:-(')
+        end
+
+        function set_handle(this, handle)
+            this.objectHandle = handle;
         end
 
         function varargout = set_data(this, data)
@@ -74,24 +85,34 @@ classdef HDC < handle
 
         function varargout = as_hdc_t(this)
             % Create MATLAB struct
-            sm.storage = hdc_mex('get_storage', this.objectHandle)
-            sm.uuid = char(hdc_mex('get_uuid', this.objectHandle))
-            [varargout{1:nargout}] = sm
+            [varargout{1:nargout}] = hdc_mex('as_hdc_t', this.objectHandle)
         end
     end
     methods(Static)
-        function res = load_json(path,data_path)
-//             inp = {char(path),char(data_path)};
-//             [varargout{1:nargout}] = hdc_mex('load_json', inp{:});
-            disp("load_json(): Not implemented yet");
+        function this = load_json(path,data_path)
+            this = HDC("__noinit")
+            inp = {char(path),char(data_path)};
+            this.set_handle(hdc_mex('load_json',inp{:}));
         end
-
+        function this = load_hdf5(path,data_path)
+            this = HDC("__noinit")
+            inp = {char(path),char(data_path)};
+            this.set_handle(hdc_mex('load_hdf5',inp{:}));
+        end
         function destroy()
-            disp("destroy(): Not implemented yet");
+            hdc_mex('destroy');
         end
 
-        function init()
-            disp("init(): Not implemented yet");
+        function init(varargin)
+            if (length(varargin) >= 0)
+                for i = 1:length(varargin)
+                    data = varargin{i};
+                    if (class(data) == "string")
+                        varargin(i) = {char(data)};
+                    end
+                end
+            end
+            hdc_mex('init',varargin{:});
         end
     end
 end

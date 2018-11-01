@@ -11,6 +11,7 @@
 
 using namespace std;
 
+std::vector<HDCStorage*>* stores = nullptr;
 HDCStorage* global_storage = nullptr;
 
 unordered_map<string, string> avail_stores;
@@ -94,7 +95,7 @@ void HDC::search_plugins(std::string searchPath)
                 //cout << pluginPath << endl;
                 // try to load the plugin and if it runs if succeeds, bring it into hdc_map_t
                 try {
-                    HDCStorage stor(globbuf.gl_pathv[i], "{\"do_not_init\": true}");
+                    HDCStorage stor(0, globbuf.gl_pathv[i], "{\"do_not_init\": true}");
                     string name = stor.name();
                     if (!name.empty()) {
                         if (avail_stores.find(name) == avail_stores.end()) {
@@ -137,10 +138,12 @@ void HDC::set_storage(std::string storage)
     }
     std::string selected_store_name = options->get<std::string>("storage", storage);
     //cout << "Selected storage: " << selected_store_name <<endl;
+    if (stores == nullptr) stores = new vector<HDCStorage*>();
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
         //cout << avail_stores[selected_store_name] << endl;
         if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());
-        global_storage = new HDCStorage(avail_stores[selected_store_name], options->get_child("storage_options"));
+        stores->push_back(new HDCStorage(stores->size(), avail_stores[selected_store_name], options->get_child("storage_options")));
+        global_storage = stores->at(0);
     } else {
         throw HDCException("Unable to select the store.\n");
     }
@@ -180,7 +183,8 @@ void HDC::init(const std::string& storage_str, const std::string& storage_option
 void HDC::destroy()
 {
     if (global_storage == nullptr) return;
-    delete global_storage;
+    delete stores;
+    stores = nullptr;
     global_storage = nullptr;
     delete options;
     options = nullptr;
@@ -295,7 +299,7 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 }
 
 HDC::HDC(hdc_t& obj) {
-    storage = (HDCStorage*)obj.storage;
+    storage = stores->at(obj.storage_id);
     uuid = obj.uuid;
 }
 
@@ -1041,7 +1045,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t ty
 
 hdc_t HDC::as_obj() {
     hdc_t res;
-    res.storage = storage;
+    res.storage_id = storage->id();
     strcpy(res.uuid,uuid.c_str());
     return res;
 }
@@ -1165,7 +1169,14 @@ const char* HDC::get_type_str() const
 
 hdc_header_t HDC::get_header() const {
     hdc_header_t h;
-    memcpy(&h,storage->get(uuid),sizeof(hdc_header_t));
+    //memcpy(&h,storage->get(uuid),sizeof(hdc_header_t));
+    auto s = (hdc_header_t*)(storage->get(uuid));
+    h.buffer_size = s->buffer_size;
+    h.data_size = s->data_size;
+    h.type = s->type;
+    h.flags = s->flags;
+    h.rank = s->rank;
+    for (auto i=0; i < HDC_MAX_DIMS; i++) h.shape[i] = s->shape[i];
     return h;
 }
 

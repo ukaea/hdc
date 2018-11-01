@@ -44,6 +44,8 @@ namespace pt = boost::property_tree;
 
 //this will hold all the settings, instead of boost::property_tree json we will use the jsoncpp for actual reading of them.
 extern pt::ptree* options;
+//this holds all registered storages
+extern std::vector<HDCStorage*>* stores;
 //this is default global storage
 extern HDCStorage* global_storage;
 //list of found plugins
@@ -1076,6 +1078,12 @@ public:
     * @return HDCStorage*
     */
     HDCStorage* get_storage() const {return this->storage; };
+    /**
+    * @brief Returns storage id
+    *
+    * @return size_t
+    */
+    size_t get_storage_id() const {return this->storage->id(); };
     /**
     * @brief ...
     *
