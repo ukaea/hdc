@@ -3598,6 +3598,7 @@ contains
         real(kind=dp), pointer, intent(inout) :: res(:)
         type(hdc_data_t) :: data
         data = hdc_get_data(this,path)
+        write(*,*) "hdc_as_double_1d_path_sub", data%rank, data%dshape(1), data%dtype
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_1d_path_sub
 

@@ -102,7 +102,7 @@ classdef HDC < handle
             end
             inp = {path};
             ch = HDC(1,hdc_mex('get_child',this.objectHandle, inp{:}));
-            t = hdc_mex('type',ch.objectHandle)
+            t = hdc_mex('type',ch.objectHandle);
             if (t == "double" || t == "single" || t == "int8"   || t == "int16"  || t == "int32" || t == "int64" ||  ...
                 t == "uint8"  || t == "uint16" || t == "uint32" || t == "uint64" || t == "string")
                 result = hdc_mex('get_data',ch.objectHandle);

@@ -170,7 +170,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if (nrhs > 2) {
             // TODO: change this from int to string
             int32_t constructor_variant = (int32_t)mxGetScalar(prhs[1]);
-            std::cout << "Constructor variant: " << constructor_variant << std::endl;
             switch (constructor_variant) {
                 case 1: // Copy constructor
                     plhs[0] = convertPtr2Mat<HDC>(new HDC(*convertMat2Ptr<HDC>(prhs[2])));
@@ -250,9 +249,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 // matlab::data::TypedArray<double> in = std::move(inputs[1]);
                 obj.rank = mxGetNumberOfDimensions(data_in);
                 const mwSize *mat_shape = mxGetDimensions(data_in);
+                size_t n_elem = 1;
                 for (size_t i = 0; i < obj.rank; i++) {
+                    mexPrintf("shape: %d %d %f \n", i, mat_shape[i], data[i]);
                     obj.shape[i] = mat_shape[i];
+                    n_elem *= mat_shape[i];
                 };
+                //here we should change the shape for 1D case as MATLAB gives us always at least a matrix...
+                if (obj.rank == 2 && n_elem != obj.shape[0]) {
+                    obj.rank = 1;
+                    obj.shape[0] = n_elem;
+                    obj.shape[1] = 0;
+                }
                 obj.flags = HDCDefault | HDCFortranOrder;
                 obj.type = t;
                 obj.data = (char*)mxGetPr(data_in);
