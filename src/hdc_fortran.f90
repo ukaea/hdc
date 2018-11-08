@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-10-15 17:54:49.801755 by generate_fortran_api.py
+! This file was generated on 2018-11-02 17:17:19.371657 by ./generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -8,7 +8,7 @@ module hdc_fortran
     implicit none
     type, bind(c) :: hdc_t
         character(kind=c_char) :: uuid(37)
-        type(c_ptr) :: storage
+        integer(kind=c_size_t) :: storage_id
     end type hdc_t
 
     integer, parameter :: HDC_MAX_DIMS = 10

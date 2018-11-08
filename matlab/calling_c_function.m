@@ -1,16 +1,14 @@
-% Prepare HDC
-%HDC.init('mdbm');
-h = HDC(1.23456789);
-sm = h.as_hdc_t()
+equilibrium = HDC()
+equilibrium.set('profiles_1d/psi', linspace(0, 1, 5))
+equilibrium.set('time',2.34)
 
-% Load library
-header = '/home/david/projects/hdc/install/include/hdc/hdc_c.h';
-lib = '/home/david/projects/hdc/install/lib/libchdc.so';
-loadlibrary(lib,header)
-libfunctions('libchdc')
+equilibrium.dump()
 
-% Prepare c struct
-sc = libstruct('hdc_t',sm)
+disp(["equilibrium['time'] -> ",num2str(equilibrium.at("time"))])
+disp(["equilibrium['profiles_1d/psi'] -> {}",num2str(equilibrium.at('profiles_1d/psi'))])
 
-% call the library
-res = calllib('libchdc','hdc_as_double_scalar',sc,'')
+tree_out = test_cpos(equilibrium)
+
+tree_out.dump()
+
+tree_out.at('distsourceout/source/profiles_1d/psi') == -3 * equilibrium.at('profiles_1d/psi')

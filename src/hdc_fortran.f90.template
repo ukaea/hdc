@@ -5,7 +5,7 @@ module hdc_fortran
     implicit none
     type, bind(c) :: hdc_t
         character(kind=c_char) :: uuid(37)
-        type(c_ptr) :: storage
+        integer(kind=c_size_t) :: storage_id
     end type hdc_t
 
     integer, parameter :: HDC_MAX_DIMS = 10

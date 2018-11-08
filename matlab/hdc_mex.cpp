@@ -72,6 +72,43 @@ mxClassID HDCType2matlabClassID(hdc_type_t hdc_type)
     return mxDOUBLE_CLASS; // Should newer go here
 }
 
+std::string HDCType2MatlabStr(hdc_type_t hdc_type)
+{
+    switch(hdc_type) {
+        case HDC_DOUBLE:
+            return "double";
+        case HDC_FLOAT:
+            return "single";
+        case HDC_INT8:
+            return "int8";
+        case HDC_UINT8:
+            return "uint8";
+        case HDC_INT16:
+            return "int16";
+        case HDC_UINT16:
+            return "uint16";
+        case HDC_INT32:
+            return "int32";
+        case HDC_UINT32:
+            return "uint32";
+        case HDC_INT64:
+            return "int64";
+        case HDC_UINT64:
+            return "uint64";
+        case HDC_STRUCT:
+            return "HDC struct";
+        case HDC_LIST:
+            return "HDC list";
+        case HDC_ERROR:
+            return "HDC error";
+        case HDC_EMPTY:
+            return "HDC empty";
+        default:
+            mexErrMsgTxt("HDCType2MatlabStr(): Unknown hdc_type.");
+    };
+    return ""; // Should newer go here
+}
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     // Get the command string
@@ -235,17 +272,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             plhs[0] = str;
             return;
         } else if (hdc_is_numeric(obj.type)) {
-            auto size = hdc_instance->get_datasize();
             mwSize my_rank = obj.rank;
             std::vector<size_t> my_shape(obj.rank);
+            size_t n_elem = 1;
             for (int i = 0; i < obj.rank; i++) {
                 my_shape[i] = obj.shape[i];
+                n_elem *= obj.shape[i];
             }
             auto classid = HDCType2matlabClassID(obj.type);
             // create output matlab matrix and copy data
-            result = mxCreateNumericArray(obj.rank, obj.shape, classid, mxREAL);
-            memcpy(mxGetPr(result), obj.data, size);
-
+            if (n_elem > 1) {
+                result = mxCreateNumericArray(obj.rank, obj.shape, classid, mxREAL);
+                memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
+            } else {
+                result = mxCreateNumericMatrix(1,1,classid, mxREAL);
+                memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
+            }
             // zero-copy -- so far results into segfaults
             // most likely because matlab deallocates the memory
     //         result = mxCreateUninitNumericArray(rank, shape, mxDOUBLE_CLASS, mxREAL);
@@ -264,23 +306,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
-    if (!strcmp("add", cmd)) {
+    if (!strcmp("add_child", cmd)) {
         char path[HDC_STR_LEN];
         if (mxGetString(prhs[2], path, sizeof(path))) {
-            mexErrMsgTxt("add(): Second input should be a command string less than 1024 characters long.");
+            mexErrMsgTxt("add_child(): Second input should be a command string less than 1024 characters long.");
         }
         HDC* child = convertMat2Ptr<HDC>(prhs[3]);
         hdc_instance->add_child(path,*child);
         return;
     }
 
-    if (!strcmp("set", cmd)) {
+    if (!strcmp("delete_child", cmd)) {
+        char path[HDC_STR_LEN];
+        if (mxGetString(prhs[2], path, sizeof(path))) {
+            mexErrMsgTxt("delete_child(): Second input should be a command string less than 1024 characters long.");
+        }
+        hdc_instance->delete_child(path);
+        return;
+    }
+
+    if (!strcmp("set_child", cmd)) {
         // Get can eat string or index - get the class name:
         HDC* child = convertMat2Ptr<HDC>(prhs[3]);
         if (mxIsClass(prhs[2],"char")) {
             char path[HDC_STR_LEN];
             if (mxGetString(prhs[2], path, sizeof(path))) {
-                mexErrMsgTxt("set(): Second input should be a command string less than 1024 characters long.");
+                mexErrMsgTxt("set_child(): Second input should be a command string less than 1024 characters long.");
             }
             hdc_instance->set_child(path,*child);
         } else {
@@ -294,27 +345,57 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
-    if (!strcmp("get", cmd)) {
+    if (!strcmp("get_child", cmd)) {
         if (nlhs != 1)
-            mexErrMsgTxt("get(): One output expected.");
+            mexErrMsgTxt("get_child(): One output expected.");
         // Get can eat string or index - get the class name:
         HDC* ch;
         if (mxIsClass(prhs[2],"char")) {
             char path[HDC_STR_LEN];
             if (mxGetString(prhs[2], path, sizeof(path))) {
                 std::cout << "path: " << path << std::endl;
-                mexErrMsgTxt("get(): Second input should be a command string less than 1024 characters long.");
+                mexErrMsgTxt("get_child(): Second input should be a command string less than 1024 characters long.");
             }
             ch = new HDC(hdc_instance->get(path));
         } else {
             double index_ = mxGetScalar(prhs[2]);
             if (index_ < 0) {
-                mexErrMsgTxt("get(): Supplied index cannont be negative.");
+                mexErrMsgTxt("get_child(): Supplied index cannont be negative.");
             }
             size_t index = (size_t)index_;
             ch = new HDC(hdc_instance->get(index));
         }
         plhs[0] = convertPtr2Mat<HDC>(ch);
+        return;
+    }
+
+    if (!strcmp("get_or_create", cmd)) {
+        if (nlhs != 1)
+            mexErrMsgTxt("get_or_create(): One output expected.");
+        // Get can eat string or index - get the class name:
+        HDC* ch;
+        if (mxIsClass(prhs[2],"char")) {
+            char path[HDC_STR_LEN];
+            if (mxGetString(prhs[2], path, sizeof(path))) {
+                std::cout << "path: " << path << std::endl;
+                mexErrMsgTxt("get_or_create(): Second input should be a command string less than 1024 characters long.");
+            }
+            ch = new HDC(hdc_instance->get_or_create(path));
+        } else {
+            double index_ = mxGetScalar(prhs[2]);
+            if (index_ < 0) {
+                mexErrMsgTxt("get_or_create(): Supplied index cannont be negative.");
+            }
+            size_t index = (size_t)index_;
+            ch = new HDC(hdc_instance->get_or_create(index));
+        }
+        plhs[0] = convertPtr2Mat<HDC>(ch);
+        return;
+    }
+
+    if (!strcmp("type", cmd)) {
+        auto type_str = HDCType2MatlabStr((hdc_type_t) hdc_instance->get_type());
+        plhs[0] = mxCreateString((char*) type_str.c_str());
         return;
     }
 

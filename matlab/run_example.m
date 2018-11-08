@@ -59,7 +59,23 @@ str.set_data('aaaa')
 disp("set str done")
 str.dump()
 a = str.get_data()
-str.get_storage()
+
+%l = HDC.load_json("tree.json","");
+%l.dump()
+
+tree = HDC();
+child = HDC();
+child.set_data([1.23456]);
+tree.add("aaa/bbb",child);
+aaa = child.get_data()
+child2 = tree.at("aaa/bbb")
+subtree = tree.at("aaa")
 %}
-l = HDC.load_json("tree.json","");
-l.dump()
+
+tree = HDC();
+tree.set("aaa/bbb",3.141592)
+ch = HDC("jbgfaigigbaibi")
+tree.set("aaa/ccc",ch)
+tree.dump()
+tree.delete_child("aaa/bbb")
+tree.dump()

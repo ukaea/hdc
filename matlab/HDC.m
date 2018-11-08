@@ -6,7 +6,7 @@ classdef HDC < handle
     methods
         %% Constructor - Create a new C++ class instance
         function this = HDC(varargin)
-            if (length(varargin) >= 0)
+            if (length(varargin) > 0)
                 for i = 1:length(varargin)
                     data = varargin{i};
                     if (class(data) == "string")
@@ -25,11 +25,6 @@ classdef HDC < handle
         %% Destructor - Destroy the C++ class instance
         function delete(this)
             hdc_mex('delete', this.objectHandle);
-            % disp('do not destroy HDC >:-(')
-        end
-
-        function set_handle(this, handle)
-            this.objectHandle = handle;
         end
 
         function varargout = set_data(this, data)
@@ -45,28 +40,42 @@ classdef HDC < handle
             [varargout{1:nargout}] = hdc_mex('get_data', this.objectHandle, inp{:});
         end
 
-        function varargout = add(this, path, child)
+        function varargout = add_child(this, path, child)
             if (class(path) == "string")
                 path = char(path);
             end
             inp = {path, child.objectHandle};
-            [varargout{1:nargout}] = hdc_mex('add', this.objectHandle, inp{:});
+            [varargout{1:nargout}] = hdc_mex('add_child', this.objectHandle, inp{:});
         end
 
-        function varargout = set(this, path, child)
+        function varargout = set_child(this, path, child)
             if (class(path) == "string")
                 path = char(path);
             end
             inp = {path, child.objectHandle};
-            [varargout{1:nargout}] = hdc_mex('set', this.objectHandle, inp{:});
+            [varargout{1:nargout}] = hdc_mex('set_child', this.objectHandle, inp{:});
         end
 
-        function child = get(this, path)
+        function varargout = set(this, path, something)
             if (class(path) == "string")
                 path = char(path);
             end
             inp = {path};
-            child = HDC(1,hdc_mex('get', this.objectHandle, inp{:}));
+            if (class(something) == "HDC")
+                this.add_child(path, something);
+            else
+                ch = HDC(1,hdc_mex('get_or_create', this.objectHandle, path));
+                ch.set_data(something);
+                ch.dump()
+            end
+        end
+
+        function child = get_child(this, path)
+            if (class(path) == "string")
+                path = char(path);
+            end
+            inp = {path};
+            child = HDC(1,hdc_mex('get_child', this.objectHandle, inp{:}));
         end
 
         function varargout = append(this, child)
@@ -86,6 +95,27 @@ classdef HDC < handle
         function varargout = as_hdc_t(this)
             % Create MATLAB struct
             [varargout{1:nargout}] = hdc_mex('as_hdc_t', this.objectHandle)
+        end
+        function result = at(this, path)
+            if (class(path) == "string")
+                path = char(path);
+            end
+            inp = {path};
+            ch = HDC(1,hdc_mex('get_child',this.objectHandle, inp{:}));
+            t = hdc_mex('type',ch.objectHandle)
+            if (t == "double" || t == "single" || t == "int8"   || t == "int16"  || t == "int32" || t == "int64" ||  ...
+                t == "uint8"  || t == "uint16" || t == "uint32" || t == "uint64" || t == "string")
+                result = hdc_mex('get_data',ch.objectHandle);
+            else
+                result = ch;
+            end
+        end
+        function delete_child(this, path)
+            if (class(path) == "string")
+                path = char(path);
+            end
+            inp = {path};
+            hdc_mex('delete_child',this.objectHandle,inp{:});
         end
     end
     methods(Static)
