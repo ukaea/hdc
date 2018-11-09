@@ -17,6 +17,8 @@ using namespace std;
 hdc_type_t matlabClassID2HDCType(mxClassID matlab_type)
 {
     switch(matlab_type) {
+        case mxLOGICAL_CLASS:
+            return HDC_BOOL;
         case mxDOUBLE_CLASS:
             return HDC_DOUBLE;
         case mxSINGLE_CLASS:
@@ -46,6 +48,8 @@ hdc_type_t matlabClassID2HDCType(mxClassID matlab_type)
 mxClassID HDCType2matlabClassID(hdc_type_t hdc_type)
 {
     switch(hdc_type) {
+        case HDC_BOOL:
+            return mxLOGICAL_CLASS;
         case HDC_DOUBLE:
             return mxDOUBLE_CLASS;
         case HDC_FLOAT:
@@ -75,6 +79,8 @@ mxClassID HDCType2matlabClassID(hdc_type_t hdc_type)
 std::string HDCType2MatlabStr(hdc_type_t hdc_type)
 {
     switch(hdc_type) {
+        case HDC_BOOL:
+            return "bool";
         case HDC_DOUBLE:
             return "double";
         case HDC_FLOAT:
@@ -251,7 +257,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 const mwSize *mat_shape = mxGetDimensions(data_in);
                 size_t n_elem = 1;
                 for (size_t i = 0; i < obj.rank; i++) {
-                    mexPrintf("shape: %d %d %f \n", i, mat_shape[i], data[i]);
                     obj.shape[i] = mat_shape[i];
                     n_elem *= mat_shape[i];
                 };
@@ -311,6 +316,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     if (!strcmp("dump", cmd)) {
         hdc_instance->dump();
+        return;
+    }
+
+    if (!strcmp("dumps", cmd)) {
+        std::string str = hdc_instance->to_json_string();
+        mxArray* mxstr = mxCreateString(str.c_str());
+        plhs[0] = mxstr;
+        return;
+    }
+
+    if (!strcmp("exists", cmd)) {
+        char path[HDC_STR_LEN];
+        if (mxGetString(prhs[2], path, sizeof(path)))
+            mexErrMsgTxt("exists(): Second input should be a command string less than 1024 characters long.");
+        auto res = hdc_instance->exists(path);
+        plhs[0] = mxCreateLogicalMatrix(1,1);
+        memcpy(mxGetLogicals(plhs[0]),&res,sizeof(res));
         return;
     }
 
@@ -424,6 +446,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
+    if (!strcmp("keys", cmd)) {
+        auto keys = hdc_instance->keys();
+        mwSize mxdims[] = {keys.size()};
+        mxArray* mxkeys = mxCreateCellArray(1, mxdims);
+        for (size_t i=0; i<keys.size(); i++) {
+            mxArray* str = mxCreateString((char*) keys[i].c_str());
+            mxSetCell(mxkeys, i, str);
+        }
+        plhs[0] = mxkeys;
+        return;
+    }
+
+    if (!strcmp("shape", cmd)) {
+        auto obj = hdc_instance->get_data();
+        mwSize mxdims[] = {obj.rank};
+        mxArray* mxshape = mxCreateNumericArray(1, mxdims, mxUINT64_CLASS, mxREAL);
+        memcpy(mxGetPr(mxshape), &obj.shape, obj.rank*sizeof(size_t));
+        plhs[0] = mxshape;
+        return;
+    }
+
     if (!strcmp("as_hdc_t", cmd)) {
         const char* fnames[] = {"storage_id","uuid"};
         plhs[0] = mxCreateStructMatrix(1,1,2,fnames);
@@ -436,6 +479,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         strcpy((char*) mxGetPr(uuid_), (char*) hdc_instance->get_uuid().c_str());
         mxSetFieldByNumber(plhs[0],0,0,storage_);
         mxSetFieldByNumber(plhs[0],0,1,uuid_);
+        return;
+    }
+
+    if (!strcmp("to_json", cmd)) {
+        char path[HDC_STR_LEN];
+        if (mxGetString(prhs[2], path, sizeof(path))) {
+            mexErrMsgTxt("to_json(): Second input should be a command string less than 1024 characters long.");
+        }
+        hdc_instance->to_json(path);
+        return;
+    }
+
+
+    if (!strcmp("to_hdf5", cmd)) {
+        char path[HDC_STR_LEN];
+        if (mxGetString(prhs[2], path, sizeof(path))) {
+            mexErrMsgTxt("to_hdf5(): Second input should be a command string less than 1024 characters long.");
+        }
+        hdc_instance->to_hdf5(path);
         return;
     }
 

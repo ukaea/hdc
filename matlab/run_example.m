@@ -1,81 +1,123 @@
-%{
-disp("constructor");
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% test constructor %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 obj = HDC();
-disp("constructor done");
-obj.dump();
-disp("dump done");
-obj.set_data(1.23);
-disp("assign done");
-obj.dump()
-disp("dump done");
-obj.set_data([1, 2, 3; 4, 5, 6]);
-disp("array assign done");
-obj.dump()
-disp("dump done");
-y = obj.get_data()
-disp("get data done");
-% clear obj
+assert(class(obj) == "HDC")
 
+s = 1.23;
+obj = HDC(s);
+assert(obj.get_data() == s)
+
+s = int8(-8);
+obj = HDC(s);
+assert(obj.get_data() == s)
+assert(class(obj.get_data()) == class(s))
+
+s = 1:5;
+obj = HDC(s);
+assert(obj.get_data() == s)
+
+s = reshape(1:10,2,5);
+obj = HDC(s);
+assert(obj.get_data() == s)
+
+s = "aaa"
+obj.set_data(s);
+assert(obj.get_data() == s)
+
+s = 'bbb'
+obj = HDC(s);
+assert(obj.get_data() == s)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% test set / get %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+s = 1.23;
+obj = HDC(s);
+assert(obj.get_data() == s)
+
+
+s = 1:5;
+obj.set_data(s);
+assert(obj.get_data() == s)
+
+s = reshape(1:10,2,5);
+obj.set_data(s);
+assert(obj.get_data() == s)
+
+s = "aaa"
+obj.set_data(s);
+assert(obj.get_data() == s)
+
+s = 'bbb'
+obj.set_data(s);
+assert(obj.get_data() == s)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% test node manipulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tree = HDC();
-child = HDC();
-child.set_data(1.23456);
-tree.add("aaa/bbb",child);
-tree.dump()
-child2 = tree.get("aaa/bbb");
-child2.dump()
+s = 999;
+child = HDC(s);
+path = "aaa/bbb";
 
+% test add
+tree.add(path,child);
+child2 = tree.get(path);
+assert(child2.get_data() == s)
+assert(tree.at(path) == s)
+
+%test set
+r = 666;
+child = HDC(r);
+tree.set(path,child);
+assert(child2.get_data() == r)
+assert(tree.at(path) == r)
+
+%test list
 list = HDC();
-child = HDC();
-child.set_data(1.23456);
-child2 = HDC();
-child2.set_data(2.22222);
-list.append(child);
-list.append(child);
-list.append(child);
-list.dump()
-ch = list.get(1);
-ch.dump()
-list.insert(1,child2);
-list.dump()
-list.set(1,child);
-list.dump()
+s = 1.23456;
+s2 = 2.22222;
+ch = HDC(s);
+ch2 = HDC(s2);
+list.append(ch);
+list.append(ch);
+list.append(ch);
+ch_ = list.get(1);
+assert(list.get(3).get_data() == s)
+list.insert(3,ch2);
+assert(list.get(3).get_data() == s2)
+assert(list.get(4).get_data() == s)
 
-%str = HDC("aaa");
-%str.dump()
-d = HDC(1.23456789987);
-d.dump()
-
-d2 = HDC([111,2,3]);
-d2.dump();
-aaa = d2.get_data()
-
-f = HDC(single(111.));
-f.dump()
-i8 = HDC(int8(-8));
-i8.dump()
-
-str = HDC();
-str.set_data('aaaa')
-disp("set str done")
-str.dump()
-a = str.get_data()
-
-%l = HDC.load_json("tree.json","");
-%l.dump()
-
+%test add, set and keys
 tree = HDC();
-child = HDC();
-child.set_data([1.23456]);
-tree.add("aaa/bbb",child);
-aaa = child.get_data()
-child2 = tree.at("aaa/bbb")
-subtree = tree.at("aaa")
-%}
+s = 1.23456;
+s2 = 2.22222;
+ch = HDC(s);
+ch2 = HDC(s2);
+tree.add_child("aaa",ch)
+assert(tree.shape() == 1)
+tree.add_child("bbb",ch)
+assert(tree.shape() == 2)
+assert(tree.keys() == {'aaa';'bbb'}
 
-tree = HDC();
+
+%test set/at
+tree = HDC()
 tree.set("aaa/bbb",3.141592)
-ch = HDC("jbgfaigigbaibi")
-tree.set("aaa/ccc",ch)
-tree.dump()
-tree.delete_child("aaa/bbb")
-tree.dump()
+a = tree.at("aaa/bbb")
+assert(a,3.141592)
+assert(class(a),"double")
+c = tree.at("aaa")
+assert(class(c),"HDC")
+tree.set("bbb",45645656456)
+assert(tree.exists("bbb"))
+tree.delete_child("bbb");
+assert(~tree.exists("bbb"))
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% json / HDF5
+%l = HDC.load_json("tree.json","");
+% more sizes / types + class strings, errors when type not known, objects / cell arrays???
+% rename this, to test_*, prepare installation similarly to python
+% remove absolute paths from includes

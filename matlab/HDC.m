@@ -1,5 +1,5 @@
 %EXAMPLE_INTERFACE Example MATLAB class wrapper to an underlying C++ class
-classdef HDC < handle
+classdef HDC < handle %& matlab.mixin.CustomDisplay
     properties (SetAccess = private, Hidden = true)
         objectHandle; % Handle to the underlying C++ class instance
     end
@@ -9,9 +9,7 @@ classdef HDC < handle
             if (length(varargin) > 0)
                 for i = 1:length(varargin)
                     data = varargin{i};
-                    if (class(data) == "string")
-                        varargin(i) = {char(data)};
-                    end
+                    if (class(data) == "string"); varargin(i) = {char(data)}; end
                 end
                 if (class(varargin{1}) == "char")
                     if (varargin{1} == "__noinit")
@@ -29,9 +27,7 @@ classdef HDC < handle
 
         function varargout = set_data(this, data)
             inp = {data};
-            if (class(data) == "string")
-                data = char(data);
-            end
+            if (class(data) == "string"); data = char(data); end
             [varargout{1:nargout}] = hdc_mex('set_data', this.objectHandle, inp{:});
         end
 
@@ -41,41 +37,36 @@ classdef HDC < handle
         end
 
         function varargout = add_child(this, path, child)
-            if (class(path) == "string")
-                path = char(path);
-            end
+            if (class(path) == "string"); path = char(path); end
             inp = {path, child.objectHandle};
             [varargout{1:nargout}] = hdc_mex('add_child', this.objectHandle, inp{:});
         end
 
         function varargout = set_child(this, path, child)
-            if (class(path) == "string")
-                path = char(path);
-            end
+            if (class(path) == "string"); path = char(path); end
             inp = {path, child.objectHandle};
             [varargout{1:nargout}] = hdc_mex('set_child', this.objectHandle, inp{:});
         end
 
         function varargout = set(this, path, something)
-            if (class(path) == "string")
-                path = char(path);
-            end
+            if (class(path) == "string"); path = char(path); end
             inp = {path};
             if (class(something) == "HDC")
                 this.add_child(path, something);
             else
                 ch = HDC(1,hdc_mex('get_or_create', this.objectHandle, path));
                 ch.set_data(something);
-                ch.dump()
             end
         end
 
         function child = get_child(this, path)
-            if (class(path) == "string")
-                path = char(path);
-            end
+            if (class(path) == "string"); path = char(path); end
             inp = {path};
             child = HDC(1,hdc_mex('get_child', this.objectHandle, inp{:}));
+        end
+
+        function result = shape(this)
+            result = hdc_mex('shape', this.objectHandle);
         end
 
         function varargout = append(this, child)
@@ -92,14 +83,17 @@ classdef HDC < handle
             [varargout{1:nargout}] = hdc_mex('dump', this.objectHandle);
         end
 
+        function varargout = dumps(this)
+            [varargout{1:nargout}] = hdc_mex('dumps', this.objectHandle);
+        end
+
         function varargout = as_hdc_t(this)
             % Create MATLAB struct
             [varargout{1:nargout}] = hdc_mex('as_hdc_t', this.objectHandle)
         end
+
         function result = at(this, path)
-            if (class(path) == "string")
-                path = char(path);
-            end
+            if (class(path) == "string"); path = char(path); end
             inp = {path};
             ch = HDC(1,hdc_mex('get_child',this.objectHandle, inp{:}));
             t = hdc_mex('type',ch.objectHandle);
@@ -110,25 +104,50 @@ classdef HDC < handle
                 result = ch;
             end
         end
+
         function delete_child(this, path)
-            if (class(path) == "string")
-                path = char(path);
-            end
+            if (class(path) == "string"); path = char(path); end
             inp = {path};
             hdc_mex('delete_child',this.objectHandle,inp{:});
         end
+
+        function result = exists(this, path)
+            if (class(path) == "string"); path = char(path); end
+            inp = {path};
+            result = hdc_mex('exists',this.objectHandle,inp{:});
+        end
+
+        function result = keys(this)
+            result = hdc_mex('keys',this.objectHandle);
+        end
+
+        function varargout = to_json(this, file)
+            if (class(file) == "string"); file = char(file); end
+            inp = {file};
+            [varargout{1:nargout}] = hdc_mex('to_json', this.objectHandle, inp{:});
+        end
+
+        function varargout = to_hdf5(this, file)
+            if (class(file) == "string"); file = char(file); end
+            inp = {file};
+            [varargout{1:nargout}] = hdc_mex('to_hdf5', this.objectHandle, inp{:});
+        end
+
     end
     methods(Static)
+
         function this = load_json(path,data_path)
             this = HDC("__noinit")
             inp = {char(path),char(data_path)};
             this.set_handle(hdc_mex('load_json',inp{:}));
         end
+
         function this = load_hdf5(path,data_path)
             this = HDC("__noinit")
             inp = {char(path),char(data_path)};
             this.set_handle(hdc_mex('load_hdf5',inp{:}));
         end
+
         function destroy()
             hdc_mex('destroy');
         end
