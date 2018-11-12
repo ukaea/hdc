@@ -444,7 +444,7 @@ public:
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
@@ -483,7 +483,7 @@ public:
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
         set_data(shape,data,flags);
@@ -494,7 +494,7 @@ public:
     *
     * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
         DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)"+to_string(data[0]));
@@ -547,7 +547,7 @@ public:
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     void set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /**
@@ -556,7 +556,7 @@ public:
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     void set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
