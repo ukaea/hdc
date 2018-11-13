@@ -592,7 +592,6 @@ public:
         header.buffer_size = header.data_size + sizeof(hdc_header_t);
         std::vector<char> buffer(header.buffer_size);
         memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-        std::cout << "set_data(): " <<  (reinterpret_cast<const int64_t*>(data))[0] << std::endl;
         memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
         storage->set(uuid,buffer.data(),header.buffer_size);
     }
