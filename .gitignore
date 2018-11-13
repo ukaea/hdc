@@ -10,6 +10,7 @@ src/__pycache__
 *.kdev4
 
 \.cache/
+*.mexa64
 \.ipynb_checkpoints/
 
 *.rendered
@@ -17,3 +18,5 @@ src/__pycache__
 *.gcda
 *.gcno
 *.html
+
+fort.*

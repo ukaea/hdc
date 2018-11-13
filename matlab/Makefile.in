@@ -1,0 +1,12 @@
+INC = -I${CMAKE_INSTALL_PREFIX}/include -I${CMAKE_INSTALL_PREFIX}/include/hdc
+LIB = -L${CMAKE_INSTALL_PREFIX}/lib -lhdc -lboost_system
+RPATH = LD_RUN_PATH=${CMAKE_INSTALL_PREFIX}/lib
+MEX = mex -v
+
+all: hdc_mex.mexa64
+
+hdc_mex.mexa64: hdc_mex.cpp
+	$(RPATH) $(MEX) $(INC) hdc_mex.cpp $(LIB)
+
+clean:
+	rm -f hdc_mex.mexa64

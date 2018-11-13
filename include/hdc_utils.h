@@ -56,6 +56,7 @@ hdc_type_t to_typeid(bool a);
 hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize);
 hdc_type_t to_typeid(const std::type_info& t);
 hdc_type_t uda_str_to_typeid(std::string& str);
+bool hdc_is_numeric (hdc_type_t);
 /* -------------------------  Other stuff ----------------------------- */
 
 void hello__();

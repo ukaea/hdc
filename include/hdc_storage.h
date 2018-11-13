@@ -18,8 +18,9 @@ private:
     Storage* _store;
     boost::property_tree::ptree settings;
     string pluginPath;
+    size_t _id;
 public:
-    HDCStorage(std::string name, std::string settings_str) {
+    HDCStorage(size_t _id, std::string name, std::string settings_str) {
         _pluma.acceptProviderType<StorageProvider>();
         //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
         if (name.size() != 0) {
@@ -46,10 +47,11 @@ public:
         if (!settings.get("do_not_init",false))
             _store->init(settings);
         this->pluginPath = name;
+        this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }
 
-    HDCStorage(std::string name, boost::property_tree::ptree _settings) {
+    HDCStorage(size_t _id, std::string name, boost::property_tree::ptree _settings) {
         _pluma.acceptProviderType<StorageProvider>();
         //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
         if (!name.empty()) {
@@ -68,6 +70,7 @@ public:
         this->pluginPath = name;
         if (!settings.get("do_not_init",false))
             _store->init(this->settings);
+        this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }
     ~HDCStorage() {
@@ -120,6 +123,9 @@ public:
     };
     string name() {
         return _store->name();
+    }
+    size_t id() {
+        return _id;
     }
 };
 

@@ -8,11 +8,19 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <sstream>
-#include <boost/filesystem.hpp>
 #include <hdc_helpers.h>
 #include <exception>
-#include <hdc_utils.h>
+#include <sys/stat.h>
 using namespace std;
+
+/**
+ * Check if a file exists
+ * @return true if and only if the file exists, false else
+ */
+bool MDBMFileExists(const std::string& file) {
+    struct stat buf;
+    return (stat(file.c_str(), &buf) == 0);
+}
 
 class MDBMStorage : public Storage {
 private:
@@ -75,7 +83,7 @@ public:
             this->db = NULL;
         }
         // Remove db file if the data persistence is not required
-        if (!this->persistent && fileExists(filename)) {
+        if (!this->persistent && MDBMFileExists(filename)) {
             if (::remove(filename.c_str()) != 0) {
                 throw std::runtime_error("MDBMStorage::cleanup(): Error deleting file\n");
             };

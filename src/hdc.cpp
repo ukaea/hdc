@@ -11,6 +11,7 @@
 
 using namespace std;
 
+std::vector<HDCStorage*>* stores = nullptr;
 HDCStorage* global_storage = nullptr;
 
 unordered_map<string, string> avail_stores;
@@ -49,14 +50,16 @@ void HDC::load_config(std::string configPath)
     pt::ptree settings_read;
     bool config_found = false;
     for (auto path : parts) {
-        if (boost::filesystem::exists(path)) {
+        if (fileExists(path)) {
             try {
                 pt::read_json(path, settings_read);
                 config_found = true;
                 break;
             }
-            catch (...) {
+            catch (std::exception &e) {
+                std::cout << e.what() << std::endl;
                 std::cout << "HDC::load_config(): something bad happened" << endl;
+                exit(1);
             }
         }
     }
@@ -92,7 +95,7 @@ void HDC::search_plugins(std::string searchPath)
                 //cout << pluginPath << endl;
                 // try to load the plugin and if it runs if succeeds, bring it into hdc_map_t
                 try {
-                    HDCStorage stor(globbuf.gl_pathv[i], "{\"do_not_init\": true}");
+                    HDCStorage stor(0, globbuf.gl_pathv[i], "{\"do_not_init\": true}");
                     string name = stor.name();
                     if (!name.empty()) {
                         if (avail_stores.find(name) == avail_stores.end()) {
@@ -135,10 +138,12 @@ void HDC::set_storage(std::string storage)
     }
     std::string selected_store_name = options->get<std::string>("storage", storage);
     //cout << "Selected storage: " << selected_store_name <<endl;
+    if (stores == nullptr) stores = new vector<HDCStorage*>();
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
         //cout << avail_stores[selected_store_name] << endl;
         if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());
-        global_storage = new HDCStorage(avail_stores[selected_store_name], options->get_child("storage_options"));
+        stores->push_back(new HDCStorage(stores->size(), avail_stores[selected_store_name], options->get_child("storage_options")));
+        global_storage = stores->at(0);
     } else {
         throw HDCException("Unable to select the store.\n");
     }
@@ -159,8 +164,9 @@ std::string HDC::get_library_dir(void)
 {
     Dl_info dl_info;
     dladdr((void*)HDC::get_library_dir, &dl_info);
-    boost::filesystem::path p(dl_info.dli_fname);
-    return boost::filesystem::canonical(p.parent_path()).string();
+    std::string path = dl_info.dli_fname;
+    size_t found=path.find_last_of("/\\");
+    return path.substr(0,found);
 }
 
 void HDC::init(const std::string& storage_str, const std::string& storage_options)
@@ -177,7 +183,8 @@ void HDC::init(const std::string& storage_str, const std::string& storage_option
 void HDC::destroy()
 {
     if (global_storage == nullptr) return;
-    delete global_storage;
+    delete stores;
+    stores = nullptr;
     global_storage = nullptr;
     delete options;
     options = nullptr;
@@ -189,18 +196,18 @@ void HDC::destroy()
 /** Creates empty HDC with specified buffer size */
 HDC::HDC(size_t data_size)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     // fill some data
     hdc_header_t header;
     memset(&header, 0, sizeof(hdc_header_t));
     header.buffer_size = data_size + sizeof(hdc_header_t);
     header.data_size = data_size;
     header.rank = 1;
-
-    if (global_storage == nullptr) {
-        //HDC::init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-        HDC::init();
-        atexit(HDC::destroy);
-    }
 
     // Start by creating segment
     std::vector<char> buffer(header.buffer_size);
@@ -222,6 +229,11 @@ HDC::HDC() : HDC(0lu)
 /** Creates empty HDC with specified type and shape */
 HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
 {
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     auto rank = shape.size();
     hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
@@ -245,6 +257,39 @@ HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
     storage->set(uuid, buffer.data(), header.buffer_size);
 }
 
+HDC::HDC(hdc_data_t obj)
+{
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
+
+    auto rank = obj.rank;
+    hdc_header_t header;
+    if (rank >= HDC_MAX_DIMS) {
+        throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
+    }
+    size_t elem_size = 1;
+    memset(&header, 0, sizeof(hdc_header_t));
+    for (size_t i = 0; i < rank; i++) {
+        header.shape[i] = obj.shape[i];
+        elem_size *= obj.shape[i];
+    }
+    header.type = obj.type;
+    header.flags = obj.flags;
+    header.rank = rank;
+    header.data_size = elem_size * hdc_sizeof(obj.type);
+    header.buffer_size = header.data_size + sizeof(hdc_header_t);
+    std::vector<char> buffer(header.buffer_size);
+    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
+    memcpy(buffer.data()+sizeof(hdc_header_t), obj.data, header.data_size);
+    uuid = generate_uuid_str();
+    storage = global_storage;
+    storage->set(uuid, buffer.data(), header.buffer_size);
+}
+
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
 HDC::HDC(const std::string str) : HDC()
 {
@@ -254,6 +299,13 @@ HDC::HDC(const std::string str) : HDC()
 /** Copy constructor */
 HDC::HDC(const HDC& h)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
+
     storage = h.storage;
     uuid = h.uuid;
 };
@@ -261,14 +313,32 @@ HDC::HDC(const HDC& h)
 /** Deserializing constructor */
 HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     uuid = _uuid;
     storage = _storage;
 }
 
 HDC::HDC(hdc_t& obj) {
-    storage = (HDCStorage*)obj.storage;
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
+    storage = stores->at(obj.storage_id);
     uuid = obj.uuid;
 }
+
+HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
+{
+    set_data(data,t);
+}
+
 
 /** Destructor */
 HDC::~HDC()
@@ -1006,7 +1076,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t ty
 
 hdc_t HDC::as_obj() {
     hdc_t res;
-    res.storage = storage;
+    res.storage_id = storage->id();
     strcpy(res.uuid,uuid.c_str());
     return res;
 }
@@ -1130,7 +1200,14 @@ const char* HDC::get_type_str() const
 
 hdc_header_t HDC::get_header() const {
     hdc_header_t h;
-    memcpy(&h,storage->get(uuid),sizeof(hdc_header_t));
+    //memcpy(&h,storage->get(uuid),sizeof(hdc_header_t));
+    auto s = (hdc_header_t*)(storage->get(uuid));
+    h.buffer_size = s->buffer_size;
+    h.data_size = s->data_size;
+    h.type = s->type;
+    h.flags = s->flags;
+    h.rank = s->rank;
+    for (auto i=0; i < HDC_MAX_DIMS; i++) h.shape[i] = s->shape[i];
     return h;
 }
 
@@ -1372,6 +1449,55 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
     }
     return h;
+}
+
+HDC HDC::make_scalar(void* data, hdc_type_t t)
+{
+    return HDC(data,t);
+}
+
+HDC HDC::make_scalar(float data) {
+    return HDC((void*)&data,HDC_FLOAT);
+}
+
+HDC HDC::make_scalar(double data) {
+    return HDC((void*)&data,HDC_DOUBLE);
+}
+
+HDC HDC::make_scalar(bool data) {
+    return HDC((void*)&data,HDC_BOOL);
+}
+
+HDC HDC::make_scalar(int8_t data) {
+    return HDC((void*)&data,HDC_INT8);
+}
+
+HDC HDC::make_scalar(int16_t data) {
+    return HDC((void*)&data,HDC_INT16);
+}
+
+HDC HDC::make_scalar(int32_t data) {
+    return HDC((void*)&data,HDC_INT32);
+}
+
+HDC HDC::make_scalar(int64_t data) {
+    return HDC((void*)&data,HDC_INT64);
+}
+
+HDC HDC::make_scalar(uint8_t data) {
+    return HDC((void*)&data,HDC_UINT8);
+}
+
+HDC HDC::make_scalar(uint16_t data) {
+    return HDC((void*)&data,HDC_UINT16);
+}
+
+HDC HDC::make_scalar(uint32_t data) {
+    return HDC((void*)&data,HDC_UINT32);
+}
+
+HDC HDC::make_scalar(uint64_t data) {
+    return HDC((void*)&data,HDC_UINT64);
 }
 
 hdc_data_t HDC::get_data() const

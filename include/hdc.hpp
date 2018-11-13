@@ -7,7 +7,7 @@
 #include "andres/marray.hxx"
 
 // Boost
-#include <boost/filesystem.hpp>
+// #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -23,7 +23,7 @@
 #include <fstream>
 #include <json/json.h>
 #include <exception>
-
+#include <stdbool.h>
 // our stuff
 #include "hdc_types.h"
 #include "hdc_map.h"
@@ -44,6 +44,8 @@ namespace pt = boost::property_tree;
 
 //this will hold all the settings, instead of boost::property_tree json we will use the jsoncpp for actual reading of them.
 extern pt::ptree* options;
+//this holds all registered storages
+extern std::vector<HDCStorage*>* stores;
 //this is default global storage
 extern HDCStorage* global_storage;
 //list of found plugins
@@ -153,9 +155,12 @@ public:
     *
     * @param shape p_shape: Shape of the data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    HDC(std::vector<size_t>& shape, hdc_type_t type,long flags = HDCDefault);
+    HDC(std::vector<size_t>& shape, hdc_type_t type, long flags = HDCDefault);
+
+    HDC(hdc_data_t obj);
+    //TODO constructor from data here?
     /**
     * @brief Constructor from string
     *
@@ -182,6 +187,13 @@ public:
     * @param obj p_obj:...
     */
     HDC(hdc_t& obj);
+    /**
+    * @brief Constructs object from scalar and type - MATLAB interoperability
+    *
+    * @param data p_data:...
+    * @param t p_t:...
+    */
+    HDC(void* data, hdc_type_t t);
     /**
     * @brief Destructor
     *
@@ -432,7 +444,7 @@ public:
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
@@ -471,7 +483,7 @@ public:
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
         set_data(shape,data,flags);
@@ -482,7 +494,7 @@ public:
     *
     * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
         DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)"+to_string(data[0]));
@@ -535,7 +547,7 @@ public:
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     void set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /**
@@ -544,7 +556,7 @@ public:
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param type p_type: Type of the data (e.g. HDC_INT32)
-    * @param flags p_flags: Fags the node should have (e.g. HDCFortranOrder)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     void set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /** Sets scalar data to given node. */
@@ -978,11 +990,100 @@ public:
     */
     static HDC copy(const HDC& h, bool deep_copy = false);
     /**
-    * @brief ...
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data: Void pointer to data
+    * @return HDC
+    */
+    static HDC make_scalar(void* data, hdc_type_t t);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(float data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(double data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(bool data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(int8_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(int16_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(int32_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(int64_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(uint8_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(uint16_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @param data p_data:...
+    * @return HDC
+    */
+    static HDC make_scalar(uint32_t data);
+    /**
+    * @brief Creates scalar HDC object
+    *
+    * @return hdc_data_t
+    */
+    static HDC make_scalar(uint64_t data);
+    /**
+    * @brief Returns pointer to storage of HDC object
     *
     * @return HDCStorage*
     */
     HDCStorage* get_storage() const {return this->storage; };
+    /**
+    * @brief Returns storage id
+    *
+    * @return size_t
+    */
+    size_t get_storage_id() const {return this->storage->id(); };
     /**
     * @brief ...
     *

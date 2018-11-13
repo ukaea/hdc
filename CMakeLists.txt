@@ -73,6 +73,12 @@ set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
+message("Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message("Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+find_package(Matlab)
+# if (Matlab_FOUND)
+#     include_directories(${Matlab_INCLUDE_DIRS})
+# endif()
 
 ########################################################################################################################
 # RPATH options
@@ -248,6 +254,7 @@ include_directories(include/plugins)
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(python)
+add_subdirectory(matlab)
 add_subdirectory(misc)
 
 if (BUILD_DOC)

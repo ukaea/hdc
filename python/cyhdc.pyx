@@ -54,7 +54,7 @@ cdef extern from "hdc_types.h":
         voidptr storage
 class hdc_t_(ctypes.Structure):
     _fields_ = [("uuid", ctypes.c_char * 37),
-                ("storage", ctypes.c_void_p)]
+                ("storage_id", ctypes.c_size_t)]
 
 cdef extern from "hdc.hpp":
     cdef cppclass HDCStorage:
@@ -81,7 +81,7 @@ cdef extern from "hdc.hpp":
         intptr_t as_void_ptr() except +
         int8_t get_rank() except +
         vector[size_t] get_shape() except +
-        HDCStorage* get_storage() except +
+        size_t get_storage_id() except +
         string get_uuid() except +
         # typedef unsigned long hdc_flags_t;
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
@@ -281,7 +281,8 @@ cdef class HDC:
         """Load from JSON string"""
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
-        res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        res._this = new_hdc
         return res
 
     def dump(self, filename, mode=0):
@@ -300,7 +301,8 @@ cdef class HDC:
     def load(uri, datapath=''):
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
-        res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        res._this = new_hdc
         return res
 
     def print_info(self):
@@ -310,8 +312,8 @@ cdef class HDC:
     def _as_parameter_(self):
         # used by ctypes automatic conversion
         uuid = self._this.get_uuid()
-        cdef voidptr storage = self._this.get_storage()
-        return hdc_t_(uuid,<intptr_t>storage)
+        cdef size_t storage = self._this.get_storage_id()
+        return hdc_t_(uuid,storage)
 
     def get_type_str(self):
         return self._this.get_type_str().decode()

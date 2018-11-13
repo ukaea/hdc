@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-10-15 17:54:49.801755 by generate_fortran_api.py
+! This file was generated on 2018-11-02 17:17:19.371657 by ./generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -8,7 +8,7 @@ module hdc_fortran
     implicit none
     type, bind(c) :: hdc_t
         character(kind=c_char) :: uuid(37)
-        type(c_ptr) :: storage
+        integer(kind=c_size_t) :: storage_id
     end type hdc_t
 
     integer, parameter :: HDC_MAX_DIMS = 10
@@ -3598,6 +3598,7 @@ contains
         real(kind=dp), pointer, intent(inout) :: res(:)
         type(hdc_data_t) :: data
         data = hdc_get_data(this,path)
+        write(*,*) "hdc_as_double_1d_path_sub", data%rank, data%dshape(1), data%dtype
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_1d_path_sub
 

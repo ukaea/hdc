@@ -68,7 +68,7 @@ struct hdc_data_t {
 
 struct hdc_t {
     char        uuid[HDC_UUID_LENGTH];
-    void*       storage;
+    size_t      storage_id;
 };
 
 typedef struct hdc_t hdc_t;

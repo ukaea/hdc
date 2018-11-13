@@ -614,6 +614,58 @@ TEST_CASE("load", "[HDC]")
     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
 }
 
+
+TEST_CASE("make_scalar", "[HDC]")
+{
+    bool      b = true;
+    int8_t   i8 =  -8;
+    int16_t i16 = -16;
+    int32_t i32 = -32;
+    int64_t i64 = -64;
+    uint8_t   u8 =  8;
+    uint16_t u16 = 16;
+    uint32_t u32 = 32;
+    uint64_t u64 = 64;
+    float     f = 3.14;
+    double    d = 3.141592;
+
+    HDC hb = HDC::make_scalar(b);
+    HDC hi8 = HDC::make_scalar(i8);
+    HDC hi16 = HDC::make_scalar(i16);
+    HDC hi32 = HDC::make_scalar(i32);
+    HDC hi64 = HDC::make_scalar(i64);
+    HDC hu8 = HDC::make_scalar(u8);
+    HDC hu16 = HDC::make_scalar(u16);
+    HDC hu32 = HDC::make_scalar(u32);
+    HDC hu64 = HDC::make_scalar(u64);
+    HDC hf = HDC::make_scalar(f);
+    HDC hd = HDC::make_scalar(d);
+
+    CHECK(hb.as_scalar<bool>() == b);
+    CHECK(hi8.as_scalar<int8_t>() == i8);
+    CHECK(hi16.as_scalar<int16_t>() == i16);
+    CHECK(hi32.as_scalar<int32_t>() == i32);
+    CHECK(hi64.as_scalar<int64_t>() == i64);
+    CHECK(hu8.as_scalar<uint8_t>() == u8);
+    CHECK(hu16.as_scalar<uint16_t>() == u16);
+    CHECK(hu32.as_scalar<uint32_t>() == u32);
+    CHECK(hu64.as_scalar<uint64_t>() == u64);
+    CHECK(hf.as_scalar<float>() == f);
+    CHECK(hd.as_scalar<double>() == d);
+
+    CHECK(hb.get_type() == HDC_BOOL);
+    CHECK(hi8.get_type() == HDC_INT8);
+    CHECK(hi16.get_type() == HDC_INT16);
+    CHECK(hi32.get_type() == HDC_INT32);
+    CHECK(hi64.get_type() == HDC_INT64);
+    CHECK(hu8.get_type() == HDC_UINT8);
+    CHECK(hu16.get_type() == HDC_UINT16);
+    CHECK(hu32.get_type() == HDC_UINT32);
+    CHECK(hu64.get_type() == HDC_UINT64);
+    CHECK(hf.get_type() == HDC_FLOAT);
+    CHECK(hd.get_type() == HDC_DOUBLE);
+}
+
 #ifdef _USE_HDF5
 TEST_CASE("HDF5", "[HDC]")
 {
