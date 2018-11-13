@@ -26,8 +26,8 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
         end
 
         function varargout = set_data(this, data)
-            inp = {data};
             if (class(data) == "string"); data = char(data); end
+            inp = {data};
             [varargout{1:nargout}] = hdc_mex('set_data', this.objectHandle, inp{:});
         end
 
@@ -52,7 +52,11 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
             if (class(path) == "string"); path = char(path); end
             inp = {path};
             if (class(something) == "HDC")
-                this.add_child(path, something);
+                if (this.exists(path))
+                    this.set_child(path, something);
+                else
+                    this.add_child(path, something);
+                end
             else
                 ch = HDC(1,hdc_mex('get_or_create', this.objectHandle, path));
                 ch.set_data(something);
@@ -89,7 +93,7 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
 
         function varargout = as_hdc_t(this)
             % Create MATLAB struct
-            [varargout{1:nargout}] = hdc_mex('as_hdc_t', this.objectHandle)
+            [varargout{1:nargout}] = hdc_mex('as_hdc_t', this.objectHandle);
         end
 
         function result = at(this, path)
@@ -121,6 +125,10 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
             result = hdc_mex('keys',this.objectHandle);
         end
 
+        function result = copy(this)
+            result = HDC(1,hdc_mex('copy',this.objectHandle));
+        end
+
         function varargout = to_json(this, file)
             if (class(file) == "string"); file = char(file); end
             inp = {file};
@@ -136,16 +144,17 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
     end
     methods(Static)
 
-        function this = load_json(path,data_path)
-            this = HDC("__noinit")
-            inp = {char(path),char(data_path)};
-            this.set_handle(hdc_mex('load_json',inp{:}));
+        function result = load_json(path,data_path)
+            if (class(path) == "string"); path = char(path); end
+            if (class(data_path) == "string"); data_path = char(data_path); end
+            result = HDC(1,hdc_mex('load_json', path, data_path));
         end
 
-        function this = load_hdf5(path,data_path)
-            this = HDC("__noinit")
-            inp = {char(path),char(data_path)};
-            this.set_handle(hdc_mex('load_hdf5',inp{:}));
+        function result = load_hdf5(path,data_path)
+            if (class(path) == "string"); path = char(path); end
+            if (class(data_path) == "string"); data_path = char(data_path); end
+            error("HDC.load_hdf5(): Not implemented yet.");
+            %result = HDC(1,hdc_mex('load_hdf5', path, data_path));
         end
 
         function destroy()

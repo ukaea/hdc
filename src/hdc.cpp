@@ -196,18 +196,18 @@ void HDC::destroy()
 /** Creates empty HDC with specified buffer size */
 HDC::HDC(size_t data_size)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     // fill some data
     hdc_header_t header;
     memset(&header, 0, sizeof(hdc_header_t));
     header.buffer_size = data_size + sizeof(hdc_header_t);
     header.data_size = data_size;
     header.rank = 1;
-
-    if (global_storage == nullptr) {
-        //HDC::init("./plugins/libMDBMPlugin.so","./plugins/settings.txt");
-        HDC::init();
-        atexit(HDC::destroy);
-    }
 
     // Start by creating segment
     std::vector<char> buffer(header.buffer_size);
@@ -229,6 +229,11 @@ HDC::HDC() : HDC(0lu)
 /** Creates empty HDC with specified type and shape */
 HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
 {
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     auto rank = shape.size();
     hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
@@ -254,6 +259,13 @@ HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
 
 HDC::HDC(hdc_data_t obj)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
+
     auto rank = obj.rank;
     hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
@@ -287,6 +299,13 @@ HDC::HDC(const std::string str) : HDC()
 /** Copy constructor */
 HDC::HDC(const HDC& h)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
+
     storage = h.storage;
     uuid = h.uuid;
 };
@@ -294,11 +313,23 @@ HDC::HDC(const HDC& h)
 /** Deserializing constructor */
 HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     uuid = _uuid;
     storage = _storage;
 }
 
 HDC::HDC(hdc_t& obj) {
+
+    if (global_storage == nullptr) {
+        HDC::init();
+        atexit(HDC::destroy);
+    }
+
     storage = stores->at(obj.storage_id);
     uuid = obj.uuid;
 }

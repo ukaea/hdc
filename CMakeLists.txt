@@ -254,6 +254,7 @@ include_directories(include/plugins)
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(python)
+add_subdirectory(matlab)
 add_subdirectory(misc)
 
 if (BUILD_DOC)

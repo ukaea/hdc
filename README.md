@@ -56,6 +56,13 @@ make -j install
 cd  python
 python setup.py build
 python setup.py install
+cd ..
+
+# Optionally build & run MATLAB mex interface
+cd matlab
+make -f Makefile_
+LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
+# You should see "All tests are OK..." message - in such case, the mex interface shoul work fine...
 ```
 
 Basic ideas
@@ -85,9 +92,7 @@ See [this file](doxy/PERFORMANCE_TESTING.md)
 
 Next steps
 ==========
-- Use shared memory, for example via [mdbm](https://github.com/yahoo/mdbm).
 - Read-only and/or copy-on-write potection of data.
-- Serialization to HDF5 and other suitable formats.
 - File systems and database access (key-value, object stores) via the HDC API.
 - Support for metadata.
 - A plugin system for, e.g., data systems validation or conversion, object-oriented features (methods for particular data types), ...
@@ -102,7 +107,7 @@ HDF5
     - no data copy,
     - no serialization / deserialization,
     - better performace.
-- HDC is written in C++ with bindings to Fortran, C, Python and other languages in mind. 
+- HDC is written in C++ with bindings to Fortran, C, Python, MATLAB and other languages in mind.
 - HDC API can abstract out various back-end storage solutions: file systems, key-value stores, clouds, ...
 
 Conduit

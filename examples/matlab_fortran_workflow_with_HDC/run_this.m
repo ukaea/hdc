@@ -1,3 +1,5 @@
+addpath('../../build/matlab');
+
 equilibrium = HDC()
 equilibrium.set('profiles_1d/psi', linspace(0, 1, 5))
 equilibrium.set('time',2.34)

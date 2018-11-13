@@ -152,9 +152,69 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
             if (mxIsNumeric(data_in)) {
                 auto t = matlabClassID2HDCType(mxGetClassID(data_in));
-                if (mxIsScalar(data_in)) {
-                    auto data = mxGetScalar(data_in);
-                    plhs[0] = convertPtr2Mat<HDC>(new HDC((void*)&data,t));
+                auto n_elem = mxGetNumberOfElements(data_in);
+                if (mxIsScalar(data_in) || n_elem == 1) {
+                double data = mxGetScalar(data_in);
+
+                bool data_b;
+                int8_t data_8;
+                int16_t data_16;
+                int32_t data_32;
+                int64_t data_64;
+                uint8_t data_u8;
+                uint16_t data_u16;
+                uint32_t data_u32;
+                uint64_t data_u64;
+                float data_f;
+                auto node = new HDC();
+                switch (t) {
+                    case HDC_BOOL:
+                        data_b = static_cast<bool>(data);
+                        node->set_data(data_b);
+                        break;
+                    case HDC_DOUBLE:
+                        node->set_data(data);
+                        break;
+                    case HDC_FLOAT:
+                        data_f = static_cast<float>(data);
+                        node->set_data(data_f);
+                        break;
+                    case HDC_INT8:
+                        data_8 = static_cast<int8_t>(data);
+                        node->set_data(data_8);
+                        break;
+                    case HDC_UINT8:
+                        data_u8 = static_cast<int16_t>(data);
+                        node->set_data(data_u8);
+                        break;
+                    case HDC_INT16:
+                        data_16 = static_cast<int32_t>(data);
+                        node->set_data(data_16);
+                        break;
+                    case HDC_UINT16:
+                        data_u16 = static_cast<int32_t>(data);
+                        node->set_data(data_u16);
+                        break;
+                    case HDC_INT32:
+                        data_32 = static_cast<int32_t>(data);
+                        node->set_data(data_32);
+                        break;
+                    case HDC_UINT32:
+                        data_u32 = static_cast<int32_t>(data);
+                        node->set_data(data_u32);
+                        break;
+                    case HDC_INT64:
+                        data_64 = static_cast<int64_t>(data);
+                        node->set_data(data_64);
+                        break;
+                    case HDC_UINT64:
+                        data_u64 = static_cast<int64_t>(data);
+                        node->set_data(data_u64);
+                        break;
+                    default:
+                        mexErrMsgTxt("matlabClassID2HDCType(): Unknown matlab_type.");
+                    }
+                    plhs[0] = convertPtr2Mat<HDC>(node);
                     return;
                 } else {
                     struct hdc_data_t obj;
@@ -162,12 +222,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     // matlab::data::TypedArray<double> in = std::move(inputs[1]);
                     obj.rank = mxGetNumberOfDimensions(data_in);
                     const mwSize *mat_shape = mxGetDimensions(data_in);
+                    size_t n_elem = 1;
                     for (size_t i = 0; i < obj.rank; i++) {
                         obj.shape[i] = mat_shape[i];
+                        n_elem *= mat_shape[i];
                     };
+                    //here we should change the shape for 1D case as MATLAB gives us always at least a matrix...
+                    if (obj.rank == 2 && (n_elem == obj.shape[0] || n_elem == obj.shape[1])) {
+                        obj.rank = 1;
+                        obj.shape[0] = n_elem;
+                        obj.shape[1] = 0;
+                    }
                     obj.flags = HDCDefault | HDCFortranOrder;
                     obj.type = t;
-                    obj.data = (char*)mxGetPr(data_in);
+                    obj.data = (char*)data;
                     plhs[0] = convertPtr2Mat<HDC>(new HDC(obj));
                     return;
                 }
@@ -245,9 +313,69 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         else if (mxIsNumeric(data_in)) {
             auto t = matlabClassID2HDCType(mxGetClassID(data_in));
-            if (mxIsScalar(data_in)) {
+            auto n_elem = mxGetNumberOfElements(data_in);
+            if (mxIsScalar(data_in) || n_elem == 1) {
                 auto data = mxGetScalar(data_in);
-                hdc_instance->set_data((void*)&data,t);
+
+                bool data_b;
+                int8_t data_8;
+                int16_t data_16;
+                int32_t data_32;
+                int64_t data_64;
+                uint8_t data_u8;
+                uint16_t data_u16;
+                uint32_t data_u32;
+                uint64_t data_u64;
+                float data_f;
+
+                switch (t) {
+                    case HDC_BOOL:
+                        data_b = static_cast<float>(data);
+                        hdc_instance->set_data(data_b);
+                        return;
+                    case HDC_DOUBLE:
+                        hdc_instance->set_data(data);
+                        return;
+                    case HDC_FLOAT:
+                        data_f = static_cast<float>(data);
+                        hdc_instance->set_data(data_f);
+                        return;
+                    case HDC_INT8:
+                        data_8 = static_cast<int8_t>(data);
+                        hdc_instance->set_data(data_8);
+                        return;
+                    case HDC_UINT8:
+                        data_u8 = static_cast<int16_t>(data);
+                        hdc_instance->set_data(data_u8);
+                        return;
+                    case HDC_INT16:
+                        data_16 = static_cast<int32_t>(data);
+                        hdc_instance->set_data(data_16);
+                        return;
+                    case HDC_UINT16:
+                        data_u16 = static_cast<int32_t>(data);
+                        hdc_instance->set_data(data_u16);
+                        return;
+                    case HDC_INT32:
+                        data_32 = static_cast<int32_t>(data);
+                        hdc_instance->set_data(data_32);
+                        return;
+                    case HDC_UINT32:
+                        data_u32 = static_cast<int32_t>(data);
+                        hdc_instance->set_data(data_u32);
+                        return;
+                    case HDC_INT64:
+                        data_64 = static_cast<int64_t>(data);
+                        hdc_instance->set_data(data_64);
+                        return;
+                    case HDC_UINT64:
+                        data_u64 = static_cast<int64_t>(data);
+                        hdc_instance->set_data(data_u64);
+                        return;
+                    default:
+                        mexErrMsgTxt("matlabClassID2HDCType(): Unknown matlab_type.");
+                }
+//                 hdc_instance->set_data(data,t);
                 return;
             } else {
                 struct hdc_data_t obj;
@@ -261,7 +389,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     n_elem *= mat_shape[i];
                 };
                 //here we should change the shape for 1D case as MATLAB gives us always at least a matrix...
-                if (obj.rank == 2 && n_elem != obj.shape[0]) {
+                if (obj.rank == 2 && (n_elem == obj.shape[0] || n_elem == obj.shape[1])) {
                     obj.rank = 1;
                     obj.shape[0] = n_elem;
                     obj.shape[1] = 0;
@@ -295,12 +423,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             auto classid = HDCType2matlabClassID(obj.type);
             // create output matlab matrix and copy data
             if (n_elem > 1) {
-                result = mxCreateNumericArray(obj.rank, obj.shape, classid, mxREAL);
-                memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
+                if (obj.rank == 1)
+                    result = mxCreateNumericMatrix(1, n_elem, classid, mxREAL);
+                else
+                    result = mxCreateNumericArray(obj.rank, obj.shape, classid, mxREAL);
             } else {
-                result = mxCreateNumericMatrix(1,1,classid, mxREAL);
-                memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
+                result = mxCreateNumericMatrix(1, 1, classid, mxREAL);
             }
+            memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
             // zero-copy -- so far results into segfaults
             // most likely because matlab deallocates the memory
     //         result = mxCreateUninitNumericArray(rank, shape, mxDOUBLE_CLASS, mxREAL);
@@ -446,6 +576,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
+    if (!strcmp("copy", cmd)) {
+        auto copy = hdc_instance->copy();
+        auto copy_ptr = new HDC(copy);
+        plhs[0] = convertPtr2Mat<HDC>(copy_ptr);
+        return;
+    }
+
     if (!strcmp("keys", cmd)) {
         auto keys = hdc_instance->keys();
         mwSize mxdims[] = {keys.size()};
@@ -493,6 +630,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
     if (!strcmp("to_hdf5", cmd)) {
+        mexErrMsgTxt("to_hdf5(): Not imlemented yet...");
+        // This crashes - probably MATLAB HDF5 linking issue.
         char path[HDC_STR_LEN];
         if (mxGetString(prhs[2], path, sizeof(path))) {
             mexErrMsgTxt("to_hdf5(): Second input should be a command string less than 1024 characters long.");
