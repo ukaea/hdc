@@ -55,7 +55,6 @@ static void BM_C_HDC_ZeroCopyDataRead(benchmark::State& state) {
     shape[0] = state.range(0);
     double* data = new double[state.range(0)];
     for (auto i=0;i<state.range(0);i++) data[i] = 1.0;
-    double* data_copy = new double[state.range(0)];
     hdc_set_double(node,"",1,shape,data,HDCDefault);
     double s=0.0;
     while (state.KeepRunning()) {
@@ -66,7 +65,6 @@ static void BM_C_HDC_ZeroCopyDataRead(benchmark::State& state) {
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
     if (s < 0) printf("%f",s); // trick compilator to not optimize :)
     delete[] data;
-    delete[] data_copy;
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_ZeroCopyDataRead)->RangeMultiplier(2)->Range(2<<20,2<<25);
@@ -77,7 +75,6 @@ static void BM_C_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     shape[0] = state.range(0);
     double* data = new double[state.range(0)];
     for (auto i=0;i<state.range(0);i++) data[i] = 1.0;
-    double* data_copy = new double[state.range(0)];
     hdc_set_double(node,"",1,shape,data,HDCDefault);
     double s=0.0;
     while (state.KeepRunning()) {
@@ -86,7 +83,6 @@ static void BM_C_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
     delete[] data;
-    delete[] data_copy;
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_ZeroCopyDataWrite)->RangeMultiplier(2)->Range(2<<20,2<<25);

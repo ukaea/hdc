@@ -163,7 +163,6 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
         }
     } else if (uda_data->type().name() == typeid(std::string).name()) {
         auto array = dynamic_cast<uda::Array*>(uda_data);
-        std::vector<uda::Dim> dims = array->dims();
         std::vector<std::string> strings = array->as<std::string>();
         for (size_t i = 0; i < strings.size(); i++) {
             HDC n;

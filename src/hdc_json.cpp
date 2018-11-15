@@ -87,7 +87,6 @@ bool is_jagged(const Json::Value& root)
     for (unsigned int i = 0; i < root.size(); i++) {
         if (root[i].size() != dim) {
             return true;
-            break;
         } else { return is_jagged(root[i]); }
     }
     return jagged;

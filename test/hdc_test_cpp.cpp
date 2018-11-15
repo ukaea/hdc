@@ -44,14 +44,14 @@ TEST_CASE("StringParsing", "[HDCUtils]")
 {
     std::vector<bool> expected_is_num = { false, true, false, true, true, false, false };
     auto vs = split_no_brackets("flux/3444/lalala/5/4/l///l");
-    CHECK(vs.size() == 7);
+    CHECK(7 == vs.size());
     int i = 0;
     for (auto item : vs) {
         CHECK((item.type() == typeid(size_t)) == expected_is_num[i]);
         i++;
     }
     auto vs2 = split("flux[3444]/lalala[5][4]l///l");
-    CHECK(vs2.size() == 7);
+    CHECK(7 == vs2.size());
     i = 0;
     for (auto item : vs2) {
         CHECK((item.type() == typeid(size_t)) == expected_is_num[i]);
@@ -423,7 +423,7 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(strcmp(tree["str"].as_cstring(),str.c_str()) == 0);
     //test replace
     tree["i8"] = static_cast<int8_t>(9);
-    CHECK(tree["i8"].as_scalar<int8_t>() == 9);
+    CHECK(9 == tree["i8"].as_scalar<int8_t>());
 
     HDC list;
     list[0] = HDC();
@@ -503,7 +503,7 @@ TEST_CASE("BufferGrowArray", "[HDC]")
     h.grow(4096);
     double* data2 = h.as<double*>();
     CHECK(h.get_datasize() == 4*sizeof(double) + 4096);
-    CHECK(h.get_shape()[0] == 4);
+    CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_type() == HDC_DOUBLE);
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
@@ -675,11 +675,11 @@ TEST_CASE("HDF5", "[HDC]")
     tree.to_hdf5(fname);
     HDC tree2 = HDC::from_hdf5(fname);
     double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
-    CHECK(data == 333.333);
+    CHECK(333.333 == data);
     auto path = std::string("hdf5://")+fname+"|/data/aaa/bbb/_scalar";
     HDC h5 = HDC::load(path);
     data = h5.as<double*>()[0];
-    CHECK(data == 333.333);
+    CHECK(333.333 == data);
     if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
 }
 

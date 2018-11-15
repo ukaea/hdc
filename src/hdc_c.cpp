@@ -201,12 +201,6 @@ void hdc_set_int64_scalar(hdc_t tree, const char* path, int64_t data)
     return;
 }
 
-void hello()
-{
-    cout << "Hello" << endl;
-    return;
-}
-
 void hdc_set_double(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);

@@ -91,9 +91,9 @@ int main() {
     printf("dtype: %s\n",hdc_get_type_str(node,""));
 
     // Get data back from tree
-    int32_t* array2 = hdc_as_int32_array(node,"");
+    // int32_t* array2 = hdc_as_int32_array(node,"");
     // Or you can use this:
-    array2 = (int32_t*)data2.data;
+    int32_t* array2 = (int32_t*)data2.data;
     printf("Data: ");
     for (size_t i=0; i<data2.shape[0]; i++) printf("%d ",array2[i]);
     printf("\n");

@@ -452,7 +452,7 @@ bool HDC::exists(hdc_path_t& path) const
 {
     D(
         std::cout << "exists(";
-        for {auto str : path} std::cout << str;
+        for (auto str : path) std::cout << str;
         std::cout << ")\n";
     )
     if (path.empty()) {
@@ -640,7 +640,7 @@ void HDC::delete_child(hdc_path_t& path)
     hdc_header_t header = get_header();
     D(
         std::cout << "delete_child(";
-        for {auto str: path} std::cout << str;
+        for (auto str: path) std::cout << str;
         std::cout << ")\n";
     )
     auto path2 = path;
@@ -685,7 +685,7 @@ HDC HDC::get(hdc_path_t& path)
 {
     D(
         std::cout << "get(";
-        for {auto str: path} std::cout << str;
+        for (auto str : path) std::cout << str;
         std::cout << ")\n";
     )
     // Return itself when empty list
@@ -708,7 +708,7 @@ const HDC HDC::get(hdc_path_t& path) const
 {
     D(
         std::cout << "get(";
-        for {auto str: path} std::cout << str;
+        for (auto str: path) std::cout << str;
         std::cout << ")\n";
     )
     // Return itself when empty list
@@ -885,7 +885,7 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
 {
     D(
         std::cout << "set_child_single(";
-        for {auto str: path} std::cout << str;
+        for (auto str: path) std::cout << str;
         std::cout << ")\n";
     )
     hdc_map_t* children = get_children_ptr();
@@ -924,7 +924,7 @@ void HDC::set_child(hdc_path_t& path, HDC& n)
 {
     D(
         std::cout << "set_child(";
-        for {auto str: path} std::cout << str;
+        for (auto str: path) std::cout << str;
         std::cout << ")\n";
     )
     auto path2 = path;
