@@ -1,6 +1,7 @@
 #include "hdc_benchmark_common_c.hpp"
 #include <string.h>
 // Plain memcpy test to show over overhead of HDC
+
 static void BM_C_memcpy(benchmark::State& state) {
     size_t n = state.range(0);
     int32_t* src = new int32_t[n];
@@ -26,6 +27,7 @@ static void BM_C_HDC_SetData(benchmark::State& state) {
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(int32_t)));
     delete[] data;
+    hdc_clean(node);
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_SetData)->RangeMultiplier(2)->Range(2<<20,2<<25);
@@ -45,6 +47,7 @@ static void BM_C_HDC_GetData(benchmark::State& state) {
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(int32_t)));
     delete[] data;
     delete[] data_copy;
+    hdc_clean(node);
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_GetData)->RangeMultiplier(2)->Range(2<<20,2<<25);
@@ -64,6 +67,7 @@ static void BM_C_HDC_ZeroCopyDataRead(benchmark::State& state) {
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
     if (s < 0) printf("%f",s); // trick compilator to not optimize :)
+    hdc_clean(node);
     delete[] data;
     StorageReset();
 }
@@ -82,6 +86,7 @@ static void BM_C_HDC_ZeroCopyDataWrite(benchmark::State& state) {
         for (auto i=0;i<state.range(0);i++) data2[i] = s;
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));
+    hdc_clean(node);
     delete[] data;
     StorageReset();
 }

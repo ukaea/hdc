@@ -15,7 +15,6 @@ void* hdc_new_void_ptr(); /** Alernative constuctor to be used in Fortran. */
 
 // ----------------------- Node manipulation ---------------------- //
 
-void hdc_delete(hdc_t tree); /** Deletes HDC object (Destructor). */
 void hdc_delete_ptr(void* obj);
 void* hdc_get_ptr(hdc_t tree);
 void hdc_add_child(hdc_t tree, const char* path, hdc_t n); /**  */
@@ -45,6 +44,7 @@ void hdc_serialize(hdc_t tree, char* buffer);
 hdc_t hdc_deserialize(const char* str);
 size_t hdc_get_size(hdc_t tree);
 void hdc_get_available_plugins(char** keys, int* num);
+void hdc_clean(hdc_t tree);
 
 // ----------------------- Data setters --------------------------- //
 

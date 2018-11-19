@@ -165,7 +165,7 @@ contains
 
             write (*,Format) SIGNAL_LENGTH, time_full, time_single
 
-            call hdc_delete(magnetics)
+            call hdc_clean(magnetics)
             deallocate(data_in)
         end do
     end subroutine f_main

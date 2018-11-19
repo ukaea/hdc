@@ -21,7 +21,7 @@ contains
 
         do i = 1,n_items
             tree = hdc_new()
-            call hdc_delete(tree)
+            call hdc_clean(tree)
         end do
         call storage_reset()
         call system_clock(count=clock_stop)      ! Stop Timer
@@ -41,7 +41,7 @@ contains
 
         do i = 1,n_items
             tree = hdc_new()
-            call hdc_delete(tree)
+            call hdc_clean(tree)
         end do
 
         call system_clock(count=clock_stop)      ! Stop Timer
@@ -94,7 +94,7 @@ contains
             call hdc_add_child(tree,trim(path),hdc_new())
             call system_clock(count=clock_stop)      ! Stop Timer
             e_time = e_time + real(clock_stop-clock_start)/real(clock_rate)
-            call hdc_delete(tree)
+            call hdc_clean(tree)
         end do
         print '("bm_add_child_depth, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',depth,e_time/100,1.0e-3/e_time*1000,e_time/1000
         call storage_reset()

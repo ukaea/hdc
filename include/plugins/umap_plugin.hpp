@@ -66,6 +66,7 @@ public:
     };
     void cleanup () {
         DEBUG_STDOUT("UnorderedMapStorage::cleanup()\n");
+        _map.clear();
         return;
     };
     void remove(string key) {

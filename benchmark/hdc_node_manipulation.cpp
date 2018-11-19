@@ -1,8 +1,10 @@
 #include "hdc_benchmark_common.hpp"
+
 // Empty child creation and deletion
 static void BM_HDC_CreationAndDeletion(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC h;
+        h.clean();
     }
     state.SetItemsProcessed(state.iterations());
     StorageReset();
@@ -16,6 +18,7 @@ static void BM_HDC_AddChild(benchmark::State& state) {
         for (auto i = 0;i < state.range(0);i++) tree.add_child(std::to_string(i),child);
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
+    tree.clean();
     StorageReset();
 }
 BENCHMARK(BM_HDC_AddChild)->RangeMultiplier(2)->Range(1024<<2,1024<<5);
@@ -27,6 +30,7 @@ static void BM_HDC_AddChildPreallocated(benchmark::State& state) {
             HDC child;
             tree.add_child(std::to_string(i),child);
         }
+        tree.clean();
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
@@ -40,6 +44,7 @@ static void BM_HDC_AddChildPathDepth(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC tree, child;
         tree.add_child(path,child);
+        tree.clean();
     }
     state.SetItemsProcessed(state.iterations());
     StorageReset();
@@ -56,6 +61,7 @@ static void BM_HDC_GetChildPathDepth(benchmark::State& state) {
         HDC node = tree.get(path);
     }
     state.SetItemsProcessed(state.iterations());
+    tree.clean();
     StorageReset();
 }
 BENCHMARK(BM_HDC_GetChildPathDepth)->RangeMultiplier(2)->Range(1,16);
@@ -68,6 +74,7 @@ static void BM_HDC_AddChildPathLength(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC tree, child;
         tree.add_child(path,child);
+        tree.clean();
     }
     state.SetItemsProcessed(state.iterations());
     StorageReset();
@@ -94,6 +101,7 @@ static void BM_HDC_AppendSlice(benchmark::State& state) {
     while (state.KeepRunning()) {
         HDC tree, child;
         for (auto i=0;i<state.range(0);i++) tree.append(child);
+        tree.clean();
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
@@ -109,6 +117,7 @@ static void BM_HDC_AppendSlicePreallocated(benchmark::State& state) {
             HDC child;
             tree.append(child);
         }
+        tree.clean();
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
@@ -147,6 +156,7 @@ static void BM_HDC_GetChildMultipleItems(benchmark::State& state) {
             HDC node = tree.get(paths[i]);
         }
     }
+    tree.clean();
     state.SetItemsProcessed(100 * state.iterations());
     StorageReset();
 }
@@ -167,4 +177,3 @@ static void BM_HDC_GetSliceMultipleItems(benchmark::State& state) {
     StorageReset();
 }
 BENCHMARK(BM_HDC_GetSliceMultipleItems)->RangeMultiplier(2)->Range(16,1024<<5);
-

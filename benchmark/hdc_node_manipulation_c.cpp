@@ -1,9 +1,10 @@
 #include "hdc_benchmark_common_c.hpp"
+
 // Empty child creation and deletion
 static void BM_C_HDC_CreationAndDeletion(benchmark::State& state) {
     while (state.KeepRunning()) {
         hdc_t h = hdc_new_empty();
-        hdc_delete(h);
+        hdc_clean(h);
     }
     state.SetItemsProcessed(state.iterations());
     StorageReset();
@@ -20,7 +21,7 @@ static void BM_C_HDC_AddChild(benchmark::State& state) {
             hdc_add_child(tree,str,hdc_new_empty());
         }
     }
-    hdc_delete(tree);
+    hdc_clean(tree);
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
 }
@@ -34,7 +35,7 @@ static void BM_C_HDC_AddChildPreallocated(benchmark::State& state) {
             sprintf(str,"%d",i);
             hdc_add_child(tree,str,hdc_new_empty());
         }
-        hdc_delete(tree);
+        hdc_clean(tree);
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
@@ -49,7 +50,7 @@ static void BM_C_HDC_AddChildPathDepth(benchmark::State& state) {
     while (state.KeepRunning()) {
         hdc_t tree = hdc_new_empty();
         hdc_add_child(tree,(char*)cpath,hdc_new_empty());
-        hdc_delete(tree);
+        hdc_clean(tree);
     }
     state.SetItemsProcessed(state.iterations());
     StorageReset();
@@ -68,7 +69,7 @@ static void BM_C_HDC_GetChildPathDepth(benchmark::State& state) {
         if (false) hdc_dump(node); // I do not like the warnings
     }
     state.SetItemsProcessed(state.iterations());
-    hdc_delete(tree);
+    hdc_clean(tree);
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_GetChildPathDepth)->RangeMultiplier(2)->Range(1,16);
@@ -82,7 +83,7 @@ static void BM_C_HDC_AddChildPathLength(benchmark::State& state) {
     while (state.KeepRunning()) {
         hdc_t tree = hdc_new_empty();
         hdc_add_child(tree,(char*)cpath,hdc_new_empty());
-        hdc_delete(tree);
+        hdc_clean(tree);
     }
     state.SetItemsProcessed(state.iterations());
     StorageReset();
@@ -101,7 +102,7 @@ static void BM_C_HDC_GetChildPathLength(benchmark::State& state) {
         if (false) hdc_dump(node);
     }
     state.SetItemsProcessed(state.iterations());
-    hdc_delete(tree);
+    hdc_clean(tree);
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_GetChildPathLength)->RangeMultiplier(2)->Range(2,1024);
@@ -112,7 +113,7 @@ static void BM_C_HDC_AppendSlice(benchmark::State& state) {
     while (state.KeepRunning()) {
         hdc_t tree = hdc_new_empty();
         for (auto i=0;i<state.range(0);i++) hdc_append_slice(tree,hdc_new_empty());
-        hdc_delete(tree);
+        hdc_clean(tree);
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
@@ -125,7 +126,7 @@ static void BM_C_HDC_AppendSlicePreallocated(benchmark::State& state) {
     while (state.KeepRunning()) {
         hdc_t tree = hdc_new_size(1024*1024*32);
         for (auto i=0;i<state.range(0);i++) hdc_append_slice(tree,hdc_new_empty());
-        hdc_delete(tree);
+        hdc_clean(tree);
     }
     state.SetItemsProcessed(state.range(0) * state.iterations());
     StorageReset();
@@ -146,7 +147,7 @@ static void BM_C_HDC_HasChildMultipleItems(benchmark::State& state) {
         }
     }
     state.SetItemsProcessed(100 * state.iterations());
-    hdc_delete(tree);
+    hdc_clean(tree);
     StorageReset();
 }
 BENCHMARK(BM_C_HDC_HasChildMultipleItems)->RangeMultiplier(2)->Range(1024,1024<<5);
@@ -167,6 +168,7 @@ static void BM_C_HDC_GetChildMultipleItems(benchmark::State& state) {
             if (false) hdc_dump(child); // I do not like the warnings
         }
     }
+    hdc_clean(tree);
     state.SetItemsProcessed(100 * state.iterations());
     StorageReset();
 }

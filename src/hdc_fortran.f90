@@ -94,10 +94,10 @@ module hdc_fortran
         end subroutine hdc_delete_ptr
 
         !> Desctructor. This is interface to C.
-        subroutine hdc_delete(obj) bind(c,name="hdc_delete")
+        subroutine hdc_clean(obj) bind(c,name="hdc_clean")
             import
            type(hdc_t), value :: obj
-        end subroutine hdc_delete
+        end subroutine hdc_clean
 
         !> Performs deep copy of current node. This is interface to C.
         function c_hdc_copy(src) result(obj) bind(c,name="hdc_copy")
@@ -609,7 +609,7 @@ module hdc_fortran
                 hdc_data_t, &
                 dp, &
                 sp, &
-                hdc_delete, &
+                hdc_clean, &
                 hdc_add_child, &
                 hdc_get_child, &
                 hdc_set_child, &

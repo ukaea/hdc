@@ -30,13 +30,6 @@ hdc_t hdc_new_array2(size_t rank, size_t* shape_in, hdc_type_t type, size_t flag
     return HDC(shape,type,flags).as_obj();
 }
 
-void hdc_delete(hdc_t tree UNUSED)
-{
-    //std::cerr << "hdc_delete(): I do nothing TODO: remove me...\n";
-    HDC(tree).clean();
-    return;
-}
-
 void hdc_print_info(hdc_t tree UNUSED)
 {
     HDC(tree).print_info();
@@ -232,6 +225,11 @@ hdc_t hdc_copy(hdc_t src)
 {
     HDC h(src);
     return HDC(h).copy().as_obj();
+}
+
+void hdc_clean(hdc_t node)
+{
+    return HDC(node).clean();
 }
 
 void hdc_set_string(hdc_t tree, const char* path, const char* str)

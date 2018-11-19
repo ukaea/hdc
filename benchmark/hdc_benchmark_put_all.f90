@@ -91,7 +91,7 @@ contains
             Format = "(I8.8, EN15.5)"
     ! 	    write (out_unit,Format) SIGNAL_LENGTH, (t2-t1)*1e-3/float(NSTATS)
             write (*,Format) SIGNAL_LENGTH, (dble(t2)-dble(t1))*1e-3/float(NSTATS)
-            call hdc_delete(magnetics)
+            call hdc_clean(magnetics)
             deallocate(data_in)
         end do
     end subroutine f_main

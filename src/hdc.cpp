@@ -183,6 +183,7 @@ void HDC::init(const std::string& storage_str, const std::string& storage_option
 void HDC::destroy()
 {
     if (global_storage == nullptr) return;
+    stores->clear();
     delete stores;
     stores = nullptr;
     global_storage = nullptr;
@@ -211,7 +212,6 @@ HDC::HDC(size_t data_size)
 
     // Start by creating segment
     std::vector<char> buffer(header.buffer_size);
-
     // copy header there -- we need that, hopefully it will be optimized out
     memcpy(buffer.data(), &header, sizeof(hdc_header_t));
 
