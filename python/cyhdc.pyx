@@ -116,7 +116,8 @@ cdef class HDC:
             #  copy constructor
             self._this = (<HDC> data)._this
         elif isinstance(data, six.string_types):
-            self._this = CppHDC(bytes(data, 'utf-8'))
+            #self._this = CppHDC(bytes(data, 'utf-8'))
+            self._this = CppHDC(<string> str(data).encode('utf-8'))
         else:
             # assert NotImplementedError()
             self._this = CppHDC()

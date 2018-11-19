@@ -22,7 +22,7 @@ def test_trees():
                 'float': np.arange(6, dtype=np.float32).reshape((2, -1)),
             },
             'text': '\tspam & ham\n',
-            'list': ['zero', 1, 2, 'three'],
+            'list': ['zero', 1, 2.0, 'three'],
         }
     }
     hdctree = HDC()
@@ -46,7 +46,7 @@ def tree_equal(py_obj, hdc_obj, exception=False):
             res = False
         if exception and not res:
             raise ValueError("{} != {}".format(py_obj, hdc_obj))
-    elif isinstance(py_obj, future.builtins.str):
+    elif isinstance(py_obj, future.builtins.str) or isinstance(py_obj, str):
         res = py_obj == future.builtins.str(hdc_obj)
         if exception and not res:
             raise ValueError("{} != {}".format(py_obj, future.builtins.str(hdc_obj)))
@@ -336,7 +336,6 @@ def test_tree_json_string(test_trees):
     pytree, hdctree = test_trees
     json_str = hdctree.dumps()
     hdctree_test = HDC.loads(json_str)
-
     assert tree_equal(pytree, hdctree_test, exception=False)
 
 
