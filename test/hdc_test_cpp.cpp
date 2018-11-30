@@ -293,6 +293,16 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
 
+TEST_CASE("SetExternal", "[HDC]")
+{
+    HDC tree;
+    int64_t array[4] = { 7, 2, 3, 4 };
+    std::vector<size_t> shape = {4};
+    tree.set_external(shape, array);
+    int64_t* array2 = tree.as<int64_t*>();
+    CHECK(*array == *array2);
+}
+
 TEST_CASE("StringDataManipulation", "[HDC]")
 {
     HDC h;
@@ -300,7 +310,6 @@ TEST_CASE("StringDataManipulation", "[HDC]")
     h.set_string(str);
     std::string str2 = std::string(h.as_string());
     CHECK(strcmp(str.c_str(), str2.c_str()) == 0);
-
 }
 
 TEST_CASE("GetStrides", "[HDC]")
