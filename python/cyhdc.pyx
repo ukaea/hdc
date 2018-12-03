@@ -47,6 +47,7 @@ cdef extern from "hdc_types.h":
     cdef size_t HDC_ERROR
     cdef size_t HDCDefault
     cdef size_t HDCFortranOrder
+    cdef size_t HDCExternal
     cdef size_t HDC_MAX_DIMS
     cdef size_t HDC_UUID_LENGTH
     ctypedef struct hdc_t:
@@ -85,6 +86,7 @@ cdef extern from "hdc.hpp":
         string get_uuid() except +
         # typedef unsigned long hdc_flags_t;
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
+        void set_external[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         T as[T]() except +
         string as_string() except +
         vector[string] keys() except +
@@ -212,7 +214,7 @@ cdef class HDC:
             # TODO is 0 always correct?
             return 0
 
-    cdef _set_data(self, cnp.ndarray data):
+    cdef _set_data(self, cnp.ndarray data, external=False):
         cdef size_t flags  = HDCDefault
         #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
@@ -225,36 +227,59 @@ cdef class HDC:
             # TODO C-ordering vs Fortran
             if data.flags['F_CONTIGUOUS'] and not data.flags['C_CONTIGUOUS']:
                 flags |= HDCFortranOrder
+            if external:
+                flags |= HDCExternal
             data_view = np.ascontiguousarray(data)
         data_view.setflags(write=True)
         cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
-        # TODO support other types
-        if np.issubdtype(data.dtype, np.bool_):
-            self._this.set_data(_shape, <bool*> data_view.data, flags)
-        elif np.issubdtype(data.dtype, np.int8):
-            self._this.set_data(_shape, <int8_t*> data_view.data, flags)
-        elif np.issubdtype(data.dtype, np.int16):
-            self._this.set_data(_shape, <int16_t*> data_view.data, flags)
-        elif np.issubdtype(data.dtype, np.int32):
-            self._this.set_data(_shape, <int32_t*> data_view.data, flags)
-        elif np.issubdtype(data.dtype, np.int64):
-            self._this.set_data(_shape, <int64_t*> data_view.data, flags)
-        elif np.issubdtype(data.dtype, np.float32):
-            self._this.set_data(_shape, <float*> data_view.data, flags)
-        elif np.issubdtype(data.dtype, np.float64):
-            self._this.set_data(_shape, <double*> data_view.data, flags)
-
+        if not external:
+            # TODO support other types
+            if np.issubdtype(data.dtype, np.bool_):
+                self._this.set_data(_shape, <bool*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int8):
+                self._this.set_data(_shape, <int8_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int16):
+                self._this.set_data(_shape, <int16_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int32):
+                self._this.set_data(_shape, <int32_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int64):
+                self._this.set_data(_shape, <int64_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.float32):
+                self._this.set_data(_shape, <float*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.float64):
+                self._this.set_data(_shape, <double*> data_view.data, flags)
+            else:
+                NotImplementedError('Type not supported')
         else:
-            NotImplementedError('Type not supported')
+            # TODO support other types
+            if np.issubdtype(data.dtype, np.bool_):
+                self._this.set_external(_shape, <bool*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int8):
+                self._this.set_external(_shape, <int8_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int16):
+                self._this.set_external(_shape, <int16_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int32):
+                self._this.set_external(_shape, <int32_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.int64):
+                self._this.set_external(_shape, <int64_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.float32):
+                self._this.set_external(_shape, <float*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.float64):
+                self._this.set_external(_shape, <double*> data_view.data, flags)
+            else:
+                NotImplementedError('Type not supported')
 
-    def set_data(self, data):
+    def set_data(self, data, external=False):
+        if external:
+            if not isinstance(data, np.ndarray):
+                NotImplementedError('external=True not supported for non np.ndarray type data')
 
         if isinstance(data, six.string_types):
             self._this.set_string(data.encode())
         elif isinstance(data, np.ndarray):
-            self._set_data(data)
+            self._set_data(data, external=external)
         elif isinstance(data, numbers.Number):
             # convert numbers to numpy
             self._set_data(np.asarray(data))

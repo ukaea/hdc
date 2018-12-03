@@ -457,10 +457,11 @@ public:
         size_t buffer_size = data_size + sizeof(hdc_header_t);
         if (header.buffer_size == buffer_size) {
             storage->lock(uuid);
-            memcpy(buffer+sizeof(hdc_header_t),data,data_size);
+            memcpy(get_data_ptr(),data,data_size);
             storage->unlock(uuid);
             return;
         } else {
+            if (header.flags & HDCExternal) throw HDCException("set_data(): I can't enarge your external buffer for you...");
             header.buffer_size = buffer_size;
             header.data_size = data_size;
             memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
@@ -523,7 +524,22 @@ public:
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
-        set_data(shape,data,flags);
+        std::vector<size_t> _shape = shape;
+        set_data(_shape,data,flags);
+    };
+
+
+    /**
+     * @brief ...
+     *
+    * @param T p_T: Desired data type.
+    * @param shape p_shape: Shape of the data
+    * @param data p_data: Pointer to data
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
+     */
+    template<typename T> void set_external(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
+        std::vector<size_t> _shape = shape;
+        set_external(_shape,data,flags);
     };
 
     /**
@@ -777,7 +793,7 @@ public:
         if (!storage->has(uuid)) {
             throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
-        if (is_external())
+        if (header.flags & HDCExternal)
         {
             T result;
             memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(void*));
@@ -1119,6 +1135,22 @@ public:
     */
     static HDC make_scalar(uint64_t data);
     /**
+     * @brief ...
+     *
+     * @param obj p_obj:...
+     * @return HDC
+     */
+    static HDC make_external(hdc_data_t obj);
+    /**
+     * @brief ...
+     *
+     * @param shape p_shape:...
+     * @param type p_type:...
+     * @param flags p_flags:...
+     * @return HDC
+     */
+    static HDC make_external(std::vector<size_t>& shape, hdc_type_t type, long flags);
+    /**
     * @brief Returns pointer to storage of HDC object
     *
     * @return HDCStorage*
@@ -1142,6 +1174,12 @@ public:
     * @param obj p_obj:...
     */
     void set_data(hdc_data_t obj);
+    /**
+     * @brief ...
+     *
+     * @param obj p_obj:...
+     */
+    void set_external(hdc_data_t obj);
 };
 
 #endif // HDC_HPP

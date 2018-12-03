@@ -366,6 +366,11 @@ void hdc_set_data(hdc_t tree, const char* path, hdc_data_t data)
     HDC(tree).get_or_create(path).set_data(data);
 }
 
+void hdc_set_external(hdc_t tree, const char* path, hdc_data_t data)
+{
+    HDC(tree).get_or_create(path).set_external(data);
+}
+
 size_t hdc_get_size(hdc_t tree)
 {
     return HDC(tree).get_size();
