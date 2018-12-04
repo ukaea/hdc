@@ -191,6 +191,23 @@ TEST_CASE("C_SetDataObj", "[CHDC]")
     }
 }
 
+TEST_CASE("C_SetExternal", "[CHDC]")
+{
+    double data[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
+    hdc_data_t d;
+    d.data = (char*)&data;
+    d.type = HDC_DOUBLE;
+    d.flags = HDCDefault;
+    d.rank = 1;
+    d.shape[0] = 4;
+    hdc_t h = hdc_new_empty();
+    hdc_set_external(h,"",d);
+    double* gdata = hdc_as_double_array(h,"");
+    CHECK(hdc_get_type(h,"") == HDC_DOUBLE);
+    for (auto i = 0;i<1;i++) {
+        CHECK(gdata[i] == data[i]);
+    }
+}
 
 TEST_CASE("C_StringDataManipulation", "[CHDC]")
 {
