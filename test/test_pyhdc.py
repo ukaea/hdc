@@ -62,11 +62,12 @@ def tree_equal(py_obj, hdc_obj, exception=False):
     return res
 
 
+@pytest.mark.parametrize("external",[True,False])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64, np.int16, np.int8, np.bool_])
 @pytest.mark.parametrize("shape", [(), (1, ), (5, ), (1, 1), (1, 3), (4, 1), (6, 8),
                                    (1, 3, 4), (7, 2, 3), (1, 2, 3, 4),(7, 2, 3, 4),
                                    (1, 2, 3, 4, 5),(7, 2, 3, 4, 5)])
-def test_ndarray(dtype, shape):
+def test_ndarray(dtype, shape, external):
     """Create np.array and put/get to/from flat HDC container
     """
     if dtype == np.bool_:
@@ -74,7 +75,7 @@ def test_ndarray(dtype, shape):
     else:
         x_in = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
     h = HDC()
-    h.set_data(x_in)
+    h.set_data(x_in,external=external)
     x_out = np.asarray(h)
     assert x_in.shape == x_out.shape
     assert x_in.size == x_out.size

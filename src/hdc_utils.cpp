@@ -392,6 +392,7 @@ char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc
 char* transpose_buffer(char* buffer) {
     hdc_header_t header;
     memcpy(&header,buffer,sizeof(hdc_header_t));
+    if (header.flags & HDCExternal) throw HDCException("transpose_buffer(): Not enabled on external buffer.");
     auto data = buffer+sizeof(hdc_header_t);
     char* new_buffer = new char[header.buffer_size];
     bool fortranOrder = (header.flags & HDCFortranOrder) == HDCFortranOrder;

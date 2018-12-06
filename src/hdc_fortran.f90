@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-11-02 17:17:19.371657 by ./generate_fortran_api.py
+! This file was generated on 2018-12-03 15:10:18.487181 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -237,6 +237,14 @@ module hdc_fortran
             type(hdc_data_t),value :: data
         end subroutine c_hdc_set_data
 
+        !> Sets hdc_data_t object. This is interface to C.
+        subroutine c_hdc_set_external(obj,path,data) bind(c,name="hdc_set_external")
+            import
+            character(kind=c_char), intent(in) :: path(*)
+            type(hdc_t), value:: obj
+            type(hdc_data_t),value :: data
+        end subroutine c_hdc_set_external
+
         !> Sets arbitrary data casted to void pointer. This is interface to C.
         subroutine c_hdc_as_string_fortran(obj,path,str,strlen)  bind(c,name="hdc_as_string_fortran")
             import
@@ -291,6 +299,8 @@ module hdc_fortran
     interface hdc_set_data
         module procedure hdc_set_string
         module procedure hdc_set_string_path
+        module procedure hdc_set_data_
+        module procedure hdc_set_data_path
         module procedure hdc_set_int8_scalar_path
         module procedure hdc_set_int8_scalar
         module procedure hdc_set_int8_1d
@@ -389,12 +399,19 @@ module hdc_fortran
         module procedure hdc_set_double_7d_path
     end interface hdc_set_data
 
+    !> Genneric set_external interface.
+    interface hdc_set_external
+        module procedure hdc_set_external_path
+        module procedure hdc_set_external_
+    end interface hdc_set_external
 
     !> Generic set interface.
     interface hdc_set
         module procedure hdc_set_child
         module procedure hdc_set_string
         module procedure hdc_set_string_path
+        module procedure hdc_set_data_
+        module procedure hdc_set_data_path
         module procedure hdc_set_int8_scalar_path
         module procedure hdc_set_int8_scalar
         module procedure hdc_set_int8_1d
@@ -618,6 +635,7 @@ module hdc_fortran
                 hdc_set, &
                 hdc_get_shape, &
                 hdc_set_data, &
+                hdc_set_external, &
                 hdc_get_slice, &
                 hdc_get, &
                 hdc_copy, &
@@ -934,6 +952,36 @@ contains
         type(c_ptr) :: res
         res = c_loc(tree)
     end function hdc_get_ptr_f
+
+    subroutine hdc_set_data_path(tree, path, data)
+        use iso_c_binding
+        type(hdc_t), target :: tree
+        type(hdc_data_t) :: data
+        character(len=*), intent(in) :: path
+        call c_hdc_set_external(tree, trim(path)//c_null_char, data)
+    end subroutine hdc_set_data_path
+
+    subroutine hdc_set_data_(tree, data)
+        use iso_c_binding
+        type(hdc_t), target :: tree
+        type(hdc_data_t) :: data
+        call c_hdc_set_external(tree, c_null_char, data)
+    end subroutine hdc_set_data_
+
+    subroutine hdc_set_external_path(tree, path, data)
+        use iso_c_binding
+        type(hdc_t), target :: tree
+        type(hdc_data_t) :: data
+        character(len=*), intent(in) :: path
+        call c_hdc_set_external(tree, trim(path)//c_null_char, data)
+    end subroutine hdc_set_external_path
+
+    subroutine hdc_set_external_(tree, data)
+        use iso_c_binding
+        type(hdc_t), target :: tree
+        type(hdc_data_t) :: data
+        call c_hdc_set_external(tree, c_null_char, data)
+    end subroutine hdc_set_external_
 
     !> Destroy HDC
     subroutine hdc_destroy() bind(c,name="HDC_destroy_c")
@@ -3598,7 +3646,6 @@ contains
         real(kind=dp), pointer, intent(inout) :: res(:)
         type(hdc_data_t) :: data
         data = hdc_get_data(this,path)
-        write(*,*) "hdc_as_double_1d_path_sub", data%rank, data%dshape(1), data%dtype
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_1d_path_sub
 

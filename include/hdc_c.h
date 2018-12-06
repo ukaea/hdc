@@ -84,6 +84,7 @@ int32_t hdc_as_int32_scalar(hdc_t tree, const char* path); /** Returns scalar in
 int64_t hdc_as_int64_scalar(hdc_t tree, const char* path); /** Returns scalar int64.  */
 
 void hdc_set_data(hdc_t tree, const char* path, struct hdc_data_t data);
+void hdc_set_external(hdc_t tree, const char* path, struct hdc_data_t data);
 void hdc_set_scalar(hdc_t tree, const char* path, void* data, hdc_type_t _type);
 
 // ----------------------------- Static methods wrappers ----------------------------------------//

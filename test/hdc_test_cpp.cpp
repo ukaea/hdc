@@ -293,6 +293,40 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
 
+TEST_CASE("SetExternal", "[HDC]")
+{
+    HDC node, external, e2, e3;
+    int64_t array_in[4] = { 7, 2, 3, 4 };
+    std::vector<size_t> shape = {4};
+    node.set_data(shape,array_in);
+    external.set_external(shape, array_in);
+    int64_t* array_out = external.as<int64_t*>();
+    CHECK(*array_in == *array_out);
+    CHECK(*array_in == *(int64_t*)(external.get_data_ptr()));
+    CHECK(external.is_external() == true);
+    auto external_str = external.to_json_string();
+    auto node_str = node.to_json_string();
+    CHECK(strcmp(external_str.c_str(),node_str.c_str()) == 0);
+
+    e2.set_external({1},array_in);
+    array_out = e2.as<int64_t*>();
+    CHECK(*array_in == *array_out);
+
+    hdc_data_t data;
+    data.data = (char*)array_in;
+    data.rank = 1;
+    data.shape[0] = 4;
+    data.flags = HDCDefault;
+    data.type = HDC_INT64;
+    e3.set_external(data);
+    array_out = e3.as<int64_t*>();
+    CHECK(*array_in == *array_out);
+
+    HDC e4 = HDC::make_external(data);
+    array_out = e3.as<int64_t*>();
+    CHECK(*array_in == *array_out);
+}
+
 TEST_CASE("StringDataManipulation", "[HDC]")
 {
     HDC h;
@@ -300,7 +334,6 @@ TEST_CASE("StringDataManipulation", "[HDC]")
     h.set_string(str);
     std::string str2 = std::string(h.as_string());
     CHECK(strcmp(str.c_str(), str2.c_str()) == 0);
-
 }
 
 TEST_CASE("GetStrides", "[HDC]")
