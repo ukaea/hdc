@@ -327,6 +327,79 @@ TEST_CASE("SetExternal", "[HDC]")
     CHECK(*array_in == *array_out);
 }
 
+TEST_CASE("as_vector_int8", "[HDC]") {
+    int8_t array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<int8_t>({4},array_in);
+    auto vector_out = h.as_vector<int64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<int32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<int16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<int8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+TEST_CASE("as_vector_uint8", "[HDC]") {
+    uint8_t array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<uint8_t>({4},array_in);
+    auto vector_out = h.as_vector<uint64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<uint32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<uint16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<uint8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+TEST_CASE("as_vector_int64", "[HDC]") {
+    int64_t array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<int64_t>({4},array_in);
+    auto vector_out = h.as_vector<int64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<int32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<int16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<int8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+TEST_CASE("as_vector_double", "[HDC]") {
+    double array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<double>({4},array_in);
+    auto vector_out = h.as_vector<int64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<int32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<int16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<int8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+
 TEST_CASE("StringDataManipulation", "[HDC]")
 {
     HDC h;

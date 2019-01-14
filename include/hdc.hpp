@@ -850,7 +850,65 @@ public:
         }
     }
 
-
+    /**
+     * @brief Returns vector with data of this node casted to a given type. Unlike as(), the data are always copied.
+     *
+     * @param T p_T: Desired data type.
+     * @return std::vector< T >
+     */
+    template<typename T> std::vector<T> as_vector() const
+    {
+        hdc_header_t header = get_header();
+        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+            throw std::runtime_error("This is not a terminal node...");
+        }
+        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        if (!storage->has(uuid)) {
+            throw HDCException("as_vector(): Not found: "+std::string(uuid.c_str())+"\n");
+        }
+        auto data = get_data_ptr();
+        size_t n_elem = header.data_size/hdc_sizeof(header.type);
+        std::vector<T> result(n_elem);
+        T tp = 0;
+        if (header.type == to_typeid(tp)) {
+            result.assign(reinterpret_cast<T*>(data),reinterpret_cast<T*>(data)+n_elem);
+        } else {
+            if (header.type == HDC_INT8) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int8_t*>(data)[i];
+            }
+            else if (header.type == HDC_INT16) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int16_t*>(data)[i];
+            }
+            else if (header.type == HDC_INT32) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int32_t*>(data)[i];
+            }
+            else if (header.type == HDC_INT64) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int64_t*>(data)[i];
+            }
+            else if (header.type == HDC_UINT8) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint8_t*>(data)[i];
+            }
+            else if (header.type == HDC_UINT16) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint16_t*>(data)[i];
+            }
+            else if (header.type == HDC_UINT32) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint32_t*>(data)[i];
+            }
+            else if (header.type == HDC_UINT64) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint64_t*>(data)[i];
+            }
+            else if (header.type == HDC_FLOAT) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<float*>(data)[i];
+            }
+            else if (header.type == HDC_DOUBLE) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<double*>(data)[i];
+            }
+            else {
+                throw HDCException("as_vector(): requested unknown data conversion. This works for numerical types only...\n");
+            }
+        }
+        return result;
+    }
 
     /**
     * @brief Returns scalar value.
