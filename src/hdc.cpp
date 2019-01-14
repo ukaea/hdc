@@ -1334,7 +1334,6 @@ void HDC::grow(size_t extra_size)
     return;
 }
 
-
 char* HDC::get_data_ptr() const
 {
     hdc_header_t header = get_header();

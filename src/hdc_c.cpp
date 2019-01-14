@@ -135,7 +135,7 @@ size_t hdc_get_type(hdc_t tree, const char* path)
 
 void* hdc_as_voidptr(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<void>();
+    return HDC(tree).get(path).as_void();
 }
 
 int8_t* hdc_as_int8_array(hdc_t tree, const char* path)

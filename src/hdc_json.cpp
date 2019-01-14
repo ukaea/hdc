@@ -177,7 +177,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 else { dt = HDC_BOOL; }
                 HDC d(shape, dt);
                 tree = d;
-                void* data_ptr = tree.as<void*>();
+                void* data_ptr = tree.as_void();
                 if (dt == HDC_DOUBLE) {
                     switch (rank) {
                         case 1: {

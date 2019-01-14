@@ -30,6 +30,7 @@ typedef enum {
     HDC_STRING = 13,
     HDC_BOOL   = 14,
     HDC_ERROR  = 15,
+    HDC_UNDEF  = 16,
     Internal_ForceMyEnumIntSize = ULONG_MAX // enum : unsigned int is not compatible with C, so we will do this and hope that it will be ok.
 } hdc_type_t;
 

@@ -89,6 +89,7 @@ cdef extern from "hdc.hpp":
         void set_external[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         T as2[T]() except +
         voidptr as_void() except +
+        #char* get_data_ptr() except +
         string as_string() except +
         vector[string] keys() except +
         size_t childs_count() except +
