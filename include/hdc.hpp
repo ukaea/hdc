@@ -785,8 +785,10 @@ public:
     */
     template<typename T> T* as() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        auto data = buffer+sizeof(hdc_header_t);
+        if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
@@ -794,19 +796,19 @@ public:
             throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
         T tp{};
-        if (header.type != to_typeid(tp))
+        if (header->type != to_typeid(tp))
         {
             throw HDCException("as() stored and requested types do not match\n");
         }
-        if (header.flags & HDCExternal)
+        if (header->flags & HDCExternal)
         {
             T* result;
-            memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(void*));
+            memcpy(&result,data,sizeof(void*));
             return result;
         }
         else
         {
-            return reinterpret_cast<T*>(storage->get(uuid)+sizeof(hdc_header_t));
+            return reinterpret_cast<T*>(data);
         }
     }
 
