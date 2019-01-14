@@ -988,12 +988,6 @@ public:
     * @return const char*
     */
     const char* get_type_str() const;
-//     /**
-//     * @brief Returns void pointer to data
-//     *
-//     * @return char*
-//     */
-//     char* get_data_ptr() const;
     /**
     * @brief Returns vector of keys of a struct node and empty vector otherwise.
     *

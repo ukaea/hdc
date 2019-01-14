@@ -1329,20 +1329,6 @@ void HDC::grow(size_t extra_size)
     return;
 }
 
-// char* HDC::get_data_ptr() const
-// {
-//     hdc_header_t header = get_header();
-//     if (header.data_size == 0) return nullptr;
-//     if (header.flags & HDCExternal)
-//     {
-//         char* result;
-//         memcpy(&result,storage->get(uuid) + sizeof(hdc_header_t), sizeof(void*));
-//         return result;
-//     }
-//     else
-//         return (char*)(storage->get(uuid) + sizeof(hdc_header_t));
-// }
-
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
 {
