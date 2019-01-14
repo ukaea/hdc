@@ -302,7 +302,7 @@ TEST_CASE("SetExternal", "[HDC]")
     external.set_external(shape, array_in);
     int64_t* array_out = external.as<int64_t>();
     CHECK(*array_in == *array_out);
-    CHECK(*array_in == *(int64_t*)(external.get_data_ptr()));
+    CHECK(*array_in == *(int64_t*)(external.as_void_ptr()));
     CHECK(external.is_external() == true);
     auto external_str = external.to_json_string();
     auto node_str = node.to_json_string();

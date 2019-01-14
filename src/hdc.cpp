@@ -1329,19 +1329,19 @@ void HDC::grow(size_t extra_size)
     return;
 }
 
-char* HDC::get_data_ptr() const
-{
-    hdc_header_t header = get_header();
-    if (header.data_size == 0) return nullptr;
-    if (header.flags & HDCExternal)
-    {
-        char* result;
-        memcpy(&result,storage->get(uuid) + sizeof(hdc_header_t), sizeof(void*));
-        return result;
-    }
-    else
-        return (char*)(storage->get(uuid) + sizeof(hdc_header_t));
-}
+// char* HDC::get_data_ptr() const
+// {
+//     hdc_header_t header = get_header();
+//     if (header.data_size == 0) return nullptr;
+//     if (header.flags & HDCExternal)
+//     {
+//         char* result;
+//         memcpy(&result,storage->get(uuid) + sizeof(hdc_header_t), sizeof(void*));
+//         return result;
+//     }
+//     else
+//         return (char*)(storage->get(uuid) + sizeof(hdc_header_t));
+// }
 
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
@@ -1523,7 +1523,7 @@ hdc_data_t HDC::get_data() const
         obj.flags = header.flags;
         obj.rank = header.rank;
         for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = header.shape[i];
-        obj.data = get_data_ptr();
+        obj.data = buffer+sizeof(hdc_header_t);
         return obj;
 }
 

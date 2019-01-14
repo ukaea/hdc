@@ -457,7 +457,7 @@ public:
         size_t buffer_size = data_size + sizeof(hdc_header_t);
         if (header.buffer_size == buffer_size) {
             storage->lock(uuid);
-            memcpy(get_data_ptr(),data,data_size);
+            memcpy(buffer+sizeof(hdc_header_t),data,data_size);
             storage->unlock(uuid);
             return;
         } else {
@@ -819,7 +819,7 @@ public:
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
         if (!storage->has(uuid)) {
-            throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
+            throw HDCException("as_void_ptr(): Not found: "+std::string(uuid.c_str())+"\n");
         }
         if (header.flags & HDCExternal)
         {
@@ -841,6 +841,7 @@ public:
      */
     template<typename T> std::vector<T> as_vector() const
     {
+        auto buffer = get_buffer();
         hdc_header_t header = get_header();
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
@@ -849,7 +850,7 @@ public:
         if (!storage->has(uuid)) {
             throw HDCException("as_vector(): Not found: "+std::string(uuid.c_str())+"\n");
         }
-        auto data = get_data_ptr();
+        auto data = buffer+sizeof(hdc_header_t);
         size_t n_elem = header.data_size/hdc_sizeof(header.type);
         std::vector<T> result(n_elem);
         T tp = 0;
@@ -987,12 +988,12 @@ public:
     * @return const char*
     */
     const char* get_type_str() const;
-    /**
-    * @brief Returns void pointer to data
-    *
-    * @return char*
-    */
-    char* get_data_ptr() const;
+//     /**
+//     * @brief Returns void pointer to data
+//     *
+//     * @return char*
+//     */
+//     char* get_data_ptr() const;
     /**
     * @brief Returns vector of keys of a struct node and empty vector otherwise.
     *

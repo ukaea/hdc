@@ -14,8 +14,9 @@ void write_node(HDC h, H5File* file, std::string path)
     auto buffer = h.get_buffer();
     hdc_header_t header;
     memcpy(&header, buffer, sizeof(hdc_header_t));
-    auto data = h.get_data_ptr();
-    char* transposed_data = NULL;
+
+    auto data = buffer+sizeof(hdc_header_t);
+    char* transposed_data = nullptr;
     if (h.is_fortranorder()) {
         transposed_data = transpose_buffer(h.get_buffer(), h.get_rank(), h.get_shape(), (hdc_type_t)h.get_type(),
                                            h.is_fortranorder());
