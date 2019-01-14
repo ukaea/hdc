@@ -54,7 +54,7 @@ int main(int argc, const char* argv[])
     cout << endl;
     cout << "dtype: " << node.get_type_str() << endl;
     // Get data back from tree
-    int32_t* array2 = node.as<int32_t*>();
+    int32_t* array2 = node.as<int32_t>();
     cout << "Data: ";
     for (size_t i = 0; i < shape2[0]; i++) cout << array2[i] << " ";
     cout << endl;

@@ -40,7 +40,7 @@ static void BM_HDC_GetData(benchmark::State& state) {
     memset(data,1,sizeof(int32_t)*state.range(0));
     node.set_data(shape,data);
     while (state.KeepRunning()) {
-        int32_t* data2 = node.as<int32_t*>();
+        int32_t* data2 = node.as<int32_t>();
         memcpy(data_copy,data2,state.range(0)*sizeof(int32_t));
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(int32_t)));
@@ -60,7 +60,7 @@ static void BM_HDC_ZeroCopyDataRead(benchmark::State& state) {
     node.set_data(shape,data);
     double s=0.0;
     while (state.KeepRunning()) {
-        double* data2 = node.as<double*>();
+        double* data2 = node.as<double>();
         for (auto i=0;i<state.range(0);i++) {
             s = data2[i];}
     }
@@ -81,7 +81,7 @@ static void BM_HDC_ZeroCopyDataWrite(benchmark::State& state) {
     node.set_data(shape,data);
     double s=0.0;
     while (state.KeepRunning()) {
-        double* data2 = node.as<double*>();
+        double* data2 = node.as<double>();
         for (auto i=0;i<state.range(0);i++) data2[i] = s;
     }
     state.SetBytesProcessed(int64_t(state.iterations()) * int64_t(state.range(0)) * int64_t(sizeof(double)));

@@ -135,39 +135,39 @@ size_t hdc_get_type(hdc_t tree, const char* path)
 
 void* hdc_as_voidptr(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<void*>();
+    return HDC(tree).get(path).as<void>();
 }
 
 int8_t* hdc_as_int8_array(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<int8_t*>();
+    return HDC(tree).get(path).as<int8_t>();
 }
 
 int16_t* hdc_as_int16_array(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<int16_t*>();
+    return HDC(tree).get(path).as<int16_t>();
 }
 
 int32_t* hdc_as_int32_array(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<int32_t*>();
+    return HDC(tree).get(path).as<int32_t>();
 }
 
 int64_t* hdc_as_int64_array(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<int64_t*>();
+    return HDC(tree).get(path).as<int64_t>();
 }
 
 
 double* hdc_as_double_array(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<double*>();
+    return HDC(tree).get(path).as<double>();
 }
 
 
 float* hdc_as_float_array(hdc_t tree, const char* path)
 {
-    return HDC(tree).get(path).as<float*>();
+    return HDC(tree).get(path).as<float>();
 }
 
 void hdc_set_int8_scalar(hdc_t tree, const char* path, int8_t data)
@@ -246,32 +246,32 @@ const char* hdc_as_string(hdc_t tree, const char* path)
 
 double hdc_as_double_scalar(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).as<double*>())[0];
+    return (HDC(tree).get(path).as<double>())[0];
 }
 
 float hdc_as_float_scalar(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).as<float*>())[0];
+    return (HDC(tree).get(path).as<float>())[0];
 }
 
 int8_t hdc_as_int8_scalar(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).as<int8_t*>())[0];
+    return (HDC(tree).get(path).as<int8_t>())[0];
 }
 
 int16_t hdc_as_int16_scalar(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).as<int16_t*>())[0];
+    return (HDC(tree).get(path).as<int16_t>())[0];
 }
 
 int32_t hdc_as_int32_scalar(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).as<int32_t*>())[0];
+    return (HDC(tree).get(path).as<int32_t>())[0];
 }
 
 int64_t hdc_as_int64_scalar(hdc_t tree, const char* path)
 {
-    return (HDC(tree).get(path).as<int64_t*>())[0];
+    return (HDC(tree).get(path).as<int64_t>())[0];
 }
 
 

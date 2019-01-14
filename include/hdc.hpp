@@ -783,7 +783,30 @@ public:
     * @param T p_T: Desired data type.
     * @return T
     */
-    template<typename T> T as() const
+    template<typename T> T* as() const
+    {
+        hdc_header_t header = get_header();
+        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+            throw std::runtime_error("This is not a terminal node...");
+        }
+        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        if (!storage->has(uuid)) {
+            throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
+        }
+        if (header.flags & HDCExternal)
+        {
+            T* result;
+            memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(void*));
+            return result;
+        }
+        else
+        {
+            return reinterpret_cast<T*>(storage->get(uuid)+sizeof(hdc_header_t));
+        }
+    }
+
+
+    template<typename T> T as2() const
     {
         hdc_header_t header = get_header();
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
@@ -804,6 +827,9 @@ public:
             return reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
         }
     }
+
+
+
     /**
     * @brief Returns scalar value.
     *
