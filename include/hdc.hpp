@@ -811,7 +811,7 @@ public:
     }
 
 
-    void* as_void() const
+    void* as_void_ptr() const
     {
         hdc_header_t header = get_header();
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
@@ -981,12 +981,6 @@ public:
     * @param filename p_filename:...
     */
     void serialize(const std::string& filename) const;
-    /**
-    * @brief Returns void pointer to data.
-    *
-    * @return intptr_t
-    */
-    intptr_t as_void_ptr() const;
     /**
     * @brief Returns string representing data/node type.
     *

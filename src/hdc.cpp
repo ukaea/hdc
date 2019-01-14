@@ -986,11 +986,6 @@ void HDC::set_type(hdc_type_t type)
     return;
 }
 
-intptr_t HDC::as_void_ptr() const
-{
-    return (intptr_t)(void*)this;
-}
-
 void HDC::dump() const
 {
     std::cout << to_json(0) << std::endl;

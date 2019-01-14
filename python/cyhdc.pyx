@@ -79,7 +79,6 @@ cdef extern from "hdc.hpp":
         void print_info() except +
         size_t get_type() except +
         string get_type_str() except +
-        intptr_t as_void_ptr() except +
         int8_t get_rank() except +
         vector[size_t] get_shape() except +
         size_t get_storage_id() except +
@@ -87,9 +86,7 @@ cdef extern from "hdc.hpp":
         # typedef unsigned long hdc_flags_t;
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         void set_external[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
-        T as2[T]() except +
-        voidptr as_void() except +
-        #char* get_data_ptr() except +
+        voidptr as_void_ptr() except +
         string as_string() except +
         vector[string] keys() except +
         size_t childs_count() except +
@@ -391,8 +388,7 @@ cdef class HDC:
         cdef Py_ssize_t strides_buf[10]
         for i in range(rank):
             strides_buf[i] = strides[i]
-        #buffer.buf = <char *> self._this.as2[voidptr]()
-        buffer.buf = self._this.as_void()
+        buffer.buf = self._this.as_void_ptr()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
 
         # Set buffer format here:
