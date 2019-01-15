@@ -778,7 +778,7 @@ public:
     */
     size_t get_rank() const;
     /**
-    * @brief Returns pointer to data of this node.
+    * @brief Returns desirely typed pointer to data of this node.
     *
     * @param T p_T: Desired data type.
     * @return T
@@ -813,8 +813,15 @@ public:
     }
 
 
+    /**
+     * @brief Returnd void pointer to data of this node.
+     *
+     * @return void*
+     */
     void* as_void_ptr() const
     {
+        auto buffer = get_buffer();
+        auto data = buffer+sizeof(hdc_header_t);
         hdc_header_t header = get_header();
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
@@ -826,12 +833,12 @@ public:
         if (header.flags & HDCExternal)
         {
             void* result;
-            memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(void*));
+            memcpy(&result,data,sizeof(void*));
             return result;
         }
         else
         {
-            return reinterpret_cast<void*>(storage->get(uuid)+sizeof(hdc_header_t));
+            return reinterpret_cast<void*>(data);
         }
     }
 

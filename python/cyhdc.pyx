@@ -376,7 +376,6 @@ cdef class HDC:
 
         # TODO generalize
         cdef Py_ssize_t itemsize = self._this.get_itemsize()
-
         cdef vector[size_t] shape = self._this.get_shape()
         cdef vector[size_t] strides = self._this.get_strides()
         cdef int rank = self._this.get_rank()
