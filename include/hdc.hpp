@@ -910,8 +910,9 @@ public:
     */
     template<typename T> T as_scalar() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
@@ -919,7 +920,7 @@ public:
             throw HDCException("as_scalar(): Not found: "+std::string(uuid.c_str())+"\n");
         }
         T result;
-        memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(T));
+        memcpy(&result,buffer+sizeof(hdc_header_t),sizeof(T));
         return result;
         //return *reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
     }
@@ -930,8 +931,9 @@ public:
     */
     const std::string as_string() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRING) {
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRING) {
             std::string str(storage->get(uuid)+sizeof(hdc_header_t));
             return str;
 
@@ -943,9 +945,10 @@ public:
     }
     const char* as_cstring() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRING) {
-            return static_cast<const char*>(get_buffer()+sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRING) {
+            return static_cast<const char*>(buffer+sizeof(hdc_header_t));
         } else {
             std::ostringstream oss;
             oss << to_json(0) << "\n";
