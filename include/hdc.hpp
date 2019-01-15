@@ -814,7 +814,7 @@ public:
 
 
     /**
-     * @brief Returnd void pointer to data of this node.
+     * @brief Return void pointer to data of this node.
      *
      * @return void*
      */
@@ -822,7 +822,7 @@ public:
     {
         auto buffer = get_buffer();
         auto data = buffer+sizeof(hdc_header_t);
-        hdc_header_t header = get_header();
+        hdc_header_t header = get_header(); // This is needed in Python for some reason
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
