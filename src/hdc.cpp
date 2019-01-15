@@ -343,50 +343,46 @@ HDC::~HDC()
 //---------------------------- Header information ----------------------------------
 size_t HDC::get_datasize() const
 {
-    return get_header().data_size;
+//     return get_header().data_size;
+    return reinterpret_cast<hdc_header_t*>(get_buffer())->data_size;
 }
 
 size_t HDC::get_size() const
 {
-    return get_header().buffer_size;
+//     return get_header().buffer_size;
+    return reinterpret_cast<hdc_header_t*>(get_buffer())->buffer_size;
 }
 
 /** Returns type of current node. */
 size_t HDC::get_type() const
 {
-    return get_header().type;
+    return reinterpret_cast<hdc_header_t*>(get_buffer())->type;
 }
 
 /** Returns the size of a single item in bytes */
 size_t HDC::get_itemsize() const
 {
-    return hdc_sizeof(static_cast<hdc_type_t>(get_header().type));
+    return hdc_sizeof(static_cast<hdc_type_t>(get_type()));
 }
 
 size_t HDC::get_flags() const
 {
-    return get_header().flags;
-}
-
-template <typename T>
-T* HDC::get_data() const
-{
-    return reinterpret_cast<T*>(get_buffer() + sizeof(hdc_header_t));
+    return reinterpret_cast<hdc_header_t*>(get_buffer())->flags;
 }
 
 bool HDC::is_external() const
 {
-    return (get_header().flags & HDCExternal) != 0;
+    return (get_flags() & HDCExternal) != 0;
 }
 
 bool HDC::is_readonly() const
 {
-    return (get_header().flags & HDCReadOnly) != 0;
+    return (get_flags() & HDCReadOnly) != 0;
 }
 
 bool HDC::is_fortranorder() const
 {
-    return (get_header().flags & HDCFortranOrder) != 0;
+    return (get_flags() & HDCFortranOrder) != 0;
 }
 
 void HDC::print_info() const

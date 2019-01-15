@@ -370,13 +370,6 @@ public:
     */
     HDC get_or_create(const std::string& path);
     /**
-    * @brief Returns the data, the pointer is just casted => there is no conversion for now.
-    *
-    * @param T p_T: Desired data type.
-    * @return T*
-    */
-    template<typename T> T* get_data() const;
-    /**
     * @brief Stores data in node's buffer
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
