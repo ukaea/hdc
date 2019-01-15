@@ -202,23 +202,18 @@ HDC::HDC(size_t data_size)
         HDC::init();
         atexit(HDC::destroy);
     }
-
-    // fill some data
-    hdc_header_t header;
-    memset(&header, 0, sizeof(hdc_header_t));
-    header.buffer_size = data_size + sizeof(hdc_header_t);
-    header.data_size = data_size;
-    header.rank = 1;
-
     // Start by creating segment
-    std::vector<char> buffer(header.buffer_size);
-    // copy header there -- we need that, hopefully it will be optimized out
-    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
-
+    auto buffer_size = data_size+sizeof(hdc_header_t);
+    std::vector<char> buffer(buffer_size);
+    auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+    memset(header, 0, sizeof(hdc_header_t));
+    header->buffer_size = data_size + sizeof(hdc_header_t);
+    header->data_size = data_size;
+    header->rank = 1;
     //Store to some storage
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer.data(), header.buffer_size);
+    storage->set(uuid, buffer.data(), buffer_size);
 }
 
 
