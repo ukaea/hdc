@@ -980,29 +980,28 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
     auto rank = shape.size();
-    hdc_header_t header;
     auto buffer = storage->get(uuid);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(type);
     for (size_t i = 0; i < rank; i++) data_size *= shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
-    if (header.buffer_size == buffer_size) {
+    if (header->buffer_size == buffer_size) {
         storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), data, data_size);
         storage->unlock(uuid);
     } else {
-        header.buffer_size = buffer_size;
-        header.data_size = data_size;
-        header.flags = flags;
-        memset(header.shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-        for (size_t i = 0; i < rank; i++) header.shape[i] = shape[i];
-        header.type = type;
-        header.rank = rank;
-        std::vector<char> buffer(header.buffer_size);
-        memcpy(buffer.data(), &header, sizeof(hdc_header_t));
-        memcpy(buffer.data() + sizeof(hdc_header_t), data, header.data_size);
-        storage->set(uuid, buffer.data(), header.buffer_size);
+        std::vector<char> new_buffer(buffer_size);
+        header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+        header->buffer_size = buffer_size;
+        header->data_size = data_size;
+        header->flags = flags;
+        memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
+        for (size_t i = 0; i < rank; i++) header->shape[i] = shape[i];
+        header->type = type;
+        header->rank = rank;
+        memcpy(new_buffer.data() + sizeof(hdc_header_t), data, header->data_size);
+        storage->set(uuid, new_buffer.data(), header->buffer_size);
     }
     return;
 }
@@ -1013,30 +1012,29 @@ void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t ty
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
     auto rank = shape.size();
-    hdc_header_t header;
     auto buffer = storage->get(uuid);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(type);
     for (size_t i = 0; i < rank; i++) data_size *= shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
-    if (header.buffer_size == buffer_size) {
+    if (header->buffer_size == buffer_size) {
         storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), data, data_size);
         storage->unlock(uuid);
         return;
     } else {
-        header.buffer_size = buffer_size;
-        header.data_size = data_size;
-        header.flags = flags;
-        memset(header.shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-        for (size_t i = 0; i < rank; i++) header.shape[i] = shape[i];
-        header.type = type;
-        header.rank = rank;
-        std::vector<char> buffer(header.buffer_size);
-        memcpy(buffer.data(), &header, sizeof(hdc_header_t));
-        memcpy(buffer.data() + sizeof(hdc_header_t), data, header.data_size);
-        storage->set(uuid, buffer.data(), header.buffer_size);
+        std::vector<char> new_buffer(buffer_size);
+        header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+        header->buffer_size = buffer_size;
+        header->data_size = data_size;
+        header->flags = flags;
+        memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
+        for (size_t i = 0; i < rank; i++) header->shape[i] = shape[i];
+        header->type = type;
+        header->rank = rank;
+        memcpy(new_buffer.data() + sizeof(hdc_header_t), data, header->data_size);
+        storage->set(uuid, new_buffer.data(), header->buffer_size);
         return;
     }
 }
@@ -1052,27 +1050,25 @@ void HDC::insert(size_t index, HDC& h)
 {
     DEBUG_STDOUT("insert(" + to_string(i) + ")\n");
     //sync buffer
-    hdc_header_t header;
-    auto buffer = storage->get(uuid);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
-    size_t old_size = header.buffer_size;
-    if (header.type != HDC_EMPTY && header.type != HDC_LIST) {
+    auto buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    size_t old_size = header->buffer_size;
+    if (header->type != HDC_EMPTY && header->type != HDC_LIST) {
         throw HDCException("insert(): Cannot add child to this node. Data assigned???\n");
     }
-    if (header.type == HDC_EMPTY) set_type(HDC_LIST);
-    buffer = storage->get(uuid);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    if (header->type == HDC_EMPTY) set_type(HDC_LIST);
+    buffer = get_buffer();
+    header = reinterpret_cast<hdc_header_t*>(buffer);
     if (get_shape()[0] < index) {
         std::cout << "Warning: insert():: inserting behind current list length, filling with empty containers\n";
-        for (size_t i = header.shape[0]; i < index; i++) {
+        for (size_t i = header->shape[0]; i < index; i++) {
             HDC ch;
             append(ch);
         }
     }
 
     // load new buffer
-    buffer = storage->get(uuid);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    buffer = get_buffer();
     vector<char> new_buffer;
     auto segment = get_segment();
     auto children = segment.find<hdc_map_t>("d").first;
@@ -1094,14 +1090,14 @@ void HDC::insert(size_t index, HDC& h)
             redo = 0;
         }
         catch (HDCBadAllocException& e) {
-            new_buffer = buffer_grow(buffer, header.buffer_size);
+            new_buffer = buffer_grow(buffer, header->buffer_size);
             if (new_buffer.data() == buffer) {
                 throw HDCException("grow called, but buffer == new_buffer.\n");
             }
             //if (!storage->usesBuffersDirectly()) delete[] buffer;
             storage->remove(uuid);
             buffer = new_buffer.data();
-            memcpy(&header, buffer, sizeof(hdc_header_t));
+            header = reinterpret_cast<hdc_header_t*>(buffer);
             segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
             children = segment.find<hdc_map_t>("d").first;
             redo = 1;
@@ -1110,10 +1106,9 @@ void HDC::insert(size_t index, HDC& h)
             throw HDCBadAllocException("insert(): Could not allocate enough memory.\n");
         }
     }
-    header.shape[0] = children->size();
-    memcpy(buffer, &header, sizeof(hdc_header_t));
-    if (header.buffer_size != old_size) {
-        storage->set(uuid, buffer, header.buffer_size);
+    header->shape[0] = children->size();
+    if (header->buffer_size != old_size) {
+        storage->set(uuid, buffer, header->buffer_size);
     }
     return;
 }
@@ -1167,48 +1162,41 @@ const char* HDC::get_type_str() const
 
 hdc_header_t HDC::get_header() const {
     hdc_header_t h;
-    //memcpy(&h,storage->get(uuid),sizeof(hdc_header_t));
-    auto s = (hdc_header_t*)(storage->get(uuid));
-    h.buffer_size = s->buffer_size;
-    h.data_size = s->data_size;
-    h.type = s->type;
-    h.flags = s->flags;
-    h.rank = s->rank;
-    for (auto i=0; i < HDC_MAX_DIMS; i++) h.shape[i] = s->shape[i];
+    memcpy(&h,get_buffer(),sizeof(hdc_header_t));
     return h;
 }
 
 std::vector<size_t> HDC::get_shape() const
 {
-    hdc_header_t header = get_header();
-//     size_t offset = reinterpret_cast<size_t>(header.shape) - reinterpret_cast<size_t>(&header);
-    std::vector<size_t> shape(&header.shape[0], &header.shape[0]+header.rank);
-    //TODO: C++17 has offsetoff
-//     return reinterpret_cast<size_t*>(get_buffer() + offset);
+    auto buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    std::vector<size_t> shape(&header->shape[0], &header->shape[0]+header->rank);
     return shape;
 }
 
 std::vector<size_t> HDC::get_strides() const
 {
-    hdc_header_t header = get_header();
+    //hdc_header_t header = get_header();
+    auto buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
     std::vector<size_t> strides;
-    size_t elem_size = hdc_sizeof(static_cast<hdc_type_t>(header.type));
+    size_t elem_size = hdc_sizeof(static_cast<hdc_type_t>(header->type));
     size_t last_stride;
-    if (is_fortranorder()) {
-        for (size_t i = 0; i < header.rank; ++i) {
+    if ((header->flags & HDCFortranOrder) != 0) {
+        for (size_t i = 0; i < header->rank; ++i) {
             if (i == 0) {
                 last_stride = elem_size;
             } else {
-                last_stride = header.shape[i - 1] * last_stride;
+                last_stride = header->shape[i - 1] * last_stride;
             }
             strides.insert(strides.end(), last_stride);
         }
     } else {
-        for (size_t i = 0; i < header.rank; ++i) {
+        for (size_t i = 0; i < header->rank; ++i) {
             if (i == 0) {
                 last_stride = elem_size;
             } else {
-                last_stride = header.shape[header.rank - i] * last_stride;
+                last_stride = header->shape[header->rank - i] * last_stride;
             }
             strides.insert(strides.begin(), last_stride);
         }
@@ -1218,7 +1206,7 @@ std::vector<size_t> HDC::get_strides() const
 
 size_t HDC::get_rank() const
 {
-    return get_header().rank;
+    return reinterpret_cast<hdc_header_t*>(get_buffer())->rank;
 }
 
 size_t HDC::children_count() const
