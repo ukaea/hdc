@@ -204,7 +204,7 @@ HDC::HDC(size_t data_size)
     }
     // Start by creating segment
     auto buffer_size = data_size+sizeof(hdc_header_t);
-    std::vector<char> buffer(buffer_size);
+    std::vector<char> buffer(buffer_size,0);
     auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
     memset(header, 0, sizeof(hdc_header_t));
     header->buffer_size = data_size + sizeof(hdc_header_t);
@@ -228,66 +228,54 @@ HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
         HDC::init();
         atexit(HDC::destroy);
     }
-
     auto rank = shape.size();
-    hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
         throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
     }
-    size_t elem_size = 1;
-    memset(&header, 0, sizeof(hdc_header_t));
-    for (size_t i = 0; i < rank; i++) {
-        header.shape[i] = shape[i];
-        elem_size *= shape[i];
-    }
-    header.type = type;
-    header.flags = flags;
-    header.rank = rank;
-    header.data_size = elem_size * hdc_sizeof(type);
-    header.buffer_size = header.data_size + sizeof(hdc_header_t);
-    std::vector<char> buffer(header.buffer_size);
-    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
+    auto data_size = hdc_sizeof(type);
+    for (size_t i = 0; i < rank; i++) data_size *= shape[i];
+    auto buffer_size = data_size + sizeof(hdc_header_t);
+    std::vector<char> buffer(buffer_size,0);
+    auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+    header->type = type;
+    header->flags = flags;
+    header->rank = rank;
+    header->data_size = data_size;
+    header->buffer_size = buffer_size;
+    for (size_t i=0; i<rank; i++) header->shape[i] = shape[i];
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer.data(), header.buffer_size);
+    storage->set(uuid, buffer.data(), buffer_size);
 }
 
 HDC::HDC(hdc_data_t obj)
 {
-
     if (global_storage == nullptr) {
         HDC::init();
         atexit(HDC::destroy);
     }
-
     auto rank = obj.rank;
-    hdc_header_t header;
     if (rank >= HDC_MAX_DIMS) {
         throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
     }
-    size_t elem_size = 1;
-    memset(&header, 0, sizeof(hdc_header_t));
-    for (size_t i = 0; i < rank; i++) {
-        header.shape[i] = obj.shape[i];
-        elem_size *= obj.shape[i];
-    }
-    header.type = obj.type;
-    header.flags = obj.flags;
-    header.rank = rank;
+    size_t data_size = hdc_sizeof(obj.type);
+    for (size_t i = 0; i < rank; i++) data_size *= obj.shape[i];
+    if (obj.flags & HDCExternal) data_size = sizeof(intptr_t);
+    auto buffer_size = data_size + sizeof(hdc_header_t);
+    std::vector<char> buffer(buffer_size,0);
+    auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+    header->type = obj.type;
+    header->flags = obj.flags;
+    header->rank = rank;
+    header->data_size = data_size;
+    header->buffer_size = buffer_size;
     if (obj.flags & HDCExternal)
-        header.data_size = sizeof(intptr_t);
+        memcpy(buffer.data()+sizeof(hdc_header_t), &(obj.data), data_size);
     else
-        header.data_size = elem_size * hdc_sizeof(obj.type);
-    header.buffer_size = header.data_size + sizeof(hdc_header_t);
-    std::vector<char> buffer(header.buffer_size);
-    memcpy(buffer.data(), &header, sizeof(hdc_header_t));
-    if (obj.flags & HDCExternal)
-        memcpy(buffer.data()+sizeof(hdc_header_t), &(obj.data), header.data_size);
-    else
-        memcpy(buffer.data()+sizeof(hdc_header_t), obj.data, header.data_size);
+        memcpy(buffer.data()+sizeof(hdc_header_t), obj.data, data_size);
     uuid = generate_uuid_str();
     storage = global_storage;
-    storage->set(uuid, buffer.data(), header.buffer_size);
+    storage->set(uuid, buffer.data(), buffer_size);
 }
 
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
@@ -299,13 +287,10 @@ HDC::HDC(const std::string str) : HDC()
 /** Copy constructor */
 HDC::HDC(const HDC& h)
 {
-
     if (global_storage == nullptr) {
         HDC::init();
         atexit(HDC::destroy);
     }
-
-
     storage = h.storage;
     uuid = h.uuid;
 };
@@ -313,23 +298,19 @@ HDC::HDC(const HDC& h)
 /** Deserializing constructor */
 HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 {
-
     if (global_storage == nullptr) {
         HDC::init();
         atexit(HDC::destroy);
     }
-
     uuid = _uuid;
     storage = _storage;
 }
 
 HDC::HDC(hdc_t& obj) {
-
     if (global_storage == nullptr) {
         HDC::init();
         atexit(HDC::destroy);
     }
-
     storage = stores->at(obj.storage_id);
     uuid = obj.uuid;
 }
