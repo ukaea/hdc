@@ -343,13 +343,11 @@ HDC::~HDC()
 //---------------------------- Header information ----------------------------------
 size_t HDC::get_datasize() const
 {
-//     return get_header().data_size;
     return reinterpret_cast<hdc_header_t*>(get_buffer())->data_size;
 }
 
 size_t HDC::get_size() const
 {
-//     return get_header().buffer_size;
     return reinterpret_cast<hdc_header_t*>(get_buffer())->buffer_size;
 }
 
@@ -614,7 +612,8 @@ void HDC::clean() {
 
 void HDC::delete_child(hdc_path_t& path)
 {
-    hdc_header_t header = get_header();
+    auto buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
     D(
         std::cout << "delete_child(";
         for (auto str: path) std::cout << str;
@@ -627,9 +626,7 @@ void HDC::delete_child(hdc_path_t& path)
     auto first = path.front();
     path.pop_front();
     hdc_map_t* children = get_children_ptr();
-    auto buffer = get_buffer();
     if (path.empty()) {
-        //size_t index;
         if (first.type() == typeid(size_t)) {
             auto it = children->get<by_index>()[boost::get<size_t>(first)];
             storage->remove(it.address.c_str());
@@ -641,8 +638,7 @@ void HDC::delete_child(hdc_path_t& path)
                 children->erase(it);
             }
         }
-        header.shape[0] = children->size();
-        memcpy(buffer, &header, sizeof(hdc_header_t));
+        header->shape[0] = children->size();
     } else {
         get(boost::get<std::string>(first)).delete_child(path);
     }
@@ -931,28 +927,27 @@ void HDC::set_child(const std::string& path, HDC& n)
 void HDC::set_type(hdc_type_t type)
 {
     // More to be added here later
+    auto old_buffer = storage->get(uuid);
+    auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
     DEBUG_STDOUT("set_type(" + to_string(header.type) + " -> " + to_string(type) + ")\n");
-    hdc_header_t header;
-    char* old_buffer = storage->get(uuid);
-    memcpy(&header, old_buffer, sizeof(hdc_header_t)); //sync header
-    if (header.type == type) return; // Nothing to do
-    header.type = type;
-    memcpy(old_buffer, &header, sizeof(hdc_header_t)); //sync header back
+    if (header->type == type) return; // Nothing to do
+    header->type = type;
     if (!is_terminal()) {
-        if (header.data_size < HDC_NODE_SIZE_DEFAULT) {
+        if (header->data_size < HDC_NODE_SIZE_DEFAULT) {
             vector<char> new_buffer(HDC_NODE_SIZE_DEFAULT);
-            header.data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
-            header.buffer_size = HDC_NODE_SIZE_DEFAULT;
-            memcpy(new_buffer.data(), &header, sizeof(hdc_header_t));
-            bip::managed_external_buffer segment(bip::create_only, new_buffer.data() + sizeof(hdc_header_t), header.data_size);
+            header->data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
+            header->buffer_size = HDC_NODE_SIZE_DEFAULT;
+            memcpy(new_buffer.data(), old_buffer, sizeof(hdc_header_t));
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            bip::managed_external_buffer segment(bip::create_only, new_buffer.data() + sizeof(hdc_header_t), header->data_size);
             auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
             if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
-            storage->set(uuid, new_buffer.data(), header.buffer_size);
+            storage->set(uuid, new_buffer.data(), header->buffer_size);
         } else {
-            bip::managed_external_buffer segment(bip::create_only, old_buffer + sizeof(hdc_header_t), header.data_size);
+            bip::managed_external_buffer segment(bip::create_only, old_buffer + sizeof(hdc_header_t), header->data_size);
             auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
             if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
-            storage->set(uuid, old_buffer, header.buffer_size);
+            storage->set(uuid, old_buffer, header->buffer_size);
         }
     }
     return;
