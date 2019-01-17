@@ -504,22 +504,20 @@ void HDC::add_child_single(const std::string& path, HDC& n)
 {
     D(std::cout << "add_child_single(" + path + ")\n";)
     // sync buffer
-    hdc_header_t header;
     auto buffer = get_buffer();
-    memcpy(&header, buffer, sizeof(hdc_header_t));
-    size_t old_size = header.buffer_size;
-    if (!(header.type == HDC_EMPTY || header.type == HDC_STRUCT)) {
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    size_t old_size = header->buffer_size;
+    if (!(header->type == HDC_EMPTY || header->type == HDC_STRUCT)) {
         throw HDCException("add_child_single(): Cannot add child to this node. Data assigned???\n");
     }
-    if (header.type == HDC_EMPTY) set_type(HDC_STRUCT);
+    if (header->type == HDC_EMPTY) set_type(HDC_STRUCT);
 
     if (path.size() > 1024) {
         throw HDCException("add_child_single(): string too long.\n");
     }
-
     // load new buffer
     buffer = get_buffer();
-    memcpy(&header, buffer, sizeof(hdc_header_t));
+    header = reinterpret_cast<hdc_header_t*>(buffer);
     vector<char> new_buffer;
     auto segment = get_segment();
     auto children = segment.find<hdc_map_t>("d").first;
@@ -544,14 +542,15 @@ void HDC::add_child_single(const std::string& path, HDC& n)
                 redo = 0;
             }
             catch (HDCBadAllocException& e) {
-               new_buffer = buffer_grow(buffer, max(header.buffer_size, 4 * path.size()));
+               new_buffer = buffer_grow(buffer, max(header->buffer_size, 4 * path.size()));
+               header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
                if (new_buffer.data() == buffer) {
                    throw HDCException("grow called, but buffer == new_buffer.\n");
                }
                //if (!storage->usesBuffersDirectly()) delete[] buffer;
                storage->remove(uuid);
                buffer = new_buffer.data();
-               memcpy(&header, buffer, sizeof(hdc_header_t));
+               header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
                segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
                children = segment.find<hdc_map_t>("d").first;
                redo = 1;
@@ -560,14 +559,12 @@ void HDC::add_child_single(const std::string& path, HDC& n)
                 throw HDCBadAllocException("add_child_single(): Could not allocate enough memory.\n");
             }
         }
-        header.shape[0] = children->size();
-        memcpy(buffer, &header, sizeof(hdc_header_t));
-        if (header.buffer_size != old_size) {
-            storage->set(uuid, buffer, header.buffer_size);
-        }
+        header->shape[0] = children->size();
+        if (header->buffer_size != old_size) storage->set(uuid, buffer, header->buffer_size);
     }
     return;
 }
+
 
 std::vector<std::string> HDC::keys() const
 {
