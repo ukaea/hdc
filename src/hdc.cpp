@@ -924,7 +924,7 @@ void HDC::set_type(hdc_type_t type)
     // More to be added here later
     auto old_buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
-    DEBUG_STDOUT("set_type(" + to_string(header.type) + " -> " + to_string(type) + ")\n");
+    DEBUG_STDOUT("set_type(" + to_string(header->type) + " -> " + to_string(type) + ")\n");
     if (header->type == type) return; // Nothing to do
     header->type = type;
     if (!is_terminal()) {
@@ -1282,18 +1282,17 @@ void HDC::grow(size_t extra_size)
 std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
 {
     DEBUG_STDOUT("buffer_grow(extra_size = " + to_string(extra_size) + ")\n");
-    //load header
-    hdc_header_t header;
-    memcpy(&header, old_buffer, sizeof(hdc_header_t));
-    if (header.flags & HDCExternal) throw HDCException("buffer_grow(): Not enabled on external buffer.");
+    auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
+    if (header->flags & HDCExternal) throw HDCException("buffer_grow(): Not enabled on external buffer.");
     if (old_buffer == nullptr) return vector<char>(0);
-    if (extra_size <= 0) return vector<char>(old_buffer,old_buffer+header.buffer_size);
-    auto newdata_size = header.data_size + extra_size;
+    if (extra_size <= 0) return vector<char>(old_buffer,old_buffer+header->buffer_size);
+    auto newdata_size = header->data_size + extra_size;
     auto new_buffer_size = newdata_size + sizeof(hdc_header_t);
     std::vector<char> new_buffer(new_buffer_size);
-//     auto new_buffer = new std::vector<char>(new_buffer_size);
+    memcpy(new_buffer.data(),old_buffer,sizeof(hdc_header_t));
+    header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
     // if there were children, resize the segment
-    if ((header.type == HDC_LIST || header.type == HDC_STRUCT) && header.data_size > 0) {
+    if ((header->type == HDC_LIST || header->type == HDC_STRUCT) && header->data_size > 0) {
         // try to open old children
         auto old_segment = bip::managed_external_buffer(bip::open_only, old_buffer + sizeof(hdc_header_t), 0);
         hdc_map_t* old_children = old_segment.find<hdc_map_t>("d").first;
@@ -1315,9 +1314,8 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
         memcpy(new_buffer.data()+sizeof(hdc_header_t), old_buffer+sizeof(hdc_header_t), sizeof(hdc_header_t));
     }
     // finalize header and copy it to the new buffer
-    header.data_size = newdata_size;
-    header.buffer_size = new_buffer_size;
-    memcpy(new_buffer.data(), &header, sizeof(hdc_header_t));
+    header->data_size = newdata_size;
+    header->buffer_size = new_buffer_size;
     return new_buffer;
 }
 
