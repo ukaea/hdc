@@ -390,16 +390,17 @@ char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc
 }
 
 char* transpose_buffer(char* buffer) {
-    hdc_header_t header;
-    memcpy(&header,buffer,sizeof(hdc_header_t));
-    if (header.flags & HDCExternal) throw HDCException("transpose_buffer(): Not enabled on external buffer.");
+    //hdc_header_t header;
+    //memcpy(&header,buffer,sizeof(hdc_header_t));
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    if (header->flags & HDCExternal) throw HDCException("transpose_buffer(): Not enabled on external buffer.");
     auto data = buffer+sizeof(hdc_header_t);
-    char* new_buffer = new char[header.buffer_size];
-    bool fortranOrder = (header.flags & HDCFortranOrder) == HDCFortranOrder;
-    std::vector<size_t> shape(&header.shape[0],&header.shape[0]+header.rank);
-    auto transposed_data = transpose_buffer(data, header.rank, shape, (hdc_type_t)header.type, fortranOrder);
+    char* new_buffer = new char[header->buffer_size];
+    bool fortranOrder = (header->flags & HDCFortranOrder) == HDCFortranOrder;
+    std::vector<size_t> shape(header->shape,header->shape+header->rank);
+    auto transposed_data = transpose_buffer(data, header->rank, shape, (hdc_type_t)header->type, fortranOrder);
     memcpy(new_buffer,&header,sizeof(hdc_header_t));
-    memcpy(new_buffer,transposed_data,header.data_size);
+    memcpy(new_buffer,transposed_data,header->data_size);
     return new_buffer;
 }
 
