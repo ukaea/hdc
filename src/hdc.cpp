@@ -385,13 +385,14 @@ bool HDC::is_fortranorder() const
 
 void HDC::print_info() const
 {
-    hdc_header_t header = get_header();
-    printf("Size:\t\t%zu\n", header.buffer_size);
-    printf("NDim:\t\t%zu\n", header.rank);
+    auto buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    printf("Size:\t\t%zu\n", header->buffer_size);
+    printf("NDim:\t\t%zu\n", header->rank);
     printf("Shape:\t\t");
-    for (size_t i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", header.shape[i]);
+    for (size_t i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", header->shape[i]);
     printf("\n");
-    printf("Data Size:\t\t%zu\n", header.data_size);
+    printf("Data Size:\t\t%zu\n", header->data_size);
     printf("External:\t\t%d\n", is_external());
     printf("ReadOnly:\t\t%d\n", is_readonly());
     printf("FortranOrder:\t%d\n", is_fortranorder());
@@ -1535,26 +1536,19 @@ HDC HDC::copy(bool deep_copy)
 HDC HDC::copy(const HDC& h, bool deep_copy) {
     auto storage = h.get_storage();
     auto h_buffer = h.get_buffer();
-    hdc_header_t h_header;
-    memcpy(&h_header,h_buffer,sizeof(hdc_header_t));
-
-    std::vector<char> c_buffer(h_header.buffer_size);
-    hdc_header_t c_header;
-    memcpy(&c_header,h_buffer,sizeof(hdc_header_t));
-
+    auto h_header = reinterpret_cast<hdc_header_t*>(h_buffer);
+    std::vector<char> c_buffer(h_header->buffer_size);
+    memcpy(c_buffer.data(),h_buffer,sizeof(hdc_header_t));
+    auto c_header = reinterpret_cast<hdc_header_t*>(c_buffer.data());
     auto c_uuid = generate_uuid_str();
-
-    if ((h_header.type != HDC_STRUCT && h_header.type != HDC_LIST) || !deep_copy) {
-        memcpy(c_buffer.data(),h_buffer,h_header.buffer_size);
+    if ((h_header->type != HDC_STRUCT && h_header->type != HDC_LIST) || !deep_copy) {
+        memcpy(c_buffer.data(),h_buffer,h_header->buffer_size);
     } else {
-        memcpy(c_buffer.data(),h_buffer,sizeof(hdc_header_t));
         bip::managed_external_buffer h_segment(bip::open_only, h_buffer + sizeof(hdc_header_t),
-                                                 h_header.data_size);
+                                                 h_header->data_size);
         hdc_map_t* h_children = h_segment.find<hdc_map_t>("d").first;
-
-
         bip::managed_external_buffer c_segment(bip::create_only, c_buffer.data() + sizeof(hdc_header_t),
-                                             h_header.data_size);
+                                             h_header->data_size);
         hdc_map_t* c_children = c_segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),
                                                          hdc_map_t::allocator_type(c_segment.get_segment_manager()));
         // The children seem to have to be copied before iterating over them, otherwise the recursion fails and we get multiple instances of deepest terminal nodes spreaded all over the tree copy..
@@ -1569,6 +1563,6 @@ HDC HDC::copy(const HDC& h, bool deep_copy) {
             c_children->insert(rec);
         }
     }
-    storage->set(c_uuid,c_buffer.data(),h_header.buffer_size);
+    storage->set(c_uuid,c_buffer.data(),c_header->buffer_size);
     return HDC(storage,c_uuid);
 }
