@@ -442,7 +442,7 @@ public:
     template<typename T> void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
         hdc_header_t header = get_header();
-        auto buffer = storage->get(uuid);
+        auto buffer = get_buffer();
         memcpy(&header,buffer,sizeof(hdc_header_t));
         // Start with determining of the buffer size
         size_t data_size = sizeof(T);
@@ -481,7 +481,7 @@ public:
     template<typename T> void set_external(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
         hdc_header_t header = get_header();
-        auto buffer = storage->get(uuid);
+        auto buffer = get_buffer();
         memcpy(&header,buffer,sizeof(hdc_header_t));
         // Start with determining of the buffer size
         size_t data_size = sizeof(void*);
@@ -915,7 +915,7 @@ public:
         T result;
         memcpy(&result,buffer+sizeof(hdc_header_t),sizeof(T));
         return result;
-        //return *reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
+        //return *reinterpret_cast<T>(get_buffer()+sizeof(hdc_header_t));
     }
     /**
     * @brief Returns string. Needs to have separate function
@@ -927,7 +927,7 @@ public:
         auto buffer = get_buffer();
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
         if (header->type == HDC_STRING) {
-            std::string str(storage->get(uuid)+sizeof(hdc_header_t));
+            std::string str(get_buffer()+sizeof(hdc_header_t));
             return str;
 
         } else {

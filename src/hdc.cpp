@@ -502,12 +502,10 @@ void HDC::add_child(hdc_path_t& path, HDC& n)
 
 void HDC::add_child_single(const std::string& path, HDC& n)
 {
-    D(
-        std::cout << "add_child_single(" + path + ")\n";
-    )
+    D(std::cout << "add_child_single(" + path + ")\n";)
     // sync buffer
     hdc_header_t header;
-    auto buffer = storage->get(uuid);
+    auto buffer = get_buffer();
     memcpy(&header, buffer, sizeof(hdc_header_t));
     size_t old_size = header.buffer_size;
     if (!(header.type == HDC_EMPTY || header.type == HDC_STRUCT)) {
@@ -520,7 +518,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
     }
 
     // load new buffer
-    buffer = storage->get(uuid);
+    buffer = get_buffer();
     memcpy(&header, buffer, sizeof(hdc_header_t));
     vector<char> new_buffer;
     auto segment = get_segment();
@@ -927,7 +925,7 @@ void HDC::set_child(const std::string& path, HDC& n)
 void HDC::set_type(hdc_type_t type)
 {
     // More to be added here later
-    auto old_buffer = storage->get(uuid);
+    auto old_buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
     DEBUG_STDOUT("set_type(" + to_string(header.type) + " -> " + to_string(type) + ")\n");
     if (header->type == type) return; // Nothing to do
@@ -980,7 +978,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
     auto rank = shape.size();
-    auto buffer = storage->get(uuid);
+    auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(type);
@@ -1012,7 +1010,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t ty
     D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
              hdc_type_str(type).c_str());)
     auto rank = shape.size();
-    auto buffer = storage->get(uuid);
+    auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(type);
@@ -1230,7 +1228,7 @@ string HDC::get_uuid() const
 // allocator stuff
 bip::managed_external_buffer HDC::get_segment() const
 {
-    char* buffer = storage->get(uuid);
+    auto buffer = get_buffer();
     bip::managed_external_buffer segment;
     return bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
 }
@@ -1270,14 +1268,13 @@ const std::vector<HDC> HDC::get_slices() const
 /* Grows underlying storage by given extra size, it does nothing if extra_size <= 0.*/
 void HDC::grow(size_t extra_size)
 {
-    hdc_header_t header = get_header();
     if (extra_size <= 0) return;
-    char* old_buffer = storage->get(uuid);
-    memcpy(&header, old_buffer, sizeof(hdc_header_t));
-    auto new_size = header.data_size + extra_size;
-    D(printf("Growing %luB->%luB\n", header.data_size, new_size);)
+    auto old_buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
+    auto new_size = header->data_size + extra_size;
+    D(printf("Growing %luB->%luB\n", header->data_size, new_size);)
     vector<char> new_buffer = buffer_grow(old_buffer, extra_size);
-    memcpy(&header, new_buffer.data(), sizeof(hdc_header_t));
+    header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
     storage->set(uuid, new_buffer.data(), new_size);
 //     if (!storage->usesBuffersDirectly()) delete[] old_buffer;
 //     if (!storage->usesBuffersDirectly()) delete[] new_buffer;
@@ -1456,86 +1453,76 @@ HDC HDC::make_external(hdc_data_t obj)
 
 hdc_data_t HDC::get_data() const
 {
-        hdc_header_t header;
-        auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         hdc_data_t obj;
-        obj.type = header.type;
-        obj.flags = header.flags;
-        obj.rank = header.rank;
-        for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = header.shape[i];
+        obj.type = header->type;
+        obj.flags = header->flags;
+        obj.rank = header->rank;
+        for (size_t i=0;i<HDC_MAX_DIMS;i++) obj.shape[i] = header->shape[i];
         obj.data = buffer+sizeof(hdc_header_t);
         return obj;
 }
 
 void HDC::set_data(hdc_data_t obj)
 {
-        hdc_header_t header;
-        auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
         size_t data_size = hdc_sizeof(obj.type);
         for (size_t i = 0; i < obj.rank; i++) data_size *= obj.shape[i];
         size_t buffer_size = data_size + sizeof(hdc_header_t);
-        if (header.buffer_size == buffer_size) {
+        if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
-            header.type = obj.type;
-            header.flags = obj.flags;
-            memcpy(buffer,&header,sizeof(hdc_header_t));
+            header->type = obj.type;
+            header->flags = obj.flags;
             memcpy(buffer + sizeof(hdc_header_t), obj.data, data_size);
             storage->unlock(uuid);
             return;
         } else {
             storage->remove(uuid);
-            header.type = obj.type;
-            header.flags = obj.flags;
-            header.rank = obj.rank;
-            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            header.data_size = hdc_sizeof(obj.type);
-            for (size_t i=0;i<header.rank;i++) {
-                header.shape[i] = obj.shape[i];
-                header.data_size *= obj.shape[i];
-            }
-            header.buffer_size = header.data_size + sizeof(hdc_header_t);
-            std::vector<char> buffer(header.buffer_size);
-            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-            memcpy(buffer.data()+sizeof(hdc_header_t),obj.data,header.data_size);
-            storage->set(uuid, buffer.data(), header.buffer_size);
+            std::vector<char> new_buffer(buffer_size);
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            header->type = obj.type;
+            header->flags = obj.flags;
+            header->rank = obj.rank;
+            memset(header->shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            for (size_t i=0; i<header->rank; i++) header->shape[i] = obj.shape[i];
+            header->data_size = data_size;
+            header->buffer_size = buffer_size;
+            memcpy(new_buffer.data()+sizeof(hdc_header_t),obj.data,header->data_size);
+            storage->set(uuid, new_buffer.data(), header->buffer_size);
         }
 };
 
 void HDC::set_external(hdc_data_t obj)
 {
-        hdc_header_t header;
-        auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
         size_t data_size = sizeof(intptr_t);
         size_t buffer_size = data_size + sizeof(hdc_header_t);
-        if (header.buffer_size == buffer_size) {
+        if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
-            header.type = obj.type;
-            header.flags = obj.flags | HDCExternal;
+            header->type = obj.type;
+            header->flags = obj.flags | HDCExternal;
             memcpy(buffer,&header,sizeof(hdc_header_t));
             memcpy(buffer + sizeof(hdc_header_t), &(obj.data), data_size);
             storage->unlock(uuid);
             return;
         } else {
             storage->remove(uuid);
-            header.type = obj.type;
-            header.flags = obj.flags | HDCExternal;
-            header.rank = obj.rank;
-            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            header.data_size = hdc_sizeof(obj.type);
-            for (size_t i=0;i<header.rank;i++) {
-                header.shape[i] = obj.shape[i];
-                header.data_size *= obj.shape[i];
-            }
-            header.buffer_size = header.data_size + sizeof(hdc_header_t);
-            std::vector<char> buffer(header.buffer_size);
-            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-            memcpy(buffer.data()+sizeof(hdc_header_t),&(obj.data),header.data_size);
-            storage->set(uuid, buffer.data(), header.buffer_size);
+            std::vector<char> new_buffer(buffer_size);
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            header->type = obj.type;
+            header->flags = obj.flags | HDCExternal;
+            header->rank = obj.rank;
+            memset(header->shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            header->data_size = hdc_sizeof(obj.type);
+            for (size_t i=0;i<header->rank;i++) header->shape[i] = obj.shape[i];
+            header->buffer_size = buffer_size;
+            memcpy(new_buffer.data()+sizeof(hdc_header_t),&(obj.data),header->data_size);
+            storage->set(uuid, new_buffer.data(), header->buffer_size);
         }
 };
 
