@@ -197,11 +197,7 @@ void HDC::destroy()
 /** Creates empty HDC with specified buffer size */
 HDC::HDC(size_t data_size)
 {
-
-    if (global_storage == nullptr) {
-        HDC::init();
-        atexit(HDC::destroy);
-    }
+    HDC_STORAGE_INIT()
     // Start by creating segment
     auto buffer_size = data_size+sizeof(hdc_header_t);
     std::vector<char> buffer(buffer_size,0);
@@ -224,10 +220,7 @@ HDC::HDC() : HDC(0lu)
 /** Creates empty HDC with specified type and shape */
 HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
 {
-    if (global_storage == nullptr) {
-        HDC::init();
-        atexit(HDC::destroy);
-    }
+    HDC_STORAGE_INIT()
     auto rank = shape.size();
     if (rank >= HDC_MAX_DIMS) {
         throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
@@ -250,10 +243,7 @@ HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
 
 HDC::HDC(hdc_data_t obj)
 {
-    if (global_storage == nullptr) {
-        HDC::init();
-        atexit(HDC::destroy);
-    }
+    HDC_STORAGE_INIT()
     auto rank = obj.rank;
     if (rank >= HDC_MAX_DIMS) {
         throw HDCException("HDC(): Unsupported number of dimensions: " + to_string(rank));
@@ -287,10 +277,7 @@ HDC::HDC(const std::string str) : HDC()
 /** Copy constructor */
 HDC::HDC(const HDC& h)
 {
-    if (global_storage == nullptr) {
-        HDC::init();
-        atexit(HDC::destroy);
-    }
+    HDC_STORAGE_INIT()
     storage = h.storage;
     uuid = h.uuid;
 };
@@ -298,25 +285,20 @@ HDC::HDC(const HDC& h)
 /** Deserializing constructor */
 HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
 {
-    if (global_storage == nullptr) {
-        HDC::init();
-        atexit(HDC::destroy);
-    }
+    HDC_STORAGE_INIT()
     uuid = _uuid;
     storage = _storage;
 }
 
 HDC::HDC(hdc_t& obj) {
-    if (global_storage == nullptr) {
-        HDC::init();
-        atexit(HDC::destroy);
-    }
+    HDC_STORAGE_INIT()
     storage = stores->at(obj.storage_id);
     uuid = obj.uuid;
 }
 
 HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
 {
+    HDC_STORAGE_INIT()
     set_data(data,t);
 }
 
@@ -343,18 +325,18 @@ HDC::~HDC()
 //---------------------------- Header information ----------------------------------
 size_t HDC::get_datasize() const
 {
-    return reinterpret_cast<hdc_header_t*>(get_buffer())->data_size;
+    return get_header_ptr()->data_size;
 }
 
 size_t HDC::get_size() const
 {
-    return reinterpret_cast<hdc_header_t*>(get_buffer())->buffer_size;
+    return get_header_ptr()->buffer_size;
 }
 
 /** Returns type of current node. */
 size_t HDC::get_type() const
 {
-    return reinterpret_cast<hdc_header_t*>(get_buffer())->type;
+    return get_header_ptr()->type;
 }
 
 /** Returns the size of a single item in bytes */
@@ -365,7 +347,7 @@ size_t HDC::get_itemsize() const
 
 size_t HDC::get_flags() const
 {
-    return reinterpret_cast<hdc_header_t*>(get_buffer())->flags;
+    return get_header_ptr()->flags;
 }
 
 bool HDC::is_external() const
@@ -1111,7 +1093,7 @@ void HDC::insert(size_t index, HDC& h)
 
 void HDC::append(HDC& h)
 {
-    insert(get_header().shape[0], h);
+    insert(get_header_ptr()->shape[0], h);
     return;
 }
 
@@ -1162,19 +1144,20 @@ hdc_header_t HDC::get_header() const {
     return h;
 }
 
+hdc_header_t* HDC::get_header_ptr() const {
+    return reinterpret_cast<hdc_header_t*>(get_buffer());
+}
+
 std::vector<size_t> HDC::get_shape() const
 {
-    auto buffer = get_buffer();
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    std::vector<size_t> shape(&header->shape[0], &header->shape[0]+header->rank);
+    auto header = get_header_ptr();
+    std::vector<size_t> shape(header->shape, header->shape+header->rank);
     return shape;
 }
 
 std::vector<size_t> HDC::get_strides() const
 {
-    //hdc_header_t header = get_header();
-    auto buffer = get_buffer();
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    auto header = get_header_ptr();
     std::vector<size_t> strides;
     size_t elem_size = hdc_sizeof(static_cast<hdc_type_t>(header->type));
     size_t last_stride;
@@ -1192,7 +1175,7 @@ std::vector<size_t> HDC::get_strides() const
             if (i == 0) {
                 last_stride = elem_size;
             } else {
-                last_stride = header->shape[header->rank - i] * last_stride;
+                last_stride = header->shape[header->rank-i] * last_stride;
             }
             strides.insert(strides.begin(), last_stride);
         }
