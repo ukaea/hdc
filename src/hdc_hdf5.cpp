@@ -12,22 +12,20 @@ void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest);
 void write_node(HDC h, H5File* file, std::string path)
 {
     auto buffer = h.get_buffer();
-    hdc_header_t header;
-    memcpy(&header, buffer, sizeof(hdc_header_t));
-    auto data = h.get_data_ptr();
-    char* transposed_data = NULL;
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    auto data = buffer+sizeof(hdc_header_t);
+    char* transposed_data = nullptr;
     if (h.is_fortranorder()) {
         transposed_data = transpose_buffer(h.get_buffer(), h.get_rank(), h.get_shape(), (hdc_type_t)h.get_type(),
                                            h.is_fortranorder());
         data = transposed_data;
     }
     H5std_string DATASET_NAME(path);
-    memcpy(&header, buffer, sizeof(hdc_header_t));
     try {
-        hsize_t rank = header.rank;
+        hsize_t rank = header->rank;
         hsize_t dimsf[10];
         for (unsigned int i = 0; i < rank; i++) {
-            dimsf[i] = header.shape[i];
+            dimsf[i] = header->shape[i];
         };
         DataSpace dataspace(rank, dimsf);
         DataSet dataset;
@@ -59,7 +57,7 @@ void write_node(HDC h, H5File* file, std::string path)
 
         hdc_map_t* children;
 
-        switch (header.type) {
+        switch (header->type) {
             case HDC_STRUCT:
                 children = h.get_children_ptr();
                 if (children != nullptr) {
@@ -162,7 +160,7 @@ void write_node(HDC h, H5File* file, std::string path)
                 dataset.write(edata, PredType::NATIVE_DOUBLE);
                 return;
             default:
-                throw HDCException("Unknown data type." + std::to_string(header.type) + "\n");
+                throw HDCException("Unknown data type." + std::to_string(header->type) + "\n");
 
         }
         if (transposed_data != NULL) delete[] transposed_data;

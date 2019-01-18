@@ -112,11 +112,17 @@ private:
     */
     void add_child_single(const std::string& path, HDC& n);
     /**
-    * @brief ...
+    * @brief Returns copy of header containing metadata
     *
     * @return hdc_header_t
     */
     hdc_header_t get_header() const;
+    /**
+    * @brief Returns pointer to header containing metadata
+    *
+    * @return hdc_header_t
+    */
+    hdc_header_t* get_header_ptr() const;
     /**
     * @brief ...
     *
@@ -370,13 +376,6 @@ public:
     */
     HDC get_or_create(const std::string& path);
     /**
-    * @brief Returns the data, the pointer is just casted => there is no conversion for now.
-    *
-    * @param T p_T: Desired data type.
-    * @return T*
-    */
-    template<typename T> T* get_data() const;
-    /**
     * @brief Stores data in node's buffer
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
@@ -448,35 +447,33 @@ public:
     */
     template<typename T> void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
-        hdc_header_t header = get_header();
-        auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
-        size_t data_size = sizeof(T);
-        for (size_t i=0;i<rank;i++) data_size *= shape[i];
-        size_t buffer_size = data_size + sizeof(hdc_header_t);
-        if (header.buffer_size == buffer_size) {
+        auto data_size = sizeof(T);
+        for (size_t i=0; i<rank; i++) data_size *= shape[i];
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
-            memcpy(get_data_ptr(),data,data_size);
+            memcpy(buffer+sizeof(hdc_header_t),data,data_size);
             storage->unlock(uuid);
             return;
         } else {
-            if (header.flags & HDCExternal) throw HDCException("set_data(): I can't enarge your external buffer for you...");
-            header.buffer_size = buffer_size;
-            header.data_size = data_size;
-            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            for (size_t i=0;i<rank;i++) header.shape[i] = shape[i];
-            header.flags = flags;
-            header.type = to_typeid(data[0]);
-            header.rank = rank;
-            std::vector<char> buffer(header.buffer_size);
-            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-            memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
-            storage->set(uuid,buffer.data(),header.buffer_size);
+            std::vector<char> new_buffer(buffer_size);
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            if (header->flags & HDCExternal) throw HDCException("set_data(): I can't enlarge your external buffer for you...");
+            header->buffer_size = buffer_size;
+            header->data_size = data_size;
+            memset(header->shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            for (size_t i=0;i<rank;i++) header->shape[i] = shape[i];
+            header->flags = flags;
+            header->type = to_typeid(data[0]);
+            header->rank = rank;
+            memcpy(new_buffer.data()+sizeof(hdc_header_t),data,data_size);
+            storage->set(uuid,new_buffer.data(),buffer_size);
             return;
         }
     }
-
     /**
     * @brief ...
     *
@@ -487,34 +484,31 @@ public:
     */
     template<typename T> void set_external(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault) {
         auto rank = shape.size();
-        hdc_header_t header = get_header();
-        auto buffer = storage->get(uuid);
-        memcpy(&header,buffer,sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
-        size_t data_size = sizeof(void*);
-        size_t buffer_size = data_size + sizeof(hdc_header_t);
-        if (header.buffer_size == buffer_size) {
+        auto data_size = sizeof(void*);
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
             memcpy(buffer+sizeof(hdc_header_t),&data,data_size);
             storage->unlock(uuid);
             return;
         } else {
-            header.buffer_size = buffer_size;
-            header.data_size = data_size;
-            memset(header.shape,0,HDC_MAX_DIMS*sizeof(size_t));
-            for (size_t i=0;i<rank;i++) header.shape[i] = shape[i];
-            header.flags = flags | HDCExternal;
-            header.type = to_typeid(data[0]);
-            header.rank = rank;
-            std::vector<char> buffer(header.buffer_size);
-            memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-            memcpy(buffer.data()+sizeof(hdc_header_t),&data,header.data_size);
-            storage->set(uuid,buffer.data(),header.buffer_size);
+            std::vector<char> new_buffer(buffer_size);
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            header->buffer_size = buffer_size;
+            header->data_size = data_size;
+            memset(header->shape,0,HDC_MAX_DIMS*sizeof(size_t));
+            for (size_t i=0; i<rank; i++) header->shape[i] = shape[i];
+            header->flags = flags | HDCExternal;
+            header->type = to_typeid(data[0]);
+            header->rank = rank;
+            memcpy(new_buffer.data()+sizeof(hdc_header_t),&data,data_size);
+            storage->set(uuid,new_buffer.data(),buffer_size);
             return;
         }
     }
-
-
     /**
     * @brief ...
     *
@@ -527,8 +521,6 @@ public:
         std::vector<size_t> _shape = shape;
         set_data(_shape,data,flags);
     };
-
-
     /**
      * @brief ...
      *
@@ -579,20 +571,20 @@ public:
     * @param str p_str: string to ne set.
     */
     void set_string(const std::string& str) {
-        hdc_header_t header = get_header();
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
-        memset(&header,0,sizeof(hdc_header_t));
-        header.data_size = str.length()+1;
-        header.type = HDC_STRING;
-        header.rank = 1;
-        header.shape[0] = str.length();
-        header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(header.buffer_size);
-        memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-        memcpy(buffer.data()+sizeof(hdc_header_t),str.c_str(),header.data_size);
-        storage->set(uuid,buffer.data(),header.buffer_size);
+        auto data_size = str.length()+1;
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        std::vector<char> buffer(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        header->data_size = data_size;
+        header->type = HDC_STRING;
+        header->rank = 1;
+        header->shape[0] = str.length();
+        header->buffer_size = buffer_size;
+        memcpy(buffer.data()+sizeof(hdc_header_t),str.c_str(),header->data_size);
+        storage->set(uuid,buffer.data(),header->buffer_size);
     };
     /**
     * @brief ...
@@ -621,15 +613,15 @@ public:
     * @param data p_data: Pointer to data
     */
     void set_data(T data) {
-        hdc_header_t header = get_header();
-        memset(&header,0,sizeof(hdc_header_t));
-        header.type = to_typeid(data);
-        header.data_size = sizeof(T);
-        header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(header.buffer_size);
-        memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-        memcpy(buffer.data()+sizeof(hdc_header_t),&data,header.data_size);
-        storage->set(uuid,buffer.data(),header.buffer_size);
+        auto data_size = sizeof(T);
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        std::vector<char> buffer(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        header->type = to_typeid(data);
+        header->data_size = data_size;
+        header->buffer_size = buffer_size;
+        memcpy(buffer.data()+sizeof(hdc_header_t),&data,data_size);
+        storage->set(uuid,buffer.data(),buffer_size);
     }
     /**
     * @brief Sets scalar data to given node - UDA version.
@@ -638,15 +630,15 @@ public:
     * @param _type p__type:...
     */
     void set_data(const unsigned char* data, hdc_type_t _type) {
-        hdc_header_t header = get_header();
-        memset(&header,0,sizeof(hdc_header_t));
-        header.type = _type;
-        header.data_size = hdc_sizeof(_type);
-        header.buffer_size = header.data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(header.buffer_size);
-        memcpy(buffer.data(),&header,sizeof(hdc_header_t));
-        memcpy(buffer.data()+sizeof(hdc_header_t),data,header.data_size);
-        storage->set(uuid,buffer.data(),header.buffer_size);
+        auto data_size = hdc_sizeof(_type);
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        std::vector<char> buffer(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        header->type = _type;
+        header->data_size = data_size;
+        header->buffer_size = buffer_size;
+        memcpy(buffer.data()+sizeof(hdc_header_t),data,data_size);
+        storage->set(uuid,buffer.data(),buffer_size);
     }
     /**
     * @brief Sets scalar data to given node - UDA version.
@@ -778,32 +770,153 @@ public:
     */
     size_t get_rank() const;
     /**
-    * @brief Returns pointer to data of this node.
+    * @brief Returns desirely typed pointer to data of this node.
     *
     * @param T p_T: Desired data type.
     * @return T
     */
-    template<typename T> T as() const
+    template<typename T> T* as() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        auto data = buffer+sizeof(hdc_header_t);
+        if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
         if (!storage->has(uuid)) {
             throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
-        if (header.flags & HDCExternal)
+        T tp{};
+        if (header->type != to_typeid(tp))
         {
-            T result;
-            memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(void*));
+            throw HDCException("as() stored and requested types do not match\n");
+        }
+        if (header->flags & HDCExternal)
+        {
+            T* result;
+            memcpy(&result,data,sizeof(void*));
             return result;
         }
         else
         {
-            return reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
+            return reinterpret_cast<T*>(data);
         }
     }
+    /**
+     * @brief Return void pointer to data of this node.
+     *
+     * @return void*
+     */
+    void* as_void_ptr() const
+    {
+        auto buffer = get_buffer();
+        auto data = buffer+sizeof(hdc_header_t);
+        hdc_header_t header = get_header(); // This is needed in Python for some reason
+        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+            throw std::runtime_error("This is not a terminal node...");
+        }
+        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        if (!storage->has(uuid)) {
+            throw HDCException("as_void_ptr(): Not found: "+std::string(uuid.c_str())+"\n");
+        }
+        if (header.flags & HDCExternal)
+        {
+            void* result;
+            memcpy(&result,data,sizeof(void*));
+            return result;
+        }
+        else
+        {
+            return reinterpret_cast<void*>(data);
+        }
+    }
+//     void* as_void_ptr() const
+//     {
+//         auto buffer = get_buffer();
+//         auto data = buffer+sizeof(hdc_header_t);
+//         auto header = reinterpret_cast<hdc_header_t*>(buffer);
+//         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
+//             throw std::runtime_error("This is not a terminal node...");
+//         }
+//         DEBUG_STDOUT("as<"+get_type_str()+">()");
+//         if (!storage->has(uuid)) {
+//             throw HDCException("as_void_ptr(): Not found: "+std::string(uuid.c_str())+"\n");
+//         }
+//         if (header->flags & HDCExternal)
+//         {
+//             void* result;
+//             memcpy(&result,data,sizeof(void*));
+//             return result;
+//         }
+//         else
+//         {
+//             return reinterpret_cast<void*>(data);
+//         }
+//     }
+    /**
+     * @brief Returns vector with data of this node casted to a given type. Unlike as(), the data are always copied.
+     *
+     * @param T p_T: Desired data type.
+     * @return std::vector< T >
+     */
+    template<typename T> std::vector<T> as_vector() const
+    {
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
+            throw std::runtime_error("This is not a terminal node...");
+        }
+        DEBUG_STDOUT("as_vector<"+get_type_str()+">()");
+        if (!storage->has(uuid)) {
+            throw HDCException("as_vector(): Not found: "+std::string(uuid.c_str())+"\n");
+        }
+        auto data = buffer+sizeof(hdc_header_t);
+        auto size_elem = hdc_sizeof(header->type);
+        size_t n_elem = 0;
+        if (size_elem) n_elem = header->data_size/size_elem;
+        std::vector<T> result(n_elem);
+        T tp = 0;
+        if (header->type == to_typeid(tp)) {
+            result.assign(reinterpret_cast<T*>(data),reinterpret_cast<T*>(data)+n_elem);
+        } else {
+            if (header->type == HDC_INT8) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int8_t*>(data)[i];
+            }
+            else if (header->type == HDC_INT16) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int16_t*>(data)[i];
+            }
+            else if (header->type == HDC_INT32) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int32_t*>(data)[i];
+            }
+            else if (header->type == HDC_INT64) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int64_t*>(data)[i];
+            }
+            else if (header->type == HDC_UINT8) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint8_t*>(data)[i];
+            }
+            else if (header->type == HDC_UINT16) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint16_t*>(data)[i];
+            }
+            else if (header->type == HDC_UINT32) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint32_t*>(data)[i];
+            }
+            else if (header->type == HDC_UINT64) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint64_t*>(data)[i];
+            }
+            else if (header->type == HDC_FLOAT) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<float*>(data)[i];
+            }
+            else if (header->type == HDC_DOUBLE) {
+                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<double*>(data)[i];
+            }
+            else {
+                throw HDCException("as_vector(): requested unknown data conversion. This works for numerical types only...\n");
+            }
+        }
+        return result;
+    }
+
     /**
     * @brief Returns scalar value.
     *
@@ -812,8 +925,9 @@ public:
     */
     template<typename T> T as_scalar() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT("as<"+get_type_str()+">()");
@@ -821,9 +935,9 @@ public:
             throw HDCException("as_scalar(): Not found: "+std::string(uuid.c_str())+"\n");
         }
         T result;
-        memcpy(&result,storage->get(uuid)+sizeof(hdc_header_t),sizeof(T));
+        memcpy(&result,buffer+sizeof(hdc_header_t),sizeof(T));
         return result;
-        //return *reinterpret_cast<T>(storage->get(uuid)+sizeof(hdc_header_t));
+        //return *reinterpret_cast<T>(get_buffer()+sizeof(hdc_header_t));
     }
     /**
     * @brief Returns string. Needs to have separate function
@@ -832,9 +946,10 @@ public:
     */
     const std::string as_string() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRING) {
-            std::string str(storage->get(uuid)+sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRING) {
+            std::string str(get_buffer()+sizeof(hdc_header_t));
             return str;
 
         } else {
@@ -845,9 +960,10 @@ public:
     }
     const char* as_cstring() const
     {
-        hdc_header_t header = get_header();
-        if (header.type == HDC_STRING) {
-            return static_cast<const char*>(get_buffer()+sizeof(hdc_header_t));
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRING) {
+            return static_cast<const char*>(buffer+sizeof(hdc_header_t));
         } else {
             std::ostringstream oss;
             oss << to_json(0) << "\n";
@@ -893,23 +1009,11 @@ public:
     */
     void serialize(const std::string& filename) const;
     /**
-    * @brief Returns void pointer to data.
-    *
-    * @return intptr_t
-    */
-    intptr_t as_void_ptr() const;
-    /**
     * @brief Returns string representing data/node type.
     *
     * @return const char*
     */
     const char* get_type_str() const;
-    /**
-    * @brief Returns void pointer to data
-    *
-    * @return char*
-    */
-    char* get_data_ptr() const;
     /**
     * @brief Returns vector of keys of a struct node and empty vector otherwise.
     *

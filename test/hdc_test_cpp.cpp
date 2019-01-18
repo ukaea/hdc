@@ -219,13 +219,13 @@ TEST_CASE("Int8DataManipulation", "[HDC]")
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_itemsize() == sizeof(int8_t));
     CHECK(strcmp("int8", h.get_type_str()) == 0);
-    int8_t* data2 = h.as<int8_t*>();
+    int8_t* data2 = h.as<int8_t>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
     // This is no longer possible as for some storages data have to be copied (all for now, maybe we can enable specifically for umap storage in future)
     // All further occurencies will be removed.
     data[3] = 120;
     h.set_data(shape, data);
-    data2 = h.as<int8_t*>();
+    data2 = h.as<int8_t>();
     CHECK(120 == data2[3]);
 }
 
@@ -240,7 +240,7 @@ TEST_CASE("Int16DataManipulation", "[HDC]")
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_itemsize() == sizeof(int16_t));
     CHECK(strcmp("int16", h.get_type_str()) == 0);
-    int16_t* data2 = h.as<int16_t*>();
+    int16_t* data2 = h.as<int16_t>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
 }
@@ -256,7 +256,7 @@ TEST_CASE("Int32DataManipulation", "[HDC]")
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_itemsize() == sizeof(int32_t));
     CHECK(strcmp("int32", h.get_type_str()) == 0);
-    int32_t* data2 = h.as<int32_t*>();
+    int32_t* data2 = h.as<int32_t>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
 }
@@ -272,7 +272,7 @@ TEST_CASE("Int64DataManipulation", "[HDC]")
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_itemsize() == sizeof(int64_t));
     CHECK(strcmp("int64", h.get_type_str()) == 0);
-    int64_t* data2 = h.as<int64_t*>();
+    int64_t* data2 = h.as<int64_t>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 
 }
@@ -289,7 +289,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_itemsize() == sizeof(double));
     CHECK(strcmp("float64", h.get_type_str()) == 0);
-    double* data2 = h.as<double*>();
+    double* data2 = h.as<double>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
 
@@ -300,16 +300,16 @@ TEST_CASE("SetExternal", "[HDC]")
     std::vector<size_t> shape = {4};
     node.set_data(shape,array_in);
     external.set_external(shape, array_in);
-    int64_t* array_out = external.as<int64_t*>();
+    int64_t* array_out = external.as<int64_t>();
     CHECK(*array_in == *array_out);
-    CHECK(*array_in == *(int64_t*)(external.get_data_ptr()));
+    CHECK(*array_in == *(int64_t*)(external.as_void_ptr()));
     CHECK(external.is_external() == true);
     auto external_str = external.to_json_string();
     auto node_str = node.to_json_string();
     CHECK(strcmp(external_str.c_str(),node_str.c_str()) == 0);
 
     e2.set_external({1},array_in);
-    array_out = e2.as<int64_t*>();
+    array_out = e2.as<int64_t>();
     CHECK(*array_in == *array_out);
 
     hdc_data_t data;
@@ -319,13 +319,86 @@ TEST_CASE("SetExternal", "[HDC]")
     data.flags = HDCDefault;
     data.type = HDC_INT64;
     e3.set_external(data);
-    array_out = e3.as<int64_t*>();
+    array_out = e3.as<int64_t>();
     CHECK(*array_in == *array_out);
 
     HDC e4 = HDC::make_external(data);
-    array_out = e3.as<int64_t*>();
+    array_out = e3.as<int64_t>();
     CHECK(*array_in == *array_out);
 }
+
+TEST_CASE("as_vector_int8", "[HDC]") {
+    int8_t array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<int8_t>({4},array_in);
+    auto vector_out = h.as_vector<int64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<int32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<int16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<int8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+TEST_CASE("as_vector_uint8", "[HDC]") {
+    uint8_t array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<uint8_t>({4},array_in);
+    auto vector_out = h.as_vector<uint64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<uint32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<uint16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<uint8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+TEST_CASE("as_vector_int64", "[HDC]") {
+    int64_t array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<int64_t>({4},array_in);
+    auto vector_out = h.as_vector<int64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<int32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<int16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<int8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
+TEST_CASE("as_vector_double", "[HDC]") {
+    double array_in[4] = { 7, 2, 3, 4 };
+    HDC h;
+    h.set_data<double>({4},array_in);
+    auto vector_out = h.as_vector<int64_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector_out[i]);
+    auto vector32 = h.as_vector<int32_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector32[i]);
+    auto vector16 = h.as_vector<int16_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector16[i]);
+    auto vector8 = h.as_vector<int8_t>();
+    for (size_t i=0; i<4; i++) CHECK(array_in[i] == vector8[i]);
+    auto vectord = h.as_vector<double>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<double>(array_in[i]) == vectord[i]);
+    auto vectorf = h.as_vector<float>();
+    for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
+}
+
 
 TEST_CASE("StringDataManipulation", "[HDC]")
 {
@@ -488,7 +561,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(4 == s.get_shape()[0]);
     CHECK(HDC_DOUBLE == s.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
-    double* data_double_in = s.as<double*>();
+    double* data_double_in = s.as<double>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
     // Test int
     s = tree2.get("aaa/bbb/int");
@@ -496,7 +569,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(4 == s.get_shape()[0]);
     CHECK(HDC_INT32 == s.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str(), tree2.get("aaa/bbb/int").get_type_str()) == 0);
-    int32_t* data_int_in = s.as<int32_t*>();
+    int32_t* data_int_in = s.as<int32_t>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
     // Test empty
     CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
@@ -534,7 +607,7 @@ TEST_CASE("BufferGrowArray", "[HDC]")
     HDC h;
     h.set_data<double>(shape, data);
     h.grow(4096);
-    double* data2 = h.as<double*>();
+    double* data2 = h.as<double>();
     CHECK(h.get_datasize() == 4*sizeof(double) + 4096);
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_type() == HDC_DOUBLE);
@@ -707,11 +780,11 @@ TEST_CASE("HDF5", "[HDC]")
     auto fname = make_tmp_name("h5");
     tree.to_hdf5(fname);
     HDC tree2 = HDC::from_hdf5(fname);
-    double data = tree2.get("aaa/bbb/_scalar").as<double*>()[0];
+    double data = tree2.get("aaa/bbb/_scalar").as<double>()[0];
     CHECK(333.333 == data);
     auto path = std::string("hdf5://")+fname+"|/data/aaa/bbb/_scalar";
     HDC h5 = HDC::load(path);
-    data = h5.as<double*>()[0];
+    data = h5.as<double>()[0];
     CHECK(333.333 == data);
     if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
 }
