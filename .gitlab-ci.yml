@@ -1,6 +1,7 @@
 test-bionic:
   image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-bionic-hdc-prereq
   script:
+    - ls /sw
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
