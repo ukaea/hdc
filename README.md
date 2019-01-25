@@ -3,7 +3,7 @@ HDC - Hierarchical Dynamic Containers                         {#mainpage}
 
 HDC is tiny library for exchanging hierarchical data (arrays of structures) in shared memory between multiple programming languages, currently supporting C, C++, Python and Fortran.
 
-As of September 2016 it is still in a preview state - it works, but many work is still need to be done.
+As of January 2019 it should mostly work
 
 Building instructions
 =====================
@@ -12,11 +12,11 @@ Prerequisites
 -------------
 
 To build HDC, you will need:
-- c++11 compliant compiler
+- c++11 compliant compiler (tested with intelstudio>=2018 and gcc>=5.0)
 - gfortran>=4.9
-- Boost >= 1.48 (does not work with 1.41, versions 1.41-1.48 untested)
+- Boost >= 1.48
 - Yahoo MDBM (optional, but recommended)
-- Python 2.7 or any Python 3 (tested only with 3.4, 3.5 and 3.6)
+- Python 2.7 or any Python 3 (tested only with 3.4, 3.5, 3.6 and 3.7)
 - CMake >= 3.3
 - Doxygen for documentation building
 - Cython > 0.23 (there is some parsing error in 0.23)
@@ -62,7 +62,16 @@ cd ..
 cd matlab
 make -f Makefile_
 LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
-# You should see "All tests are OK..." message - in such case, the mex interface shoul work fine...
+# You should see "All tests are OK..." message - in such case, the mex interface should work fine...
+```
+
+Building using IntelStudio
+--------------------------
+```
+Instrucions are similar as above, just setup your environment and CC,CXX and FORTRAN variables:
+source /sw/intel/parallel_studio_xe_2018/psxevars.sh
+CC=icc FORTRAN=ifort CXX=icpc cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+
 ```
 
 Basic ideas
