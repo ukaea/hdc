@@ -12,7 +12,7 @@ Prerequisites
 -------------
 
 To build HDC, you will need:
-- c++11 compliant compiler (tested with intelstudio and gcc>=5.0)
+- c++11 compliant compiler (tested with intelstudio>=2018 and gcc>=5.0)
 - gfortran>=4.9
 - Boost >= 1.48
 - Yahoo MDBM (optional, but recommended)
@@ -62,7 +62,7 @@ cd ..
 cd matlab
 make -f Makefile_
 LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
-# You should see "All tests are OK..." message - in such case, the mex interface shoul work fine...
+# You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 ```
 
 Building using IntelStudio
