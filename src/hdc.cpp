@@ -565,7 +565,7 @@ std::vector<std::string> HDC::keys() const
 
 void HDC::add_child(const std::string& path, HDC& n)
 {
-    DEBUG_STDOUT("add_child(" + path + ")\n");
+    DEBUG_STDOUT(std::string("add_child(") + path + ")\n");
     if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
     auto pth = split(path);
     add_child(pth, n);
@@ -680,7 +680,7 @@ const HDC HDC::get(hdc_path_t& path) const
 
 HDC HDC::get_single(hdc_index_t index)
 {
-    DEBUG_STDOUT("get_single(" + to_string(index) + ")\n");
+    DEBUG_STDOUT(std::string("get_single(") + boost::lexical_cast<std::string>(index) + ")\n");
 
     hdc_map_t* children = get_children_ptr();
 
@@ -703,7 +703,7 @@ HDC HDC::get_single(hdc_index_t index)
 
 const HDC HDC::get_single(hdc_index_t index) const
 {
-    DEBUG_STDOUT("get_single(" + to_string(index) + ")\n");
+    DEBUG_STDOUT(std::string("get_single(") + boost::lexical_cast<std::string>(index) + ")\n");
 
     hdc_map_t* children = get_children_ptr();
 
@@ -834,11 +834,7 @@ const HDC HDC::operator[](size_t index) const
 
 void HDC::set_child_single(hdc_index_t path, HDC& n)
 {
-    D(
-        std::cout << "set_child_single(";
-        for (auto str: path) std::cout << str;
-        std::cout << ")\n";
-    )
+    DEBUG_STDOUT(std::string("set_child_single(")+boost::lexical_cast<std::string>(path)+")\n");
     hdc_map_t* children = get_children_ptr();
     auto ca = get_segment().get_allocator<record>();
     if (path.type() == typeid(size_t)) {
@@ -907,7 +903,7 @@ void HDC::set_type(hdc_type_t type)
     // More to be added here later
     auto old_buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
-    DEBUG_STDOUT("set_type(" + to_string(header->type) + " -> " + to_string(type) + ")\n");
+    DEBUG_STDOUT(std::string("set_type(") + to_string(header->type) + " -> " + to_string(type) + ")\n");
     if (header->type == type) return; // Nothing to do
     header->type = type;
     if (!is_terminal()) {
@@ -955,8 +951,12 @@ const std::string HDC::serialize() const
 
 void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags)
 {
-    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
-             hdc_type_str(type).c_str());)
+    D(
+        std::cout << "set_data_c(shape = {";
+        for (auto s : shape) std::cout << s << ", ";
+        std::cout << "}, type = " << type << ", flags = " << flags;
+        std::cout << std::endl;
+    );
     auto rank = shape.size();
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -987,8 +987,12 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
 
 void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
-    D(printf("set_data_c(%d, {%d,%d,%d}, %f, %s)\n", rank, shape[0], shape[1], shape[2], ((double*)data)[0],
-             hdc_type_str(type).c_str());)
+    D(
+        std::cout << "set_data_c(shape = {";
+        for (auto s : shape) std::cout << s << ", ";
+        std::cout << "}, type = " << type << ", flags = " << flags;
+        std::cout << std::endl;
+    );
     auto rank = shape.size();
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -1026,7 +1030,7 @@ hdc_t HDC::as_obj() {
 
 void HDC::insert(size_t index, HDC& h)
 {
-    DEBUG_STDOUT("insert(" + to_string(i) + ")\n");
+    DEBUG_STDOUT(std::string("insert(") + std::to_string(index) + ")\n");
     //sync buffer
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -1265,7 +1269,7 @@ void HDC::grow(size_t extra_size)
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
 std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
 {
-    DEBUG_STDOUT("buffer_grow(extra_size = " + to_string(extra_size) + ")\n");
+    DEBUG_STDOUT(std::string("buffer_grow(extra_size = ") + to_string(extra_size) + ")\n");
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
     if (header->flags & HDCExternal) throw HDCException("buffer_grow(): Not enabled on external buffer.");
     if (old_buffer == nullptr) return vector<char>(0);

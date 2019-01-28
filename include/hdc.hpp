@@ -542,7 +542,7 @@ public:
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault) {
-        DEBUG_STDOUT("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)"+to_string(data[0]));
+        DEBUG_STDOUT(std::string("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)")+to_string(data[0]));
         vector<T> vec = data;
         set_data(1,{vec.size()},&vec[0],flags);
     };
@@ -555,7 +555,7 @@ public:
     */
     template <typename T> void set_data(vector<T> data)
     {
-        DEBUG_STDOUT("template <typename T> void set_data(vector<T> data)"+to_string(data[0]));
+        DEBUG_STDOUT(std::string("template <typename T> void set_data(vector<T> data)")+to_string(data[0]));
         if (get_children_ptr() != nullptr) {
             std::cout << "The node has already children set..." << std::endl;
             return;
@@ -783,7 +783,7 @@ public:
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
-        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        DEBUG_STDOUT(std::string("as<")+get_type_str()+">()");
         if (!storage->has(uuid)) {
             throw HDCException("as(): Not found: "+std::string(uuid.c_str())+"\n");
         }
@@ -816,7 +816,7 @@ public:
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
-        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        DEBUG_STDOUT(std::string("as<")+get_type_str()+">()");
         if (!storage->has(uuid)) {
             throw HDCException("as_void_ptr(): Not found: "+std::string(uuid.c_str())+"\n");
         }
@@ -839,7 +839,7 @@ public:
 //         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
 //             throw std::runtime_error("This is not a terminal node...");
 //         }
-//         DEBUG_STDOUT("as<"+get_type_str()+">()");
+//         DEBUG_STDOUT(std::string("as<")+get_type_str()+">()");
 //         if (!storage->has(uuid)) {
 //             throw HDCException("as_void_ptr(): Not found: "+std::string(uuid.c_str())+"\n");
 //         }
@@ -867,7 +867,7 @@ public:
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
-        DEBUG_STDOUT("as_vector<"+get_type_str()+">()");
+        DEBUG_STDOUT(std::string("as_vector<")+get_type_str()+">()");
         if (!storage->has(uuid)) {
             throw HDCException("as_vector(): Not found: "+std::string(uuid.c_str())+"\n");
         }
@@ -930,7 +930,7 @@ public:
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
-        DEBUG_STDOUT("as<"+get_type_str()+">()");
+        DEBUG_STDOUT(std::string("as<")+get_type_str()+">()");
         if (!storage->has(uuid)) {
             throw HDCException("as_scalar(): Not found: "+std::string(uuid.c_str())+"\n");
         }
