@@ -163,7 +163,6 @@ void write_node(HDC h, H5File* file, std::string path)
                 throw HDCException("Unknown data type." + std::to_string(header->type) + "\n");
 
         }
-        if (transposed_data != NULL) delete[] transposed_data;
     }  // end of try block
         // catch failure caused by the H5File operations
     catch (FileIException& error) {
@@ -555,16 +554,13 @@ void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest)
             // unsupported types
         case H5O_TYPE_UNKNOWN: {
             HDC_HDF5_ERROR(ref_path, "Cannot read HDF5 Object : " << "(type == H5O_TYPE_UNKNOWN )");
-            break;
         }
         case H5O_TYPE_NAMED_DATATYPE: {
             HDC_HDF5_ERROR(ref_path, "Cannot read HDF5 Object " << "(type == H5O_TYPE_NAMED_DATATYPE )");
-            break;
         }
         case H5O_TYPE_NTYPES: {
             HDC_HDF5_ERROR(ref_path,
                            "Cannot read HDF5 Object " << "(type == H5O_TYPE_NTYPES [This is an invalid HDF5 type!]");
-            break;
         }
         default: {
             HDC_HDF5_ERROR(ref_path, "Cannot read HDF5 Object (type == Unknown )");

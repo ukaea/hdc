@@ -520,7 +520,7 @@ public:
     template<typename T> void set_data(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
         std::vector<size_t> _shape = shape;
         set_data(_shape,data,flags);
-    };
+    }
     /**
      * @brief ...
      *
@@ -532,8 +532,7 @@ public:
     template<typename T> void set_external(initializer_list<size_t> shape, T* data, hdc_flags_t flags = HDCDefault) {
         std::vector<size_t> _shape = shape;
         set_external(_shape,data,flags);
-    };
-
+    }
     /**
     * @brief ...
     *
@@ -545,8 +544,7 @@ public:
         DEBUG_STDOUT(std::string("template<typename T> void set_data(initializer_list<T> data, hdc_flags_t flags = HDCDefault)")+to_string(data[0]));
         vector<T> vec = data;
         set_data(1,{vec.size()},&vec[0],flags);
-    };
-
+    }
     /**
     * @brief Sets data to current node from vector<T> data. This function is primarily designed for interoperability with Python
     *
@@ -563,8 +561,7 @@ public:
         size_t shape[1] = {data.size()};
         set_data<T>(1,shape,&data[0]);
         return;
-    };
-
+    }
     /**
     * @brief Sets string to current node
     *
@@ -585,7 +582,7 @@ public:
         header->buffer_size = buffer_size;
         memcpy(buffer.data()+sizeof(hdc_header_t),str.c_str(),header->data_size);
         storage->set(uuid,buffer.data(),header->buffer_size);
-    };
+    }
     /**
     * @brief ...
     *
@@ -1259,13 +1256,13 @@ public:
     *
     * @return HDCStorage*
     */
-    HDCStorage* get_storage() const {return this->storage; };
+    HDCStorage* get_storage() const {return this->storage; }
     /**
     * @brief Returns storage id
     *
     * @return size_t
     */
-    size_t get_storage_id() const {return this->storage->id(); };
+    size_t get_storage_id() const {return this->storage->id(); }
     /**
     * @brief ...
     *

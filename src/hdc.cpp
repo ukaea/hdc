@@ -455,7 +455,6 @@ bool HDC::exists(hdc_path_t& path) const
             }
         }
     }
-    return false; // never goes here
 }
 
 void HDC::add_child(hdc_path_t& path, HDC& n)
@@ -1139,7 +1138,6 @@ const char* HDC::get_type_str() const
         default:
             return "unknown";
     };
-    return "unknown";
 }
 
 hdc_header_t HDC::get_header() const {
@@ -1376,7 +1374,6 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
     } else {
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
     }
-    return h;
 }
 
 HDC HDC::make_scalar(void* data, hdc_type_t t)
