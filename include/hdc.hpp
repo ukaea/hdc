@@ -166,7 +166,6 @@ public:
     HDC(std::vector<size_t>& shape, hdc_type_t type, long flags = HDCDefault);
 
     HDC(hdc_data_t obj);
-    //TODO constructor from data here?
     /**
     * @brief Constructor from string
     *
@@ -778,7 +777,7 @@ public:
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
         auto data = buffer+sizeof(hdc_header_t);
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
-            throw std::runtime_error("This is not a terminal node...");
+            throw HDCException("This is not a terminal node...");
         }
         DEBUG_STDOUT(std::string("as<")+get_type_str()+">()");
         if (!storage->has(uuid)) {
@@ -787,6 +786,7 @@ public:
         T tp{};
         if (header->type != to_typeid(tp))
         {
+            std::cerr << "Remove this: " << (int)(header->type) << " " << to_typeid(tp) << std::endl;
             throw HDCException("as() stored and requested types do not match\n");
         }
         if (header->flags & HDCExternal)

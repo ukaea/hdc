@@ -1481,7 +1481,7 @@ void HDC::set_external(hdc_data_t obj)
             storage->lock(uuid);
             header->type = obj.type;
             header->flags = obj.flags | HDCExternal;
-            memcpy(buffer,&header,sizeof(hdc_header_t));
+            memcpy(buffer,header,sizeof(hdc_header_t));
             memcpy(buffer + sizeof(hdc_header_t), &(obj.data), data_size);
             storage->unlock(uuid);
             return;

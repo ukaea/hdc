@@ -97,19 +97,25 @@ TEST_CASE("C_Int8DataManipulation", "[CHDC]")
 {
     int rank = 1;
     size_t shape[] = { 4 };
-    int8_t data[] = { 7, 20, 3, 5 };
+    int8_t data_in[] = { 7, 2, 3, 5 };
+
     hdc_t h = hdc_new_empty();
-    hdc_set_int8(h, "", rank, shape, (void*)data, HDCDefault);
+    hdc_set_int8(h, "", rank, shape, (void*)data_in, HDCDefault);
     hdc_data_t h_data = hdc_get_data(h, "");
     CHECK(HDC_INT8 == h_data.type);
     CHECK(1 == h_data.rank);
     CHECK(4 == h_data.shape[0]);
-    int8_t* data2 = hdc_as_int8_array(h, "");
-    for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
-    data[3] = 120;
-    hdc_set_int8(h, "", rank, shape, (void*)data, HDCDefault);
-    data2 = hdc_as_int8_array(h, "");
-    CHECK(120 == data2[3]);
+    int8_t* data_out = hdc_as_int8_array(h, "");
+    for (int i = 0; i < 3; i++) CHECK(data_in[i] == data_out[i]);
+    data_in[3] = 120;
+    hdc_set_int8(h, "", rank, shape, (void*)data_in, HDCDefault);
+    data_out = hdc_as_int8_array(h, "");
+    CHECK(120 == data_out[3]);
+
+    int8_t data_in2[] = { 70, 20, 30, 50 };
+    hdc_set_int8(h, "", rank, shape, (void*)data_in2, HDCDefault);
+    data_out = hdc_as_int8_array(h, "");
+    for (int i = 0; i < 3; i++) CHECK(data_in2[i] == data_out[i]);
 }
 
 TEST_CASE("C_Int32DataManipulation", "[CHDC]")

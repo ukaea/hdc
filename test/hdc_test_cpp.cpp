@@ -143,6 +143,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     CHECK(true == tree.exists("aaa/bbb"));
     CHECK(true == tree.exists("aaa"));
     CHECK(strcmp(n1.get_uuid().c_str(), tree.get("aaa/bbb").get_uuid().c_str()) == 0);
+    CHECK_THROWS(tree.get("not_here"));
     CHECK(strcmp(n2.get_uuid().c_str(), tree.get("aaa/bbb").get_uuid().c_str()) != 0);
     // Try add and get index
     HDC n3 = HDC();
@@ -308,6 +309,12 @@ TEST_CASE("SetExternal", "[HDC]")
     auto node_str = node.to_json_string();
     CHECK(strcmp(external_str.c_str(),node_str.c_str()) == 0);
 
+    //update
+    int64_t array_in2[4] = { 70, 20, 30, 40 };
+    external.set_external(shape, array_in2);
+    array_out = external.as<int64_t>();
+    CHECK(*array_in2 == *array_out);
+
     e2.set_external({1},array_in);
     array_out = e2.as<int64_t>();
     CHECK(*array_in == *array_out);
@@ -325,6 +332,14 @@ TEST_CASE("SetExternal", "[HDC]")
     HDC e4 = HDC::make_external(data);
     array_out = e3.as<int64_t>();
     CHECK(*array_in == *array_out);
+
+    //update
+    hdc_data_t data2;
+    memcpy(&data2,&data,sizeof(hdc_data_t));
+    data2.data = (char*)array_in2;
+    e3.set_external(data2);
+    array_out = e3.as<int64_t>();
+    CHECK(*array_in2 == *array_out);
 }
 
 TEST_CASE("as_vector_int8", "[HDC]") {
@@ -721,7 +736,7 @@ TEST_CASE("load", "[HDC]")
 }
 
 
-TEST_CASE("make_scalar", "[HDC]")
+TEST_CASE("scalar", "[HDC]")
 {
     bool      b = true;
     int8_t   i8 =  -8;
@@ -770,7 +785,38 @@ TEST_CASE("make_scalar", "[HDC]")
     CHECK(hu64.get_type() == HDC_UINT64);
     CHECK(hf.get_type() == HDC_FLOAT);
     CHECK(hd.get_type() == HDC_DOUBLE);
+
+    HDC tree,ch;
+    tree.add_child("aaa",ch);
+    CHECK_THROWS(tree.as_scalar<double>());
 }
+
+TEST_CASE("get_data", "[HDC]")
+{
+    double array_in[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
+    hdc_data_t data_in;
+    data_in.data = (char*)&array_in;
+    data_in.type = HDC_DOUBLE;
+    data_in.flags = HDCDefault;
+    data_in.rank = 1;
+    data_in.shape[0] = 4;
+    HDC h;
+    h.set_data(data_in);
+    auto data_out = h.get_data();
+    CHECK(data_in.type == data_out.type);
+    CHECK(data_in.flags == data_out.flags);
+    CHECK(data_in.rank == data_out.rank);
+    CHECK(data_in.shape[0] == data_out.shape[0]);
+    for (size_t i=0;i<4;i++) CHECK(array_in[i] == reinterpret_cast<double*>(data_out.data)[i]);
+
+    //update
+    double array_in2[] = { 110.0, 100.0, 1.0e-20, 1.0e20 };
+    data_in.data = (char*)&array_in2;
+    h.set_data(data_in);
+    auto data_out2 = h.get_data();
+    for (size_t i=0;i<4;i++) CHECK(array_in2[i] == reinterpret_cast<double*>(data_out2.data)[i]);
+}
+
 
 #ifdef _USE_HDF5
 TEST_CASE("HDF5", "[HDC]")
