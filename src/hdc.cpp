@@ -1186,14 +1186,6 @@ size_t HDC::get_rank() const
     return reinterpret_cast<hdc_header_t*>(get_buffer())->rank;
 }
 
-size_t HDC::children_count() const
-{
-    auto children = get_children_ptr();
-    if (children != nullptr)
-        return get_children_ptr()->size();
-    else return 0;
-}
-
 char* HDC::get_buffer() const
 {
     return storage->get(uuid);

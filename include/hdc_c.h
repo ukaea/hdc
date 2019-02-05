@@ -38,7 +38,6 @@ void hdc_dump(hdc_t tree);
 const char* hdc_dumps(hdc_t tree);
 const char* hdc_get_datashape_str(hdc_t tree);
 const char* hdc_get_type_str(hdc_t tree, const char* path); /**  */
-size_t hdc_childs_count(hdc_t tree); /** */
 void test_str(char* str);
 void hdc_serialize(hdc_t tree, char* buffer);
 hdc_t hdc_deserialize(const char* str);

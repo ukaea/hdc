@@ -312,11 +312,6 @@ const char* hdc_dumps(hdc_t tree)
     return strdup(dump_str.c_str());
 }
 
-size_t hdc_childs_count(hdc_t tree)
-{
-    return HDC(tree).children_count();
-}
-
 void hdc_init(const char* pluginFileName, const char* pluginSettingsFileName)
 {
     if (strlen(pluginFileName) != 0) {

@@ -422,6 +422,7 @@ TEST_CASE("StringDataManipulation", "[HDC]")
     h.set_string(str);
     std::string str2 = std::string(h.as_string());
     CHECK(strcmp(str.c_str(), str2.c_str()) == 0);
+    CHECK(strcmp("string", h.get_type_str()) == 0);
 }
 
 TEST_CASE("GetStrides", "[HDC]")
@@ -816,7 +817,6 @@ TEST_CASE("get_data", "[HDC]")
     auto data_out2 = h.get_data();
     for (size_t i=0;i<4;i++) CHECK(array_in2[i] == reinterpret_cast<double*>(data_out2.data)[i]);
 }
-
 
 #ifdef _USE_HDF5
 TEST_CASE("HDF5", "[HDC]")

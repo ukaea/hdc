@@ -1020,12 +1020,6 @@ public:
     /**
     * @brief ...
     *
-    * @return size_t
-    */
-    size_t children_count() const;
-    /**
-    * @brief ...
-    *
     * @return char*
     */
     char* get_buffer() const;
