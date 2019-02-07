@@ -888,8 +888,8 @@ TEST_CASE("scalar", "[HDC]")
     HDC hd = HDC::make_scalar(d);
 
     CHECK(hb.as_scalar<bool>() == b);
-//     CHECK(hi8.as_scalar<int8_t>() == i8);
-//     CHECK(hi16.as_scalar<int16_t>() == i16);
+    CHECK(hi8.as_scalar<int8_t>() == i8);
+    CHECK(hi16.as_scalar<int16_t>() == i16);
 //     CHECK(hi32.as_scalar<int32_t>() == i32);
 //     CHECK(hi64.as_scalar<int64_t>() == i64);
 //     CHECK(hu8.as_scalar<uint8_t>() == u8);
