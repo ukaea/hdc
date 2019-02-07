@@ -855,12 +855,12 @@ TEST_CASE("clean", "[HDC]")
 }
 
 
-TEST_CASE("load", "[HDC]")
-{
-    CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
-}
+// TEST_CASE("load", "[HDC]")
+// {
+//     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
+// }
 
-/*
+
 TEST_CASE("scalar", "[HDC]")
 {
     bool      b = true;
@@ -888,34 +888,34 @@ TEST_CASE("scalar", "[HDC]")
     HDC hd = HDC::make_scalar(d);
 
     CHECK(hb.as_scalar<bool>() == b);
-    CHECK(hi8.as_scalar<int8_t>() == i8);
-    CHECK(hi16.as_scalar<int16_t>() == i16);
-    CHECK(hi32.as_scalar<int32_t>() == i32);
-    CHECK(hi64.as_scalar<int64_t>() == i64);
-    CHECK(hu8.as_scalar<uint8_t>() == u8);
-    CHECK(hu16.as_scalar<uint16_t>() == u16);
-    CHECK(hu32.as_scalar<uint32_t>() == u32);
-    CHECK(hu64.as_scalar<uint64_t>() == u64);
-    CHECK(hf.as_scalar<float>() == f);
-    CHECK(hd.as_scalar<double>() == d);
-
-    CHECK(hb.get_type() == HDC_BOOL);
-    CHECK(hi8.get_type() == HDC_INT8);
-    CHECK(hi16.get_type() == HDC_INT16);
-    CHECK(hi32.get_type() == HDC_INT32);
-    CHECK(hi64.get_type() == HDC_INT64);
-    CHECK(hu8.get_type() == HDC_UINT8);
-    CHECK(hu16.get_type() == HDC_UINT16);
-    CHECK(hu32.get_type() == HDC_UINT32);
-    CHECK(hu64.get_type() == HDC_UINT64);
-    CHECK(hf.get_type() == HDC_FLOAT);
-    CHECK(hd.get_type() == HDC_DOUBLE);
-
-    HDC tree,ch;
-    tree.add_child("aaa",ch);
-    CHECK_THROWS(tree.as_scalar<double>());
+//     CHECK(hi8.as_scalar<int8_t>() == i8);
+//     CHECK(hi16.as_scalar<int16_t>() == i16);
+//     CHECK(hi32.as_scalar<int32_t>() == i32);
+//     CHECK(hi64.as_scalar<int64_t>() == i64);
+//     CHECK(hu8.as_scalar<uint8_t>() == u8);
+//     CHECK(hu16.as_scalar<uint16_t>() == u16);
+//     CHECK(hu32.as_scalar<uint32_t>() == u32);
+//     CHECK(hu64.as_scalar<uint64_t>() == u64);
+//     CHECK(hf.as_scalar<float>() == f);
+//     CHECK(hd.as_scalar<double>() == d);
+//
+//     CHECK(hb.get_type() == HDC_BOOL);
+//     CHECK(hi8.get_type() == HDC_INT8);
+//     CHECK(hi16.get_type() == HDC_INT16);
+//     CHECK(hi32.get_type() == HDC_INT32);
+//     CHECK(hi64.get_type() == HDC_INT64);
+//     CHECK(hu8.get_type() == HDC_UINT8);
+//     CHECK(hu16.get_type() == HDC_UINT16);
+//     CHECK(hu32.get_type() == HDC_UINT32);
+//     CHECK(hu64.get_type() == HDC_UINT64);
+//     CHECK(hf.get_type() == HDC_FLOAT);
+//     CHECK(hd.get_type() == HDC_DOUBLE);
+//
+//     HDC tree,ch;
+//     tree.add_child("aaa",ch);
+//     CHECK_THROWS(tree.as_scalar<double>());
 }
-
+/*
 TEST_CASE("get_data", "[HDC]")
 {
     double array_in[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
