@@ -563,7 +563,7 @@ TEST_CASE("GetStrides", "[HDC]")
     CHECK(16 == strides_c[1]);
     CHECK(4 == strides_c[2]);
 }
-/*
+
 TEST_CASE("SliceManipulation", "[HDC]")
 {
     HDC h;
@@ -753,7 +753,7 @@ TEST_CASE("BufferGrowArray", "[HDC]")
     CHECK(h.get_type() == HDC_DOUBLE);
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
-
+/*
 TEST_CASE("BufferGrowStruct", "[HDC]")
 {
     std::vector<std::string> keys = {"aaa","bbb","ccc","ddd"};
