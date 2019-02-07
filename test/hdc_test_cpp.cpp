@@ -38,7 +38,7 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
     tree.add_child("aaa/list", list);                                                               \
     HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
     tree.add_child("aaa/string",str);                                                               \
-/*
+
 
 TEST_CASE("StringParsing", "[HDCUtils]")
 {
@@ -58,7 +58,7 @@ TEST_CASE("StringParsing", "[HDCUtils]")
         i++;
     }
 }
-
+/*
 TEST_CASE("GetPlugins","[HDC]")
 {
     //HDC::search_plugins(); // This is called in main.cpp
@@ -294,7 +294,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     double* data2 = h.as<double>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
-*/
+
 TEST_CASE("SetExternal", "[HDC]")
 {
     HDC node, external, e2, e3;
@@ -860,7 +860,7 @@ TEST_CASE("load", "[HDC]")
     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
 }
 
-/*
+
 TEST_CASE("scalar", "[HDC]")
 {
     bool      b = true;
