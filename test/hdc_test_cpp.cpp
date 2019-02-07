@@ -753,7 +753,7 @@ TEST_CASE("BufferGrowArray", "[HDC]")
     CHECK(h.get_type() == HDC_DOUBLE);
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
-/*
+
 TEST_CASE("BufferGrowStruct", "[HDC]")
 {
     std::vector<std::string> keys = {"aaa","bbb","ccc","ddd"};
@@ -842,7 +842,7 @@ TEST_CASE("GetSlices", "[HDC]")
         CHECK(strcmp(h[i].as_string().c_str(),slices[i].as_string().c_str()) == 0);
     }
 }
-
+/*
 TEST_CASE("clean", "[HDC]")
 {
     HDC tree;
