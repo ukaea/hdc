@@ -2,7 +2,7 @@
 #include "hdc.hpp"
 #include <boost/filesystem.hpp>
 
-
+/*
 bool in_vector(std::string str, const std::vector<std::string>& vector)
 {
     return (std::find(vector.begin(), vector.end(), str) != vector.end());
@@ -187,6 +187,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     a.set_type(HDC_STRUCT);
     CHECK(a.get_type() == HDC_STRUCT);
 }
+*/
 
 TEST_CASE("ListManipulation", "[HDC]")
 {
