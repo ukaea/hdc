@@ -294,7 +294,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     double* data2 = h.as<double>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
-/*
+
 TEST_CASE("SetExternal", "[HDC]")
 {
     HDC node, external, e2, e3;
@@ -421,7 +421,7 @@ TEST_CASE("as_vector_uint16", "[HDC]") {
     auto vectorf = h.as_vector<float>();
     for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
 }
-
+/*
 TEST_CASE("as_vector_int32", "[HDC]") {
     int32_t array_in[4] = { 7, 2, 3, 4 };
     HDC h;
