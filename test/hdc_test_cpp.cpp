@@ -125,7 +125,7 @@ TEST_CASE("EmptyArrayNode", "[HDC]")
     for (size_t i=0; i<HDC_MAX_DIMS+1;i++) sh[i] = 1;
     CHECK_THROWS(HDC{sh,HDC_DOUBLE});
 }
-/*
+
 TEST_CASE("NodeManipulation", "[HDC]")
 {
     HDC tree;
@@ -294,7 +294,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     double* data2 = h.as<double>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
-
+/*
 TEST_CASE("SetExternal", "[HDC]")
 {
     HDC node, external, e2, e3;
