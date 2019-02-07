@@ -35,7 +35,10 @@ void HDC::parse_cmdline(int argc, const char* argv[])
     }
     if (_list_plugins) {
         HDC::search_plugins();
-        HDC::list_plugins();
+        std::cout << "Available storage plugins:\n";
+        for (const auto& store : avail_stores) {
+            std::cout << "  - " << store.first << " : " << store.second << "\n";
+        }
         exit(0);
     }
     options->put("storage_cmdline", _storage);
@@ -120,14 +123,6 @@ std::vector<std::string> HDC::get_available_plugins()
     return keys;
 }
 
-void HDC::list_plugins()
-{
-    std::cout << "Available storage plugins:\n";
-    for (const auto& store : avail_stores) {
-        std::cout << "  - " << store.first << " : " << store.second << "\n";
-    }
-}
-
 void HDC::set_storage(std::string storage)
 {
     boost::optional<std::string> storage_cmd = options->get_optional<std::string>("storage_cmdline");
@@ -137,10 +132,8 @@ void HDC::set_storage(std::string storage)
         while (options->count("storage_cmdline") > 0) options->erase("storage_cmdline");
     }
     std::string selected_store_name = options->get<std::string>("storage", storage);
-    //cout << "Selected storage: " << selected_store_name <<endl;
     if (stores == nullptr) stores = new vector<HDCStorage*>();
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
-        //cout << avail_stores[selected_store_name] << endl;
         if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());
         stores->push_back(new HDCStorage(stores->size(), avail_stores[selected_store_name], options->get_child("storage_options")));
         global_storage = stores->at(0);
@@ -306,6 +299,7 @@ HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
 /** Destructor */
 HDC::~HDC()
 {
+    D(std::cout << "~HDC()\n";)
     /*
     auto t = get_type();
     if (!is_terminal()) {
@@ -752,18 +746,6 @@ const HDC HDC::get(size_t index) const
     return get_single(index);
 }
 
-HDC HDC::get_or_create(hdc_path_t& path)
-{
-    if (path.empty()) return *this;
-    if (!exists(path)) {
-        HDC h;
-        add_child(path,h);
-        return h;
-    } else {
-        return get(path);
-    }
-}
-
 HDC HDC::get_or_create(const std::string& path)
 {
     if (path.empty()) return *this;
@@ -837,9 +819,6 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
     auto ca = get_segment().get_allocator<record>();
     if (path.type() == typeid(size_t)) {
         size_t i = boost::get<size_t>(path);
-        if (get_type() != HDC_LIST) {
-            throw HDCException("set_child_single(): called on non list type node\n");
-        }
         if (i >= children->size()) {
             throw HDCException("set_child_single(): Index " + std::to_string(i) + " >= list size.\n");
         }
@@ -979,7 +958,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
     return;
 }
 
-
+/*
 void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
 {
     D(
@@ -1015,7 +994,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t ty
         return;
     }
 }
-
+*/
 hdc_t HDC::as_obj() {
     hdc_t res;
     res.storage_id = storage->id();
@@ -1280,9 +1259,7 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
                 record rec(it->key.c_str(), it->address.c_str(), new_segment.get_segment_manager());
                 new_children->insert(rec);
             }
-        } else {
-            throw HDCException("buffer_grow(): children not found\n");
-        };
+        }
     } else {
         memcpy(new_buffer.data()+sizeof(hdc_header_t), old_buffer+sizeof(hdc_header_t), sizeof(hdc_header_t));
     }

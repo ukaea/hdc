@@ -1,6 +1,10 @@
 #include "hdc.hpp"
 
 #include <sstream>
+//TODO Use this instead of marray???
+#define at2(a,i1,i2) (a)[i2][i1]
+#define at3(a,i1,i2,i3) (a)[i3][i2][i1]
+#define at4(a,i1,i2,i3,i4) (a)[i4][i3][i2][i1]
 
 bool is_all_numeric(const Json::Value& root)
 {

@@ -224,11 +224,6 @@ public:
     */
     static void search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
     /**
-    * @brief Prints out all found storage plugins.
-    *
-    */
-    static void list_plugins();
-    /**
     * @brief Sets the default storage to be used.
     *
     * @param storage p_storage:...
@@ -237,13 +232,13 @@ public:
     /**
     * @brief Returns list of all available storage plugins
     *
-    * @return std::vector< std::__cxx11::string >
+    * @return std::vector< std::string >
     */
     static std::vector<std::string> get_available_plugins();
     /**
     * @brief Returns a directory path where the HDC library is loaded from.
     *
-    * @return std::__cxx11::string
+    * @return std::string
     */
     static std::string get_library_dir(void);
     /**
@@ -360,13 +355,6 @@ public:
     * @return HDC
     */
     HDC get_or_create(size_t index);
-    /**
-    * @brief ...
-    *
-    * @param path p_path: path in the subtree of this node
-    * @return HDC
-    */
-    HDC get_or_create(hdc_path_t& path);
     /**
     * @brief ...
     *
