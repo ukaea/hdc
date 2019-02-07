@@ -187,7 +187,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     a.set_type(HDC_STRUCT);
     CHECK(a.get_type() == HDC_STRUCT);
 }
-*/
+
 
 TEST_CASE("ListManipulation", "[HDC]")
 {
@@ -294,7 +294,7 @@ TEST_CASE("DoubleDataManipulation", "[HDC]")
     double* data2 = h.as<double>();
     for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
 }
-
+*/
 TEST_CASE("SetExternal", "[HDC]")
 {
     HDC node, external, e2, e3;
