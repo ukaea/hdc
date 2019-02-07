@@ -842,7 +842,7 @@ TEST_CASE("GetSlices", "[HDC]")
         CHECK(strcmp(h[i].as_string().c_str(),slices[i].as_string().c_str()) == 0);
     }
 }
-/*
+
 TEST_CASE("clean", "[HDC]")
 {
     HDC tree;
@@ -915,7 +915,7 @@ TEST_CASE("scalar", "[HDC]")
     tree.add_child("aaa",ch);
     CHECK_THROWS(tree.as_scalar<double>());
 }
-
+/*
 TEST_CASE("get_data", "[HDC]")
 {
     double array_in[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
