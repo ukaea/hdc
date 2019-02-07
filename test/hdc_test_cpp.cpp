@@ -2,7 +2,7 @@
 #include "hdc.hpp"
 #include <boost/filesystem.hpp>
 
-/*
+
 bool in_vector(std::string str, const std::vector<std::string>& vector)
 {
     return (std::find(vector.begin(), vector.end(), str) != vector.end());
@@ -38,7 +38,7 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
     tree.add_child("aaa/list", list);                                                               \
     HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
     tree.add_child("aaa/string",str);                                                               \
-
+/*
 
 TEST_CASE("StringParsing", "[HDCUtils]")
 {
