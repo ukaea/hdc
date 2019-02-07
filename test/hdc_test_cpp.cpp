@@ -860,7 +860,7 @@ TEST_CASE("load", "[HDC]")
     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
 }
 
-
+/*
 TEST_CASE("scalar", "[HDC]")
 {
     bool      b = true;
@@ -956,7 +956,7 @@ TEST_CASE("hdc_t_manipulation", "[HDC]")
     HDC h2(obj);
     CHECK(strcmp(h2.get_uuid().c_str(), obj.uuid) == 0);
     CHECK(h2.get_storage_id() == obj.storage_id);
-}
+}*/
 
 #ifdef _USE_HDF5
 TEST_CASE("HDF5", "[HDC]")
