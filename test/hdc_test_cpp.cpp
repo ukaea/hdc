@@ -860,7 +860,7 @@ TEST_CASE("load", "[HDC]")
     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
 }
 
-
+/*
 TEST_CASE("scalar", "[HDC]")
 {
     bool      b = true;
@@ -915,7 +915,7 @@ TEST_CASE("scalar", "[HDC]")
     tree.add_child("aaa",ch);
     CHECK_THROWS(tree.as_scalar<double>());
 }
-/*
+
 TEST_CASE("get_data", "[HDC]")
 {
     double array_in[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };
