@@ -58,7 +58,7 @@ TEST_CASE("StringParsing", "[HDCUtils]")
         i++;
     }
 }
-/*
+
 TEST_CASE("GetPlugins","[HDC]")
 {
     //HDC::search_plugins(); // This is called in main.cpp
@@ -125,7 +125,7 @@ TEST_CASE("EmptyArrayNode", "[HDC]")
     for (size_t i=0; i<HDC_MAX_DIMS+1;i++) sh[i] = 1;
     CHECK_THROWS(HDC{sh,HDC_DOUBLE});
 }
-
+/*
 TEST_CASE("NodeManipulation", "[HDC]")
 {
     HDC tree;
