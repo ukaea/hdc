@@ -421,7 +421,7 @@ TEST_CASE("as_vector_uint16", "[HDC]") {
     auto vectorf = h.as_vector<float>();
     for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
 }
-/*
+
 TEST_CASE("as_vector_int32", "[HDC]") {
     int32_t array_in[4] = { 7, 2, 3, 4 };
     HDC h;
@@ -563,7 +563,7 @@ TEST_CASE("GetStrides", "[HDC]")
     CHECK(16 == strides_c[1]);
     CHECK(4 == strides_c[2]);
 }
-
+/*
 TEST_CASE("SliceManipulation", "[HDC]")
 {
     HDC h;
