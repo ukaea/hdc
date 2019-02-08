@@ -939,7 +939,7 @@ TEST_CASE("get_data", "[HDC]")
     auto data_out2 = h.get_data();
     for (size_t i=0;i<4;i++) CHECK(array_in2[i] == reinterpret_cast<double*>(data_out2.data)[i]);
 
-    //check if constructor throws if large rang supplied;
+    //check if constructor throws if large rank supplied;
     data_in.rank = 20;
     CHECK_THROWS(HDC(data_in));
 
