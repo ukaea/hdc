@@ -1012,21 +1012,22 @@ void HDC::insert(size_t index, HDC& h)
     if (header->type != HDC_EMPTY && header->type != HDC_LIST) {
         throw HDCException("insert(): Cannot add child to this node. Data assigned???\n");
     }
-    if (header->type == HDC_EMPTY) set_type(HDC_LIST);
-    buffer = get_buffer();
-    header = reinterpret_cast<hdc_header_t*>(buffer);
-    if (get_shape()[0] < index) {
+    if (header->type == HDC_EMPTY) {
+        set_type(HDC_LIST);
+        buffer = get_buffer();
+        header = reinterpret_cast<hdc_header_t*>(buffer);
+    }
+    if (header->shape[0] < index) {
         std::cout << "Warning: insert():: inserting behind current list length, filling with empty containers\n";
         for (size_t i = header->shape[0]; i < index; i++) {
             HDC ch;
             append(ch);
         }
+        buffer = get_buffer();
+        header = reinterpret_cast<hdc_header_t*>(buffer);
     }
-
-    // load new buffer
-    buffer = get_buffer();
-    vector<char> new_buffer;
-    auto segment = get_segment();
+    std::vector<char> new_buffer;
+    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
     auto children = segment.find<hdc_map_t>("d").first;
     if (children == nullptr) throw HDCException("insert(): Could not get the children.\n");
 
@@ -1128,7 +1129,8 @@ hdc_header_t* HDC::get_header_ptr() const {
 std::vector<size_t> HDC::get_shape() const
 {
     auto header = get_header_ptr();
-    std::vector<size_t> shape(header->shape, header->shape+header->rank);
+    std::vector<size_t> shape(header->rank);
+    for (size_t i=0; i<header->rank; i++) shape[i] = header->shape[i];
     return shape;
 }
 

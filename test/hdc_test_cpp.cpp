@@ -188,6 +188,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     CHECK(a.get_type() == HDC_STRUCT);
 }
 
+
 TEST_CASE("ListManipulation", "[HDC]")
 {
     HDC h;
@@ -853,12 +854,10 @@ TEST_CASE("clean", "[HDC]")
     CHECK(global_storage->has(ch_uuid) == false);
 }
 
-
 TEST_CASE("load", "[HDC]")
 {
     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
 }
-
 
 TEST_CASE("scalar", "[HDC]")
 {
