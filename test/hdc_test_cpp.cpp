@@ -349,7 +349,7 @@ TEST_CASE("SetExternal", "[HDC]")
     CHECK(*array_in2 == *array_out);
 
 }
-
+/*
 TEST_CASE("as_vector_int8", "[HDC]") {
     int8_t array_in[4] = { 7, 2, 3, 4 };
     HDC h;
@@ -529,7 +529,7 @@ TEST_CASE("as_vector_double", "[HDC]") {
     auto vectorf = h.as_vector<float>();
     for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
 }
-
+*/
 TEST_CASE("as_vector_unknown", "[HDC]") {
     HDC h,n;
     h.add_child("aaa",n);
