@@ -594,12 +594,12 @@ TEST_CASE("SliceManipulation", "[HDC]")
     n.set_type(HDC_LIST);
     HDC ch;
     n.insert(10, ch);
-    CHECK(11 == n.get_shape()[0]);
-    CHECK(HDC_LIST == n.get_type());
-    for (int i = 0; i < 11; i++) CHECK(HDC_EMPTY == n.get(i).get_type());
-    //Check exception on assiged data
-    HDC h2 = HDC::make_scalar(8.8);
-    CHECK_THROWS(h2.insert(0,sl3));
+//     CHECK(11 == n.get_shape()[0]);
+//     CHECK(HDC_LIST == n.get_type());
+//     for (int i = 0; i < 11; i++) CHECK(HDC_EMPTY == n.get(i).get_type());
+//     //Check exception on assiged data
+//     HDC h2 = HDC::make_scalar(8.8);
+//     CHECK_THROWS(h2.insert(0,sl3));
 }
 
 TEST_CASE("GetKeys", "[HDC]")
