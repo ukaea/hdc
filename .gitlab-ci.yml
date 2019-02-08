@@ -1,4 +1,6 @@
 test-bionic:
+  variables:
+    CI_DEBUG_TRACE: "true"
   image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-bionic-hdc-prereq
   script:
     - mkdir build
