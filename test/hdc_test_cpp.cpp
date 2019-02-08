@@ -349,7 +349,7 @@ TEST_CASE("SetExternal", "[HDC]")
     CHECK(*array_in2 == *array_out);
 
 }
-
+/*
 TEST_CASE("as_vector_int8", "[HDC]") {
     int8_t array_in[4] = { 7, 2, 3, 4 };
     HDC h;
@@ -529,7 +529,7 @@ TEST_CASE("as_vector_double", "[HDC]") {
     auto vectorf = h.as_vector<float>();
     for (size_t i=0; i<4; i++) CHECK(static_cast<float>(array_in[i]) == vectorf[i]);
 }
-
+*/
 TEST_CASE("as_vector_unknown", "[HDC]") {
     HDC h,n;
     h.add_child("aaa",n);
@@ -854,12 +854,10 @@ TEST_CASE("clean", "[HDC]")
     CHECK(global_storage->has(ch_uuid) == false);
 }
 
-
-// TEST_CASE("load", "[HDC]")
-// {
-//     CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
-// }
-
+TEST_CASE("load", "[HDC]")
+{
+    CHECK_THROWS_AS(HDC::load("json://aaa|aaa", "aaa"), HDCException);
+}
 
 TEST_CASE("scalar", "[HDC]")
 {
@@ -946,7 +944,7 @@ TEST_CASE("get_data", "[HDC]")
     CHECK_THROWS(HDC(data_in));
 
 }
-/*
+
 TEST_CASE("hdc_t_manipulation", "[HDC]")
 {
     HDC h;
@@ -956,7 +954,7 @@ TEST_CASE("hdc_t_manipulation", "[HDC]")
     HDC h2(obj);
     CHECK(strcmp(h2.get_uuid().c_str(), obj.uuid) == 0);
     CHECK(h2.get_storage_id() == obj.storage_id);
-}*/
+}
 
 #ifdef _USE_HDF5
 TEST_CASE("HDF5", "[HDC]")
