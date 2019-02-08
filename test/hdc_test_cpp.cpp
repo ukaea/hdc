@@ -19,14 +19,30 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
 #define PREPARE_TREE()                                                                              \
     std::vector<size_t> shape = {4};                                                                \
     double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
-    int32_t data_int[] = {777,20202020,3333,555555};                                                \
+    int8_t data_int8[] = {-7,2,3,4};                                                                \
+    int16_t data_int16[] = {-7000,2000,3000,4000};                                                  \
+    int32_t data_int32[] = {-70000000,10000000,20000000,300000000};                                 \
+    int64_t data_int64[] = {-70000000,10000000,20000000,300000000};                                 \
+    uint8_t data_uint8[] = {7,2,3,4};                                                               \
+    uint16_t data_uint16[] = {7000,2000,3000,4000};                                                 \
+    uint32_t data_uint32[] = {70000000,10000000,20000000,300000000};                                \
+    uint64_t data_uint64[] = {70000000,10000000,20000000,300000000};                                \
+    float data_float[] = {0.0,1000.0,1.0e-20,1.0e20};                                               \
     HDC tree;                                                                                       \
     HDC scalar;                                                                                     \
     scalar.set_data(333.333);                                                                       \
     tree.add_child("aaa/bbb/_scalar", scalar);                                                      \
     tree["aaa/bbb/double"].set_data<double>(shape,data_double);                                     \
+    tree["aaa/bbb/float"].set_data<float>(shape,data_float);                                        \
     tree["aaa/bbb/double2"].set_data<double>(shape,data_double);                                    \
-    tree["aaa/bbb/int"].set_data<int>(shape,data_int);                                              \
+    tree["aaa/bbb/int8"].set_data<int8_t>(shape,data_int8);                                         \
+    tree["aaa/bbb/int16"].set_data<int16_t>(shape,data_int16);                                      \
+    tree["aaa/bbb/int32"].set_data<int32_t>(shape,data_int32);                                      \
+    tree["aaa/bbb/int64"].set_data<int64_t>(shape,data_int64);                                      \
+    tree["aaa/bbb/uint8"].set_data<uint8_t>(shape,data_uint8);                                      \
+    tree["aaa/bbb/uint16"].set_data<uint16_t>(shape,data_uint16);                                   \
+    tree["aaa/bbb/uint32"].set_data<uint32_t>(shape,data_uint32);                                   \
+    tree["aaa/bbb/uint64"].set_data<uint64_t>(shape,data_uint64);                                   \
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
@@ -704,13 +720,13 @@ TEST_CASE("JsonComplete", "[HDC]")
     double* data_double_in = s.as<double>();
     for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
     // Test int
-    s = tree2.get("aaa/bbb/int");
+    s = tree2.get("aaa/bbb/int32");
     CHECK(1 == s.get_rank());
     CHECK(4 == s.get_shape()[0]);
     CHECK(HDC_INT32 == s.get_type());
-    CHECK(strcmp(tree.get("aaa/bbb/int").get_type_str(), tree2.get("aaa/bbb/int").get_type_str()) == 0);
+    CHECK(strcmp(tree.get("aaa/bbb/int32").get_type_str(), tree2.get("aaa/bbb/int32").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t>();
-    for (size_t i = 0; i < shape[0]; i++) CHECK(data_int[i] == data_int_in[i]);
+    for (size_t i = 0; i < shape[0]; i++) CHECK(data_int32[i] == data_int_in[i]);
     // Test empty
     CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
     // Test list
