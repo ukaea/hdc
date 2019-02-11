@@ -492,10 +492,10 @@ Json::Value HDC::to_json(int mode) const
                 root = buffer_to_json<uint32_t>(buffer);
                 break;
             }
-//             case(HDC_UINT64): {
-//                  root =  buffer_to_json<uint64_t>(buffer);
-//                  break;
-//                 }
+            case(HDC_UINT64): {
+                 root =  buffer_to_json<uint64_t>(buffer);
+                 break;
+                }
             case (HDC_FLOAT): {
                 root = buffer_to_json<float>(buffer);
                 break;

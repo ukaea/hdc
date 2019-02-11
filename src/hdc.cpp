@@ -1196,7 +1196,10 @@ const std::map<std::string,HDC> HDC::get_children() const
     auto children = get_children_ptr();
     std::map<std::string,HDC> ch;
     if (children != nullptr) {
+        auto s = children->size();
+        size_t i = 0;
         for (auto it = children->begin(); it != children->end(); ++it) {
+            if (i++ == s) break;
             ch[it->key.c_str()] = HDC(storage,it->address.c_str());
         }
     }
@@ -1208,8 +1211,11 @@ const std::vector<HDC> HDC::get_slices() const
     auto children = get_children_ptr();
     std::vector<HDC> ch;
     if (children != nullptr) {
+        auto s = children->size();
+        size_t i = 0;
         ch.reserve(children->size());
         for (auto it = children->begin(); it != children->end(); ++it) {
+            if (i++ == s) break;
             ch.push_back(HDC(storage,it->address.c_str()));
         }
     }

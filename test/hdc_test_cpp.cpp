@@ -42,7 +42,7 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
     tree["aaa/bbb/uint8"].set_data<uint8_t>(shape,data_uint8);                                      \
     tree["aaa/bbb/uint16"].set_data<uint16_t>(shape,data_uint16);                                   \
     tree["aaa/bbb/uint32"].set_data<uint32_t>(shape,data_uint32);                                   \
-    /*tree["aaa/bbb/uint64"].set_data<uint64_t>(shape,data_uint64);*/                                   \
+    tree["aaa/bbb/uint64"].set_data<uint64_t>(shape,data_uint64);                                   \
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
