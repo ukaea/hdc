@@ -479,7 +479,20 @@ TEST_CASE("GetKeys", "[HDC]")
     for (size_t i = 0; i < keys.size(); i++) CHECK(true == tree.exists(keys[i]));
 }
 
-TEST_CASE("BracketOperators", "[HDC]")
+TEMPLATE_TEST_CASE("BracketOperatorsNum", "[HDC]", ALL_NUMERIC_TYPES)
+{
+    HDC tree;
+    TestType num = 16;
+    tree["num"] = num;
+    CHECK(tree.exists("num"));
+    CHECK(tree["num"].get_type() == to_typeid(num));
+    CHECK(tree["num"].as_scalar<TestType>() == num);
+    //test replace
+    tree["num"] = static_cast<TestType>(9);
+    CHECK(9 == tree["num"].as_scalar<TestType>());
+}
+
+TEST_CASE("BracketOperatorsOthers", "[HDC]")
 {
     HDC tree;
     tree["aaa/bbb/ccc"] = HDC();
@@ -487,59 +500,25 @@ TEST_CASE("BracketOperators", "[HDC]")
     CHECK(tree.exists("aaa/bbb/ccc"));
     CHECK(tree["aaa/bbb/ccc"].get_type() == HDC_EMPTY);
 
-    int8_t i8 = 8;
-    int16_t i16 = 16;
-    int32_t i32 = 32;
-    int64_t i64 = 64;
-    float f = 3.14;
-    double d = 3.141592;
     std::string str = "test";
-    tree["i8"] = i8;
-    tree["i16"] = i16;
-    tree["i32"] = i32;
-    tree["i64"] = i64;
-    tree["f"] = f;
-    tree["d"] = d;
     tree["str"] = str;
     tree["empty"] = HDC();
-    CHECK(tree.exists("i8"));
-    CHECK(tree.exists("i16"));
-    CHECK(tree.exists("i32"));
-    CHECK(tree.exists("i64"));
-    CHECK(tree.exists("f"));
-    CHECK(tree.exists("d"));
     CHECK(tree.exists("str"));
     CHECK(tree.exists("empty"));
-    CHECK(tree["i8"].get_type() == HDC_INT8);
-    CHECK(tree["i16"].get_type() == HDC_INT16);
-    CHECK(tree["i32"].get_type() == HDC_INT32);
-    CHECK(tree["i64"].get_type() == HDC_INT64);
-    CHECK(tree["f"].get_type() == HDC_FLOAT);
-    CHECK(tree["d"].get_type() == HDC_DOUBLE);
     CHECK(tree["str"].get_type() == HDC_STRING);
     CHECK(tree["empty"].get_type() == HDC_EMPTY);
-    CHECK(tree["i8"].as_scalar<int8_t>() == i8);
-    CHECK(tree["i16"].as_scalar<int16_t>() == i16);
-    CHECK(tree["i32"].as_scalar<int32_t>() == i32);
-    CHECK(tree["i64"].as_scalar<int64_t>() == i64);
-    CHECK(tree["f"].as_scalar<float>() == f);
-    CHECK(tree["d"].as_scalar<double>() == d);
     CHECK(strcmp(tree["str"].as_cstring(),str.c_str()) == 0);
-    //test replace
-    tree["i8"] = static_cast<int8_t>(9);
-    CHECK(9 == tree["i8"].as_scalar<int8_t>());
 
     HDC list;
     list[0] = HDC();
-    list[1] = i8;
+    list[1] = 120;
     CHECK(list[0].get_type() == HDC_EMPTY);
-    CHECK(list[1].as_scalar<int8_t>() == i8);
+    CHECK(list[1].as_scalar<int8_t>() == 120);
     // test replace
-    list[1] = i32;
+    list[1] = 240l;
     CHECK(list[0].get_type() == HDC_EMPTY);
-    CHECK(list[1].as_scalar<int32_t>() == i32);
+    CHECK(list[1].as_scalar<int32_t>() == 240l);
 }
-
 
 TEST_CASE("JsonComplete", "[HDC]")
 {
