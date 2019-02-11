@@ -2,6 +2,10 @@
 #include "hdc.hpp"
 #include <boost/filesystem.hpp>
 
+size_t factorial(size_t n)
+{
+  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
 
 bool in_vector(std::string str, const std::vector<std::string>& vector)
 {
@@ -28,6 +32,7 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
     uint32_t data_uint32[] = {70000000,10000000,20000000,300000000};                                \
     uint64_t data_uint64[] = {70000000,10000000,20000000,300000000};                                \
     float data_float[] = {0.0,1000.0,1.0e-20,1.0e20};                                               \
+    bool data_bool[] = {false,true,false,true};                                                     \
     HDC tree;                                                                                       \
     HDC scalar;                                                                                     \
     scalar.set_data(333.333);                                                                       \
@@ -43,6 +48,7 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
     tree["aaa/bbb/uint16"].set_data<uint16_t>(shape,data_uint16);                                   \
     tree["aaa/bbb/uint32"].set_data<uint32_t>(shape,data_uint32);                                   \
     tree["aaa/bbb/uint64"].set_data<uint64_t>(shape,data_uint64);                                   \
+    tree["aaa/bbb/bool"].set_data<bool>(shape,data_bool);                                           \
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
@@ -972,6 +978,36 @@ TEST_CASE("hdc_t_manipulation", "[HDC]")
     CHECK(h2.get_storage_id() == obj.storage_id);
 }
 
+TEMPLATE_TEST_CASE("TestJSONArrays","[HDC]", bool, int32_t, double) {
+    size_t n = 5;
+    auto s = factorial(n+1);
+    TestType array[s];
+    for (size_t i=0; i<s; i++) array[i] = i + 0.1;
+
+    size_t shapes[n][n];
+    memset(shapes,0,n*n*sizeof(size_t));
+    for (size_t d=0; d<n; d++) {
+        auto r = 1;
+        for (size_t i=0; i<d; i++) {
+            shapes[d][i] = i+2;
+            r *= (i+2);
+        }
+        shapes[d][d]=s/r;
+    }
+    for (size_t d=1; d<=n; d++) {
+        std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
+        HDC h;
+        h.set_data<TestType>(shape,array);
+        auto fname = make_tmp_name("txt");
+        h.to_json(fname);
+        auto __path = std::string("json://") + fname;
+        HDC j = HDC::load(__path,"");
+        auto array_j = j.as<TestType>();
+        CHECK(memcmp(array,array_j,s*sizeof(TestType)) == 0);
+        if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    }
+}
+
 #ifdef _USE_HDF5
 TEST_CASE("HDF5", "[HDC]")
 {
@@ -991,11 +1027,10 @@ TEST_CASE("HDF5", "[HDC]")
 
 #endif
 
-#ifdef _USE_UDA
 TEST_CASE("UDA", "[HDC]")
 {
+#ifdef _USE_UDA
     HDC h = HDC::load("uda://HELP::help()");
-    h.dump();
     std::string expected =
             "\nHelp\tList of HELP plugin functions:\n"
             "\n"
@@ -1003,6 +1038,8 @@ TEST_CASE("UDA", "[HDC]")
             "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
             "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
     CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
-}
-
+#else
+    CHECK_THROWS(HDC::load("uda://HELP::help()"));
+    CHECK_THROWS(HDC::load("uda_new://HELP::help()"));
 #endif
+}
