@@ -208,10 +208,10 @@ HDC::HDC(size_t data_size)
 
 /** Default constructor. Creates empty HDC */
 HDC::HDC() : HDC(0lu)
-{};
+{}
 
 /** Creates empty HDC with specified type and shape */
-HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, long flags)
+HDC::HDC(std::vector<size_t>& shape, hdc_type_t type, hdc_flags_t flags)
 {
     HDC_STORAGE_INIT()
     auto rank = shape.size();
@@ -294,7 +294,6 @@ HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
     HDC_STORAGE_INIT()
     set_data(data,t);
 }
-
 
 /** Destructor */
 HDC::~HDC()
@@ -958,43 +957,6 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
     return;
 }
 
-/*
-void HDC::set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags)
-{
-    D(
-        std::cout << "set_data_c(shape = {";
-        for (auto s : shape) std::cout << s << ", ";
-        std::cout << "}, type = " << type << ", flags = " << flags;
-        std::cout << std::endl;
-    );
-    auto rank = shape.size();
-    auto buffer = get_buffer();
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    // Start with determining of the buffer size
-    size_t data_size = hdc_sizeof(type);
-    for (size_t i = 0; i < rank; i++) data_size *= shape[i];
-    size_t buffer_size = data_size + sizeof(hdc_header_t);
-    if (header->buffer_size == buffer_size) {
-        storage->lock(uuid);
-        memcpy(buffer + sizeof(hdc_header_t), data, data_size);
-        storage->unlock(uuid);
-        return;
-    } else {
-        std::vector<char> new_buffer(buffer_size);
-        header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
-        header->buffer_size = buffer_size;
-        header->data_size = data_size;
-        header->flags = flags;
-        memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-        for (size_t i = 0; i < rank; i++) header->shape[i] = shape[i];
-        header->type = type;
-        header->rank = rank;
-        memcpy(new_buffer.data() + sizeof(hdc_header_t), data, header->data_size);
-        storage->set(uuid, new_buffer.data(), header->buffer_size);
-        return;
-    }
-}
-*/
 hdc_t HDC::as_obj() {
     hdc_t res;
     res.storage_id = storage->id();

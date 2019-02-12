@@ -163,7 +163,7 @@ public:
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    HDC(std::vector<size_t>& shape, hdc_type_t type, long flags = HDCDefault);
+    HDC(std::vector<size_t>& shape, hdc_type_t type, hdc_flags_t flags = HDCDefault);
 
     HDC(hdc_data_t obj);
     /**
@@ -187,18 +187,43 @@ public:
     HDC(HDCStorage* _storage, const std::string& _uuid);
 
     /**
-    * @brief Constructs object from hdc_obj_t struct - C/FORTRAN interoperability
+    * @brief Constructs HDC object from hdc_obj_t struct - C/FORTRAN interoperability
     *
     * @param obj p_obj:...
     */
     HDC(hdc_t& obj);
     /**
-    * @brief Constructs object from scalar and type - MATLAB interoperability
+    * @brief Constructs HDC object from scalar and type - MATLAB interoperability
     *
     * @param data p_data:...
     * @param t p_t:...
     */
     HDC(void* data, hdc_type_t t);
+    /**
+    * @brief Constructs HDC object from std::vector
+    *
+    * @param T p_T: data type
+    * @param data p_data: vector with data
+    * @param flags p_flags: flags
+    */
+    template <typename T>
+    HDC(std::vector<T> data, hdc_flags_t flags = HDCDefault) {
+        HDC_STORAGE_INIT()
+        size_t rank = 1;
+        size_t data_size = sizeof(T)*data.size();
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        std::vector<char> buffer(buffer_size,0);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        header->type = to_typeid(data[0]);
+        header->flags = flags;
+        header->rank = rank;
+        header->data_size = data_size;
+        header->buffer_size = buffer_size;
+        memcpy(buffer.data()+sizeof(hdc_header_t), data.data(), data_size);
+        uuid = generate_uuid_str();
+        storage = global_storage;
+        storage->set(uuid, buffer.data(), buffer_size);
+    }
     /**
     * @brief Destructor
     *
@@ -545,8 +570,8 @@ public:
             std::cout << "The node has already children set..." << std::endl;
             return;
         }
-        size_t shape[1] = {data.size()};
-        set_data<T>(1,shape,&data[0]);
+        std::vector<size_t> shape = {data.size()};
+        set_data<T>(shape,&data[0]);
         return;
     }
     /**
@@ -774,7 +799,6 @@ public:
         T tp{};
         if (header->type != to_typeid(tp))
         {
-            std::cerr << "Remove this: " << (int)(header->type) << " " << to_typeid(tp) << std::endl;
             throw HDCException("as() stored and requested types do not match\n");
         }
         if (header->flags & HDCExternal)

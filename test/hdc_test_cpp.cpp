@@ -20,6 +20,13 @@ const std::string make_tmp_name(const std::string& suffix = "h5")
     return tempstr;
 }
 
+template<typename T, typename U>
+bool arrcmp(T* arr1, U* arr2, size_t n_elem) {
+    for (size_t i=0; i<n_elem; i++) {
+        if (arr1[i] != arr2[i]) return false;
+    }
+    return true;
+}
 
 #define ALL_NUMERIC_TYPES int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, float, double
 
@@ -246,7 +253,7 @@ TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_itemsize() == sizeof(TestType));
     TestType* data2 = h.as<TestType>();
-    CHECK(memcmp(data,data2,4*sizeof(TestType)) == 0);
+    CHECK(memcmp(data,data2,sizeof(data)) == 0);
     data[3] = 120;
     h.set_data(shape, data);
     data2 = h.as<TestType>();
@@ -309,83 +316,73 @@ TEST_CASE("SetExternal", "[HDC]")
 }
 
 TEMPLATE_TEST_CASE("as_vector_int8", "[HDC]", ALL_NUMERIC_TYPES) {
-    int8_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<int8_t>({4},array_in);
+    std::vector<int8_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_uint8", "[HDC]", ALL_NUMERIC_TYPES) {
-    uint8_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<uint8_t>({4},array_in);
+    std::vector<uint8_t>array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_int16", "[HDC]", ALL_NUMERIC_TYPES) {
-    int16_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<int16_t>({4},array_in);
+    std::vector<int16_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_uint16", "[HDC]", ALL_NUMERIC_TYPES) {
-    uint16_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<uint16_t>({4},array_in);
+    std::vector<uint16_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_int32", "[HDC]", ALL_NUMERIC_TYPES) {
-    int32_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<int32_t>({4},array_in);
+    std::vector<int32_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_uint32", "[HDC]", ALL_NUMERIC_TYPES) {
-    uint32_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<uint32_t>({4},array_in);
+    std::vector<uint32_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_int64", "[HDC]", ALL_NUMERIC_TYPES) {
-    int64_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<int64_t>({4},array_in);
+    std::vector<int64_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_uint64", "[HDC]", ALL_NUMERIC_TYPES) {
-    uint64_t array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<uint64_t>({4},array_in);
+    std::vector<uint64_t> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_float", "[HDC]", ALL_NUMERIC_TYPES) {
-    float array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<float>({4},array_in);
+    std::vector<float> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEMPLATE_TEST_CASE("as_vector_double", "[HDC]", ALL_NUMERIC_TYPES) {
-    double array_in[4] = { 7, 2, 3, 4 };
-    HDC h;
-    h.set_data<double>({4},array_in);
+    std::vector<double> array_in = { 7, 2, 3, 4 };
+    HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
-    for (size_t i=0; i<4; i++) CHECK(static_cast<TestType>(array_in[i]) == vector_out[i]);
+    CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));
 }
 
 TEST_CASE("as_vector_unknown", "[HDC]") {
@@ -539,7 +536,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(HDC_DOUBLE == s.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
     double* data_double_in = s.as<double>();
-    for (size_t i = 0; i < shape[0]; i++) CHECK(data_double[i] == data_double_in[i]);
+    CHECK(memcmp(data_double,data_double_in,sizeof(data_double)) == 0);
     // Test int
     s = tree2.get("aaa/bbb/int32");
     CHECK(1 == s.get_rank());
@@ -547,7 +544,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(HDC_INT32 == s.get_type());
     CHECK(strcmp(tree.get("aaa/bbb/int32").get_type_str(), tree2.get("aaa/bbb/int32").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t>();
-    for (size_t i = 0; i < shape[0]; i++) CHECK(data_int32[i] == data_int_in[i]);
+    CHECK(memcmp(data_int32,data_int_in,sizeof(data_int32)) == 0);
     // Test empty
     CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
     // Test list
@@ -585,10 +582,10 @@ TEST_CASE("BufferGrowArray", "[HDC]")
     h.set_data<double>(shape, data);
     h.grow(4096);
     double* data2 = h.as<double>();
-    CHECK(h.get_datasize() == 4*sizeof(double) + 4096);
+    CHECK(h.get_datasize() == sizeof(data) + 4096);
     CHECK(4 == h.get_shape()[0]);
     CHECK(h.get_type() == HDC_DOUBLE);
-    for (int i = 0; i < 3; i++) CHECK(data[i] == data2[i]);
+    CHECK(memcmp(data, data2, sizeof(data)) == 0);
 }
 
 TEST_CASE("BufferGrowStruct", "[HDC]")
@@ -602,9 +599,7 @@ TEST_CASE("BufferGrowStruct", "[HDC]")
     h.grow(4096);
     auto keys2 = h.keys();
     CHECK(keys2.size() == keys.size());
-    for (size_t i=0; i<keys.size(); i++) {
-        CHECK(keys[i] == keys2[i]);
-    }
+    CHECK(std::equal(keys.begin(),keys.end(),keys2.begin()));
 }
 
 TEST_CASE("BufferGrowList", "[HDC]")
@@ -724,14 +719,14 @@ TEST_CASE("get_data", "[HDC]")
     CHECK(data_in.flags == data_out.flags);
     CHECK(data_in.rank == data_out.rank);
     CHECK(data_in.shape[0] == data_out.shape[0]);
-    for (size_t i=0;i<4;i++) CHECK(array_in[i] == reinterpret_cast<double*>(data_out.data)[i]);
+    CHECK(memcmp(array_in,data_out.data,sizeof(array_in)) == 0);
 
     //update
     double array_in2[] = { 110.0, 100.0, 1.0e-20, 1.0e20 };
     data_in.data = (char*)&array_in2;
     h.set_data(data_in);
     auto data_out2 = h.get_data();
-    for (size_t i=0;i<4;i++) CHECK(array_in2[i] == reinterpret_cast<double*>(data_out2.data)[i]);
+    CHECK(memcmp(array_in2,data_out2.data,sizeof(array_in2)) == 0);
 
     //check if constructor throws if large rank supplied;
     data_in.rank = 20;
