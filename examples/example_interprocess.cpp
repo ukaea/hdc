@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
             ~shm_remove(){ shared_memory_object::remove("MySharedMemory"); }
         } remover;
         HDC::init("mdbm","{\"filename\": \"/tmp/db.mdbm\", \"persistent\": true}");
-        //HDC_init("mdbm","{\"filename\": \"/tmp/db.mdbm\"}");
         // Create new HDC tree
         HDC tree;
         // Add some children
