@@ -12,21 +12,6 @@
 
 boost::mt19937 ran;
 
-void print_uuid(std::vector<char> uuid) {
-    for (int i = 0; i < 16; ++i)
-        std::cout << std::hex << std::setfill('0') << std::setw(2) << (uint)uuid[i] << " ";
-    std::cout << std::endl;
-    printf("\n");
-}
-
-std::vector<char> generate_uuid() {
-    boost::uuids::random_generator gen(&ran);
-    boost::uuids::uuid u = gen();
-    std::vector<char> v(u.size());
-    copy(u.begin(), u.end(), v.begin());
-    return v;
-}
-
 std::string generate_uuid_str() {
     boost::uuids::random_generator gen(&ran);
     boost::uuids::uuid u = gen();
@@ -110,95 +95,6 @@ size_t hdc_sizeof (hdc_type_t type) {
     }
 };
 
-bool hdc_is_numeric (hdc_type_t type) {
-    switch(type) {
-        case HDC_UINT8:
-        case HDC_INT8:
-        case HDC_UINT16:
-        case HDC_INT16:
-        case HDC_UINT32:
-        case HDC_INT32:
-        case HDC_UINT64:
-        case HDC_INT64:
-        case HDC_FLOAT:
-        case HDC_DOUBLE:
-        case HDC_BOOL:
-            return true;
-        case HDC_EMPTY:
-        case HDC_LIST:
-        case HDC_STRUCT:
-        case HDC_ERROR:
-        case HDC_STRING:
-            return false;
-        default:
-            throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
-    }
-}
-
-bool hdc_is_primitive_type(hdc_type_t type) {
-    switch(type) {
-        case HDC_EMPTY:
-        case HDC_LIST:
-        case HDC_STRUCT:
-        case HDC_ERROR:
-            return false;
-        case HDC_STRING:
-        case HDC_UINT8:
-        case HDC_INT8:
-        case HDC_UINT16:
-        case HDC_INT16:
-        case HDC_UINT32:
-        case HDC_INT32:
-        case HDC_UINT64:
-        case HDC_INT64:
-        case HDC_FLOAT:
-        case HDC_DOUBLE:
-        case HDC_BOOL:
-            return true;
-        default:
-            throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
-    }
-}
-
-std::string hdc_type_str(hdc_type_t _type) {
-    switch(_type) {
-        case HDC_EMPTY:
-            return "null";
-        case HDC_LIST:
-            return "list";
-        case HDC_STRUCT:
-            return "hdc";
-        case HDC_ERROR:
-            return "error";
-        case HDC_STRING:
-            return "string";
-        case HDC_UINT8:
-            return "uint8";
-        case HDC_INT8:
-            return "int8";
-        case HDC_UINT16:
-            return "uint16";
-        case HDC_INT16:
-            return "int16";
-        case HDC_UINT32:
-            return "uint32";
-        case HDC_INT32:
-            return "int32";
-        case HDC_UINT64:
-            return "uint64";
-        case HDC_INT64:
-            return "int64";
-        case HDC_FLOAT:
-            return "float32";
-        case HDC_DOUBLE:
-            return "float64";
-        case HDC_BOOL:
-            return "bool";
-        default:
-            return "unknown";
-    }
-}
-
 template <typename T>
 hdc_type_t to_typeid(T a) {
     throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(a)+"\n");
@@ -218,26 +114,6 @@ hdc_type_t to_typeid(std::string a UNUSED) {return HDC_STRING;};
 hdc_type_t to_typeid(char* a UNUSED) {return HDC_STRING;};
 hdc_type_t to_typeid(char const* a UNUSED) {return HDC_STRING;};
 hdc_type_t to_typeid(bool a UNUSED) {return HDC_BOOL;};
-hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize UNUSED) {
-    if (format == "i") {
-        return HDC_INT32;
-    } else if (format == "d") {
-        return HDC_DOUBLE;
-    } else if (format == "f") {
-        return HDC_FLOAT;
-    } else if (format == "l") {
-        return HDC_INT64;
-    } else if (format == "h") {
-        return HDC_INT16;
-    // TODO crashed - bool binary compatible?
-    // } else if (format == "?") {
-    //     return HDC_BOOL;
-    } else if (format == "b") {
-        return HDC_INT8;
-    }
-    // return error by default
-    return HDC_ERROR;
-};
 
 
 hdc_type_t to_typeid(const std::type_info& t) {
@@ -273,13 +149,10 @@ hdc_type_t uda_str_to_typeid(std::string& str) {
 
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
-char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder) {
-    //TODO: remove these ugly switch - cases and use something better (if possible)
-    auto item_size = hdc_sizeof(type_);
-    auto n_items = 1lu;
+template<typename T>
+void transpose_buf(char* new_buffer, char* buffer, int8_t rank, std::vector<size_t> shape, bool fortranOrder) {
     std::vector<size_t> new_shape(rank);
     for (int i=0; i<rank;i++) {
-        n_items *= shape[i];
         new_shape[i] = shape[rank-i-1];
     }
     andres::CoordinateOrder order;
@@ -292,87 +165,93 @@ char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc
         order = andres::FirstMajorOrder;
         new_order = andres::LastMajorOrder;
     }
-    char* new_buffer = new char[item_size*n_items];
+    andres::View<T> view(&shape[0], &shape[0]+rank, reinterpret_cast<T*>(buffer),order);
+    andres::View<T> new_view(&new_shape[0], &new_shape[0]+rank, reinterpret_cast<T*>(new_buffer),new_order);
+    if (rank == 1) {
+        for (size_t i0=0;i0<shape[0];i0++)
+            new_view(i0) = view(i0);
+    } else if (rank == 2) {
+        for (size_t i0=0;i0<shape[0];i0++)
+            for (size_t i1=0;i1<shape[1];i1++)
+                new_view(i1,i0) = view(i0,i1);
+    } else if (rank == 3) {
+        for (size_t i0=0;i0<shape[0];i0++)
+            for (size_t i1=0;i1<shape[1];i1++)
+                for (size_t i2=0;i2<shape[2];i2++)
+                    new_view(i2,i1,i0) = view(i0,i1,i2);
+    } else if (rank == 4) {
+        for (size_t i0=0;i0<shape[0];i0++)
+            for (size_t i1=0;i1<shape[1];i1++)
+                for (size_t i2=0;i2<shape[2];i2++)
+                    for (size_t i3=0;i3<shape[3];i3++)
+                        new_view(i3,i2,i1,i0) = view(i0,i1,i2,i3);
+    } else if (rank == 5) {
+        for (size_t i0=0;i0<shape[0];i0++)
+            for (size_t i1=0;i1<shape[1];i1++)
+                for (size_t i2=0;i2<shape[2];i2++)
+                    for (size_t i3=0;i3<shape[3];i3++)
+                        for (size_t i4=0;i4<shape[4];i4++)
+                            new_view(i4,i3,i2,i1,i0) = view(i0,i1,i2,i3,i4);
+    } else {
+        throw std::runtime_error("transpose buffer: unsupported dimension.");
+    }
+}
 
+void transpose_buffer(char* new_buffer, char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder) {
     switch(type_) {
         case(HDC_INT8):
         {
-            andres::View<int8_t> view(&shape[0], &shape[0]+rank, (int8_t*)buffer,order);
-            andres::View<int8_t> new_view(&new_shape[0], &new_shape[0]+rank, (int8_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<int8_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_INT16):
         {
-            andres::View<int16_t> view(&shape[0], &shape[0]+rank, (int16_t*)buffer,order);
-            andres::View<int16_t> new_view(&new_shape[0], &new_shape[0]+rank, (int16_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<int16_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_INT32):
         {
-            andres::View<int32_t> view(&shape[0], &shape[0]+rank, (int32_t*)buffer,order);
-            andres::View<int32_t> new_view(&new_shape[0], &new_shape[0]+rank, (int32_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
-//             std::cout << view.asString() << std::endl;
-//             andres::View<int32_t> transposed_view(&shape[0], &shape[0]+rank, (int32_t*)new_buffer,order);
-//             std::cout << transposed_view.asString() << std::endl;
+            transpose_buf<int32_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_INT64):
         {
-            andres::View<int64_t> view(&shape[0], &shape[0]+rank, (int64_t*)buffer,order);
-            andres::View<int64_t> new_view(&new_shape[0], &new_shape[0]+rank, (int64_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<int64_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_UINT8):
         {
-            andres::View<uint8_t> view(&shape[0], &shape[0]+rank, (uint8_t*)buffer,order);
-            andres::View<uint8_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint8_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<uint8_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_UINT16):
         {
-            andres::View<uint16_t> view(&shape[0], &shape[0]+rank, (uint16_t*)buffer,order);
-            andres::View<uint16_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint16_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<uint16_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_UINT32):
         {
-            andres::View<uint32_t> view(&shape[0], &shape[0]+rank, (uint32_t*)buffer,order);
-            andres::View<uint32_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint32_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<uint32_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_UINT64):
         {
-            andres::View<uint64_t> view(&shape[0], &shape[0]+rank, (uint64_t*)buffer,order);
-            andres::View<uint64_t> new_view(&new_shape[0], &new_shape[0]+rank, (uint64_t*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<uint64_t>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_FLOAT):
         {
-            andres::View<float> view(&shape[0], &shape[0]+rank, (float*)buffer,order);
-            andres::View<float> new_view(&new_shape[0], &new_shape[0]+rank, (float*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<float>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_DOUBLE):
         {
-            andres::View<double> view(&shape[0], &shape[0]+rank, (double*)buffer,order);
-            andres::View<double> new_view(&new_shape[0], &new_shape[0]+rank, (double*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<double>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_BOOL):
         {
-            andres::View<bool> view(&shape[0], &shape[0]+rank, (bool*)buffer,order);
-            andres::View<bool> new_view(&new_shape[0], &new_shape[0]+rank, (bool*)new_buffer,new_order);
-            for (size_t i=0;i<view.size();i++) new_view(i) = view(i);
+            transpose_buf<bool>(new_buffer, buffer, rank, shape, fortranOrder);
             break;
         }
         case(HDC_STRUCT):
@@ -385,23 +264,6 @@ char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc
             throw HDCException("transpose_buffer(): hdc_type_t = "+std::to_string((size_t)type_)+" not supported yet.");
         }
     }
-
-    return new_buffer;
-}
-
-char* transpose_buffer(char* buffer) {
-    //hdc_header_t header;
-    //memcpy(&header,buffer,sizeof(hdc_header_t));
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    if (header->flags & HDCExternal) throw HDCException("transpose_buffer(): Not enabled on external buffer.");
-    auto data = buffer+sizeof(hdc_header_t);
-    char* new_buffer = new char[header->buffer_size];
-    bool fortranOrder = (header->flags & HDCFortranOrder) == HDCFortranOrder;
-    std::vector<size_t> shape(header->shape,header->shape+header->rank);
-    auto transposed_data = transpose_buffer(data, header->rank, shape, (hdc_type_t)header->type, fortranOrder);
-    memcpy(new_buffer,&header,sizeof(hdc_header_t));
-    memcpy(new_buffer,transposed_data,header->data_size);
-    return new_buffer;
 }
 
 /**

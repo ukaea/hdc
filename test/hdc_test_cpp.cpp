@@ -616,35 +616,6 @@ TEST_CASE("BufferGrowList", "[HDC]")
     }
 }
 
-TEST_CASE("SerializeString", "[HDC]")
-{
-    // This does not makes sense for umap storage
-    if (global_storage->name() == "mdbm") {
-        PREPARE_TREE();
-        std::string ser = tree.serialize();
-        HDC tree2 = HDC::deserialize_HDC_string(ser);
-        auto tree_dump = tree.to_json_string();
-        auto tree2_dump = tree2.to_json_string();
-        CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
-    }
-}
-
-TEST_CASE("SerializeFile", "[HDC]")
-{
-    // This does not makes sense for umap storage
-    if (global_storage->name() == "mdbm") {
-        // the same thing to/from file
-        auto fname = make_tmp_name("h5");
-        PREPARE_TREE();
-        tree.serialize(fname);
-        auto tree_dump = tree.to_json_string();
-        HDC from_file = HDC::deserialize_HDC_file(fname);
-        auto file_dump = from_file.to_json_string();
-        CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
-        if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
-    }
-}
-
 TEST_CASE("GetChildren", "[HDC]")
 {
     std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
@@ -745,7 +716,7 @@ TEST_CASE("hdc_t_manipulation", "[HDC]")
     CHECK(h2.get_storage_id() == obj.storage_id);
 }
 
-TEMPLATE_TEST_CASE("TestJSONArrays","[HDC]", bool, int32_t, double) {
+TEMPLATE_TEST_CASE("JSONArrays","[HDC]", bool, int32_t, double) {
     size_t n = 5;
     auto s = factorial(n+1);
     TestType array[s];
@@ -770,13 +741,15 @@ TEMPLATE_TEST_CASE("TestJSONArrays","[HDC]", bool, int32_t, double) {
         auto __path = std::string("json://") + fname;
         HDC j = HDC::load(__path,"");
         auto array_j = j.as<TestType>();
-        CHECK(memcmp(array,array_j,s*sizeof(TestType)) == 0);
+        CHECK(memcmp(array,array_j,sizeof(array)) == 0);
+        auto shape_j = j.get_shape();
+        CHECK(memcmp(array,array_j,shape.size()*sizeof(size_t)) == 0);
         if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
     }
 }
 
 #ifdef _USE_HDF5
-TEST_CASE("HDF5", "[HDC]")
+TEST_CASE("HDF5Tree", "[HDC]")
 {
     PREPARE_TREE()
     // create temporary file name
@@ -792,6 +765,56 @@ TEST_CASE("HDF5", "[HDC]")
     if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
 }
 
+TEMPLATE_TEST_CASE("HDF5Arrays", "[HDC]", ALL_NUMERIC_TYPES) {
+    size_t n = 5;
+    auto s = factorial(n+1);
+    TestType array[s];
+    for (size_t i=0; i<s; i++) array[i] = i + 0.1;
+
+    size_t shapes[n][n];
+    memset(shapes,0,n*n*sizeof(size_t));
+    for (size_t d=0; d<n; d++) {
+        auto r = 1;
+        for (size_t i=0; i<d; i++) {
+            shapes[d][i] = i+2;
+            r *= (i+2);
+        }
+        shapes[d][d]=s/r;
+    }
+    auto testFlags = HDCDefault;
+    for (size_t d=1; d<=n; d++) {
+        // create temporary file name
+        auto fname = make_tmp_name("h5");
+        HDC h;
+        std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
+        h.set_data<TestType>(shape,array,testFlags);
+        h.to_hdf5(fname);
+        auto __path = std::string("hdf5://") + fname;
+        HDC j = HDC::load(__path,"");
+        auto array_j = j.as<TestType>();
+        CHECK(memcmp(array,array_j,sizeof(array)) == 0);
+        auto shape_j = j.get_shape();
+        CHECK(memcmp(array,array_j,shape.size()*sizeof(size_t)) == 0);
+        if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    }
+
+    testFlags = HDCFortranOrder;
+    for (size_t d=1; d<=n; d++) {
+        // create temporary file name
+        auto fname = make_tmp_name("h5");
+        HDC h;
+        std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
+        h.set_data<TestType>(shape,array,testFlags);
+        h.to_hdf5(fname);
+        auto __path = std::string("hdf5://") + fname;
+        HDC j = HDC::load(__path,"");
+        auto array_j = j.as<TestType>();
+        CHECK(memcmp(array,array_j,sizeof(array)) == 0);
+        auto shape_j = j.get_shape();
+        CHECK(memcmp(array,array_j,shape.size()*sizeof(size_t)) == 0);
+        if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    }
+}
 #endif
 
 TEST_CASE("UDA", "[HDC]")
@@ -810,3 +833,33 @@ TEST_CASE("UDA", "[HDC]")
     CHECK_THROWS(HDC::load("uda_new://HELP::help()"));
 #endif
 }
+
+// // // // THIS IS SUBJECT TO CHANGE - we need to deal with HDC storage being rewritten...
+// // // TEST_CASE("SerializeString", "[HDC]")
+// // // {
+// // //     // This does not makes sense for umap storage
+// // //     if (global_storage->name() == "mdbm") {
+// // //         PREPARE_TREE();
+// // //         std::string ser = tree.serialize();
+// // //         HDC tree2 = HDC::deserialize_HDC_string(ser);
+// // //         auto tree_dump = tree.to_json_string();
+// // //         auto tree2_dump = tree2.to_json_string();
+// // //         CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
+// // //     }
+// // // }
+// // //
+// // // TEST_CASE("SerializeFile", "[HDC]")
+// // // {
+// // //     // This does not makes sense for umap storage
+// // //     if (global_storage->name() == "mdbm") {
+// // //         // the same thing to/from file
+// // //         auto fname = make_tmp_name("h5");
+// // //         PREPARE_TREE();
+// // //         tree.serialize(fname);
+// // //         auto tree_dump = tree.to_json_string();
+// // //         HDC from_file = HDC::deserialize_HDC_file(fname);
+// // //         auto file_dump = from_file.to_json_string();
+// // //         CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
+// // //         if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+// // //     }
+// // // }

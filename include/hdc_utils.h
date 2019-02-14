@@ -63,7 +63,7 @@ void hello__();
 
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
-char* transpose_buffer(char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder = false);
+void transpose_buffer(char* new_buffer, char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder = false);
 char* transpose_buffer(char* buffer);
 
 bool fileExists(const std::string& file);

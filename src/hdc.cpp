@@ -125,6 +125,7 @@ std::vector<std::string> HDC::get_available_plugins()
 
 void HDC::set_storage(std::string storage)
 {
+//     if (stores != nullptr) throw HDCException("Storage is already set...");
     boost::optional<std::string> storage_cmd = options->get_optional<std::string>("storage_cmdline");
     if (storage_cmd) {
         while (options->count("storage") > 0) options->erase("storage");
@@ -1158,10 +1159,7 @@ const std::map<std::string,HDC> HDC::get_children() const
     auto children = get_children_ptr();
     std::map<std::string,HDC> ch;
     if (children != nullptr) {
-        auto s = children->size();
-        size_t i = 0;
         for (auto it = children->begin(); it != children->end(); ++it) {
-            if (i++ == s) break;
             ch[it->key.c_str()] = HDC(storage,it->address.c_str());
         }
     }
@@ -1173,11 +1171,8 @@ const std::vector<HDC> HDC::get_slices() const
     auto children = get_children_ptr();
     std::vector<HDC> ch;
     if (children != nullptr) {
-        auto s = children->size();
-        size_t i = 0;
         ch.reserve(children->size());
         for (auto it = children->begin(); it != children->end(); ++it) {
-            if (i++ == s) break;
             ch.push_back(HDC(storage,it->address.c_str()));
         }
     }
@@ -1255,17 +1250,17 @@ HDC HDC::deserialize_HDC_file(const std::string& filename)
 
 HDC HDC::deserialize_HDC_string(const std::string& str)
 {
-    HDC tree;
+    // This function should be called only once at the beginning because it replaces initialization
     pt::ptree root;
-
     stringstream ss;
     ss << str;
     pt::read_json(ss, root);
 
     string storage_str = root.get<std::string>("storage");
+    auto storage_options = root.get_child("settings");
+    //Check
     options = new pt::ptree();
     HDC::set_default_storage_options(storage_str,"");
-    auto storage_options = root.get_child("settings");
     for (const auto& kv : storage_options) {
         options->add_child("storage-options/" + kv.first, kv.second);
     }

@@ -9,159 +9,124 @@ const char* ref_group_name = "__hdc";
 
 void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest);
 
+PredType HDCtype2HDF5(hdc_type_t t) {
+    switch (t) {
+        case HDC_STRUCT:
+        case HDC_LIST:
+            return PredType::STD_REF_OBJ;
+        case HDC_BOOL:
+            return PredType::NATIVE_UINT_LEAST8;
+        case HDC_INT8:
+            return PredType::NATIVE_INT_LEAST8;
+        case HDC_INT16:
+            return PredType::NATIVE_INT_LEAST16;
+        case HDC_INT32:
+            return PredType::NATIVE_INT_LEAST32;
+        case HDC_INT64:
+            return PredType::NATIVE_INT_LEAST64;
+        case HDC_UINT8:
+            return PredType::NATIVE_UINT_LEAST8;
+        case HDC_UINT16:
+            return PredType::NATIVE_UINT_LEAST16;
+        case HDC_UINT32:
+            return PredType::NATIVE_UINT_LEAST32;
+        case HDC_UINT64:
+            return PredType::NATIVE_UINT_LEAST64;
+        case HDC_FLOAT:
+            return PredType::NATIVE_FLOAT;
+        case HDC_DOUBLE:
+            return PredType::NATIVE_DOUBLE;
+        case HDC_STRING:
+            return PredType::C_S1;
+        case HDC_EMPTY:
+            return PredType::NATIVE_DOUBLE;
+        default:
+            throw HDCException("hdf5_tree_to_hdc(): Unknown data type: " + std::to_string(t) + "\n");
+    }
+    return PredType::NATIVE_UINT_LEAST32;
+}
+
 void write_node(HDC h, H5File* file, std::string path)
 {
     auto buffer = h.get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     auto data = buffer+sizeof(hdc_header_t);
-    char* transposed_data = nullptr;
+    std::vector<char> new_buffer(header->buffer_size);
     if (h.is_fortranorder()) {
-        transposed_data = transpose_buffer(h.get_buffer(), h.get_rank(), h.get_shape(), (hdc_type_t)h.get_type(),
+        transpose_buffer(new_buffer.data()+sizeof(hdc_header_t),h.get_buffer()+sizeof(hdc_header_t), h.get_rank(), h.get_shape(), (hdc_type_t)h.get_type(),
                                            h.is_fortranorder());
-        data = transposed_data;
+        data = new_buffer.data()+sizeof(hdc_header_t);
     }
     H5std_string DATASET_NAME(path);
     try {
-        hsize_t rank = header->rank;
-        hsize_t dimsf[10];
-        for (unsigned int i = 0; i < rank; i++) {
-            dimsf[i] = header->shape[i];
-        };
-        DataSpace dataspace(rank, dimsf);
-        DataSet dataset;
-        IntType i8datatype(PredType::NATIVE_INT8);
-        i8datatype.setOrder(H5T_ORDER_LE);
-        IntType i16datatype(PredType::NATIVE_INT16);
-        i16datatype.setOrder(H5T_ORDER_LE);
-        IntType i32datatype(PredType::NATIVE_INT32);
-        i32datatype.setOrder(H5T_ORDER_LE);
-        IntType i64datatype(PredType::NATIVE_INT64);
-        i64datatype.setOrder(H5T_ORDER_LE);
-        IntType u8datatype(PredType::NATIVE_UINT8);
-        u8datatype.setOrder(H5T_ORDER_LE);
-        IntType u16datatype(PredType::NATIVE_UINT16);
-        u16datatype.setOrder(H5T_ORDER_LE);
-        IntType u32datatype(PredType::NATIVE_UINT32);
-        u32datatype.setOrder(H5T_ORDER_LE);
-        IntType u64datatype(PredType::NATIVE_UINT64);
-        u64datatype.setOrder(H5T_ORDER_LE);
-        FloatType fdatatype(PredType::NATIVE_FLOAT);
-        fdatatype.setOrder(H5T_ORDER_LE);
-        FloatType ddatatype(PredType::NATIVE_DOUBLE);
-        ddatatype.setOrder(H5T_ORDER_LE);
-        StrType sdatatype(PredType::C_S1);
-
-        hsize_t dims1[] = { 1 };
-        DataSpace edataspace(1, dims1);
-        double edata[] = { NAN };
-
         hdc_map_t* children;
-
-        switch (header->type) {
-            case HDC_STRUCT:
-                children = h.get_children_ptr();
-                if (children != nullptr) {
-                    Group* group = new Group(file->createGroup(path));
-                    hdc_map_t::nth_index<1>::type& ri = children->get<1>();
-                    for (auto it = ri.begin(); it != ri.end(); ++it) {
-                        auto key = it->key.c_str();
-                        auto uuid = it->address.c_str();
-                        write_node(HDC(global_storage, uuid), file, path + "/" + key);
-                    }
-                    delete group;
+        DataSet dataset;
+        if (header->type == HDC_STRUCT) {
+            children = h.get_children_ptr();
+            if (children != nullptr) {
+                Group* group = new Group(file->createGroup(path));
+                hdc_map_t::nth_index<1>::type& ri = children->get<1>();
+                for (auto it = ri.begin(); it != ri.end(); ++it) {
+                    auto key = it->key.c_str();
+                    auto uuid = it->address.c_str();
+                    write_node(HDC(global_storage, uuid), file, path + "/" + key);
                 }
-                return;
-            case HDC_LIST:
-                children = h.get_children_ptr();
-                if (children != nullptr) {
-                    Group ref_group;
-                    try {
-                        Exception::dontPrint(); //TODO: Do this just temporarily???
-                        ref_group = file->openGroup(ref_group_name);
-                    } catch (FileIException& e) {
-                        ref_group = file->createGroup(ref_group_name);
-                    }
-                    hdc_map_t::nth_index<1>::type& ri = children->get<1>();
-                    size_t n_child = children->size();
-                    hobj_ref_t* wbuf = new hobj_ref_t[n_child];
-                    size_t i = 0;
-                    for (auto it = ri.begin(); it != ri.end(); ++it) {
-                        auto uuid = it->address.c_str();
-                        HDC h(global_storage, uuid);
-                        auto _uuid = h.get_uuid();
+                delete group;
+            }
+            return;
+        } else if (header->type == HDC_LIST) {
+            children = h.get_children_ptr();
+            if (children != nullptr) {
+                Group ref_group;
+                try {
+                    Exception::dontPrint(); //TODO: Do this just temporarily???
+                    ref_group = file->openGroup(ref_group_name);
+                } catch (FileIException& e) {
+                    ref_group = file->createGroup(ref_group_name);
+                }
+                hdc_map_t::nth_index<1>::type& ri = children->get<1>();
+                size_t n_child = children->size();
+                hobj_ref_t* wbuf = new hobj_ref_t[n_child];
+                size_t i = 0;
+                for (auto it = ri.begin(); it != ri.end(); ++it) {
+                    auto uuid = it->address.c_str();
+                    HDC h(global_storage, uuid);
+                    auto _uuid = h.get_uuid();
 //                         write_node(h,file,path+"/"+to_string(i++));
-                        std::string full_path = std::string(ref_group_name) + "/" + _uuid;
-                        write_node(h, file, full_path.c_str());
-                        auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
-                        if (ret < 0) throw HDCException("Could not create refference to " + full_path);
-                        i++;
-                    }
+                    std::string full_path = std::string(ref_group_name) + "/" + _uuid;
+                    write_node(h, file, full_path.c_str());
+                    auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
+                    if (ret < 0) throw HDCException("Could not create refference to " + full_path);
+                    i++;
+                }
 
-                    hsize_t ref_dims[1];
-                    ref_dims[0] = n_child;
-                    DataSpace ref_dataspace(1, ref_dims);
-                    DataSet ref_dataset = file->createDataSet(DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace);
-                    ref_dataset.write(wbuf, PredType::STD_REF_OBJ);
+                hsize_t ref_dims[1];
+                ref_dims[0] = n_child;
+                DataSpace ref_dataspace(1, ref_dims);
+                DataSet ref_dataset = file->createDataSet(DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace);
+                ref_dataset.write(wbuf, PredType::STD_REF_OBJ);
 
 //                     delete group;
-                    delete[] wbuf;
-                }
-                return;
-            case HDC_BOOL:
-                dataset = file->createDataSet(DATASET_NAME, u8datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_UINT_LEAST8);
-                return;
-            case HDC_INT8:
-                dataset = file->createDataSet(DATASET_NAME, i8datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_INT_LEAST8);
-                return;
-            case HDC_INT16:
-                dataset = file->createDataSet(DATASET_NAME, i16datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_INT_LEAST16);
-                return;
-            case HDC_INT32:
-                dataset = file->createDataSet(DATASET_NAME, i32datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_INT_LEAST32);
-                return;
-            case HDC_INT64:
-                dataset = file->createDataSet(DATASET_NAME, i64datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_INT_LEAST64);
-                return;
-            case HDC_UINT8:
-                dataset = file->createDataSet(DATASET_NAME, u8datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_UINT_LEAST8);
-                return;
-            case HDC_UINT16:
-                dataset = file->createDataSet(DATASET_NAME, u16datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_UINT_LEAST16);
-                return;
-            case HDC_UINT32:
-                dataset = file->createDataSet(DATASET_NAME, u32datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_UINT_LEAST32);
-                return;
-            case HDC_UINT64:
-                dataset = file->createDataSet(DATASET_NAME, u64datatype, dataspace);
-                dataset.write(data, PredType::NATIVE_UINT_LEAST64);
-                return;
-            case HDC_FLOAT:
-                dataset = file->createDataSet(DATASET_NAME, fdatatype, dataspace);
-                dataset.write(data, PredType::NATIVE_FLOAT);
-                return;
-            case HDC_DOUBLE:
-                dataset = file->createDataSet(DATASET_NAME, ddatatype, dataspace);
-                dataset.write(data, PredType::NATIVE_DOUBLE);
-                return;
-            case HDC_STRING:
-                dataset = file->createDataSet(DATASET_NAME, sdatatype, dataspace);
-                dataset.write(data, PredType::C_S1);
-                return;
-            case HDC_EMPTY:
-                dataset = file->createDataSet(DATASET_NAME, ddatatype, edataspace);
-                dataset.write(edata, PredType::NATIVE_DOUBLE);
-                return;
-            default:
-                throw HDCException("Unknown data type." + std::to_string(header->type) + "\n");
-
+                delete[] wbuf;
+            }
+            return;
+        } else if (header->type == HDC_EMPTY) {
+            hsize_t dims1[] = { 1 };
+            DataSpace edataspace(1, dims1);
+            double edata[] = { NAN };
+            dataset = file->createDataSet(DATASET_NAME, PredType::NATIVE_DOUBLE, edataspace);
+            dataset.write(edata, PredType::NATIVE_DOUBLE);
+        } else {
+            hsize_t rank = header->rank;
+            hsize_t dimsf[10];
+            for (unsigned int i = 0; i < rank; i++) {
+                dimsf[i] = header->shape[i];
+            };
+            DataSpace dataspace(rank, dimsf);
+            auto t = HDCtype2HDF5(header->type);
+            dataset = file->createDataSet(DATASET_NAME, t, dataspace);
+            dataset.write(data, t);
+            return;
         }
     }  // end of try block
         // catch failure caused by the H5File operations
@@ -171,7 +136,6 @@ void write_node(HDC h, H5File* file, std::string path)
         #else
             std::cerr << "write_node(): " << "FileIException" << std::endl;
         #endif
-        exit(-1);
     }
         // catch failure caused by the DataSet operations
     catch (DataSetIException& error) {
@@ -180,7 +144,6 @@ void write_node(HDC h, H5File* file, std::string path)
         #else
             std::cerr << "write_node(): " << "DataSetIException" << std::endl;
         #endif
-        exit(-1);
     }
         // catch failure caused by the DataSpace operations
     catch (DataSpaceIException& error) {
@@ -189,7 +152,6 @@ void write_node(HDC h, H5File* file, std::string path)
         #else
             std::cerr << "write_node(): " << "DataSpaceIException" << std::endl;
         #endif
-        exit(-1);
     }
         // catch failure caused by the DataSpace operations
     catch (DataTypeIException& error) {
@@ -198,7 +160,6 @@ void write_node(HDC h, H5File* file, std::string path)
         #else
             std::cerr << "write_node(): " << "DataTypeIException" << std::endl;
         #endif
-        exit(-1);
     }
     return;
 }

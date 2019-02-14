@@ -840,29 +840,6 @@ public:
             return reinterpret_cast<void*>(data);
         }
     }
-//     void* as_void_ptr() const
-//     {
-//         auto buffer = get_buffer();
-//         auto data = buffer+sizeof(hdc_header_t);
-//         auto header = reinterpret_cast<hdc_header_t*>(buffer);
-//         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
-//             throw std::runtime_error("This is not a terminal node...");
-//         }
-//         DEBUG_STDOUT(std::string("as<")+get_type_str()+">()");
-//         if (!storage->has(uuid)) {
-//             throw HDCException("as_void_ptr(): Not found: "+std::string(uuid.c_str())+"\n");
-//         }
-//         if (header->flags & HDCExternal)
-//         {
-//             void* result;
-//             memcpy(&result,data,sizeof(void*));
-//             return result;
-//         }
-//         else
-//         {
-//             return reinterpret_cast<void*>(data);
-//         }
-//     }
     /**
      * @brief Returns vector with data of this node casted to a given type. Unlike as(), the data are always copied.
      *
