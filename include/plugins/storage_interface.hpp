@@ -2,8 +2,7 @@
 #define STORAGE_INTERFACE
 
 #include <Pluma/Pluma.hpp>
-#include <boost/property_tree/ptree.hpp>
-
+#include "storage_options.hpp"
 using namespace std;
 
 class Storage{
@@ -22,7 +21,7 @@ public:
     virtual bool has(string path) = 0;
     virtual void remove(string path) = 0;
     virtual void init(string settings) = 0;
-    virtual void init(boost::property_tree::ptree& settings) = 0;
+    virtual void init(StorageOptions& settings) = 0;
     virtual string name() = 0;
 };
 

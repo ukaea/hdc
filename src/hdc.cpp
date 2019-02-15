@@ -135,8 +135,12 @@ void HDC::set_storage(std::string storage)
     std::string selected_store_name = options->get<std::string>("storage", storage);
     if (stores == nullptr) stores = new vector<HDCStorage*>();
     if (avail_stores.find(selected_store_name) != avail_stores.end()) {
-        if (!options->count("storage_options")) options->add_child("storage_options", pt::ptree());
-        stores->push_back(new HDCStorage(stores->size(), avail_stores[selected_store_name], options->get_child("storage_options")));
+
+        //TODO: ADD SETTINGS HERE!!!
+        StorageOptions so;
+        so.filename = "/tmp/changeme";
+        so.persistent = true;
+        stores->push_back(new HDCStorage(stores->size(), avail_stores[selected_store_name], so));
         global_storage = stores->at(0);
     } else {
         throw HDCException("Unable to select the store.\n");
@@ -205,7 +209,6 @@ HDC::HDC(size_t data_size)
     storage = global_storage;
     storage->set(uuid, buffer.data(), buffer_size);
 }
-
 
 /** Default constructor. Creates empty HDC */
 HDC::HDC() : HDC(0lu)
@@ -916,10 +919,13 @@ void HDC::serialize(const std::string& filename) const
 
 const std::string HDC::serialize() const
 {
-    pt::ptree root = this->storage->get_status();
-    root.put("uuid", this->uuid);
+    auto so = this->storage->get_options();
+    Json::Value root;
+    root["filename"] = so.filename;
+    root["persistent"] = so.persistent;
+    root["uuid"] = this->uuid;
     std::stringstream ss;
-    write_json(ss, root);
+    ss << root;
     return ss.str();
 }
 

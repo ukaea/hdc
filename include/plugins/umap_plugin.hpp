@@ -17,7 +17,6 @@ struct datum {
 
 using namespace std;
 
-
 class UnorderedMapStorage : public Storage {
 private:
     unordered_map<string,vector<char>> _map;
@@ -76,11 +75,9 @@ public:
         return;
     };
     void init(string settings UNUSED) {
-        // Nothing to set here ...
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
-    void init(boost::property_tree::ptree& settings UNUSED) {
-        // Nothing to set here ...
+    void init(StorageOptions& settings UNUSED) {
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
     string name() {

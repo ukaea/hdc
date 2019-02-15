@@ -5,12 +5,12 @@
 #include <mdbm.h>
 #include <iostream>
 #include <cstdio>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 #include <hdc_helpers.h>
 #include <exception>
 #include <sys/stat.h>
+#include <json/json.h>
+
 using namespace std;
 
 /**
@@ -26,18 +26,16 @@ class MDBMStorage : public Storage {
 private:
     MDBM* db = NULL;
     bool initialized = false;
-    bool persistent = false;
-    std::string filename;
+    StorageOptions options;
 public:
     MDBMStorage() {
         DEBUG_STDOUT("MDBMStorage()\n");
     };
     ~MDBMStorage() {
         DEBUG_STDOUT("~MDBMStorage()\n");
-        if(!persistent) {
-//             cout << "Calling cleanup()\n";
+        if(!options.persistent) {
             cleanup();
-        } else std::cout << "Storage has been set persistent. The File database has been stored in file \"" << filename << "\""<< std::endl;
+        } else std::cout << "Storage has been set persistent. The File database has been stored in file \"" << options.filename << "\""<< std::endl;
     };
     bool usesBuffersDirectly() {
         return false;
@@ -79,12 +77,12 @@ public:
         DEBUG_STDOUT("MDBMStorage::cleanup()\n");
         if (this->db != NULL) {
             mdbm_close(this->db);
-            mdbm_delete_lockfiles(this->filename.c_str());
+            mdbm_delete_lockfiles(this->options.filename.c_str());
             this->db = NULL;
         }
         // Remove db file if the data persistence is not required
-        if (!this->persistent && MDBMFileExists(filename)) {
-            if (::remove(filename.c_str()) != 0) {
+        if (!this->options.persistent && MDBMFileExists(options.filename)) {
+            if (::remove(options.filename.c_str()) != 0) {
                 throw std::runtime_error("MDBMStorage::cleanup(): Error deleting file\n");
             };
         }
@@ -101,18 +99,20 @@ public:
         return;
     };
     void init(string settings) {
-        boost::property_tree::ptree root;
+        Json::Value root;
         std::stringstream ss;
         ss << settings;
-        boost::property_tree::read_json(ss,root);
-        init(root);
+        ss >> root;
+        StorageOptions so;
+        so.filename = root.get("filename","/tmp/db.mdbm").asString();
+        so.persistent = root.get("persistent",false).asBool();
+        init(so);
         return;
     }
-    void init(boost::property_tree::ptree& root) {
-        filename = root.get<std::string>("filename","/tmp/db.mdbm");
-        persistent = root.get<bool>("persistent",true);
+    void init(StorageOptions& _options) {
+        options = _options;
         D(printf("Filename: %s\n", filename.c_str());)
-        this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
+        this->db = mdbm_open(options.filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
         return;

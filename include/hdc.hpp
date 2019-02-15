@@ -7,7 +7,6 @@
 #include "andres/marray.hxx"
 
 // Boost
-// #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -31,6 +30,7 @@
 #include "hdc_storage.h"
 #include "hdc_errors.hpp"
 #include "hdc_helpers.h"
+#include "hdc_options.hpp"
 
 #ifdef _USE_HDF5
 #include <H5Cpp.h>

@@ -7,8 +7,9 @@
 #include <iostream>
 #include <cstdio>
 #include <hdc_helpers.h>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include "storage_options.hpp"
+// #include <boost/property_tree/ptree.hpp>
+// #include <boost/property_tree/json_parser.hpp>
 
 using namespace std;
 
@@ -16,9 +17,11 @@ class HDCStorage {
 private:
     pluma::Pluma _pluma;
     Storage* _store;
-    boost::property_tree::ptree settings;
+//     boost::property_tree::ptree settings;
     string pluginPath;
     size_t _id;
+    StorageOptions options;
+
 public:
     HDCStorage(size_t _id, std::string name, std::string settings_str) {
         _pluma.acceptProviderType<StorageProvider>();
@@ -34,23 +37,50 @@ public:
         }
         std::vector<StorageProvider*> providers;
         _pluma.getProviders(providers);
+
+        Json::Value root;
         if (!settings_str.empty()) {
             try {
                 stringstream ss(settings_str);
-                boost::property_tree::read_json(ss,settings);
+                //boost::property_tree::read_json(ss,settings);
+                ss >> root;
+                options.do_init = !root.get("do_not_init",false).asBool();
+                options.filename = root.get("filename","/tmp/db.mdbm").asString();
+                options.persistent = root.get("persistent",false).asBool();
             }
             catch (ifstream::failure& e) {
                 cout << "Error reading / opening file." << endl;
             }
         }
         _store = providers.front()->create();
-        if (!settings.get("do_not_init",false))
-            _store->init(settings);
+        if (options.do_init) _store->init(options);
         this->pluginPath = name;
         this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }
+    HDCStorage(size_t _id, std::string name, StorageOptions _options) {
+        _pluma.acceptProviderType<StorageProvider>();
+        //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
+        if (name.size() != 0) {
+            if (!_pluma.load(name)) {
+                DEBUG_STDERR("Could not load plugin \"" +name +"\"\n");
+                DEBUG_STDERR("Using std::unordered_map as fallback\n");
+                _pluma.addProvider( new UnorderedMapStorageProvider() );
+            }
+        } else {
+            _pluma.addProvider( new UnorderedMapStorageProvider() );
+        }
+        std::vector<StorageProvider*> providers;
+        _pluma.getProviders(providers);
 
+        options = _options;
+        _store = providers.front()->create();
+        if (options.do_init) _store->init(options);
+        this->pluginPath = name;
+        this->_id = _id;
+        DEBUG_STDOUT(_store->getDescription());
+    }
+/*
     HDCStorage(size_t _id, std::string name, boost::property_tree::ptree _settings) {
         _pluma.acceptProviderType<StorageProvider>();
         //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
@@ -73,9 +103,9 @@ public:
         this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }
+*/
     ~HDCStorage() {
-        if (!settings.get("do_not_init",false))
-            _store->cleanup();
+        if (options.do_init) _store->cleanup();
         delete _store;
         _pluma.unloadAll();
     }
@@ -115,11 +145,8 @@ public:
     void sync() {
         _store-> sync();
     };
-    boost::property_tree::ptree get_status() {
-        boost::property_tree::ptree root;
-        root.put("storage", this->name());
-        root.add_child("settings",this->settings);
-        return root;
+    StorageOptions get_options() {
+        return options;
     };
     string name() {
         return _store->name();
