@@ -40,6 +40,9 @@ public:
     string getDescription() {
         return "This is unordered_map based storage.";
     };
+    std::string get_settings() {
+        return "{}";
+    }
     void set(string key, char* data, size_t size) {
         if (_map.find(key) != _map.end() && &(_map[key])[0] != data) {
             _map.erase(key);
@@ -74,10 +77,7 @@ public:
         }
         return;
     };
-    void init(string settings UNUSED) {
-        DEBUG_STDOUT("UnorderedMapStorage::init()\n");
-    };
-    void init(StorageOptions& settings UNUSED) {
+    void init(std::string settings UNUSED) {
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
     string name() {

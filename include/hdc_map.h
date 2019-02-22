@@ -55,10 +55,10 @@ struct shared_string_hash {
     }
 };
 
-// Equal predicate -- replacement fot std::equal_to, same reasom as hash
+// Equal predicate -- replacement for std::equal_to, same reason as hash
 struct shared_string_equal {
     template <class T, class U>
-    bool compare(const T& lhs, const U& rhs) const {
+    static bool compare(const T& lhs, const U& rhs) {
         return lhs == rhs;
     }
     template <class T, class U>

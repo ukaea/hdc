@@ -6,7 +6,7 @@
 #include <unistd.h>
 using namespace std;
 static void StorageReset() {
-    if (global_storage != nullptr) HDC::destroy();
+    if (hdc_global.storage != nullptr) HDC::destroy();
     //HDC::init("mdbm","{\"filename\": \"/tmp/db1.mdbm\", \"persistent\": false}");
     HDC::init();
 }

@@ -1,5 +1,5 @@
-#ifndef HDC_OPTIONS_HPP
-#define HDC_OPTIONS_HPP
+#ifndef HDC_GLOBAL_HPP
+#define HDC_GLOBAL_HPP
 
 #include <vector>
 #include <string>
@@ -8,17 +8,14 @@
 // HDC
 #include "hdc_storage.h"
 
-
-class HDCOptions {
+class HDCGlobal {
 public:
     //this holds all registered storages
-    std::vector<HDCStorage> stores;
+    std::vector<HDCStorage*> stores;
     //this is default global storage
-    HDCStorage* global_storage;
+    HDCStorage* storage = nullptr;
     //list of found plugins
     std::unordered_map<std::string,std::string> avail_stores;
 };
 
-extern HDCOptions opt;
-
-#endif //HDC_OPTIONS_HPP
+#endif //HDC_GLOBAL_HPP

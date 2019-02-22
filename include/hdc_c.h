@@ -42,7 +42,7 @@ void test_str(char* str);
 void hdc_serialize(hdc_t tree, char* buffer);
 hdc_t hdc_deserialize(const char* str);
 size_t hdc_get_size(hdc_t tree);
-void hdc_get_available_plugins(char** keys, int* num);
+void hdc_search_plugins(char** keys, int* num);
 void hdc_clean(hdc_t tree);
 
 // ----------------------- Data setters --------------------------- //

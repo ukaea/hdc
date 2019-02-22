@@ -6,10 +6,6 @@
 // marray - array views
 #include "andres/marray.hxx"
 
-// Boost
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
 // some other stuff -- to be reduced later
 #include <cstdint>
 #include <cstdlib>
@@ -30,7 +26,7 @@
 #include "hdc_storage.h"
 #include "hdc_errors.hpp"
 #include "hdc_helpers.h"
-#include "hdc_options.hpp"
+#include "hdc_global.hpp"
 
 #ifdef _USE_HDF5
 #include <H5Cpp.h>
@@ -40,16 +36,8 @@
 
 
 using namespace std;
-namespace pt = boost::property_tree;
+extern HDCGlobal hdc_global;
 
-//this will hold all the settings, instead of boost::property_tree json we will use the jsoncpp for actual reading of them.
-extern pt::ptree* options;
-//this holds all registered storages
-extern std::vector<HDCStorage*>* stores;
-//this is default global storage
-extern HDCStorage* global_storage;
-//list of found plugins
-extern std::unordered_map<std::string,std::string> avail_stores;
 
 using byte = unsigned char;
 using hdc_index_t = boost::variant<size_t,std::string>;
@@ -221,7 +209,7 @@ public:
         header->buffer_size = buffer_size;
         memcpy(buffer.data()+sizeof(hdc_header_t), data.data(), data_size);
         uuid = generate_uuid_str();
-        storage = global_storage;
+        storage = hdc_global.storage;
         storage->set(uuid, buffer.data(), buffer_size);
     }
     /**
@@ -247,19 +235,13 @@ public:
     *
     * @param searchPath p_searchPath:...
     */
-    static void search_plugins(string searchPath="./:./plugins:./hdc_plugins:.local/hdc/plugins");
+    static std::unordered_map<std::string,std::string> search_plugins(std::string customSearchPath="");
     /**
     * @brief Sets the default storage to be used.
     *
     * @param storage p_storage:...
     */
-    static void set_storage(std::string storage="umap");
-    /**
-    * @brief Returns list of all available storage plugins
-    *
-    * @return std::vector< std::string >
-    */
-    static std::vector<std::string> get_available_plugins();
+    static void set_storage(std::string storage="umap", std::string storage_cmd="");
     /**
     * @brief Returns a directory path where the HDC library is loaded from.
     *
@@ -267,12 +249,12 @@ public:
     */
     static std::string get_library_dir(void);
     /**
-    * @brief Initializes global_storage  -- mainly due to C and Fortran
+    * @brief Initializes hdc_global.storage  -- mainly due to C and Fortran
     *
     * @param storage p_storage:...
     * @param storage_options p_storage_options:...
     */
-    static void init(const std::string& storage="umap", const std::string& storage_options="");
+    static void init(const std::string& storage="", const std::string& storage_options="");
     /**
     * @brief Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions.
     *
@@ -305,7 +287,7 @@ public:
     */
     void clean();
     /**
-    * @brief Cleans up the global_storage  -- mainly due to C and Fortran
+    * @brief Cleans up the hdc_global.storage  -- mainly due to C and Fortran
     *
     */
     static void destroy();
@@ -804,7 +786,7 @@ public:
         if (header->flags & HDCExternal)
         {
             T* result;
-            memcpy(&result,data,sizeof(void*));
+            memcpy(&result,data,sizeof(result));
             return result;
         }
         else
@@ -832,7 +814,7 @@ public:
         if (header.flags & HDCExternal)
         {
             void* result;
-            memcpy(&result,data,sizeof(void*));
+            memcpy(&result,data,sizeof(result));
             return result;
         }
         else
@@ -1051,14 +1033,14 @@ public:
     * @param filename p_filename:...
     * @return HDC
     */
-    static HDC deserialize_HDC_file(const std::string& filename);
+    static HDC deserialize_file(const std::string& filename);
     /**
     * @brief deserialize from storage
     *
     * @param filename p_filename:...
     * @return HDC
     */
-    static HDC deserialize_HDC_string(const std::string& filename);
+    static HDC deserialize_str(const std::string& filename);
     /**
     * @brief ...
     *

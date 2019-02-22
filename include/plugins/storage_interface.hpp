@@ -2,7 +2,7 @@
 #define STORAGE_INTERFACE
 
 #include <Pluma/Pluma.hpp>
-#include "storage_options.hpp"
+#include <unordered_map>
 using namespace std;
 
 class Storage{
@@ -20,8 +20,8 @@ public:
     virtual size_t get_size(string path) = 0;
     virtual bool has(string path) = 0;
     virtual void remove(string path) = 0;
-    virtual void init(string settings) = 0;
-    virtual void init(StorageOptions& settings) = 0;
+    virtual void init(std::string settings) = 0;
+    virtual std::string get_settings() = 0;
     virtual string name() = 0;
 };
 

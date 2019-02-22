@@ -1,76 +1,4 @@
-#include "catch.hpp"
-#include "hdc.hpp"
-#include <boost/filesystem.hpp>
-
-size_t factorial(size_t n)
-{
-  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
-}
-
-bool in_vector(std::string str, const std::vector<std::string>& vector)
-{
-    return (std::find(vector.begin(), vector.end(), str) != vector.end());
-}
-
-const std::string make_tmp_name(const std::string& suffix = "h5")
-{
-    boost::filesystem::path temp = boost::filesystem::unique_path();
-    temp += std::string(".")+suffix;
-    const std::string tempstr = temp.native();
-    return tempstr;
-}
-
-template<typename T, typename U>
-bool arrcmp(T* arr1, U* arr2, size_t n_elem) {
-    for (size_t i=0; i<n_elem; i++) {
-        if (arr1[i] != arr2[i]) return false;
-    }
-    return true;
-}
-
-#define ALL_NUMERIC_TYPES int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, float, double
-
-#define PREPARE_TREE()                                                                              \
-    std::vector<size_t> shape = {4};                                                                \
-    double data_double[] = {0.0,1000.0,1.0e-200,1.0e200};                                           \
-    int8_t data_int8[] = {-7,2,3,4};                                                                \
-    int16_t data_int16[] = {-7000,2000,3000,4000};                                                  \
-    int32_t data_int32[] = {-70000000,10000000,20000000,300000000};                                 \
-    int64_t data_int64[] = {-70000000,10000000,20000000,300000000};                                 \
-    uint8_t data_uint8[] = {7,2,3,4};                                                               \
-    uint16_t data_uint16[] = {7000,2000,3000,4000};                                                 \
-    uint32_t data_uint32[] = {70000000,10000000,20000000,300000000};                                \
-    uint64_t data_uint64[] = {70000000,10000000,20000000,300000000};                                \
-    float data_float[] = {0.0,1000.0,1.0e-20,1.0e20};                                               \
-    bool data_bool[] = {false,true,false,true};                                                     \
-    HDC tree;                                                                                       \
-    HDC scalar;                                                                                     \
-    scalar.set_data(333.333);                                                                       \
-    tree.add_child("aaa/bbb/_scalar", scalar);                                                      \
-    tree["aaa/bbb/double"].set_data<double>(shape,data_double);                                     \
-    tree["aaa/bbb/float"].set_data<float>(shape,data_float);                                        \
-    tree["aaa/bbb/double2"].set_data<double>(shape,data_double);                                    \
-    tree["aaa/bbb/int8"].set_data<int8_t>(shape,data_int8);                                         \
-    tree["aaa/bbb/int16"].set_data<int16_t>(shape,data_int16);                                      \
-    tree["aaa/bbb/int32"].set_data<int32_t>(shape,data_int32);                                      \
-    tree["aaa/bbb/int64"].set_data<int64_t>(shape,data_int64);                                      \
-    tree["aaa/bbb/uint8"].set_data<uint8_t>(shape,data_uint8);                                      \
-    tree["aaa/bbb/uint16"].set_data<uint16_t>(shape,data_uint16);                                   \
-    tree["aaa/bbb/uint32"].set_data<uint32_t>(shape,data_uint32);                                   \
-    tree["aaa/bbb/uint64"].set_data<uint64_t>(shape,data_uint64);                                   \
-    tree["aaa/bbb/bool"].set_data<bool>(shape,data_bool);                                           \
-    HDC ch;                                                                                         \
-    tree.add_child("aaa/bbb/empty", ch);                                                            \
-    HDC list;                                                                                       \
-    HDC lch;                                                                                        \
-    for (int i=0;i<5;i++) {                                                                         \
-        HDC lch;                                                                                    \
-        list.append(lch);                                                                           \
-    }                                                                                               \
-    tree.add_child("aaa/list", list);                                                               \
-    HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
-    tree.add_child("aaa/string",str);                                                               \
-
+#include "hdc_test_common.hpp"
 
 TEST_CASE("StringParsing", "[HDCUtils]")
 {
@@ -94,12 +22,12 @@ TEST_CASE("StringParsing", "[HDCUtils]")
 TEST_CASE("GetPlugins","[HDC]")
 {
     //HDC::search_plugins(); // This is called in main.cpp
-    auto plugins = HDC::get_available_plugins();
+    auto plugins = HDC::search_plugins();
     // "umap" should be always present
-    CHECK(in_vector("umap",plugins));
+    CHECK(in_map("umap",plugins));
 #ifdef _USE_MDBM
     // "mdbm" has been built and  should be found
-    CHECK(in_vector("mdbm",plugins));
+    CHECK(in_map("mdbm",plugins));
 #endif // _USE_MDBM
 }
 
@@ -653,8 +581,8 @@ TEST_CASE("clean", "[HDC]")
     tree["ch"] = HDC();
     auto ch_uuid = tree["ch"].get_uuid();
     tree.clean();
-    CHECK(global_storage->has(uuid) == false);
-    CHECK(global_storage->has(ch_uuid) == false);
+    CHECK(hdc_global.storage->has(uuid) == false);
+    CHECK(hdc_global.storage->has(ch_uuid) == false);
 }
 
 TEST_CASE("load", "[HDC]")
@@ -833,33 +761,3 @@ TEST_CASE("UDA", "[HDC]")
     CHECK_THROWS(HDC::load("uda_new://HELP::help()"));
 #endif
 }
-
-// // // // THIS IS SUBJECT TO CHANGE - we need to deal with HDC storage being rewritten...
-// // // TEST_CASE("SerializeString", "[HDC]")
-// // // {
-// // //     // This does not makes sense for umap storage
-// // //     if (global_storage->name() == "mdbm") {
-// // //         PREPARE_TREE();
-// // //         std::string ser = tree.serialize();
-// // //         HDC tree2 = HDC::deserialize_HDC_string(ser);
-// // //         auto tree_dump = tree.to_json_string();
-// // //         auto tree2_dump = tree2.to_json_string();
-// // //         CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
-// // //     }
-// // // }
-// // //
-// // // TEST_CASE("SerializeFile", "[HDC]")
-// // // {
-// // //     // This does not makes sense for umap storage
-// // //     if (global_storage->name() == "mdbm") {
-// // //         // the same thing to/from file
-// // //         auto fname = make_tmp_name("h5");
-// // //         PREPARE_TREE();
-// // //         tree.serialize(fname);
-// // //         auto tree_dump = tree.to_json_string();
-// // //         HDC from_file = HDC::deserialize_HDC_file(fname);
-// // //         auto file_dump = from_file.to_json_string();
-// // //         CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
-// // //         if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
-// // //     }
-// // // }

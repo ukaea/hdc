@@ -17,6 +17,15 @@ if (_BUILD_MDBM)
 endif()
 install(TARGETS hdc_test_c DESTINATION bin)
 
+if (_BUILD_MDBM)
+    add_executable(hdc_test_serialization hdc_test_serialization.cpp)
+    target_link_libraries(hdc_test_serialization hdc ${Boost_LIBRARIES})
+    add_test(NAME hdc_test_serialization COMMAND hdc_test_serialization WORKING_DIRECTORY "${hdc_BINARY_DIR}")
+    target_compile_definitions(hdc_test_serialization PRIVATE -D_USE_MDBM=1)
+    install(TARGETS hdc_test_serialization DESTINATION bin)
+endif()
+
+
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "DEBUG" AND ENABLE_COVERAGE)
     set(COVERAGE_GCOVR_EXCLUDES '../build/*' '../thirdparty/*' '../examples/*' '../test/*')
     SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML(NAME test_coverage EXECUTABLE hdc_test DEPENDENCIES hdc_test)

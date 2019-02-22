@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
         std::string str(mem);
-        HDC tree = HDC::deserialize_HDC_string(str);
+        HDC tree = HDC::deserialize_str(str);
         cout << "-------------- Slave tree dump start --------------" << endl;
         tree.dump();
         cout << "--------------  Slave tree dump end  --------------" << endl;

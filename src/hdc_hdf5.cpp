@@ -69,7 +69,7 @@ void write_node(HDC h, H5File* file, std::string path)
                 for (auto it = ri.begin(); it != ri.end(); ++it) {
                     auto key = it->key.c_str();
                     auto uuid = it->address.c_str();
-                    write_node(HDC(global_storage, uuid), file, path + "/" + key);
+                    write_node(HDC(hdc_global.storage, uuid), file, path + "/" + key);
                 }
                 delete group;
             }
@@ -88,9 +88,9 @@ void write_node(HDC h, H5File* file, std::string path)
                 size_t n_child = children->size();
                 hobj_ref_t* wbuf = new hobj_ref_t[n_child];
                 size_t i = 0;
-                for (auto it = ri.begin(); it != ri.end(); ++it) {
+                for (auto it = ri.begin(); it != ri.end(); ++it) { //TODO: We could probably re-do this using get_children() method
                     auto uuid = it->address.c_str();
-                    HDC h(global_storage, uuid);
+                    HDC h(hdc_global.storage, uuid);
                     auto _uuid = h.get_uuid();
 //                         write_node(h,file,path+"/"+to_string(i++));
                     std::string full_path = std::string(ref_group_name) + "/" + _uuid;

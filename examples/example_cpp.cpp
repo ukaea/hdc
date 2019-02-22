@@ -5,10 +5,9 @@
 
 using namespace std;
 
-int main(int argc, const char* argv[])
+int main()
 {
     HDC::init();
-    HDC::parse_cmdline(argc, argv);
     // Create new HDC tree
     HDC tree;
     // Add some children - one can use either bracket operator or add_child() method

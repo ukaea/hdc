@@ -327,16 +327,17 @@ void hdc_init(const char* pluginFileName, const char* pluginSettingsFileName)
 
 void hdc_destroy()
 {
-    if (global_storage != nullptr) HDC::destroy();
+    if (hdc_global.storage != nullptr) HDC::destroy();
 }
 
-void hdc_get_available_plugins(char** keys, int* num)
+void hdc_search_plugins(char** keys, int* num)
 {
-    std::vector<std::string> cppkeys = HDC::get_available_plugins();
-    for (size_t i = 0; i < cppkeys.size(); i++) {
-        strcpy(keys[i],cppkeys[i].c_str());
+    auto plugins = HDC::search_plugins();
+    size_t i=0;
+    for (auto plugin: plugins) {
+        strcpy(keys[i++],plugin.first.c_str());
     }
-    *num = cppkeys.size();
+    *num = plugins.size();
 }
 
 void hdc_serialize(hdc_t tree, char* buffer)
@@ -348,7 +349,7 @@ void hdc_serialize(hdc_t tree, char* buffer)
 
 hdc_t hdc_deserialize(const char* str)
 {
-    return HDC::deserialize_HDC_string(str).as_obj();
+    return HDC::deserialize_str(str).as_obj();
 }
 
 hdc_data_t hdc_get_data(hdc_t tree, const char* path)
