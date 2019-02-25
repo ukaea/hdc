@@ -42,7 +42,6 @@
     HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
     tree.add_child("aaa/string",str);                                                               \
 
-// THIS IS SUBJECT TO CHANGE - we need to deal with HDC storage being rewritten...
 TEST_CASE("SerializeString", "[HDC]")
 {
     HDC::destroy();
@@ -50,9 +49,9 @@ TEST_CASE("SerializeString", "[HDC]")
     auto settings_str = "{\"filename\": \"" + fname + "\", \"persistent\": true}";
     HDC::init("mdbm",settings_str);
     PREPARE_TREE();
-    std::string ser = tree.serialize();
+    auto tree_dump = tree.to_json_string();
+    auto ser = tree.serialize();
     auto uuid = tree.get_uuid();
-
     //Check serialized string for arbitrary filelds.
     std::stringstream ss(ser);
     Json::Value root;
@@ -66,7 +65,6 @@ TEST_CASE("SerializeString", "[HDC]")
     HDC::destroy();
     // load back from the file
     HDC tree2 = HDC::deserialize_str(ser);
-    auto tree_dump = tree.to_json_string();
     auto tree2_dump = tree2.to_json_string();
     CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
     HDC::destroy();

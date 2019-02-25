@@ -72,7 +72,6 @@ std::string HDC::get_library_dir()
 
 void HDC::init(const std::string& _storage_str, const std::string& _storage_options)
 {
-std::cerr << "HDC::init("<<_storage_options<<","<<"_storage_options"<<")\n";
     std::string env_plugin_path_str = "";
     std::string env_persistent_str = "";
     std::string env_filename_str = "";
