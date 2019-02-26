@@ -44,9 +44,6 @@ public:
         delete _store;
         _pluma.unloadAll();
     }
-    bool usesBuffersDirectly() {
-        return _store->usesBuffersDirectly();
-    }
     string getDescription() {
         return _store->getDescription();
     }

@@ -28,7 +28,7 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "DEBUG" AND ENABLE_COVERAGE)
     set(COVERAGE_GCOVR_EXCLUDES '../build/*' '../thirdparty/*' '../examples/*' '../test/*')
-    SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML(NAME test_coverage EXECUTABLE hdc_test DEPENDENCIES hdc_test)
+    SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML(NAME test_coverage EXECUTABLE ctest DEPENDENCIES hdc_test)
 endif()
 
 # Just to make CTest happy:

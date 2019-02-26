@@ -27,9 +27,6 @@ public:
     ~UnorderedMapStorage() {
         DEBUG_STDOUT("~UnorderedMapStorage()\n");
     };
-    bool usesBuffersDirectly() {
-        return true;
-    };
     void lock(string path UNUSED) {};
     void unlock(string path UNUSED) {};
     bool locked() {

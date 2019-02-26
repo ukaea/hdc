@@ -12,7 +12,7 @@ public:
     virtual void unlock(string path) = 0;
     virtual bool locked() = 0;
     virtual void sync() = 0;
-    virtual bool usesBuffersDirectly() = 0;
+//     virtual bool usesBuffersDirectly() = 0;
     virtual string getDescription() = 0;
     virtual void set(string path, char* data, size_t size) = 0;
     virtual char* get(string path) = 0;

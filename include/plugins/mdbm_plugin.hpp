@@ -38,9 +38,6 @@ public:
             cleanup();
         } else std::cout << "Storage has been set persistent. The File database has been stored in file \"" << filename << "\""<< std::endl;
     };
-    bool usesBuffersDirectly() {
-        return false;
-    };
     void lock(string path) {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         datum key = {&path[0u], static_cast<int>(path.length())};

@@ -21,6 +21,19 @@
 #include <andres/marray.hxx>
 #include <sys/stat.h>
 
+#define PRINT_INFO(buffer)                                                          \
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);                          \
+    printf("Size:\t\t%zu\n", header->buffer_size);                                  \
+    printf("NDim:\t\t%zu\n", header->rank);                                         \
+    printf("Shape:\t\t");                                                           \
+    for (size_t i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", header->shape[i]);     \
+    printf("\n");                                                                   \
+    printf("Data Size:\t\t%zu\n", header->data_size);                               \
+    printf("External:\t\t%d\n", is_external());                                     \
+    printf("ReadOnly:\t\t%d\n", is_readonly());                                     \
+    printf("FortranOrder:\t%d\n", is_fortranorder());                               \
+    std::cout << "Type:\t" << header->type << "\n";                                 \
+
 using hdc_index_t = boost::variant<size_t,std::string>;
 using hdc_path_t = std::list<hdc_index_t>;
 
