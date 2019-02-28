@@ -70,30 +70,41 @@ std::string HDC::get_library_dir()
     return path.substr(0,found);
 }
 
-void HDC::init(const std::string& _storage_str, const std::string& _storage_options)
+void HDC::init(const std::string& _storage_str, const std::string& settings_str)
 {
     std::string env_plugin_path_str = "";
     std::string env_persistent_str = "";
     std::string env_filename_str = "";
     std::string env_plugin_str = "";
     //get environment
-    if(const char* env_plugin_path = std::getenv("HDC_STORAGE")) {
+    if(const char* env_plugin_path = std::getenv("HDC_PLUGIN_PATH")) {
         env_plugin_path_str = env_plugin_path;
-        std::cout << "Your HDC_STORAGE is: " << env_plugin_path << '\n';
+        D(std::cerr << "Your HDC_PLUGIN_PATH is: " << env_plugin_path << '\n';)
     }
     if(const char* env_persistent = std::getenv("HDC_PERSISTENT")) {
         env_persistent_str = env_persistent;
         std::transform(env_persistent_str.begin(), env_persistent_str.end(), env_persistent_str.begin(), ::tolower);
-        std::cout << "Your HDC_PERSISTENT is: " << env_persistent << '\n';
+        D(std::cerr << "Your HDC_PERSISTENT is: " << env_persistent << '\n';)
     }
     if(const char* env_filename = std::getenv("HDC_DB_FILE")) {
         env_filename_str = env_filename;
-        std::cout << "Your HDC_DB_FILE is: " << env_filename << '\n';
+        D(std::cerr << "Your HDC_DB_FILE is: " << env_filename << '\n';)
     }
     if(const char* env_plugin = std::getenv("HDC_PLUGIN")) {
         env_plugin_str = env_plugin;
-        std::cout << "Your HDC_PLUGIN is: " << env_plugin << '\n';
+        D(std::cerr << "Your HDC_PLUGIN is: " << env_plugin << '\n';)
     }
+    // create settings from environment
+    Json::Value so_env;
+    if (env_persistent_str != "") so_env["persistent"] = (env_persistent_str == "true");
+    if (env_filename_str != "") so_env["filename"] = env_filename_str;
+    Json::Value so_arg;
+    std::stringstream ss_arg(settings_str);
+    if (settings_str != "") ss_arg >> so_arg;
+    if (so_arg.isMember("persistent")) so_env["persistent"] = so_arg["persistent"];
+    if (so_arg.isMember("filename")) so_env["filename"] = so_arg["filename"];
+    std::stringstream ss_stor;
+    ss_stor << so_env;
     // get library dir and assemble plugin search path
     std::string lib_dir = HDC::get_library_dir();
     std::string searchPath  = lib_dir + ":" + lib_dir+"/plugins" + ":" + lib_dir+"/hdc"
@@ -105,9 +116,8 @@ void HDC::init(const std::string& _storage_str, const std::string& _storage_opti
     std::string selected_store_name = "umap"; //This is the default
     if (env_plugin_str != "") selected_store_name = env_plugin_str;
     if (_storage_str != "") selected_store_name = _storage_str;
-
     // set the storage
-    hdc_global.stores.push_back(new HDCStorage(hdc_global.stores.size(), hdc_global.avail_stores[selected_store_name], _storage_options));
+    hdc_global.stores.push_back(new HDCStorage(hdc_global.stores.size(), hdc_global.avail_stores[selected_store_name], ss_stor.str()));
     hdc_global.storage = hdc_global.stores[0];
 
 }

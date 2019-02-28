@@ -18,12 +18,11 @@ private:
     size_t _id;
     bool _do_init;
 public:
-    HDCStorage(size_t _id, std::string name, std::string settings_str, bool do_init=true) {
+    HDCStorage(size_t _id, std::string plugin_path, std::string settings_str, bool do_init=true) {
         _pluma.acceptProviderType<StorageProvider>();
-        //_pluma.addProvider( new UnorderedMapStorageProvider() ); // Add Unordered map storage as fallback
-        if (name.size() != 0) {
-            if (!_pluma.load(name)) {
-                DEBUG_STDERR("Could not load plugin \"" +name +"\"\n");
+        if (plugin_path.size() != 0) {
+            if (!_pluma.load(plugin_path)) {
+                DEBUG_STDERR("Could not load plugin \"" + plugin_path +"\"\n");
                 DEBUG_STDERR("Using std::unordered_map as fallback\n");
                 _pluma.addProvider( new UnorderedMapStorageProvider() );
             }
@@ -35,7 +34,7 @@ public:
         _store = providers.front()->create();
         _do_init = do_init;
         if (_do_init) _store->init(settings_str);
-        this->pluginPath = name;
+        this->pluginPath = plugin_path;
         this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }

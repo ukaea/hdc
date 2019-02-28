@@ -94,3 +94,28 @@ TEST_CASE("SerializeFile", "[HDC]")
     //Remove mdbm file
     if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
 }
+
+TEST_CASE("TestSettings" ,"[HDC]")
+{
+    HDC::destroy();
+    putenv((char *)"HDC_PLUGIN_PATH=/1");
+    putenv((char *)"HDC_PERSISTENT=TRUE");
+    putenv((char *)"HDC_DB_FILE=/tmp/pokus.db");
+    putenv((char *)"HDC_PLUGIN=mdbm");
+    HDC::init();
+    CHECK(strcmp(hdc_global.storage->name().c_str(), "mdbm") == 0);
+    Json::Value settings;
+    std::stringstream ss(hdc_global.storage->get_settings());
+    ss >> settings;
+    CHECK(settings["persistent"].asBool() == true);
+    CHECK(strcmp(settings["filename"].asCString(),"/tmp/pokus.db") == 0);
+    HDC::destroy();
+    //test that arguments have preffered
+    HDC::init("mdbm","{\"filename\":\"/tmp/aaa.mdbm\",\"persistent\": false}");
+    Json::Value settings2;
+    std::stringstream ss2(hdc_global.storage->get_settings());
+    ss2 >> settings2;
+    CHECK(settings2["persistent"].asBool() == false);
+    CHECK(strcmp(settings2["filename"].asCString(),"/tmp/aaa.mdbm") == 0);
+    HDC::destroy();
+}

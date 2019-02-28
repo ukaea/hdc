@@ -36,7 +36,7 @@ public:
         DEBUG_STDOUT("~MDBMStorage()\n");
         if(!persistent) {
             cleanup();
-        } else std::cout << "Storage has been set persistent. The File database has been stored in file \"" << filename << "\""<< std::endl;
+        } else std::cout << "Storage has been set persistent. The data are stored in file \"" << filename << "\""<< std::endl;
     };
     void lock(string path) {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
@@ -115,8 +115,10 @@ public:
     };
     void init(std::string settings) {
         Json::Value root;
-        std::stringstream ss(settings);
-        ss >> root;
+        if (settings != "") {
+            std::stringstream ss(settings);
+            ss >> root;
+        }
         filename = root.get("filename", "/tmp/db.mdbm").asString();
         persistent = root.get("persistent", false).asBool();
         D(printf("Filename: %s\n", filename.c_str());)
