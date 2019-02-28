@@ -1219,7 +1219,6 @@ HDC HDC::deserialize_str(const std::string& str)
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
 HDC HDC::load(const std::string& uri, const std::string& datapath)
 {
-    HDC h;
     // start by parsing the string
     std::vector<std::string> result;
     boost::algorithm::split_regex(result, uri, boost::regex("://"));
@@ -1240,6 +1239,10 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
             return from_uda(split_res[0], split_res[1]);
         } else if (prefix == "uda_new") {
             return uda2HDC(split_res[0], split_res[1]);
+        } else if (prefix == "hdc_file") {
+            return deserialize_file(split_res[0]);
+        } else if (prefix == "hdc_string") {
+            return deserialize_str(split_res[0]);
         } else {
             throw HDCException("Protocol " + prefix + " not known\n");
         }
