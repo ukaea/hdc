@@ -17,7 +17,7 @@
 #define UNUSED __attribute__((unused))
 
 #define HDC_STORAGE_INIT()              \
-    if (global_storage == nullptr) {    \
+    if (hdc_global.storage == nullptr) {    \
         HDC::init();                    \
         atexit(HDC::destroy);           \
     }

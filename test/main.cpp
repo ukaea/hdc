@@ -5,11 +5,10 @@
 int main( int argc, char* argv[] ) {
     int result = -1;
     Catch::Session session;
-    HDC::search_plugins();
-    auto plugins = HDC::get_available_plugins();
+    auto plugins = HDC::search_plugins();
     for (auto plugin : plugins) {
-        std::cout << "--- Testing \"" << plugin << "\" plugin..." << std::endl;
-        HDC::init(plugin, "{\"persistent\": false}");
+        std::cout << "--- Testing \"" << plugin.first << "\" plugin found in " << plugin.second << " ..." << std::endl;
+        HDC::init(plugin.first, "{\"persistent\": false}");
         result = session.run( argc, argv );
         HDC::destroy();
         if (result) break;

@@ -17,7 +17,6 @@ struct datum {
 
 using namespace std;
 
-
 class UnorderedMapStorage : public Storage {
 private:
     unordered_map<string,vector<char>> _map;
@@ -27,9 +26,6 @@ public:
     };
     ~UnorderedMapStorage() {
         DEBUG_STDOUT("~UnorderedMapStorage()\n");
-    };
-    bool usesBuffersDirectly() {
-        return true;
     };
     void lock(string path UNUSED) {};
     void unlock(string path UNUSED) {};
@@ -41,6 +37,9 @@ public:
     string getDescription() {
         return "This is unordered_map based storage.";
     };
+    std::string get_settings() {
+        return "{}";
+    }
     void set(string key, char* data, size_t size) {
         if (_map.find(key) != _map.end() && &(_map[key])[0] != data) {
             _map.erase(key);
@@ -75,12 +74,7 @@ public:
         }
         return;
     };
-    void init(string settings UNUSED) {
-        // Nothing to set here ...
-        DEBUG_STDOUT("UnorderedMapStorage::init()\n");
-    };
-    void init(boost::property_tree::ptree& settings UNUSED) {
-        // Nothing to set here ...
+    void init(std::string settings UNUSED) {
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
     };
     string name() {
