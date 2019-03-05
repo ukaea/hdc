@@ -135,6 +135,7 @@ option(DEBUG "Turns some debug output on or off." OFF)
 option(GOPTION "adds -g to compiler flags" ON)
 option(BUILD_DOC "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 option(BUILD_MDBM_PLUGIN "Enables MDBM storage plugin." ON)
+option(BUILD_OWN_MDBM "Build own MDBM" OFF)
 
 if (GOPTION)
     set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g" )
@@ -224,8 +225,21 @@ if (BUILD_MDBM_PLUGIN)
         message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
         message("Found MDBM library: ${MDBM_LIBRARY}")
         set(_BUILD_MDBM TRUE)
+    elseif(BUILD_OWN_MDBM)
+        include(ExternalProject)
+        ExternalProject_Add(mdbm
+            GIT_REPOSITORY https://github.com/yahoo/mdbm.git
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND make -j PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
+            INSTALL_COMMAND make  install PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
+            PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
+            BUILD_IN_SOURCE 1
+        )
+        set(MDBM_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/mdbm/include)
+        set(MDBM_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/mdbm/lib64/libmdbm.so)
+        set(_BUILD_MDBM TRUE)
     else()
-        message("libmdbm not found. Skipping build of MDBM plugin...")
+        message("libmdbm not found and not set to build. Skipping build of MDBM plugin...")
     endif()
 else() # BUILD_MDBM_PLUGIN
     message("MDBM plugin disabled. Skipping...")
