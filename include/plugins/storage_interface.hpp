@@ -24,6 +24,6 @@ public:
     virtual string name() = 0;
 };
 
-PLUMA_PROVIDER_HEADER(Storage);
+PLUMA_PROVIDER_HEADER(Storage)
 
 #endif // STORAGE_INTERFACE

@@ -82,7 +82,7 @@ public:
     }
 };
 
-PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage);
+PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage)
 
 #endif //UMAP_PLUGIN_HPP
 

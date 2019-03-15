@@ -559,7 +559,7 @@ public:
     /**
     * @brief Sets string to current node
     *
-    * @param str p_str: string to ne set.
+    * @param str p_str: string to set.
     */
     void set_string(const std::string& str) {
         if (storage->has(uuid)) {
@@ -781,6 +781,7 @@ public:
         T tp{};
         if (header->type != to_typeid(tp))
         {
+std::cerr << "*** " << header->type << " " << to_typeid(tp) << std::endl;
             throw HDCException("as() stored and requested types do not match\n");
         }
         if (header->flags & HDCExternal)

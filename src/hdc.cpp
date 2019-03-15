@@ -59,7 +59,7 @@ std::unordered_map<std::string,std::string> HDC::search_plugins(std::string cust
         }
     }
     return found_stores;
-};
+}
 
 std::string HDC::get_library_dir()
 {
@@ -221,7 +221,7 @@ HDC::HDC(const HDC& h)
     HDC_STORAGE_INIT()
     storage = h.storage;
     uuid = h.uuid;
-};
+}
 
 /** Deserializing constructor */
 HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
@@ -748,7 +748,6 @@ const HDC HDC::operator[](const std::string& path) const
     return get(path);
 }
 
-
 HDC HDC::operator[](size_t index)
 {
     return get_or_create(index);
@@ -880,7 +879,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
         for (auto s : shape) std::cout << s << ", ";
         std::cout << "}, type = " << type << ", flags = " << flags;
         std::cout << std::endl;
-    );
+    )
     auto rank = shape.size();
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -1348,7 +1347,7 @@ void HDC::set_data(hdc_data_t obj)
             memcpy(new_buffer.data()+sizeof(hdc_header_t),obj.data,header->data_size);
             storage->set(uuid, new_buffer.data(), header->buffer_size);
         }
-};
+}
 
 void HDC::set_external(hdc_data_t obj)
 {
@@ -1379,7 +1378,7 @@ void HDC::set_external(hdc_data_t obj)
             memcpy(new_buffer.data()+sizeof(hdc_header_t),&(obj.data),header->data_size);
             storage->set(uuid, new_buffer.data(), header->buffer_size);
         }
-};
+}
 
 bool HDC::is_terminal() const
 {

@@ -93,28 +93,28 @@ size_t hdc_sizeof (hdc_type_t type) {
         default:
             throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(type)+"\n");
     }
-};
+}
 
 template <typename T>
 hdc_type_t to_typeid(T a) {
     throw HDCException("hdc_sizeof(): Wrong type "+std::to_string(a)+"\n");
-};
-hdc_type_t to_typeid(double a UNUSED) {return HDC_DOUBLE;};
-hdc_type_t to_typeid(float a UNUSED) {return HDC_FLOAT;};
-hdc_type_t to_typeid(int64_t a UNUSED) {return HDC_INT64;};
-hdc_type_t to_typeid(int32_t a UNUSED) {return HDC_INT32;};
-hdc_type_t to_typeid(int16_t a UNUSED) {return HDC_INT16;};
-hdc_type_t to_typeid(int8_t a UNUSED) {return HDC_INT8;};
-hdc_type_t to_typeid(char a UNUSED) {return HDC_INT8;};
-hdc_type_t to_typeid(uint64_t a UNUSED) {return HDC_UINT64;};
-hdc_type_t to_typeid(uint32_t a UNUSED) {return HDC_UINT32;};
-hdc_type_t to_typeid(uint16_t a UNUSED) {return HDC_UINT16;};
-hdc_type_t to_typeid(uint8_t a UNUSED) {return HDC_UINT8;};
-hdc_type_t to_typeid(std::string a UNUSED) {return HDC_STRING;};
-hdc_type_t to_typeid(char* a UNUSED) {return HDC_STRING;};
-hdc_type_t to_typeid(char const* a UNUSED) {return HDC_STRING;};
-hdc_type_t to_typeid(bool a UNUSED) {return HDC_BOOL;};
-
+}
+hdc_type_t to_typeid(double a UNUSED) {return HDC_DOUBLE;}
+hdc_type_t to_typeid(float a UNUSED) {return HDC_FLOAT;}
+hdc_type_t to_typeid(int64_t a UNUSED) {return HDC_INT64;}
+hdc_type_t to_typeid(int32_t a UNUSED) {return HDC_INT32;}
+hdc_type_t to_typeid(int16_t a UNUSED) {return HDC_INT16;}
+hdc_type_t to_typeid(int8_t a UNUSED) {return HDC_INT8;}
+hdc_type_t to_typeid(char a UNUSED) {return HDC_INT8;}
+hdc_type_t to_typeid(uint64_t a UNUSED) {return HDC_UINT64;}
+hdc_type_t to_typeid(uint32_t a UNUSED) {return HDC_UINT32;}
+hdc_type_t to_typeid(uint16_t a UNUSED) {return HDC_UINT16;}
+hdc_type_t to_typeid(uint8_t a UNUSED) {return HDC_UINT8;}
+hdc_type_t to_typeid(std::string a UNUSED) {return HDC_STRING;}
+hdc_type_t to_typeid(char* a UNUSED) {return HDC_STRING;}
+hdc_type_t to_typeid(char const* a UNUSED) {return HDC_STRING;}
+hdc_type_t to_typeid(bool a UNUSED) {return HDC_BOOL;}
+hdc_type_t to_typeid(std::_Bit_reference a UNUSED) {return HDC_BOOL;}
 
 hdc_type_t to_typeid(const std::type_info& t) {
     const std::string type_str = t.name();
