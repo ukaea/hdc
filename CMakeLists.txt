@@ -1,11 +1,25 @@
 cmake_minimum_required(VERSION 3.3)
 
 ########################################################################################################################
+# Hunter configuration
+include("cmake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/ruslo/hunter/archive/v0.16.15.tar.gz"
+    SHA1 "6974c2150fc0d3b09de3ad1efcbf15d360647ffa"
+)
+
+########################################################################################################################
 # CMake configuration
 cmake_policy(SET CMP0057 NEW)
 
 project(hdc)
 enable_language(CXX C Fortran)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED YES)
 
 set(hdc_TEST_DIR "${hdc_SOURCE_DIR}/test")
 set(hdc_SOURCE_DIR "${hdc_SOURCE_DIR}/src")
@@ -46,51 +60,19 @@ endif()
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "PGI")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -fPIC")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -fPIC")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
+
 else()
     message("Warning: Unsupported C compiler: ${CMAKE_C_COMPILER_ID}")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99")
-endif()
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++14 -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++14 -fPIC")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
-else()
-    message("Warning: Unsupported CXX compiler: ${CMAKE_CXX_COMPILER_ID}")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11")
-endif()
-if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
-# -diag-enable=remark
-    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -free -diag-enable=warn -fPIC")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -free -diag-enable=warn -fPIC")
-elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
-    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -Mfree -fPIC")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -Mfree -fPIC")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
-else()
-    message("Warning: Unsupported Fortran compiler: ${CMAKE_Fortran_COMPILER_ID}")
-    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2")
-    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0")
 endif()
 
-set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
-set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
+# hunter_add_package(Boost COMPONENTS regex system filesystem)
+
+#set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
+#set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
