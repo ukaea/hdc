@@ -48,7 +48,6 @@ TEST_CASE("EmptyNode", "[HDC]")
     CHECK(strcmp(h.as_string().c_str(),"null\n") == 0);
 }
 
-
 TEST_CASE("EmptyNodePtr", "[HDC]")
 {
     HDC h;
@@ -147,7 +146,6 @@ TEST_CASE("NodeManipulation", "[HDC]")
     a.set_type(HDC_STRUCT);
     CHECK(a.get_type() == HDC_STRUCT);
 }
-
 
 TEST_CASE("ListManipulation", "[HDC]")
 {
@@ -251,7 +249,7 @@ TEMPLATE_TEST_CASE("as_vector_int8", "[HDC]", ALL_NUMERIC_TYPES) {
 }
 
 TEMPLATE_TEST_CASE("as_vector_uint8", "[HDC]", ALL_NUMERIC_TYPES) {
-    std::vector<uint8_t>array_in = { 7, 2, 3, 4 };
+    std::vector<uint8_t> array_in = { 7, 2, 3, 4 };
     HDC h(array_in);
     auto vector_out = h.as_vector<TestType>();
     CHECK(std::equal(array_in.begin(),array_in.end(),vector_out.begin()));

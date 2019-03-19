@@ -207,6 +207,7 @@ public:
         header->rank = rank;
         header->data_size = data_size;
         header->buffer_size = buffer_size;
+        header->shape[0] = data.size();
         memcpy(buffer.data()+sizeof(hdc_header_t), data.data(), data_size);
         uuid = generate_uuid_str();
         storage = hdc_global.storage;
@@ -845,43 +846,69 @@ std::cerr << "*** " << header->type << " " << to_typeid(tp) << std::endl;
         size_t n_elem = 0;
         if (size_elem) n_elem = header->data_size/size_elem;
         std::vector<T> result(n_elem);
-        T tp = 0;
-        if (header->type == to_typeid(tp)) {
-            result.assign(reinterpret_cast<T*>(data),reinterpret_cast<T*>(data)+n_elem);
-        } else {
-            if (header->type == HDC_INT8) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int8_t*>(data)[i];
-            }
-            else if (header->type == HDC_INT16) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int16_t*>(data)[i];
-            }
-            else if (header->type == HDC_INT32) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int32_t*>(data)[i];
-            }
-            else if (header->type == HDC_INT64) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<int64_t*>(data)[i];
-            }
-            else if (header->type == HDC_UINT8) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint8_t*>(data)[i];
-            }
-            else if (header->type == HDC_UINT16) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint16_t*>(data)[i];
-            }
-            else if (header->type == HDC_UINT32) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint32_t*>(data)[i];
-            }
-            else if (header->type == HDC_UINT64) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<uint64_t*>(data)[i];
-            }
-            else if (header->type == HDC_FLOAT) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<float*>(data)[i];
-            }
-            else if (header->type == HDC_DOUBLE) {
-                for (size_t i=0; i<n_elem; i++) result[i] = reinterpret_cast<double*>(data)[i];
-            }
-            else {
-                throw HDCException("as_vector(): requested unknown data conversion. This works for numerical types only...\n");
-            }
+        if (header->type == HDC_INT8) {
+            // return std::vector<T>(reinterpret_cast<int8_t*>(data),reinterpret_cast<int8_t*>(data)+n_elem); // does not work on bionic
+            int8_t* res = new int8_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<int8_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_INT16) {
+            int16_t* res = new int16_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<int16_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_INT32) {
+            int32_t* res = new int32_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<int32_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_INT64) {
+            int64_t* res = new int64_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<int64_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_UINT8) {
+            uint8_t* res = new uint8_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<uint8_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_UINT16) {
+            uint16_t* res = new uint16_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<uint16_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_UINT32) {
+            uint32_t* res = new uint32_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<uint32_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_UINT64) {
+            uint64_t* res = new uint64_t[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<uint64_t*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_FLOAT) {
+            float* res = new float[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<float*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else if (header->type == HDC_DOUBLE) {
+            double* res = new double[n_elem];
+            for (size_t i=0; i<n_elem; i++) res[i] = reinterpret_cast<double*>(data)[i];
+            result.assign(res,res+n_elem);
+            delete[] res;
+        }
+        else {
+            throw HDCException("as_vector(): requested unknown data conversion. This works for numerical types only...\n");
         }
         return result;
     }
