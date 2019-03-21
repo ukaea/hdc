@@ -26,7 +26,8 @@ contains
         call storage_reset()
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_create_delete, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
+        print '("bm_create_delete, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")', &
+            n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
         call storage_reset()
     end subroutine bm_create_delete
 
@@ -46,7 +47,8 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_create_delete_no_alloc, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
+        print '("bm_create_delete_no_alloc, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")', &
+            n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
         call storage_reset()
     end subroutine bm_create_delete_no_alloc
 
@@ -70,7 +72,8 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_add_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
+        print '("bm_add_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")', &
+            n_items,e_time,1.0e-3/e_time*n_items,e_time/n_items
         call storage_reset()
     end subroutine bm_add_child
 
@@ -96,7 +99,8 @@ contains
             e_time = e_time + real(clock_stop-clock_start)/real(clock_rate)
             call hdc_clean(tree)
         end do
-        print '("bm_add_child_depth, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")',depth,e_time/100,1.0e-3/e_time*1000,e_time/1000
+        print '("bm_add_child_depth, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.2,"s/item")', &
+            depth,e_time/100,1.0e-3/e_time*1000,e_time/1000
         call storage_reset()
     end subroutine bm_add_child_depth
 
@@ -135,7 +139,8 @@ contains
         e_time = real(clock_stop-clock_start)/real(clock_rate)
 !         e_time = (t2-t1)/dble(10000)
 !         e_time = (tf-ts)
-        print '("bm_get_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f16.2,"k items/s")',max_items,e_time/100_dp,100_dp/dble(e_time*1000/100)
+        print '("bm_get_child, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f16.2,"k items/s")', &
+            max_items,e_time/100_dp,100_dp/dble(e_time*1000/100)
         call storage_reset()
     end subroutine bm_get_child
 
@@ -165,7 +170,8 @@ contains
 !
 !         call system_clock(count=clock_stop)      ! Stop Timer
 !         e_time = real(clock_stop-clock_start)/real(clock_rate)
-!         print '("bm_get_child_path, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.6,"us/item")',depth,e_time/100,1.0e-3/e_time*100000,e_time/100000/1000000
+!         print '("bm_get_child_path, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2,"k items/s = ",E8.6,"us/item")', &
+!                 depth,e_time/100,1.0e-3/e_time*100000,e_time/100000/1000000
 !         call storage_reset()
 !     end subroutine bm_get_child_path
 
@@ -187,7 +193,8 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_set_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8.0_dp*array_size/dble(2**30*e_time)*100
+        print '("bm_set_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+            array_size,e_time/100,8.0_dp*array_size/dble(2**30*e_time)*100
         call storage_reset()
     end subroutine bm_set_data
 
@@ -315,7 +322,8 @@ contains
 !
 !         call system_clock(count=clock_stop)      ! Stop Timer
 !         e_time = real(clock_stop-clock_start)/real(clock_rate)
-!         print '("bm_set_data_preallocated, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8.0_dp*array_size/dble(2**30*e_time)*100
+!         print '("bm_set_data_preallocated, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+!                 array_size,e_time/100,8.0_dp*array_size/dble(2**30*e_time)*100
 !         call storage_reset()
 !     end subroutine bm_set_data_preallocated
 
@@ -335,7 +343,8 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_array_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
+        print '("bm_array_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+            array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         call storage_reset()
     end subroutine bm_array_copy
 
@@ -354,7 +363,8 @@ contains
 !         end do
 !         call system_clock(count=clock_stop)      ! Stop Timer
 !         e_time = real(clock_stop-clock_start)/real(clock_rate)
-!         print '("bm_array_copy_ptr, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
+!         print '("bm_array_copy_ptr, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+!                 array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
 !         call storage_reset()
 !     end subroutine bm_array_copy_ptr
 
@@ -379,7 +389,8 @@ contains
 
         call system_clock(count=clock_stop)      ! Stop Timer
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,100*8_8*array_size/dble(2**30*e_time)
+        print '("bm_get_data, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+            array_size,e_time/100,100*8_8*array_size/dble(2**30*e_time)
         call storage_reset()
     end subroutine bm_get_data
 
@@ -407,7 +418,8 @@ contains
         call system_clock(count=clock_stop)      ! Stop Timer
         if (s < 0) print *,s
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_get_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
+        print '("bm_get_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+            array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         call storage_reset()
     end subroutine bm_get_data_zero_copy
 
@@ -435,7 +447,8 @@ contains
         call system_clock(count=clock_stop)      ! Stop Timer
         if (s < 0) print *,s
         e_time = real(clock_stop-clock_start)/real(clock_rate)
-        print '("bm_set_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")',array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
+        print '("bm_set_data_zero_copy, n = ",i10,",Time = ",f16.12,"s,  Throughput = ",f6.2," GB/s")', &
+            array_size,e_time/100,8_8*array_size/dble(2**30*e_time)*100
         call storage_reset()
     end subroutine bm_set_data_zero_copy
 
