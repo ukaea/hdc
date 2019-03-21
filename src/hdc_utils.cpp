@@ -10,11 +10,10 @@
 
 /* ------------------------- UUID generation ----------------------------- */
 
-boost::mt19937 ran;
+boost::uuids::random_generator ran;
 
 std::string generate_uuid_str() {
-    boost::uuids::random_generator gen(&ran);
-    boost::uuids::uuid u = gen();
+    boost::uuids::uuid u = ran();
     const std::string str = boost::lexical_cast<std::string>(u);
     return str;
 }
