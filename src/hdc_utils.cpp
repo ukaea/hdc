@@ -10,10 +10,19 @@
 
 /* ------------------------- UUID generation ----------------------------- */
 
-boost::uuids::random_generator ran;
+#if (BOOST_VERSION / 100 % 1000) < 67
+    boost::mt19937 ran;
+#else
+    boost::uuids::random_generator ran;
+#endif
 
 std::string generate_uuid_str() {
-    boost::uuids::uuid u = ran();
+    #if (BOOST_VERSION / 100 % 1000) < 67
+        boost::uuids::random_generator gen(&ran);
+        boost::uuids::uuid u = gen();
+    #else
+        boost::uuids::uuid u = ran();
+    #endif
     const std::string str = boost::lexical_cast<std::string>(u);
     return str;
 }
