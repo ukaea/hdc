@@ -13,7 +13,8 @@
 #if (BOOST_VERSION / 100 % 1000) < 67
     boost::mt19937 ran;
 #else
-    boost::uuids::random_generator ran;
+//     boost::uuids::random_generator ran;
+    boost::uuids::random_generator_mt19937 ran;
 #endif
 
 std::string generate_uuid_str() {

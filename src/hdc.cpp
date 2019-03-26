@@ -1108,7 +1108,9 @@ const std::map<std::string,HDC> HDC::get_children() const
     auto children = get_children_ptr();
     std::map<std::string,HDC> ch;
     if (children != nullptr) {
+        size_t n=children->size(), i=0;
         for (auto it = children->begin(); it != children->end(); ++it) {
+            if (i++ == n) break;
             ch[it->key.c_str()] = HDC(storage,it->address.c_str());
         }
     }

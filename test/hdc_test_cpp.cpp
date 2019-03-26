@@ -149,7 +149,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
 
 TEST_CASE("ListManipulation", "[HDC]")
 {
-    HDC h;
+    HDC h();
     HDC k;
     for (size_t i = 0; i < 5; i++) {
         HDC ch("data" + std::to_string(i));
@@ -167,7 +167,7 @@ TEST_CASE("ListManipulation", "[HDC]")
     CHECK(h.get("k[1]").as_string() == "data1");
     CHECK(h.get("l[1]").as_string() == "data10");
 }
-
+/*
 TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
 {
     std::vector<size_t> shape = { 4 };
@@ -541,7 +541,7 @@ TEST_CASE("BufferGrowList", "[HDC]")
         CHECK(strcmp(h[i].as_string().c_str(), std::to_string(i).c_str()) == 0);
     }
 }
-
+*/
 TEST_CASE("GetChildren", "[HDC]")
 {
     std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
