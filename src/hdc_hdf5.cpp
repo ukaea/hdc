@@ -215,7 +215,7 @@ hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_pat
         throw HDCException("Error with HDF5 DataType to DataType Leaf Conversion");
     }
     return res;
-};
+}
 
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& dest)
 {
@@ -238,8 +238,8 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
             size_t nelems = H5Sget_simple_extent_npoints(h5_dspace_id);
             size_t rank = H5Sget_simple_extent_ndims(h5_dspace_id);
             if (rank > 1) throw HDCException("Cannot handle array of refferences of rank > 1");
-            hobj_ref_t ref_out[nelems];
-            hid_t h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out);
+            std::vector<hobj_ref_t> ref_out(nelems);
+            hid_t h5_status = H5Dread(hdf5_dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out.data());
             HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                       ref_path,
                                       "Error reading HDF5 Dataset: "
@@ -270,16 +270,17 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
         hdc_type_t dt = hdf5_type_to_hdc_type(h5_dtype_id, ref_path);
         if (dt == HDC_STRING) nelems++;
         hid_t h5_status = 0;
-        char buffer[nelems * hdc_sizeof(dt)];
-        memset(&buffer, 0, nelems * hdc_sizeof(dt));
-        h5_status = H5Dread(hdf5_dset_id, h5_dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
-        hsize_t hshape[rank];
-        H5Sget_simple_extent_dims(h5_dspace_id, hshape, NULL);
+        char* buffer = new char[nelems * hdc_sizeof(dt)];
+        memset(buffer, 0, nelems * hdc_sizeof(dt)); //Necessary for pyhdc.__str__()
+        h5_status = H5Dread(hdf5_dset_id, h5_dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+        std::vector<hsize_t> hshape(rank);
+        H5Sget_simple_extent_dims(h5_dspace_id, hshape.data(), NULL);
         std::vector<size_t> shape(rank);
         for (size_t i = 0; i < rank; i++) shape[i] = hshape[i];
         if (dt == HDC_STRING) {
             dest.set_string(buffer);
         } else { dest.set_data_c(shape, buffer, dt); } //TODO: do something more inteligent here
+        delete[] buffer;
         HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                       ref_path,
                                       "Error reading HDF5 Dataset: "
@@ -297,7 +298,7 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
                                   "Error closing HDF5 Dataspace: "
                                           << h5_dspace_id);
 
-};
+}
 
 int h5_group_check(h5_read_opdata* od, haddr_t target_addr)
 {
@@ -313,7 +314,6 @@ int h5_group_check(h5_read_opdata* od, haddr_t target_addr)
         return h5_group_check(od->prev, target_addr);
     }
 }
-
 
 herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const H5L_info_t*, void* hdf5_operator_data)
 {
@@ -490,7 +490,7 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string& ref_path, HDC& de
                                           << "traverse and read HDF5 "
                                           << "hierarchy: "
                                           << hdf5_group_id);
-};
+}
 
 void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest)
 {
@@ -527,7 +527,7 @@ void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest)
             HDC_HDF5_ERROR(ref_path, "Cannot read HDF5 Object (type == Unknown )");
         }
     }
-};
+}
 
 void hdf5_read(hid_t hdf5_id, std::string hdf5_path, HDC& dest)
 {
@@ -537,7 +537,7 @@ void hdf5_read(hid_t hdf5_id, std::string hdf5_path, HDC& dest)
     HDC_CHECK_HDF5_ERROR(h5_child_obj, "Failed to fetch HDF5 object from: " << hdf5_id << ":" << hdf5_path);
     hdf5_tree_to_hdc(h5_child_obj, hdf5_path, dest);
     HDC_CHECK_HDF5_ERROR(H5Oclose(h5_child_obj), "Failed to close HDF5 Object: " << h5_child_obj);
-};
+}
 
 void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& node)
 {
@@ -548,7 +548,7 @@ void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& 
     hdf5_read(h5_file_id, hdf5_path, node);
     // close the hdf5 file
     HDC_CHECK_HDF5_ERROR(H5Fclose(h5_file_id), "Error closing HDF5 file: " << file_path);
-};
+}
 
 HDC from_hdf5(hid_t file, const std::string& dataset_name)
 {
@@ -556,7 +556,7 @@ HDC from_hdf5(hid_t file, const std::string& dataset_name)
     HDC h;
     hdf5_read(file, dataset_name, h);
     return h;
-};
+}
 
 HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name)
 {
@@ -568,7 +568,7 @@ HDC HDC::from_hdf5(const std::string& filename, const std::string& dataset_name)
         hdf5_read(filename, "/data", h);
     }
     return h;
-};
+}
 
 #else // _USE_HDF5
 void to_hdf5(std::string filename, std::string dataset_name) {

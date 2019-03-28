@@ -357,6 +357,7 @@ cdef class HDC:
         # return string representation
         # TODO
         if self.get_type() == HDC_STRING:
+            print(self._this.as_string())
             return self._this.as_string().decode()
 
         if self.is_array():

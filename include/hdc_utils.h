@@ -18,6 +18,7 @@
 #include <boost/variant.hpp>
 #include "hdc_types.h"
 #include "hdc_errors.hpp"
+#include "hdc_global.hpp"
 #include <andres/marray.hxx>
 #include <sys/stat.h>
 
@@ -66,6 +67,7 @@ hdc_type_t to_typeid(char a);
 hdc_type_t to_typeid(std::string a);
 hdc_type_t to_typeid(char* a);
 hdc_type_t to_typeid(bool a);
+hdc_type_t to_typeid(std::_Bit_reference a); //workaround for bool
 hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize);
 hdc_type_t to_typeid(const std::type_info& t);
 hdc_type_t uda_str_to_typeid(std::string& str);
@@ -77,7 +79,6 @@ void hello__();
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
 void transpose_buffer(char* new_buffer, char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder = false);
-char* transpose_buffer(char* buffer);
 
 bool fileExists(const std::string& file);
 

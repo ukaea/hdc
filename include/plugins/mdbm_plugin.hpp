@@ -132,6 +132,6 @@ public:
     };
 };
 
-PLUMA_INHERIT_PROVIDER(MDBMStorage, Storage);
+PLUMA_INHERIT_PROVIDER(MDBMStorage, Storage)
 
 #endif //MDBM_PLUGIN_HPP

@@ -16,6 +16,7 @@ public:
     HDCStorage* storage = nullptr;
     //list of found plugins
     std::unordered_map<std::string,std::string> avail_stores;
+    boost::mt19937 ran;
 };
 
 #endif //HDC_GLOBAL_HPP
