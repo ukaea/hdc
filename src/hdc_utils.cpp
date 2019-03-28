@@ -7,23 +7,13 @@
 
 #include "hdc_helpers.h"
 
+extern HDCGlobal hdc_global;
 
 /* ------------------------- UUID generation ----------------------------- */
 
-#if (BOOST_VERSION / 100 % 1000) < 67
-    boost::mt19937 ran;
-#else
-//     boost::uuids::random_generator ran;
-    boost::uuids::random_generator_mt19937 ran;
-#endif
-
 std::string generate_uuid_str() {
-    #if (BOOST_VERSION / 100 % 1000) < 67
-        boost::uuids::random_generator gen(&ran);
-        boost::uuids::uuid u = gen();
-    #else
-        boost::uuids::uuid u = ran();
-    #endif
+    boost::uuids::basic_random_generator<boost::mt19937> gen(&(hdc_global.ran));
+    boost::uuids::uuid u = gen();
     const std::string str = boost::lexical_cast<std::string>(u);
     return str;
 }

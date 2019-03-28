@@ -66,10 +66,10 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "PGI")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
-
 else()
     message("Warning: Unsupported C compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
+# add_definitions(-DBOOST_UUID_RANDOM_GENERATOR_COMPAT)
 
 # if (BUILD_OWN_BOOST)
     hunter_add_package(Boost COMPONENTS regex system filesystem)

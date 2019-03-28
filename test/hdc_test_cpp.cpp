@@ -149,7 +149,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
 
 TEST_CASE("ListManipulation", "[HDC]")
 {
-    HDC h();
+    HDC h;
     HDC k;
     for (size_t i = 0; i < 5; i++) {
         HDC ch("data" + std::to_string(i));
