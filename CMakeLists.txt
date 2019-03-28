@@ -138,7 +138,6 @@ if (BUILD_BENCHMARKS)
             -DBENCHMARK_USE_LIBCXX:BOOL=OFF
     INSTALL_COMMAND ""
     )
-    find_package(benchmark CONFIG REQUIRED)
 endif() # BUILD_BENCHMARKS
 
 if(ENABLE_HDF5)
