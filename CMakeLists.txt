@@ -7,13 +7,6 @@ cmake_policy(SET CMP0057 NEW)
 project(hdc)
 enable_language(CXX C Fortran)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE YES)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED YES)
-set(CMAKE_Fortran_FORMAT FREE)
-
 set(hdc_TEST_DIR "${hdc_SOURCE_DIR}/test")
 set(hdc_SOURCE_DIR "${hdc_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
@@ -53,16 +46,51 @@ endif()
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -fPIC")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC -pedantic")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC -pedantic")
 else()
     message("Warning: Unsupported C compiler: ${CMAKE_C_COMPILER_ID}")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99")
 endif()
-# This can be useful for Boost>=1.67
-# add_definitions(-DBOOST_UUID_RANDOM_GENERATOR_COMPAT)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++14 -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++14 -fPIC")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+else()
+    message("Warning: Unsupported CXX compiler: ${CMAKE_CXX_COMPILER_ID}")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -pedantic")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -pedantic")
+endif()
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+# -diag-enable=remark
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -free -diag-enable=warn -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -free -diag-enable=warn -fPIC")
+elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -Mfree -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -Mfree -fPIC")
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+else()
+    message("Warning: Unsupported Fortran compiler: ${CMAKE_Fortran_COMPILER_ID}")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0")
+endif()
 
+set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
+set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
@@ -136,7 +164,7 @@ if (BUILD_BENCHMARKS)
             -DBENCHMARK_ENABLE_LTO:BOOL=OFF
             -DBENCHMARK_ENABLE_TESTING:BOOL=OFF
             -DBENCHMARK_USE_LIBCXX:BOOL=OFF
-    INSTALL_COMMAND ""
+       INSTALL_COMMAND ""
     )
 endif() # BUILD_BENCHMARKS
 
@@ -158,7 +186,7 @@ if(ENABLE_HDF5)
 #         set(_hdf5_version "1.8.21")
 #         set(_hdf5_version_short "1.8")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-    ExternalProject_Add(hdf5_local
+	ExternalProject_Add(hdf5_local
             DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${_hdf5_version_short}/hdf5-${_hdf5_version}/src/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             #DOWNLOAD_COMMAND cat ${hdc_SOURCE_DIR}/../tmp/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             CMAKE_ARGS ${ExternalProjectCMakeArgs}
@@ -218,6 +246,13 @@ else() # BUILD_MDBM_PLUGIN
 endif() # BUILD_MDBM_PLUGIN
 
 if(ENABLE_UDA)
+#    find_package( PkgConfig QUIET)
+#    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
+#    string(REPLACE ";" " " UDA_CFLAGS_OTHER "${UDA_CFLAGS_OTHER}")
+#    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
+#    link_directories(${UDA_LIBRARY_DIRS})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 
