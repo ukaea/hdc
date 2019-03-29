@@ -19,7 +19,7 @@ using namespace std;
 
 class UnorderedMapStorage : public Storage {
 private:
-    unordered_map<string,vector<char>> _map;
+    unordered_map<string,vector<char> > _map;
 public:
     UnorderedMapStorage() {
         DEBUG_STDOUT("UnorderedMapStorage()\n");
