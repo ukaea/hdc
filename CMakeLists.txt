@@ -229,14 +229,14 @@ if (BUILD_MDBM_PLUGIN)
         include(ExternalProject)
         ExternalProject_Add(mdbm
             GIT_REPOSITORY https://github.com/yahoo/mdbm.git
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND make -j PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
-            INSTALL_COMMAND make  install PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
-            PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
+            CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/scripts/mdbm_configure.sh ${CMAKE_CURRENT_BINARY_DIR}/mdbm-prefix/src/mdbm ${CMAKE_CURRENT_BINARY_DIR}/mdbm-prefix
+            BUILD_COMMAND $(MAKE)
+            INSTALL_COMMAND $(MAKE) install
             BUILD_IN_SOURCE 1
         )
-        set(MDBM_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/mdbm/include)
-        set(MDBM_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/mdbm/lib64/libmdbm.so)
+	ExternalProject_Get_Property(mdbm INSTALL_DIR)
+        set(MDBM_INCLUDE_DIR ${INSTALL_DIR}/include)
+        set(MDBM_LIBRARY ${INSTALL_DIR}/lib64/libmdbm.so)
         set(_BUILD_MDBM TRUE)
     else()
         message("libmdbm not found and not set to build. Skipping build of MDBM plugin...")
