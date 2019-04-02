@@ -21,7 +21,7 @@ endif(ENABLE_UDA)
 add_library(hdc SHARED ${HDC_SOURCES})
 
 if(ENABLE_UDA)
-  target_link_libraries(hdc PRIVATE ${UDA_FAT_CPP_LIBRARIES} MdsLib netcdf)
+  target_link_libraries(hdc PRIVATE ${UDA_FAT_CPP_LIBRARIES})
 endif(ENABLE_UDA)
 
 target_link_libraries(hdc PUBLIC ${HDC_LINK_LIBRARIES})
