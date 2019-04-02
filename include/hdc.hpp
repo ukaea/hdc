@@ -371,6 +371,13 @@ public:
     */
     HDC get_or_create(const std::string& path);
     /**
+     * @brief ...
+     *
+     * @param path p_path: path in the subtree of this node
+     * @return HDC
+     */
+    HDC get_or_create(hdc_path_t& path);
+    /**
     * @brief Stores data in node's buffer
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
