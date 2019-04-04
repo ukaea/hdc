@@ -221,7 +221,7 @@ if (BUILD_MDBM_PLUGIN)
         NAMES libmdbm mdbm
         HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/sw/mdbm/lib64"
     )
-    if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+    if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY} AND NOT BUILD_OWN_MDBM)
         message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
         message("Found MDBM library: ${MDBM_LIBRARY}")
         set(_BUILD_MDBM TRUE)
