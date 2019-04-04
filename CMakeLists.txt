@@ -118,7 +118,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # the RPATH to be used when installing, but only if it's not a system directory
 LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 IF("${isSystemDir}" STREQUAL "-1")
-   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/hdc")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
 ########################################################################################################################
@@ -227,17 +227,23 @@ if (BUILD_MDBM_PLUGIN)
         set(_BUILD_MDBM TRUE)
     elseif(BUILD_OWN_MDBM)
         include(ExternalProject)
-        ExternalProject_Add(mdbm
+        ExternalProject_Add(mdbmDownload
             GIT_REPOSITORY https://github.com/yahoo/mdbm.git
-            CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/scripts/mdbm_configure.sh ${CMAKE_CURRENT_BINARY_DIR}/mdbm-prefix/src/mdbm ${CMAKE_CURRENT_BINARY_DIR}/mdbm-prefix
+            CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/scripts/mdbm_configure.sh ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/src/mdbmDownload ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix
             BUILD_COMMAND $(MAKE)
             INSTALL_COMMAND $(MAKE) install
             BUILD_IN_SOURCE 1
         )
-	ExternalProject_Get_Property(mdbm INSTALL_DIR)
-        set(MDBM_INCLUDE_DIR ${INSTALL_DIR}/include)
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/include/ DESTINATION include/hdc)
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/lib64/ DESTINATION lib/hdc)
+#         install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/bin/ DESTINATION bin )
+
+        ExternalProject_Get_Property(mdbmDownload INSTALL_DIR)
+#         set(MDBM_INCLUDE_DIR ${INSTALL_DIR}/include)
         set(MDBM_LIBRARY ${INSTALL_DIR}/lib64/libmdbm.so)
         set(_BUILD_MDBM TRUE)
+        add_library(mdbm SHARED IMPORTED)
+        set_target_properties(mdbm PROPERTIES IMPORTED_LOCATION ${MDBM_LIBRARY})
     else()
         message("libmdbm not found and not set to build. Skipping build of MDBM plugin...")
     endif()
@@ -246,13 +252,6 @@ else() # BUILD_MDBM_PLUGIN
 endif() # BUILD_MDBM_PLUGIN
 
 if(ENABLE_UDA)
-#    find_package( PkgConfig QUIET)
-#    pkg_check_modules( UDA QUIET uda-fat-cpp uda-fat-client )
-#    string(REPLACE ";" " " UDA_CFLAGS_OTHER "${UDA_CFLAGS_OTHER}")
-#    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UDA_CFLAGS_OTHER}" )
-#    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UDA_CFLAGS_OTHER}" )
-#    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${UDA_CFLAGS_OTHER}" )
-#    link_directories(${UDA_LIBRARY_DIRS})
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 
