@@ -1,4 +1,6 @@
 # -*- coding: utf-8
+# cython: language_level=3
+
 # https://github.com/cython/cython/wiki/WrappingCPlusPlus
 # https://dmtn-013.lsst.io/
 
@@ -18,11 +20,6 @@ import collections
 import six
 import numpy as np
 
-# NP_TYPES_MAP = {
-#     'float64': cnp.float64_t),
-#     'int32': cnp.int32_t,
-#     'int64': cnp.int64_t,
-# }
 
 # TODO workaroud for https://github.com/cython/cython/issues/534
 ctypedef double* doubleptr
