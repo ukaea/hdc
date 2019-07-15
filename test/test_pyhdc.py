@@ -6,6 +6,8 @@ import string
 import tempfile
 
 from pyhdc import HDC
+import hypothesis.extra.numpy
+import hypothesis.strategies
 import numpy as np
 import pytest
 
@@ -135,6 +137,25 @@ def test_floating_ndarray_equality(x_in, external):
     )
 )
 def test_int_ndarray_equality(x_in, external):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    h = HDC()
+    h.set_data(x_in, external=external)
+    x_out = np.asarray(h)
+    assert x_in.dtype == x_out.dtype
+    np.testing.assert_array_equal(x_in, x_out)
+
+
+@pytest.mark.parametrize("external", [True, False])
+@hypothesis.given(
+    x_in=hypothesis.extra.numpy.arrays(
+        dtype=hypothesis.extra.numpy.unsigned_integer_dtypes(
+            endianness="<", sizes=(8, 16, 32)
+        ),
+        shape=hypothesis.extra.numpy.array_shapes(max_dims=5),
+    )
+)
+def test_unsigned_int_ndarray_equality(x_in, external):
     """Create np.array and put/get to/from flat HDC container
     """
     h = HDC()
