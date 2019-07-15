@@ -107,6 +107,43 @@ def test_ndarray(dtype, shape, external):
     assert np.all(x_in == x_out)
 
 
+@pytest.mark.parametrize("external", [True, False])
+@hypothesis.given(
+    x_in=hypothesis.extra.numpy.arrays(
+        dtype=hypothesis.extra.numpy.floating_dtypes(endianness="<", sizes=(32, 64)),
+        shape=hypothesis.extra.numpy.array_shapes(max_dims=5),
+        elements=hypothesis.strategies.floats(allow_nan=True, allow_infinity=True),
+    )
+)
+def test_floating_ndarray_equality(x_in, external):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    h = HDC()
+    h.set_data(x_in, external=external)
+    x_out = np.asarray(h)
+    assert x_in.dtype == x_out.dtype
+    np.testing.assert_array_equal(x_in, x_out)
+
+
+@pytest.mark.parametrize("external", [True, False])
+@hypothesis.given(
+    x_in=hypothesis.extra.numpy.arrays(
+        dtype=hypothesis.extra.numpy.integer_dtypes(
+            endianness="<", sizes=(8, 16, 32, 64)
+        ),
+        shape=hypothesis.extra.numpy.array_shapes(max_dims=5),
+    )
+)
+def test_int_ndarray_equality(x_in, external):
+    """Create np.array and put/get to/from flat HDC container
+    """
+    h = HDC()
+    h.set_data(x_in, external=external)
+    x_out = np.asarray(h)
+    assert x_in.dtype == x_out.dtype
+    np.testing.assert_array_equal(x_in, x_out)
+
+
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int32, np.int64])
 @pytest.mark.parametrize("shape", [(), (5,), (6, 8), (7, 2, 3)])
 def test_zerocopy(dtype, shape):
