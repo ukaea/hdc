@@ -1,4 +1,6 @@
 # -*- coding: utf-8
+# cython: language_level=3
+
 # https://github.com/cython/cython/wiki/WrappingCPlusPlus
 # https://dmtn-013.lsst.io/
 
@@ -7,7 +9,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 cimport numpy as cnp
 from cython cimport view
-from libc.stdint cimport uint32_t, intptr_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
@@ -18,11 +20,6 @@ import collections
 import six
 import numpy as np
 
-# NP_TYPES_MAP = {
-#     'float64': cnp.float64_t),
-#     'int32': cnp.int32_t,
-#     'int64': cnp.int64_t,
-# }
 
 # TODO workaroud for https://github.com/cython/cython/issues/534
 ctypedef double* doubleptr
@@ -233,6 +230,9 @@ cdef class HDC:
         cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
+        # it seems we cannot simply assing self._this.set_data or self._this.set_external to a variable
+        # and avaid the duplication inside the if branches
+        # likely due to using templates
         if not external:
             # TODO support other types
             if np.issubdtype(data.dtype, np.bool_):
@@ -245,12 +245,21 @@ cdef class HDC:
                 self._this.set_data(_shape, <int32_t*> data_view.data, flags)
             elif np.issubdtype(data.dtype, np.int64):
                 self._this.set_data(_shape, <int64_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.uint8):
+                self._this.set_data(_shape, <uint8_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.uint16):
+                self._this.set_data(_shape, <uint16_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.uint32):
+                self._this.set_data(_shape, <uint32_t*> data_view.data, flags)
+            # not yet supported in HDC
+            # elif np.issubdtype(data.dtype, np.uint64):
+            #     self._this.set_data(_shape, <uint64_t*> data_view.data, flags)
             elif np.issubdtype(data.dtype, np.float32):
                 self._this.set_data(_shape, <float*> data_view.data, flags)
             elif np.issubdtype(data.dtype, np.float64):
                 self._this.set_data(_shape, <double*> data_view.data, flags)
             else:
-                NotImplementedError('Type not supported')
+                raise NotImplementedError('Type not supported')
         else:
             # TODO support other types
             if np.issubdtype(data.dtype, np.bool_):
@@ -263,12 +272,21 @@ cdef class HDC:
                 self._this.set_external(_shape, <int32_t*> data_view.data, flags)
             elif np.issubdtype(data.dtype, np.int64):
                 self._this.set_external(_shape, <int64_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.uint8):
+                self._this.set_external(_shape, <uint8_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.uint16):
+                self._this.set_external(_shape, <uint16_t*> data_view.data, flags)
+            elif np.issubdtype(data.dtype, np.uint32):
+                self._this.set_external(_shape, <uint32_t*> data_view.data, flags)
+            # not yet supported in HDC
+            # elif np.issubdtype(data.dtype, np.uint64):
+            #     self._this.set_external(_shape, <uint64_t*> data_view.data, flags)
             elif np.issubdtype(data.dtype, np.float32):
                 self._this.set_external(_shape, <float*> data_view.data, flags)
             elif np.issubdtype(data.dtype, np.float64):
                 self._this.set_external(_shape, <double*> data_view.data, flags)
             else:
-                NotImplementedError('Type not supported')
+                raise NotImplementedError('Type not supported')
 
     def set_data(self, data, external=False):
         if external:

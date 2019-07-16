@@ -60,7 +60,7 @@ options = dict(
         'pytest',
         'future',
     ],
-    tests_require=['pytest','h5py'],
+    tests_require=['pytest','h5py','hypothesis'],
     cmdclass={'test': PyTest},
     version='${PACKAGE_VERSION}',
 )
