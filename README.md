@@ -29,7 +29,7 @@ For building on ITM gateway, please, follow [these instructions](doxy/BUILDING_O
 There are several cmake options:
 
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
-  - `-DBUILD_DOCUMENTATION=ON` Whether to build and install documentation.
+  - `-DBUILD_DOC=ON` Whether to build and install documentation.
   - `-DBUILD_EXAMPLES=ON` Whether to build and install examples.
   - `-DENABLE_HDF5=OFF` Switch off HDF5 serialization.
   - Python, if not detected correctly:
