@@ -25,6 +25,7 @@ import numpy as np
 ctypedef double* doubleptr
 ctypedef void* voidptr
 
+# we have to cdef all the constants and types we need
 cdef extern from "hdc_types.h":
     cdef size_t HDC_EMPTY
     cdef size_t HDC_STRUCT
@@ -47,13 +48,19 @@ cdef extern from "hdc_types.h":
     cdef size_t HDCExternal
     cdef size_t HDC_MAX_DIMS
     cdef size_t HDC_UUID_LENGTH
+
     ctypedef struct hdc_t:
         char uuid[37]
         voidptr storage
+
+
 class hdc_t_(ctypes.Structure):
+    """The ctypes equivalent of hdc_t"""
     _fields_ = [("uuid", ctypes.c_char * 37),
                 ("storage_id", ctypes.c_size_t)]
 
+
+# cdef the C++ interface, any method we need must be here
 cdef extern from "hdc.hpp":
     cdef cppclass HDCStorage:
         pass
@@ -80,7 +87,6 @@ cdef extern from "hdc.hpp":
         vector[size_t] get_shape() except +
         size_t get_storage_id() except +
         string get_uuid() except +
-        # typedef unsigned long hdc_flags_t;
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         void set_external[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         voidptr as_void_ptr() except +
@@ -102,22 +108,22 @@ cdef extern from "hdc.hpp":
 
 
 cdef class HDC:
-    # data handle
+    """
+    Python wrapper class for the HDC C++ class
+    """
+    # C++ class handle
     cdef CppHDC _this
 
     def __init__(self, data=None):
-
         if data is None:
-            # create the cpp obeject
+            # create a new C++ instance
             self._this = CppHDC()
         elif isinstance(data, self.__class__):
             #  copy constructor
             self._this = (<HDC> data)._this
         elif isinstance(data, six.string_types):
-            #self._this = CppHDC(bytes(data, 'utf-8'))
             self._this = CppHDC(<string> str(data).encode('utf-8'))
         else:
-            # assert NotImplementedError()
             self._this = CppHDC()
             self.set_data(data)
 
@@ -130,16 +136,14 @@ cdef class HDC:
     def __setitem__(self, key, value):
         if isinstance(key, six.string_types):
             if key not in self:
-                # cdef CppHDC* new_hdc = new CppHDC()
-                # deref(new_hdc).set_data(value)
                 new_hdc = HDC(value)
                 self._this.add_child(key.encode(), new_hdc._this)
             else:
                 self[key].set_data(value)
-
-        # else:
-        #     # key is numeric
-        #     libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
+        else:
+            raise NotImplementedError('Non-string keys not supported')
+            # TODO support set_slice
+            # libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
 
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
@@ -149,7 +153,6 @@ cdef class HDC:
             res = <HDC> self.__class__()
             # TODO move to constructor
             res._this = self._this.get(<string> ckey)
-            # self._this.get_ptr(ckey)
             return res
         elif isinstance(key, numbers.Integral):
             res = <HDC> self.__class__()
@@ -169,7 +172,6 @@ cdef class HDC:
         """
         type_id = self.get_type()
         # check whether type id is not in non-array types
-
         if type_id == HDC_STRING:
             return str(self)
         elif type_id == HDC_EMPTY:
@@ -189,7 +191,6 @@ cdef class HDC:
                 return np.asscalar(np.asarray(self))
             else:
                 return np.asarray(self)
-
         else:
             raise TypeError('Type {} not supported'.format(self.get_type_str()))
 
