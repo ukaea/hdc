@@ -231,7 +231,8 @@ cdef class HDC:
             if external:
                 flags |= HDCExternal
             data_view = np.ascontiguousarray(data)
-        data_view.setflags(write=True)
+        # TODO do we need writeable? why?
+        # data_view.setflags(write=True)
         cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
