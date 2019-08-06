@@ -1,5 +1,5 @@
 # -*- coding: utf-8
-# cython: language_level=3
+# cython: language_level=3, binding=True, profile=True, linetrace=True
 
 # https://github.com/cython/cython/wiki/WrappingCPlusPlus
 # https://dmtn-013.lsst.io/
