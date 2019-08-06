@@ -15,8 +15,12 @@ from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 import ctypes
 
+import six
 import numbers
-import collections
+if six.PY3:
+    import collections.abc as collections_abc
+else:
+    import collections as collections_abc
 import six
 import numpy as np
 
@@ -301,11 +305,11 @@ cdef class HDC:
         elif isinstance(data, numbers.Number):
             # convert numbers to numpy
             self._set_data(np.asarray(data))
-        elif isinstance(data, collections.Mapping):
+        elif isinstance(data, collections_abc.Mapping):
             # dict-like data
             for key, value in data.items():
                 self[key] = self.__class__(value)
-        elif isinstance(data, collections.Sequence):
+        elif isinstance(data, collections_abc.Sequence):
             # list, tuple etc., not string
             for value in data:
                 self.append(self.__class__(value))
