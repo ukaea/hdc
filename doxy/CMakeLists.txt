@@ -5,7 +5,9 @@ find_package(Sphinx REQUIRED)
 if(NOT DOXYGEN_FOUND)
     message(FATAL_ERROR "Doxygen is needed to build the documentation.")
 endif()
-# TODO check Sphinx
+if(NOT SPHINX_FOUND)
+    message(FATAL_ERROR "Sphinx is needed to build the documentation.")
+endif()
 
 set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
