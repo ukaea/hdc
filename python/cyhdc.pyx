@@ -217,9 +217,7 @@ cdef class HDC:
 
     cdef _set_data(self, cnp.ndarray data, external=False):
         cdef size_t flags  = HDCDefault
-        #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
-        # data_view = np.require(data, requirements=('C', 'O'))
         if data.ndim == 0:
             # ascontiguousarray forces rank >0= 1
             data_view = data
