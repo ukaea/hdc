@@ -43,6 +43,7 @@ test-centos7:
 test-fedora-28:
   image: dockerhub.tok.ipp.cas.cz:5000/fedora-28-hdc-prereq
   script:
+    - yum -y update
     - mkdir build
     - cd build
     - cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
