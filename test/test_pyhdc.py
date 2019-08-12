@@ -114,7 +114,7 @@ def test_ndarray(dtype, shape, external):
     x_in=hypothesis.extra.numpy.arrays(
         dtype=hypothesis.extra.numpy.floating_dtypes(endianness="<", sizes=(32, 64)),
         shape=hypothesis.extra.numpy.array_shapes(max_dims=5),
-        elements=hypothesis.strategies.floats(allow_nan=True, allow_infinity=True),
+        elements=hypothesis.strategies.floats(allow_nan=True, allow_infinity=True, width=32),
     )
 )
 def test_floating_ndarray_equality(x_in, external):
