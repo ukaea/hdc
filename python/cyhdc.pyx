@@ -237,60 +237,62 @@ cdef class HDC:
         # it seems we cannot simply assing self._this.set_data or self._this.set_external to a variable
         # and avaid the duplication inside the if branches
         # likely due to using templates
+        cdef char[1] kind = data.dtype.kind[0].encode()
+        cdef int8_t itemsize = data.dtype.itemsize
         if not external:
             # TODO support other types
-            if np.issubdtype(data.dtype, np.bool_):
+            if kind == b'b':
                 self._this.set_data(_shape, <bool*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int8):
+            elif kind == b'i' and itemsize == 1:
                 self._this.set_data(_shape, <int8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int16):
+            elif kind == b'i' and itemsize == 2:
                 self._this.set_data(_shape, <int16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int32):
+            elif kind == b'i' and itemsize == 4:
                 self._this.set_data(_shape, <int32_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int64):
+            elif kind == b'i' and itemsize == 8:
                 self._this.set_data(_shape, <int64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint8):
+            elif kind == b'u' and itemsize == 1:
                 self._this.set_data(_shape, <uint8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint16):
+            elif kind == b'u' and itemsize == 2:
                 self._this.set_data(_shape, <uint16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint32):
+            elif kind == b'u' and itemsize == 4:
                 self._this.set_data(_shape, <uint32_t*> data_view.data, flags)
             # not yet supported in HDC
-            # elif np.issubdtype(data.dtype, np.uint64):
+            # elif kind == b'u' and itemsize == 8:
             #     self._this.set_data(_shape, <uint64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float32):
+            elif kind == b'f' and itemsize == 4:
                 self._this.set_data(_shape, <float*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float64):
+            elif kind == b'f' and itemsize == 8:
                 self._this.set_data(_shape, <double*> data_view.data, flags)
             else:
-                raise NotImplementedError('Type not supported')
+                raise NotImplementedError(f'Type {kind}@{itemsize} ({data.dtype}) not supported')
         else:
             # TODO support other types
-            if np.issubdtype(data.dtype, np.bool_):
+            if kind == b'b':
                 self._this.set_external(_shape, <bool*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int8):
+            elif kind == b'i' and itemsize == 1:
                 self._this.set_external(_shape, <int8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int16):
+            elif kind == b'i' and itemsize == 2:
                 self._this.set_external(_shape, <int16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int32):
+            elif kind == b'i' and itemsize == 4:
                 self._this.set_external(_shape, <int32_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int64):
+            elif kind == b'i' and itemsize == 8:
                 self._this.set_external(_shape, <int64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint8):
+            elif kind == b'u' and itemsize == 1:
                 self._this.set_external(_shape, <uint8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint16):
+            elif kind == b'u' and itemsize == 2:
                 self._this.set_external(_shape, <uint16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint32):
+            elif kind == b'u' and itemsize == 4:
                 self._this.set_external(_shape, <uint32_t*> data_view.data, flags)
             # not yet supported in HDC
-            # elif np.issubdtype(data.dtype, np.uint64):
+            # elif kind == b'u' and itemsize == 8:
             #     self._this.set_external(_shape, <uint64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float32):
+            elif kind == b'f' and itemsize == 4:
                 self._this.set_external(_shape, <float*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float64):
+            elif kind == b'f' and itemsize == 8:
                 self._this.set_external(_shape, <double*> data_view.data, flags)
             else:
-                raise NotImplementedError('Type not supported')
+                raise NotImplementedError(f'Type {kind}@{itemsize} ({data.dtype}) not supported')
 
     def set_data(self, data, external=False):
         if external:
