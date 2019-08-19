@@ -247,20 +247,6 @@ HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
 HDC::~HDC()
 {
     D(std::cout << "~HDC()\n";)
-    /*
-    auto t = get_type();
-    if (!is_terminal()) {
-        try {
-            hdc_map_t* children = get_children_ptr();
-            for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
-                storage->remove(it->address.c_str());
-            }
-        } catch(...) {
-            return;
-        }
-    }
-    */
-    //storage->remove(uuid); // This is responsibility of storage from now
 }
 
 //---------------------------- Header information ----------------------------------
@@ -1141,8 +1127,6 @@ void HDC::grow(size_t extra_size)
     vector<char> new_buffer = buffer_grow(old_buffer, extra_size);
     header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
     storage->set(uuid, new_buffer.data(), new_size);
-//     if (!storage->usesBuffersDirectly()) delete[] old_buffer;
-//     if (!storage->usesBuffersDirectly()) delete[] new_buffer;
     return;
 }
 
@@ -1187,16 +1171,10 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
 
 HDC HDC::deserialize_file(const std::string& filename)
 {
-//     try {
-        std::ifstream t(filename);
-        std::string str((std::istreambuf_iterator<char>(t)),
-                        std::istreambuf_iterator<char>());
-        return deserialize_str(str);
-//     }
-//     catch (const ifstream::failure& e) {
-//         std::cout << "deserialize_file(): Error reading / opening file." << endl;
-//         return HDC();
-//     }
+    std::ifstream t(filename);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
+    return deserialize_str(str);
 }
 
 HDC HDC::deserialize_str(const std::string& str)
