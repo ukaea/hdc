@@ -92,7 +92,6 @@ void write_node(HDC h, H5File* file, std::string path)
                     auto uuid = it->address.c_str();
                     HDC h(hdc_global.storage, uuid);
                     auto _uuid = h.get_uuid();
-//                         write_node(h,file,path+"/"+to_string(i++));
                     std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                     write_node(h, file, full_path.c_str());
                     auto ret = H5Rcreate(&wbuf[i],file->getId(),full_path.c_str(),H5R_OBJECT,-1);
@@ -105,8 +104,6 @@ void write_node(HDC h, H5File* file, std::string path)
                 DataSpace ref_dataspace(1, ref_dims);
                 DataSet ref_dataset = file->createDataSet(DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace);
                 ref_dataset.write(wbuf, PredType::STD_REF_OBJ);
-
-//                     delete group;
                 delete[] wbuf;
             }
             return;

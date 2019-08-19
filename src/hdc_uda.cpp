@@ -136,12 +136,6 @@ HDC HDC::uda2HDC(const std::string& data_object, const std::string& data_source)
 
 HDC udaData2HDC(uda::Data* uda_data, int rank)
 {
-/*
-    std::cout << "--- udaData2HDC(Data*)\n";
-    std::cout << "data.size       : " << data->size() << std::endl;
-    std::cout << "data.type       : " << data->type().name() << std::endl;
-    std::cout << "data.byte_length: " << data->byte_length() << std::endl;
-*/
     HDC result;
     auto& type = uda_data->type();
     auto type_name = type.name();
@@ -196,14 +190,6 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
         } else {
             result.set_string(std::string(reinterpret_cast<const char*>(uda_data->byte_data())));
         }
-/*    } else if (type_name == typeid(byte).name()) {
-        if (rank <= 1) {
-            uda::Scalar* value = dynamic_cast<uda::Scalar*>(data);
-            std::cout << "Type " << data->type().name() << "\n";
-            result.set_data(value->as<float>());
-        } else {
-            std::cerr << "Unsupported rank\n";
-        }*/
     } else {
         throw HDCException("udaData2HDC(): Unsupported type: " + std::string(type_name) + "\n");
     }
@@ -214,12 +200,6 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
 {
     HDC result;
     auto n_children = tree.numChildren();
-/*
-    std::cout << "tree.numChildren   : " << n_children << std::endl;
-    std::cout << "tree.printNode   : " << std::endl;
-    tree.printNode();
-    std::cout << "tree.name   : " << tree.name() << std::endl;
-*/
     if (n_children) {
         if (n_children == 1) {
             auto children = tree.children();
@@ -250,36 +230,6 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
         auto a_types = tree.atomicTypes();
         auto a_pointers = tree.atomicPointers();
         auto a_count = tree.atomicCount();
-/*        std::cout << "tree.atomicCount   : " << a_count << std::endl;
-        std::cout << "tree.atomicShape       : ";
-        for (auto shape : a_shape) {
-            for (auto s : shape)
-                std::cout << ", " << s;
-        }
-        std::cout << std::endl;
-        std::cout << "tree.atomicRank        : ";
-        for (auto r : a_rank) {
-            std::cout << ", " << r;
-        }
-        std::cout << std::endl;
-        std::cout << "tree.atomicNames       : ";
-        for (auto r : a_names) {
-            std::cout << ", " << r;
-        }
-        std::cout << std::endl;
-        std::cout << "tree.atomicTypes       : ";
-        for (auto r : a_types) {
-            std::cout << ", " << r;
-        }
-        std::cout << std::endl;
-        std::cout << "tree.atomicPointers       : ";
-        for (auto r : a_pointers) {
-            std::cout << ", " << r;
-        }
-        std::cout << std::endl;
-        tree.printUserDefinedTypeTable();
-        tree.printStructureNames();
-*/
         for (int i = 0; i < a_count; i++) {
             auto name = a_names[i];
             auto type_name = a_types[i];
@@ -316,9 +266,6 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     if (type_name == "int") result[name] = value.as<int>();
                     if (type_name == "float") result[name] = value.as<float>();
                     if (type_name == "double") result[name] = value.as<double>();
-
-
-//                     if (type_name == "char") result.set_data(name,value.as<char>());
                 } else {
                     uda::Array value = tree.atomicArray(name);
                     auto shape = value.shape();
@@ -368,24 +315,6 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
 
 HDC udaResult2HDC(const uda::Result& uda_result, bool withMetadata = false)
 {
-    /*
-    std::cout << "--- udaResult2HDC\n";
-
-    std::cout << "uda_result.hasErrors   : " << uda_result.hasErrors() << std::endl;
-    std::cout << "uda_result.type        : " << uda_result.type().name() << std::endl;
-    std::cout << "uda_result.label       : " << uda_result.label() << std::endl;
-    std::cout << "uda_result.units       : " << uda_result.units() << std::endl;
-    std::cout << "uda_result.description : " << uda_result.description() << std::endl;
-    std::cout << "uda_result.size        : " << uda_result.size() << std::endl;
-    std::cout << "uda_result.rank        : " << uda_result.rank() << std::endl;
-    std::cout << "uda_result.shape       : ";
-    for (auto& s : uda_result.shape()) {
-        std::cout << " " << s;
-    }
-    std::cout << std::endl;
-
-    std::cout << "uda_result.isTree: " << uda_result.isTree() << std::endl;
-    */
     HDC result;
     HDC tmp;
     if (!uda_result.isTree()) {
