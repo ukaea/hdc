@@ -257,7 +257,6 @@ endif()
 add_subdirectory(misc)
 
 if (BUILD_DOC)
-    # add_subdirectory(docs)
     add_subdirectory(doxy)
 endif()
 if(BUILD_TESTS)
