@@ -119,6 +119,13 @@ cdef class HDC:
     cdef CppHDC _this
 
     def __init__(self, data=None):
+        """HDC constructor
+
+        Parameters
+        ----------
+        data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
+            Data to set (default None)
+        """
         if data is None:
             # create a new C++ instance
             self._this = CppHDC()
@@ -215,7 +222,7 @@ cdef class HDC:
             # TODO is 0 always correct?
             return 0
 
-    cdef _set_data(self, cnp.ndarray data, external=False):
+    cdef _set_array_data(self, cnp.ndarray data, external=False):
         cdef size_t flags  = HDCDefault
         cdef cnp.ndarray data_view
         if data.ndim == 0:
@@ -235,7 +242,7 @@ cdef class HDC:
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
         # it seems we cannot simply assing self._this.set_data or self._this.set_external to a variable
-        # and avaid the duplication inside the if branches
+        # and avoid the duplication inside the if branches
         # likely due to using templates
         cdef char[1] kind = data.dtype.kind[0].encode()
         cdef int8_t itemsize = data.dtype.itemsize
@@ -295,6 +302,15 @@ cdef class HDC:
                 raise NotImplementedError(f'Type {kind}@{itemsize} ({data.dtype}) not supported')
 
     def set_data(self, data, external=False):
+        """Sets data to a HDC node
+
+        Parameters
+        ----------
+        data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
+            Data to set.
+        external : bool
+            Whether to copy data into HDC or just store a pointer
+        """
         if external:
             if not isinstance(data, np.ndarray):
                 NotImplementedError('external=True not supported for non np.ndarray type data')
@@ -302,10 +318,10 @@ cdef class HDC:
         if isinstance(data, six.string_types):
             self._this.set_string(data.encode())
         elif isinstance(data, np.ndarray):
-            self._set_data(data, external=external)
+            self._set_array_data(data, external=external)
         elif isinstance(data, numbers.Number):
             # convert numbers to numpy
-            self._set_data(np.asarray(data))
+            self._set_array_data(np.asarray(data))
         elif isinstance(data, collections_abc.Mapping):
             # dict-like data
             for key, value in data.items():
@@ -318,16 +334,36 @@ cdef class HDC:
             raise ValueError('{} type not supported'.format(type(data)))
 
     def append(self, data):
+        """Appends data to a HDC list
+
+        Parameters
+        ----------
+        data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
+            Data to set.
+        """
         new_hdc = HDC(data)
         self._this.append(new_hdc._this)
 
     def dumps(self, mode=0):
-        """Dump to JSON string"""
+        """Dump to JSON string
+
+        Parameters
+        ----------
+        mode : int
+            0 .. just pure JSON (default)
+            1 .. append additional metadata
+        """
         return self._this.to_json_string(mode).decode()
 
     @staticmethod
     def loads(s):
-        """Load from JSON string"""
+        """Load from JSON string
+
+        Parameters
+        ----------
+        s : string
+            JSON string to be loaded
+        """
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
         #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
@@ -339,8 +375,11 @@ cdef class HDC:
 
         Parameters
         ----------
-        fp : .write supporting object (open file)
+        filename : .write supporting object (open file)
             target to write to
+        mode : int
+            0 .. just pure JSON (default)
+            1 .. append additional metadata
         """
         self._this.to_json(filename.encode(), mode)
         # with open(filename, 'w') as fp:
@@ -348,6 +387,16 @@ cdef class HDC:
 
     @staticmethod
     def load(uri, datapath=''):
+        """Loads data from some external storage
+
+        Parameters
+        ----------
+        uri : string
+            string specifying data source in protocol://path_to_the_file format
+            e.g. json://a.txt, or hdf5://a.h5
+        datapath : string
+            additional path within the file, e.g. subgroup in HDF5
+        """
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
         #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
@@ -355,6 +404,7 @@ cdef class HDC:
         return res
 
     def print_info(self):
+        """Prints info about HDC node"""
         return self._this.print_info()
 
     @property
@@ -365,12 +415,15 @@ cdef class HDC:
         return hdc_t_(uuid,storage)
 
     def get_type_str(self):
+        """Returns string type description of HDC node, e.g. int32"""
         return self._this.get_type_str().decode()
 
     cdef get_type(self):
+        """Returns integer representing type according to hdc_type_t enum in include/hdc_types.h """
         return self._this.get_type()
 
     cdef is_array(self):
+        """Returns True if the node is an array, and False otherwise."""
         type_id = self.get_type()
         # check whether type id is not in non-array types
         return type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8,
@@ -472,6 +525,7 @@ cdef class HDC:
 
     @property
     def shape(self):
+        """Returns shape of the HDC node"""
         cdef int rank = self._this.get_rank()
         cdef vector[size_t] shape = self._this.get_shape()
         return tuple((shape[i] for i in range(rank)))
@@ -486,10 +540,28 @@ cdef class HDC:
         return (k.decode() for k in keys)
 
     def to_hdf5(self, filename, dataset_name="data"):
+        """Saves data into HFD5 file.
+
+        Parameters
+        ----------
+        filename : string
+            filename of HDF5 file
+        dataset_name : string
+            HDF5 dataset name within the file (default "data")
+        """
         self._this.to_hdf5(filename.encode(), dataset_name.encode())
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
+        """Loads data from HFD5 file into a new HDC container
+
+        Parameters
+        ----------
+        filename : string
+            filename of HDF5 file
+        dataset_name : string
+            HDF5 dataset name within the file (default "data")
+        """
         res = HDC()
         res._this = CppHDC.from_hdf5(filename.encode(), dataset_name.encode())
         return res
