@@ -35,7 +35,7 @@ extensions = [
     "breathe",
 ]
 
-# breathe_projects = {"hdc": "../../doxy/xml"}
+# breathe_projects = {"hdc": "../../docs/xml"}
 breathe_default_project = "hdc"
 
 # Add any paths that contain templates here, relative to this directory.
