@@ -16,6 +16,7 @@ configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
 
+
 # TODO add DEPENDS (header files)
 add_custom_target(doc ALL
     COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
