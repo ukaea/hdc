@@ -119,7 +119,8 @@ cdef class HDC:
     cdef CppHDC _this
 
     def __init__(self, data=None):
-        """HDC constructor
+        """
+        HDC constructor
 
         Parameters
         ----------
@@ -174,7 +175,8 @@ cdef class HDC:
             raise ValueError("key must be either string or integer")
 
     def to_python(self, deep=True):
-        """Convert to native Python type data if possible
+        """
+        Convert to native Python type data if possible
 
         Parameters
         ----------
@@ -247,6 +249,7 @@ cdef class HDC:
         cdef char[1] kind = data.dtype.kind[0].encode()
         cdef int8_t itemsize = data.dtype.itemsize
         if not external:
+            # TODO set_data_python(_shape, <void*> data_view.data, <char> kind, <int8_t> itemsize, flags)
             # TODO support other types
             if kind == b'b':
                 self._this.set_data(_shape, <bool*> data_view.data, flags)
@@ -302,7 +305,8 @@ cdef class HDC:
                 raise NotImplementedError(f'Type {kind}@{itemsize} ({data.dtype}) not supported')
 
     def set_data(self, data, external=False):
-        """Sets data to a HDC node
+        """
+        Sets data to a HDC node.
 
         Parameters
         ----------
@@ -334,7 +338,8 @@ cdef class HDC:
             raise ValueError('{} type not supported'.format(type(data)))
 
     def append(self, data):
-        """Appends data to a HDC list
+        """
+        Appends data to a HDC list
 
         Parameters
         ----------
@@ -345,19 +350,26 @@ cdef class HDC:
         self._this.append(new_hdc._this)
 
     def dumps(self, mode=0):
-        """Dump to JSON string
+        """
+        Dump to JSON string
 
         Parameters
         ----------
         mode : int
             0 .. just pure JSON (default)
             1 .. append additional metadata
+
+        Returns
+        -------
+        string
+            A JSON string.
         """
         return self._this.to_json_string(mode).decode()
 
     @staticmethod
     def loads(s):
-        """Load from JSON string
+        """
+        Load from JSON string
 
         Parameters
         ----------
@@ -371,7 +383,8 @@ cdef class HDC:
         return res
 
     def dump(self, filename, mode=0):
-        """Save to json file
+        """
+        Save to json file
 
         Parameters
         ----------
@@ -387,7 +400,8 @@ cdef class HDC:
 
     @staticmethod
     def load(uri, datapath=''):
-        """Loads data from some external storage
+        """
+        Loads data from some external storage
 
         Parameters
         ----------
@@ -467,7 +481,6 @@ cdef class HDC:
             strides_buf[i] = strides[i]
         buffer.buf = self._this.as_void_ptr()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
-
         # Set buffer format here:
         type_id = self.get_type()
         if (type_id == HDC_EMPTY):
