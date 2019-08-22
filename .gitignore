@@ -20,3 +20,7 @@ src/__pycache__
 *.html
 
 fort.*
+
+benchmark/ids_data/core_profile.pickle
+benchmark/ids_data/equilibrium.pickle
+
