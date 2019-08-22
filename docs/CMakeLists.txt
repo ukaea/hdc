@@ -13,6 +13,10 @@ set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
 set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
+# # # set(sphinx_makefile_in ${CMAKE_SOURCE_DIR}/docs/Makefile_.in)
+# # # set(sphinx_makefile ${CMAKE_BINARY_DIR}/docs/Makefile_)
+# # # configure_file(${sphinx_makefile_in} ${sphinx_makefile} @ONLY)
+
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
 
