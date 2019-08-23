@@ -146,6 +146,44 @@ hdc_type_t uda_str_to_typeid(std::string& str) {
     return HDC_ERROR;
 }
 
+hdc_type_t decode_numpy_type(char kind, int8_t itemsize) {
+    hdc_type_t type;
+    switch (kind) {
+        case 'i':
+            switch (itemsize) {
+                case 1: type = HDC_INT8; break;
+                case 2: type = HDC_INT16; break;
+                case 4: type = HDC_INT32; break;
+                case 8: type = HDC_INT64; break;
+                default: throw HDCException("set_data_Py: bad itemsize");
+            };
+            break;
+        case 'u':
+            switch (itemsize) {
+                case 1: type = HDC_UINT8; break;
+                case 2: type = HDC_UINT16; break;
+                case 4: type = HDC_UINT32; break;
+                case 8: type = HDC_UINT64; break;
+                default: throw HDCException("set_data_Py: bad itemsize");
+            };
+            break;
+        case 'f':
+            switch (itemsize) {
+                case 4: type = HDC_FLOAT; break;
+                case 8: type = HDC_DOUBLE; break;
+                default: throw HDCException("set_data_Py: bad itemsize");
+            };
+            break;
+        case 'b':
+            type = HDC_BOOL;
+            break;
+        default:
+            throw HDCException("set_data_Py: bad kind");
+    }
+    return type;
+}
+
+
 /* -------------------------  Buffer Manipulation  ------------------------- */
 
 template<typename T>

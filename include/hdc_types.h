@@ -57,7 +57,6 @@ struct hdc_header_t {
 #define HDC_MAX_RESIZE_ATTEMPTS    5 // how many times to try increasing buffer
 
 //TODO Specify offsets in header, possibly make header of dynamic length.
-//TODO support external data
 
 struct hdc_data_t {
     hdc_type_t  type;

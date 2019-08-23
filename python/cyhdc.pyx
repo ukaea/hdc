@@ -9,7 +9,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 cimport numpy as cnp
 from cython cimport view
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, intptr_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
@@ -24,10 +24,27 @@ else:
 import six
 import numpy as np
 
-
 # TODO workaroud for https://github.com/cython/cython/issues/534
 ctypedef double* doubleptr
 ctypedef void* voidptr
+
+
+from libc.string cimport memcpy
+
+cdef int from_str_to_chararray(source, char *dest, size_t N, bint ensure_nullterm) except -1:
+    cdef size_t source_len = len(source)
+    cdef bytes as_bytes = source.encode('ascii')    #hold reference to the underlying byte-object
+    cdef const char *as_ptr = <const char *>(as_bytes)
+    if ensure_nullterm:
+        source_len+=1
+    if source_len > N:
+        raise IndexError("destination array too small")
+    memcpy(dest, as_ptr, source_len)
+    return 0
+
+
+
+
 
 # we have to cdef all the constants and types we need
 cdef extern from "hdc_types.h":
@@ -92,6 +109,8 @@ cdef extern from "hdc.hpp":
         size_t get_storage_id() except +
         string get_uuid() except +
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
+        void set_data_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
+        void set_external_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
         void set_external[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         voidptr as_void_ptr() except +
         string as_string() except +
@@ -238,72 +257,18 @@ cdef class HDC:
             if external:
                 flags |= HDCExternal
             data_view = np.ascontiguousarray(data)
-        # TODO do we need writeable? why?
-        # data_view.setflags(write=True)
         cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
-        # it seems we cannot simply assing self._this.set_data or self._this.set_external to a variable
-        # and avoid the duplication inside the if branches
-        # likely due to using templates
-        cdef char[1] kind = data.dtype.kind[0].encode()
+        cdef char kind_arr[2]
+        from_str_to_chararray(data.dtype.kind,kind_arr,2,1)
+        cdef char kind = kind_arr[0]
         cdef int8_t itemsize = data.dtype.itemsize
+        #TODO merge set_data and set_external?
         if not external:
-            # TODO set_data_python(_shape, <void*> data_view.data, <char> kind, <int8_t> itemsize, flags)
-            # TODO support other types
-            if kind == b'b':
-                self._this.set_data(_shape, <bool*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 1:
-                self._this.set_data(_shape, <int8_t*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 2:
-                self._this.set_data(_shape, <int16_t*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 4:
-                self._this.set_data(_shape, <int32_t*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 8:
-                self._this.set_data(_shape, <int64_t*> data_view.data, flags)
-            elif kind == b'u' and itemsize == 1:
-                self._this.set_data(_shape, <uint8_t*> data_view.data, flags)
-            elif kind == b'u' and itemsize == 2:
-                self._this.set_data(_shape, <uint16_t*> data_view.data, flags)
-            elif kind == b'u' and itemsize == 4:
-                self._this.set_data(_shape, <uint32_t*> data_view.data, flags)
-            # not yet supported in HDC
-            # elif kind == b'u' and itemsize == 8:
-            #     self._this.set_data(_shape, <uint64_t*> data_view.data, flags)
-            elif kind == b'f' and itemsize == 4:
-                self._this.set_data(_shape, <float*> data_view.data, flags)
-            elif kind == b'f' and itemsize == 8:
-                self._this.set_data(_shape, <double*> data_view.data, flags)
-            else:
-                raise NotImplementedError(f'Type {kind}@{itemsize} ({data.dtype}) not supported')
+            self._this.set_data_Py(_shape, <voidptr> data_view.data, kind, <int8_t> itemsize, flags)
         else:
-            # TODO support other types
-            if kind == b'b':
-                self._this.set_external(_shape, <bool*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 1:
-                self._this.set_external(_shape, <int8_t*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 2:
-                self._this.set_external(_shape, <int16_t*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 4:
-                self._this.set_external(_shape, <int32_t*> data_view.data, flags)
-            elif kind == b'i' and itemsize == 8:
-                self._this.set_external(_shape, <int64_t*> data_view.data, flags)
-            elif kind == b'u' and itemsize == 1:
-                self._this.set_external(_shape, <uint8_t*> data_view.data, flags)
-            elif kind == b'u' and itemsize == 2:
-                self._this.set_external(_shape, <uint16_t*> data_view.data, flags)
-            elif kind == b'u' and itemsize == 4:
-                self._this.set_external(_shape, <uint32_t*> data_view.data, flags)
-            # not yet supported in HDC
-            # elif kind == b'u' and itemsize == 8:
-            #     self._this.set_external(_shape, <uint64_t*> data_view.data, flags)
-            elif kind == b'f' and itemsize == 4:
-                self._this.set_external(_shape, <float*> data_view.data, flags)
-            elif kind == b'f' and itemsize == 8:
-                self._this.set_external(_shape, <double*> data_view.data, flags)
-            else:
-                raise NotImplementedError(f'Type {kind}@{itemsize} ({data.dtype}) not supported')
-
+            self._this.set_external_Py(_shape, <voidptr> data_view.data, kind, <int8_t> itemsize, flags)
     def set_data(self, data, external=False):
         """
         Sets data to a HDC node.
@@ -553,7 +518,8 @@ cdef class HDC:
         return (k.decode() for k in keys)
 
     def to_hdf5(self, filename, dataset_name="data"):
-        """Saves data into HFD5 file.
+        """
+        Saves data into HFD5 file.
 
         Parameters
         ----------
@@ -566,7 +532,8 @@ cdef class HDC:
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
-        """Loads data from HFD5 file into a new HDC container
+        """
+        Loads data from HFD5 file into a new HDC container
 
         Parameters
         ----------
