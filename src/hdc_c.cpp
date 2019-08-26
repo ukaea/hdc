@@ -221,10 +221,10 @@ void hdc_set_float_scalar(hdc_t tree, const char* path, float data)
     return;
 }
 
-hdc_t hdc_copy(hdc_t src)
+hdc_t hdc_copy(hdc_t src, bool deep_copy)
 {
     HDC h(src);
-    return HDC(h).copy().as_obj();
+    return HDC(h).copy(deep_copy).as_obj();
 }
 
 void hdc_clean(hdc_t node)

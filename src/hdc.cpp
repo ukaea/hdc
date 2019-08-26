@@ -565,7 +565,7 @@ HDC HDC::get(hdc_path_t& path)
         for (auto str : path) std::cout << str;
         std::cout << ")\n";
     )
-    // Return itself when empty list
+    // Return itself when empty path
     if (path.empty()) {
         return *this;
     }
