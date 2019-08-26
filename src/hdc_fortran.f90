@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-12-03 15:10:18.487181 by generate_fortran_api.py
+! This file was generated on 2019-08-26 10:36:17.629711 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -100,9 +100,10 @@ module hdc_fortran
         end subroutine hdc_clean
 
         !> Performs deep copy of current node. This is interface to C.
-        function c_hdc_copy(src) result(obj) bind(c,name="hdc_copy")
+        function c_hdc_copy(src, deep_copy) result(obj) bind(c,name="hdc_copy")
             import
             type(hdc_t), value :: src
+            logical, value :: deep_copy
             type(hdc_t) :: obj
         end function c_hdc_copy
 
@@ -786,10 +787,13 @@ contains
         call c_hdc_set_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_set_child
 
-    subroutine hdc_copy(src, dest)
+    subroutine hdc_copy(src, dest, deep_copy)
         use iso_c_binding
         type(hdc_t) :: src, dest
-        dest = c_hdc_copy(src)
+        logical, optional :: deep_copy
+        logical :: deep_copy_ = .false.
+        if (present(deep_copy)) deep_copy_ = deep_copy
+        dest = c_hdc_copy(src, deep_copy_)
     end subroutine hdc_copy
 
     subroutine hdc_set_string_path(this, path, str)
