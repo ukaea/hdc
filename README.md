@@ -74,6 +74,32 @@ CC=icc FORTRAN=ifort CXX=icpc cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
 
 ```
 
+Contributing
+============
+
+Everyone is welcome to contribute. Please use Git and merge resquest.
+
+Versioning
+----------
+
+[bumpversion](https://github.com/c4urself/bump2version) is used for maintaining version consistently
+across the repository and files.
+
+To create a new version, use
+
+```
+bumpversion PART
+```
+
+where `PART` is either `patch`, `minor` or `major`.
+
+Git repository needs to be synchronized afterwards:
+
+```
+git push
+git push --tags
+```
+
 Basic ideas
 ===========
 - The hierarchical structure is organized as tree.
