@@ -39,7 +39,7 @@ test-centos7:
     - cd python
     - python3.6 setup.py build
     # Temporarly turned off
-    #- python3.6 setup.py test
+    - python3.6 setup.py test
 
 test-fedora-28:
   image: dockerhub.tok.ipp.cas.cz:5000/fedora-28-hdc-prereq
@@ -53,4 +53,4 @@ test-fedora-28:
     - cd python
     - python3 setup.py build
     # Temporarly turned off
-    #- python3 setup.py test
+    - python3 setup.py test
