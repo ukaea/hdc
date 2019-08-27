@@ -1,0 +1,25 @@
+import ctypes
+from pyhdc import HDC
+
+def {{ func.name }}({% for var in func.arguments if 'in' in var.intent %}
+                    {%- if not loop.first %}, {% endif -%}
+                    {{ var.name }}
+                    {%- endfor %}):
+    ctypes.CDLL('{{ func.module }}.so', ctypes.RTLD_GLOBAL) #This or LD_PRELOAD is needed
+    fm = ctypes.cdll.LoadLibrary('{{ func.module }}_bind.so')
+    input_hdc = HDC()
+    output_hdc = HDC()
+
+    {% for var in func.arguments if 'in' in var.intent %}
+    input_hdc["{{ var.name }}"] = {{ var.name }}
+    {%- endfor %}
+
+    fm.{{ func.name }}_hdc(input_hdc, output_hdc)
+
+    {% for var in func.arguments if var.intent == 'out' %}
+    {{ var.name }} = output_hdc["{{ var.name }}"]
+    {%- endfor %}
+    return {% for var in func.arguments if var.intent == 'out' %}
+        {%- if not loop.first %}, {% endif -%}
+        {{ var.name }}
+        {%- endfor %}

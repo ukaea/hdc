@@ -3,7 +3,7 @@ module hdc_fortran_test_module
 contains
 
 
-subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out) 
+subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out)
     use hdc_fortran
     use iso_c_binding
     implicit none
@@ -14,7 +14,7 @@ subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out)
 
 
 
-    !UAL ! Always describe cpo as array 
+    !UAL ! Always describe cpo as array
     !UAL ! In case of time slice, the size of the input cpo is 1
     !UAL type (type_equilibrium),pointer :: equilibriumin(:)
     !UAL type (type_distsource),pointer :: distsourceout(:)
@@ -30,7 +30,7 @@ subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out)
     real(kind=DP), dimension(4) :: psi_test
     real(kind=DP) :: time
 
-    
+
     write(*,*)'float_out = int_in * 0.1'
     float_out = int_in * 0.1
 
@@ -74,7 +74,7 @@ subroutine test_cpos(equilibriumin, int_in, distsourceout, float_out)
 
         !HDC this needs hdc_t write / format support -- HOW?
         ! write(0,*) 'Received input time from equilibrium: ', hdc_as_double(equilibrium_i, 'time')
-        
+
         ! call hdc_get(equilibrium_i, 'time', time)
         time = hdc_as_double(equilibrium_i, 'time')
         write(0,*) 'Received input time from equilibrium: ', time
