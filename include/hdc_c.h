@@ -32,7 +32,7 @@ const char* hdc_get_uuid(hdc_t tree);  /**  */
 size_t hdc_get_rank(hdc_t tree, const char* path);  /**  */
 size_t hdc_get_type(hdc_t tree, const char* path);  /**  */
 void hdc_keys(hdc_t tree, char** keys, size_t* nkeys);
-hdc_t hdc_copy(hdc_t src); /** Makes deep copy of HDC tree. */
+hdc_t hdc_copy(hdc_t src, bool deep_copy); /** Makes copy of HDC tree. */
 void hdc_to_json(hdc_t tree, const char* filename, int mode); /** Performs serialization of tree to JSON*/
 void hdc_dump(hdc_t tree);
 const char* hdc_dumps(hdc_t tree);

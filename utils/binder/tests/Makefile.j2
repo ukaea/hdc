@@ -1,0 +1,14 @@
+HDC_PATH=../../../build
+
+all:	{%- for func in funcs %}{%- if loop.first %}	{% else %} {% endif -%}lib{{ func.module }}.so lib{{ func.module }}_bind.so {%- endfor %}
+
+{% for func in funcs %}
+lib{{ func.module }}.so: {{ func.module }}.f90
+	gfortran  -fPIC -g -O0 -ffree-line-length-none -pedantic -fbacktrace -std=f2008 -shared \
+	    -o {{ func.module }}.so {{ func.module }}.f90 -I$(HDC_PATH)/mod -L$(HDC_PATH)/src -lfhdc
+
+lib{{ func.module }}_bind.so: {{ func.module }}_bind.f90
+	gfortran  -fPIC -g -O0 -ffree-line-length-none -pedantic -fbacktrace -std=f2008 -shared \
+	    -o {{ func.module }}_bind.so $< -I. -L. -J. -L{{ func.module }}.so \
+	    -I$(HDC_PATH)/mod -L$(HDC_PATH)/src -lfhdc
+{% endfor %}

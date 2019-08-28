@@ -24,12 +24,12 @@ To build HDC, you will need:
 
 Building HDC
 ------------
-For building on ITM gateway, please, follow [these instructions](doxy/BUILDING_ON_ITM_GATEWAY.md).
+For building on ITM gateway, please, follow [these instructions](docs/BUILDING_ON_ITM_GATEWAY.md).
 
 There are several cmake options:
 
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
-  - `-DBUILD_DOCUMENTATION=ON` Whether to build and install documentation.
+  - `-DBUILD_DOC=ON` Whether to build and install documentation.
   - `-DBUILD_EXAMPLES=ON` Whether to build and install examples.
   - `-DENABLE_HDF5=OFF` Switch off HDF5 serialization.
   - Python, if not detected correctly:
@@ -123,7 +123,7 @@ LD_LIBRARY_PATH="../build/lib/" ipython hdc_fortran_module.py
 
 Some benchmarks
 ===============
-See [this file](doxy/PERFORMANCE_TESTING.md)
+See [this file](docs/PERFORMANCE_TESTING.md)
 
 Next steps
 ==========

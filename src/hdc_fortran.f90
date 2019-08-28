@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-12-03 15:10:18.487181 by generate_fortran_api.py
+! This file was generated on 2019-08-28 14:37:33.801437 by ./generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -100,9 +100,10 @@ module hdc_fortran
         end subroutine hdc_clean
 
         !> Performs deep copy of current node. This is interface to C.
-        function c_hdc_copy(src) result(obj) bind(c,name="hdc_copy")
+        function c_hdc_copy(src, deep_copy) result(obj) bind(c,name="hdc_copy")
             import
             type(hdc_t), value :: src
+            logical(kind=c_bool), value :: deep_copy
             type(hdc_t) :: obj
         end function c_hdc_copy
 
@@ -200,17 +201,10 @@ module hdc_fortran
         end function c_hdc_exists
 
         !> Sets string to given path. This is interface to C.
-        subroutine c_hdc_set_string_path(obj, path, str) bind(c,name="hdc_set_string")
+        subroutine c_hdc_set_string(obj, path, str) bind(c,name="hdc_set_string")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            character(kind=c_char), intent(in) :: str(*)
-        end subroutine c_hdc_set_string_path
-
-        !> Sets string. This is interface to C.
-        subroutine c_hdc_set_string(obj, str) bind(c,name="hdc_set_string")
-            import
-            type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: str(*)
         end subroutine c_hdc_set_string
 
@@ -786,10 +780,13 @@ contains
         call c_hdc_set_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_set_child
 
-    subroutine hdc_copy(src, dest)
+    subroutine hdc_copy(src, dest, deep_copy)
         use iso_c_binding
         type(hdc_t) :: src, dest
-        dest = c_hdc_copy(src)
+        logical, optional :: deep_copy
+        logical(kind=c_bool) :: deep_copy_ = .false.
+        if (present(deep_copy)) deep_copy_ = deep_copy
+        dest = c_hdc_copy(src, deep_copy_)
     end subroutine hdc_copy
 
     subroutine hdc_set_string_path(this, path, str)
@@ -797,14 +794,14 @@ contains
         type(hdc_t) :: this
         character(len=*) :: path
         character(len=*), intent(in) :: str
-        call c_hdc_set_string_path(this, trim(path)//c_null_char, trim(str)//c_null_char)
+        call c_hdc_set_string(this, trim(path)//c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string_path
 
     subroutine hdc_set_string(this, str)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*) :: str
-        call c_hdc_set_string(this, trim(str)//c_null_char)
+        call c_hdc_set_string(this, c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string
 
     function hdc_get_child(this, path) result(res)

@@ -1,5 +1,5 @@
+#! /usr/bin/env python3
 import jinja2
-
 
 func = {
     'name': 'test_cpos',
@@ -28,11 +28,16 @@ func = {
     ],
 }
 
+templates = [
+    ('Makefile.j2', 'Makefile'),
+    ('binder_template.f90.j2', '{}_bind.f90'.format(func["module"])),
+    ('python_interface.py.j2', '{}_interface.py'.format(func["module"]))
+    ]
 
-template = jinja2.Template(open('binder_template.f90.j2', 'r').read())
-bind_src = template.render(func=func)
+for file_in, file_out in templates:
+    template = jinja2.Template(open(file_in, 'r').read())
+    bind_src = template.render(func=func)
 
-print(bind_src)
-
-with open('hdc_fortran_test_module_bind.f90', 'w') as wrap_out:
-    wrap_out.write(bind_src)
+    with open(file_out, 'w') as wrap_out:
+        wrap_out.write(bind_src)
+        print("{} written.".format(file_out))

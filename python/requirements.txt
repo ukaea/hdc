@@ -1,0 +1,9 @@
+six
+numpy>=1.10.0
+pytest>=3.0.0
+h5py>=2.8.0
+hypothesis
+Cython>=0.28.0
+Sphinx
+breathe
+

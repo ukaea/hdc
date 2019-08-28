@@ -1,0 +1,5 @@
+#!/bin/bash
+HDC_PREFIX=../../install
+./generate_bindings.py
+make
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HDC_PREFIX/lib:$HDC_PREFIX/lib/hdc:./ ./call.py

@@ -1,5 +1,5 @@
 # -*- coding: utf-8
-# cython: language_level=3
+# cython: language_level=3, binding=True, profile=True, linetrace=True
 
 # https://github.com/cython/cython/wiki/WrappingCPlusPlus
 # https://dmtn-013.lsst.io/
@@ -9,22 +9,44 @@ from libcpp.string cimport string
 from libcpp cimport bool
 cimport numpy as cnp
 from cython cimport view
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, intptr_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t, intptr_t
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 import ctypes
 
+import six
 import numbers
-import collections
+if six.PY3:
+    import collections.abc as collections_abc
+else:
+    import collections as collections_abc
 import six
 import numpy as np
-
 
 # TODO workaroud for https://github.com/cython/cython/issues/534
 ctypedef double* doubleptr
 ctypedef void* voidptr
 
+
+from libc.string cimport memcpy
+
+cdef int from_str_to_chararray(source, char *dest, size_t N, bint ensure_nullterm) except -1:
+    cdef size_t source_len = len(source)
+    cdef bytes as_bytes = source.encode('ascii')    #hold reference to the underlying byte-object
+    cdef const char *as_ptr = <const char *>(as_bytes)
+    if ensure_nullterm:
+        source_len+=1
+    if source_len > N:
+        raise IndexError("destination array too small")
+    memcpy(dest, as_ptr, source_len)
+    return 0
+
+
+
+
+
+# we have to cdef all the constants and types we need
 cdef extern from "hdc_types.h":
     cdef size_t HDC_EMPTY
     cdef size_t HDC_STRUCT
@@ -47,13 +69,19 @@ cdef extern from "hdc_types.h":
     cdef size_t HDCExternal
     cdef size_t HDC_MAX_DIMS
     cdef size_t HDC_UUID_LENGTH
+
     ctypedef struct hdc_t:
         char uuid[37]
         voidptr storage
+
+
 class hdc_t_(ctypes.Structure):
+    """The ctypes equivalent of hdc_t"""
     _fields_ = [("uuid", ctypes.c_char * 37),
                 ("storage_id", ctypes.c_size_t)]
 
+
+# cdef the C++ interface, any method we need must be here
 cdef extern from "hdc.hpp":
     cdef cppclass HDCStorage:
         pass
@@ -80,8 +108,9 @@ cdef extern from "hdc.hpp":
         vector[size_t] get_shape() except +
         size_t get_storage_id() except +
         string get_uuid() except +
-        # typedef unsigned long hdc_flags_t;
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
+        void set_data_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
+        void set_external_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
         void set_external[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         voidptr as_void_ptr() except +
         string as_string() except +
@@ -102,22 +131,30 @@ cdef extern from "hdc.hpp":
 
 
 cdef class HDC:
-    # data handle
+    """
+    Python wrapper class for the HDC C++ class
+    """
+    # C++ class handle
     cdef CppHDC _this
 
     def __init__(self, data=None):
+        """
+        HDC constructor
 
+        Parameters
+        ----------
+        data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
+            Data to set (default None)
+        """
         if data is None:
-            # create the cpp obeject
+            # create a new C++ instance
             self._this = CppHDC()
         elif isinstance(data, self.__class__):
             #  copy constructor
             self._this = (<HDC> data)._this
         elif isinstance(data, six.string_types):
-            #self._this = CppHDC(bytes(data, 'utf-8'))
             self._this = CppHDC(<string> str(data).encode('utf-8'))
         else:
-            # assert NotImplementedError()
             self._this = CppHDC()
             self.set_data(data)
 
@@ -130,16 +167,14 @@ cdef class HDC:
     def __setitem__(self, key, value):
         if isinstance(key, six.string_types):
             if key not in self:
-                # cdef CppHDC* new_hdc = new CppHDC()
-                # deref(new_hdc).set_data(value)
                 new_hdc = HDC(value)
                 self._this.add_child(key.encode(), new_hdc._this)
             else:
                 self[key].set_data(value)
-
-        # else:
-        #     # key is numeric
-        #     libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
+        else:
+            raise NotImplementedError('Non-string keys not supported')
+            # TODO support set_slice
+            # libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
 
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
@@ -149,7 +184,6 @@ cdef class HDC:
             res = <HDC> self.__class__()
             # TODO move to constructor
             res._this = self._this.get(<string> ckey)
-            # self._this.get_ptr(ckey)
             return res
         elif isinstance(key, numbers.Integral):
             res = <HDC> self.__class__()
@@ -160,7 +194,8 @@ cdef class HDC:
             raise ValueError("key must be either string or integer")
 
     def to_python(self, deep=True):
-        """Convert to native Python type data if possible
+        """
+        Convert to native Python type data if possible
 
         Parameters
         ----------
@@ -169,7 +204,6 @@ cdef class HDC:
         """
         type_id = self.get_type()
         # check whether type id is not in non-array types
-
         if type_id == HDC_STRING:
             return str(self)
         elif type_id == HDC_EMPTY:
@@ -189,7 +223,6 @@ cdef class HDC:
                 return np.asscalar(np.asarray(self))
             else:
                 return np.asarray(self)
-
         else:
             raise TypeError('Type {} not supported'.format(self.get_type_str()))
 
@@ -210,11 +243,9 @@ cdef class HDC:
             # TODO is 0 always correct?
             return 0
 
-    cdef _set_data(self, cnp.ndarray data, external=False):
+    cdef _set_array_data(self, cnp.ndarray data, external=False):
         cdef size_t flags  = HDCDefault
-        #cdef size_t flags  = HDCFortranOrder
         cdef cnp.ndarray data_view
-        # data_view = np.require(data, requirements=('C', 'O'))
         if data.ndim == 0:
             # ascontiguousarray forces rank >0= 1
             data_view = data
@@ -226,69 +257,29 @@ cdef class HDC:
             if external:
                 flags |= HDCExternal
             data_view = np.ascontiguousarray(data)
-        data_view.setflags(write=True)
         cdef cnp.ndarray[cnp.int64_t, ndim=1, mode="c"] _shape = np.zeros([data_view.ndim],dtype=np.int64,order="C")
         for i in range(data_view.ndim):
             _shape[i] = data_view.shape[i]
-        # it seems we cannot simply assing self._this.set_data or self._this.set_external to a variable
-        # and avaid the duplication inside the if branches
-        # likely due to using templates
+        cdef char kind_arr[2]
+        from_str_to_chararray(data.dtype.kind,kind_arr,2,1)
+        cdef char kind = kind_arr[0]
+        cdef int8_t itemsize = data.dtype.itemsize
+        #TODO merge set_data and set_external?
         if not external:
-            # TODO support other types
-            if np.issubdtype(data.dtype, np.bool_):
-                self._this.set_data(_shape, <bool*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int8):
-                self._this.set_data(_shape, <int8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int16):
-                self._this.set_data(_shape, <int16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int32):
-                self._this.set_data(_shape, <int32_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int64):
-                self._this.set_data(_shape, <int64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint8):
-                self._this.set_data(_shape, <uint8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint16):
-                self._this.set_data(_shape, <uint16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint32):
-                self._this.set_data(_shape, <uint32_t*> data_view.data, flags)
-            # not yet supported in HDC
-            # elif np.issubdtype(data.dtype, np.uint64):
-            #     self._this.set_data(_shape, <uint64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float32):
-                self._this.set_data(_shape, <float*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float64):
-                self._this.set_data(_shape, <double*> data_view.data, flags)
-            else:
-                raise NotImplementedError('Type not supported')
+            self._this.set_data_Py(_shape, <voidptr> data_view.data, kind, <int8_t> itemsize, flags)
         else:
-            # TODO support other types
-            if np.issubdtype(data.dtype, np.bool_):
-                self._this.set_external(_shape, <bool*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int8):
-                self._this.set_external(_shape, <int8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int16):
-                self._this.set_external(_shape, <int16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int32):
-                self._this.set_external(_shape, <int32_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.int64):
-                self._this.set_external(_shape, <int64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint8):
-                self._this.set_external(_shape, <uint8_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint16):
-                self._this.set_external(_shape, <uint16_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.uint32):
-                self._this.set_external(_shape, <uint32_t*> data_view.data, flags)
-            # not yet supported in HDC
-            # elif np.issubdtype(data.dtype, np.uint64):
-            #     self._this.set_external(_shape, <uint64_t*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float32):
-                self._this.set_external(_shape, <float*> data_view.data, flags)
-            elif np.issubdtype(data.dtype, np.float64):
-                self._this.set_external(_shape, <double*> data_view.data, flags)
-            else:
-                raise NotImplementedError('Type not supported')
-
+            self._this.set_external_Py(_shape, <voidptr> data_view.data, kind, <int8_t> itemsize, flags)
     def set_data(self, data, external=False):
+        """
+        Sets data to a HDC node.
+
+        Parameters
+        ----------
+        data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
+            Data to set.
+        external : bool
+            Whether to copy data into HDC or just store a pointer
+        """
         if external:
             if not isinstance(data, np.ndarray):
                 NotImplementedError('external=True not supported for non np.ndarray type data')
@@ -296,15 +287,15 @@ cdef class HDC:
         if isinstance(data, six.string_types):
             self._this.set_string(data.encode())
         elif isinstance(data, np.ndarray):
-            self._set_data(data, external=external)
+            self._set_array_data(data, external=external)
         elif isinstance(data, numbers.Number):
             # convert numbers to numpy
-            self._set_data(np.asarray(data))
-        elif isinstance(data, collections.Mapping):
+            self._set_array_data(np.asarray(data))
+        elif isinstance(data, collections_abc.Mapping):
             # dict-like data
             for key, value in data.items():
                 self[key] = self.__class__(value)
-        elif isinstance(data, collections.Sequence):
+        elif isinstance(data, collections_abc.Sequence):
             # list, tuple etc., not string
             for value in data:
                 self.append(self.__class__(value))
@@ -312,16 +303,44 @@ cdef class HDC:
             raise ValueError('{} type not supported'.format(type(data)))
 
     def append(self, data):
+        """
+        Appends data to a HDC list
+
+        Parameters
+        ----------
+        data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
+            Data to set.
+        """
         new_hdc = HDC(data)
         self._this.append(new_hdc._this)
 
     def dumps(self, mode=0):
-        """Dump to JSON string"""
+        """
+        Dump to JSON string
+
+        Parameters
+        ----------
+        mode : int
+            0 .. just pure JSON (default)
+            1 .. append additional metadata
+
+        Returns
+        -------
+        string
+            A JSON string.
+        """
         return self._this.to_json_string(mode).decode()
 
     @staticmethod
     def loads(s):
-        """Load from JSON string"""
+        """
+        Load from JSON string
+
+        Parameters
+        ----------
+        s : string
+            JSON string to be loaded
+        """
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
         #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
@@ -329,12 +348,16 @@ cdef class HDC:
         return res
 
     def dump(self, filename, mode=0):
-        """Save to json file
+        """
+        Save to json file
 
         Parameters
         ----------
-        fp : .write supporting object (open file)
+        filename : .write supporting object (open file)
             target to write to
+        mode : int
+            0 .. just pure JSON (default)
+            1 .. append additional metadata
         """
         self._this.to_json(filename.encode(), mode)
         # with open(filename, 'w') as fp:
@@ -342,6 +365,17 @@ cdef class HDC:
 
     @staticmethod
     def load(uri, datapath=''):
+        """
+        Loads data from some external storage
+
+        Parameters
+        ----------
+        uri : string
+            string specifying data source in protocol://path_to_the_file format
+            e.g. json://a.txt, or hdf5://a.h5
+        datapath : string
+            additional path within the file, e.g. subgroup in HDF5
+        """
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
         #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
@@ -349,6 +383,7 @@ cdef class HDC:
         return res
 
     def print_info(self):
+        """Prints info about HDC node"""
         return self._this.print_info()
 
     @property
@@ -359,12 +394,15 @@ cdef class HDC:
         return hdc_t_(uuid,storage)
 
     def get_type_str(self):
+        """Returns string type description of HDC node, e.g. int32"""
         return self._this.get_type_str().decode()
 
     cdef get_type(self):
+        """Returns integer representing type according to hdc_type_t enum in include/hdc_types.h """
         return self._this.get_type()
 
     cdef is_array(self):
+        """Returns True if the node is an array, and False otherwise."""
         type_id = self.get_type()
         # check whether type id is not in non-array types
         return type_id in (HDC_INT8, HDC_INT16, HDC_INT32, HDC_INT64, HDC_UINT8,
@@ -373,7 +411,6 @@ cdef class HDC:
 
     def __str__(self):
         # return string representation
-        # TODO
         if self.get_type() == HDC_STRING:
             print(self._this.as_string())
             return self._this.as_string().decode()
@@ -408,7 +445,6 @@ cdef class HDC:
             strides_buf[i] = strides[i]
         buffer.buf = self._this.as_void_ptr()
         # TODO https://docs.python.org/3/c-api/arg.html#arg-parsing
-
         # Set buffer format here:
         type_id = self.get_type()
         if (type_id == HDC_EMPTY):
@@ -466,6 +502,7 @@ cdef class HDC:
 
     @property
     def shape(self):
+        """Returns shape of the HDC node"""
         cdef int rank = self._this.get_rank()
         cdef vector[size_t] shape = self._this.get_shape()
         return tuple((shape[i] for i in range(rank)))
@@ -480,10 +517,30 @@ cdef class HDC:
         return (k.decode() for k in keys)
 
     def to_hdf5(self, filename, dataset_name="data"):
+        """
+        Saves data into HFD5 file.
+
+        Parameters
+        ----------
+        filename : string
+            filename of HDF5 file
+        dataset_name : string
+            HDF5 dataset name within the file (default "data")
+        """
         self._this.to_hdf5(filename.encode(), dataset_name.encode())
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
+        """
+        Loads data from HFD5 file into a new HDC container
+
+        Parameters
+        ----------
+        filename : string
+            filename of HDF5 file
+        dataset_name : string
+            HDF5 dataset name within the file (default "data")
+        """
         res = HDC()
         res._this = CppHDC.from_hdf5(filename.encode(), dataset_name.encode())
         return res

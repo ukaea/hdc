@@ -72,6 +72,8 @@ hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize);
 hdc_type_t to_typeid(const std::type_info& t);
 hdc_type_t uda_str_to_typeid(std::string& str);
 bool hdc_is_numeric (hdc_type_t);
+hdc_type_t decode_numpy_type(char kind, int8_t itemsize) ;
+
 /* -------------------------  Other stuff ----------------------------- */
 
 void hello__();
@@ -81,5 +83,7 @@ void hello__();
 void transpose_buffer(char* new_buffer, char* buffer, int8_t rank, std::vector<size_t> shape, hdc_type_t type_, bool fortranOrder = false);
 
 bool fileExists(const std::string& file);
+
+
 
 #endif

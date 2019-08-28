@@ -476,6 +476,7 @@ public:
             return;
         }
     }
+
     /**
     * @brief ...
     *
@@ -602,15 +603,44 @@ public:
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    void set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
-    /** Sets scalar data to given node. */
-    template <typename T>
+    void set_external_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    /**
+     * @brief ...
+     *
+     * @param shape p_shape:...
+     * @param data p_data:...
+     * @param kind p_kind:...
+     * @param itemsize p_itemsize:...
+     * @param flags p_flags:...
+     */
+    void set_data_Py(std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
+    /**
+     * @brief ...
+     *
+     * @param shape p_shape:...
+     * @param data p_data:...
+     * @param kind p_kind:...
+     * @param itemsize p_itemsize:...
+     * @param flags p_flags:...
+     */
+    void set_external_Py(std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
     /**
     * @brief ...
+    *
+    * @param shape p_shape: Shape of the data
+    * @param data p_data: Pointer to data
+    * @param type p_type: Type of the data (e.g. HDC_INT32)
+    * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
+    */
+    void set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+
+    /**
+    * @brief Sets scalar data to given node.
     *
     * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
     */
+    template <typename T>
     void set_data(T data) {
         auto data_size = sizeof(T);
         auto buffer_size = data_size + sizeof(hdc_header_t);

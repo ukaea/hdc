@@ -42,7 +42,8 @@ extensions = [
         ],
         libraries=['hdc'],
         library_dirs=[os.path.abspath(os.path.join("..","${CMAKE_INSTALL_PREFIX}", 'lib'))],
-        runtime_library_dirs=[os.path.abspath(os.path.join("..","${CMAKE_INSTALL_PREFIX}", 'lib'))], )
+        runtime_library_dirs=[os.path.abspath(os.path.join("..","${CMAKE_INSTALL_PREFIX}", 'lib'))],
+        cython_directives={"embedsignature": True},)
 ]
 
 options = dict(
