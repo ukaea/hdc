@@ -333,7 +333,7 @@ HDC udaResult2HDC(const uda::Result& uda_result, bool withMetadata = false)
         result = tmp;
     }
     return result;
-};
+}
 
 HDC HDC::from_uda(const std::string& signalName, const std::string& dataSource, bool withMetadata)
 {

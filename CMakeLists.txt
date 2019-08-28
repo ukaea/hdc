@@ -7,13 +7,6 @@ cmake_policy(SET CMP0057 NEW)
 project(hdc)
 enable_language(CXX C Fortran)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE YES)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED YES)
-set(CMAKE_Fortran_FORMAT FREE)
-
 set(hdc_TEST_DIR "${hdc_SOURCE_DIR}/test")
 set(hdc_SOURCE_DIR "${hdc_SOURCE_DIR}/src")
 set(CMAKE_Fortran_MODULE_DIRECTORY "mod")
@@ -53,16 +46,51 @@ endif()
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #find_package(Sphinx REQUIRED)
 if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -fPIC")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -fPIC")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(-Wno-type-limits -Wall -Wextra -pedantic)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC -pedantic")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99 -Wno-type-limits -Wall -Wextra -fPIC -pedantic")
 else()
     message("Warning: Unsupported C compiler: ${CMAKE_C_COMPILER_ID}")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -std=c99")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -std=c99")
 endif()
-# This can be useful for Boost>=1.67
-# add_definitions(-DBOOST_UUID_RANDOM_GENERATOR_COMPAT)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++14 -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++14 -fPIC")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -Wno-type-limits -Wall -Wextra -fPIC")
+else()
+    message("Warning: Unsupported CXX compiler: ${CMAKE_CXX_COMPILER_ID}")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -std=c++11 -pedantic")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -std=c++11 -pedantic")
+endif()
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+# -diag-enable=remark
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -free -diag-enable=warn -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -free -diag-enable=warn -fPIC")
+elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -Mfree -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -Mfree -fPIC")
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0 -ffree-line-length-none -pedantic -fbacktrace -Wall -Wextra -std=f2008 -fPIC")
+else()
+    message("Warning: Unsupported Fortran compiler: ${CMAKE_Fortran_COMPILER_ID}")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O2")
+    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -O0")
+endif()
 
+set(CMAKE_INCLUDE_PATH "/usr/include/boost148" ${CMAKE_INCLUDE_PATH} )
+set(CMAKE_LIBRARY_PATH "/usr/lib64/boost148" ${CMAKE_LIBRARY_PATH} )
 find_package(Boost 1.48.0 REQUIRED filesystem system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
@@ -90,7 +118,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # the RPATH to be used when installing, but only if it's not a system directory
 LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 IF("${isSystemDir}" STREQUAL "-1")
-   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/hdc")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
 ########################################################################################################################
@@ -136,7 +164,7 @@ if (BUILD_BENCHMARKS)
             -DBENCHMARK_ENABLE_LTO:BOOL=OFF
             -DBENCHMARK_ENABLE_TESTING:BOOL=OFF
             -DBENCHMARK_USE_LIBCXX:BOOL=OFF
-    INSTALL_COMMAND ""
+       INSTALL_COMMAND ""
     )
 endif() # BUILD_BENCHMARKS
 
@@ -158,7 +186,7 @@ if(ENABLE_HDF5)
 #         set(_hdf5_version "1.8.21")
 #         set(_hdf5_version_short "1.8")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-    ExternalProject_Add(hdf5_local
+	ExternalProject_Add(hdf5_local
             DOWNLOAD_COMMAND curl https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${_hdf5_version_short}/hdf5-${_hdf5_version}/src/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             #DOWNLOAD_COMMAND cat ${hdc_SOURCE_DIR}/../tmp/hdf5-${_hdf5_version}.tar.gz | tar xz -C "${PROJECT_BINARY_DIR}/hdf5_local/src"
             CMAKE_ARGS ${ExternalProjectCMakeArgs}
@@ -193,23 +221,29 @@ if (BUILD_MDBM_PLUGIN)
         NAMES libmdbm mdbm
         HINTS "/usr/local/lib64" "/usr/local/lib" "/usr/local/lib64" "/usr/lib" "/usr/lib64" "/sw/mdbm/lib64"
     )
-    if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY})
+    if (IS_DIRECTORY ${MDBM_INCLUDE_DIR} AND EXISTS ${MDBM_LIBRARY} AND NOT BUILD_OWN_MDBM)
         message("Found MDBM include: ${MDBM_INCLUDE_DIR}")
         message("Found MDBM library: ${MDBM_LIBRARY}")
         set(_BUILD_MDBM TRUE)
     elseif(BUILD_OWN_MDBM)
         include(ExternalProject)
-        ExternalProject_Add(mdbm
+        ExternalProject_Add(mdbmDownload
             GIT_REPOSITORY https://github.com/yahoo/mdbm.git
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND make -j PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
-            INSTALL_COMMAND make  install PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
-            PREFIX=${CMAKE_CURRENT_BINARY_DIR}/mdbm
+            CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/scripts/mdbm_configure.sh ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/src/mdbmDownload ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix
+            BUILD_COMMAND $(MAKE)
+            INSTALL_COMMAND $(MAKE) install
             BUILD_IN_SOURCE 1
         )
-        set(MDBM_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/mdbm/include)
-        set(MDBM_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/mdbm/lib64/libmdbm.so)
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/include/ DESTINATION include/hdc)
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/lib64/ DESTINATION lib/hdc)
+#         install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mdbmDownload-prefix/bin/ DESTINATION bin )
+
+        ExternalProject_Get_Property(mdbmDownload INSTALL_DIR)
+#         set(MDBM_INCLUDE_DIR ${INSTALL_DIR}/include)
+        set(MDBM_LIBRARY ${INSTALL_DIR}/lib64/libmdbm.so)
         set(_BUILD_MDBM TRUE)
+        add_library(mdbm SHARED IMPORTED)
+        set_target_properties(mdbm PROPERTIES IMPORTED_LOCATION ${MDBM_LIBRARY})
     else()
         message("libmdbm not found and not set to build. Skipping build of MDBM plugin...")
     endif()
