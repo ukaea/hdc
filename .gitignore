@@ -20,3 +20,18 @@ src/__pycache__
 *.html
 
 fort.*
+
+utils/binder/Makefile
+utils/binder/hdc_fortran_test_module.mod
+utils/binder/hdc_fortran_test_module.so
+utils/binder/hdc_fortran_test_module_bind.f90
+utils/binder/hdc_fortran_test_module_bind.so
+utils/binder/hdc_fortran_test_module_interface.py
+utils/binder/hdc_fortran_test_module_interface.pyc
+
+utils/binder/tests/Makefile
+utils/binder/tests/*.mod
+utils/binder/tests/*.so
+utils/binder/tests/*.pyc
+utils/binder/tests/test_*_bind.f90
+utils/binder/tests/test_*_interface.py
