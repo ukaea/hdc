@@ -12,6 +12,10 @@ test-bionic:
     - cd python
     - python3 setup.py build
     - python3 setup.py test
+    - python3 setup.py install
+    - apt install -y python3-jinja2
+    - cd ../../utils/binder/tests/
+    - ./run
 
 test-xenial:
   image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-xenial-hdc-prereq
@@ -25,6 +29,10 @@ test-xenial:
     - cd python
     - python3 setup.py build
     - python3 setup.py test
+    - python3 setup.py install
+    - apt install -y python3-jinja2
+    - cd ../../utils/binder/tests/
+    - ./run
 
 test-centos7:
   image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
