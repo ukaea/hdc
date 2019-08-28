@@ -15,6 +15,10 @@ subroutine {{ func.name }}_hdc(data_in, data_out) bind(c, name="{{ func.name }}_
     {% for var in func.arguments if var.type != 'type(hdc_t)' %}
     type(hdc_t) :: hdc_node_{{ var.name }}
     {%- endfor %}
+    ! init all output HDCs
+    {% for var in func.arguments if var.type == 'type(hdc_t)' and var.intent == 'out' %}
+    {{ var.name }} = hdc_new()
+    {% endfor %}
     write(*,*)'=== {{ func.name }}_hdc ==='
     call hdc_dump(data_in)
     {% for var in func.arguments if 'in' in var.intent %}

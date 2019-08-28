@@ -18,6 +18,7 @@ def {{ func.name }}({% for var in func.arguments if 'in' in var.intent %}
 
     {% for var in func.arguments if var.intent == 'out' %}
     {{ var.name }} = output_hdc["{{ var.name }}"]
+    {%- if var.type != 'type(hdc_t)' %}.to_python(){% endif %}
     {%- endfor %}
     return {% for var in func.arguments if var.intent == 'out' %}
         {%- if not loop.first %}, {% endif -%}
