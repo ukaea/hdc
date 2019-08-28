@@ -411,7 +411,6 @@ cdef class HDC:
 
     def __str__(self):
         # return string representation
-        # TODO
         if self.get_type() == HDC_STRING:
             print(self._this.as_string())
             return self._this.as_string().decode()
