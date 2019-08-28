@@ -1,0 +1,2 @@
+#!/bin/bash
+rm *.mod *.so *_bind.f90 *.pyc *_interface.py *.pyc Makefile
