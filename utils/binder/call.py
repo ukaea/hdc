@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 from pyhdc import HDC
 from  hdc_fortran_test_module_interface import test_cpos
 
