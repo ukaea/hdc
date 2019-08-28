@@ -1,5 +1,5 @@
 
-! This file was generated on 2019-08-28 09:24:24.319570 by ./generate_fortran_api.py
+! This file was generated on 2019-08-28 14:37:33.801437 by ./generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -103,7 +103,7 @@ module hdc_fortran
         function c_hdc_copy(src, deep_copy) result(obj) bind(c,name="hdc_copy")
             import
             type(hdc_t), value :: src
-            logical, value :: deep_copy
+            logical(kind=c_bool), value :: deep_copy
             type(hdc_t) :: obj
         end function c_hdc_copy
 
@@ -784,7 +784,7 @@ contains
         use iso_c_binding
         type(hdc_t) :: src, dest
         logical, optional :: deep_copy
-        logical :: deep_copy_ = .false.
+        logical(kind=c_bool) :: deep_copy_ = .false.
         if (present(deep_copy)) deep_copy_ = deep_copy
         dest = c_hdc_copy(src, deep_copy_)
     end subroutine hdc_copy

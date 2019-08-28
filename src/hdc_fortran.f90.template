@@ -100,7 +100,7 @@ module hdc_fortran
         function c_hdc_copy(src, deep_copy) result(obj) bind(c,name="hdc_copy")
             import
             type(hdc_t), value :: src
-            logical, value :: deep_copy
+            logical(kind=c_bool), value :: deep_copy
             type(hdc_t) :: obj
         end function c_hdc_copy
 
@@ -475,7 +475,7 @@ contains
         use iso_c_binding
         type(hdc_t) :: src, dest
         logical, optional :: deep_copy
-        logical :: deep_copy_ = .false.
+        logical(kind=c_bool) :: deep_copy_ = .false.
         if (present(deep_copy)) deep_copy_ = deep_copy
         dest = c_hdc_copy(src, deep_copy_)
     end subroutine hdc_copy
