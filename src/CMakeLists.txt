@@ -4,7 +4,7 @@ link_directories(${hdc_SOURCE_DIR}/src)
 set(HDC_SOURCES)
 list(APPEND HDC_SOURCES hdc.cpp plugins/storage_interface.cpp hdc_utils.cpp hdc_json.cpp hdc_uda.cpp hdc_errors.cpp hdc_hdf5.cpp)
 set(HDC_LINK_LIBRARIES)
-list(APPEND HDC_LINK_LIBRARIES ${Boost_LIBRARIES} Pluma dl jsoncpp)
+list(APPEND HDC_LINK_LIBRARIES ${Boost_LIBRARIES} Pluma dl hdcjsoncpp)
 
 if(HDF5_FOUND)
   #list(APPEND HDC_LINK_LIBRARIES ${HDF5_HL_LIBRARIES} ${HDF5_LIBRARIES})
