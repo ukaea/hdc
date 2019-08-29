@@ -1,6 +1,9 @@
 {
-    "name": "modify_string",
+    "function": "modify_string",
     "module": "test_module_modify_string",
+    "source_file": "test_module_modify_string.f90",
+    "do_compile": true,
+    "soname": "test_module_modify_string.so",
     "arguments": [
         {
             "name": "str_in",

@@ -1,6 +1,9 @@
 {
-    "name": "merge_hdc_trees",
+    "function": "merge_hdc_trees",
     "module": "test_module_merge_hdc_trees",
+    "source_file": "test_module_merge_hdc_trees.f90",
+    "do_compile": true,
+    "soname": "test_module_merge_hdc_trees.so",
     "arguments": [
         {
             "name": "tree1",

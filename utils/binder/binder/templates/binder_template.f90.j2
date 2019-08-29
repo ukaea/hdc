@@ -1,4 +1,4 @@
-subroutine {{ func.name }}_hdc(data_in, data_out) bind(c, name="{{ func.name }}_hdc")
+subroutine {{ func.function }}_hdc(data_in, data_out) bind(c, name="{{ func.function }}_hdc")
     use hdc_fortran
     use iso_c_binding
     {% if func.module %}
@@ -19,12 +19,12 @@ subroutine {{ func.name }}_hdc(data_in, data_out) bind(c, name="{{ func.name }}_
     {% for var in func.arguments if var.type == 'type(hdc_t)' and var.intent == 'out' %}
     {{ var.name }} = hdc_new()
     {% endfor %}
-    write(*,*)'=== {{ func.name }}_hdc ==='
+    write(*,*)'=== {{ func.function }}_hdc ==='
     call hdc_dump(data_in)
     {% for var in func.arguments if 'in' in var.intent %}
     call hdc_get(data_in, '{{ var.name }}', {{ var.name }})
     {%- endfor %}
-    call {{ func.name }}({% for var in func.arguments -%}
+    call {{ func.function }}({% for var in func.arguments -%}
         {%- if not loop.first %}, {% endif -%}
         {{ var.name }}
     {%- endfor %})
@@ -39,5 +39,5 @@ subroutine {{ func.name }}_hdc(data_in, data_out) bind(c, name="{{ func.name }}_
     {%- endfor %}
     write(*,*)'output tree:'
     call hdc_dump(data_out)
-    write(*,*)'=== END {{ func.name }} ==='
+    write(*,*)'=== END {{ func.function }} ==='
 end subroutine
