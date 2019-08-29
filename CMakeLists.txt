@@ -255,6 +255,7 @@ if (ENABLE_MATLAB)
     add_subdirectory(matlab)
 endif()
 add_subdirectory(misc)
+add_subdirectory(java)
 
 if (BUILD_DOC)
     # add_subdirectory(docs)
