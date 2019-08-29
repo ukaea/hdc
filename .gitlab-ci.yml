@@ -32,7 +32,7 @@ test-xenial:
     - python3 setup.py build
     - python3 setup.py test
     - python3 setup.py install
-    - apt install -y python3-jinja2
+    - apt install -y python3-jinja2 pkg-config python3-pytest
     - cd ../../utils/binder/tests/
     - python3 -m pip install ..
     - export LC_ALL=C.UTF-8 LANG=C.UTF-8
