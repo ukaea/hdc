@@ -7,4 +7,4 @@ do
     PKG_CONFIG_PATH=$HDC_PREFIX/lib/pkgconfig make
 done
 
-PYHONPATH=. LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HDC_PREFIX/lib:$HDC_PREFIX/lib/hdc:./ ./test_binder.py
+PYHONPATH=. LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HDC_PREFIX/lib:$HDC_PREFIX/lib/hdc:./ pytest .
