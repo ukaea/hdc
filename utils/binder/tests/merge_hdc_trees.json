@@ -1,0 +1,21 @@
+{
+    "name": "merge_hdc_trees",
+    "module": "test_module_merge_hdc_trees",
+    "arguments": [
+        {
+            "name": "tree1",
+            "type": "type(hdc_t)",
+            "intent": "in"
+        },
+        {
+            "name": "tree2",
+            "type": "type(hdc_t)",
+            "intent": "in"
+        },
+        {
+            "name": "tree_out",
+            "type": "type(hdc_t)",
+            "intent": "out"
+        }
+    ]
+}

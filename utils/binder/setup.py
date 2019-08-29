@@ -2,10 +2,11 @@ from setuptools import setup
 
 setup(
     name='binder',
-    version='0.1.0',
+    version='0.10.0',
     install_requires=[
         'Click',
         'jinja2',
+        'pyhdc',
     ],
     entry_points='''
         [console_scripts]

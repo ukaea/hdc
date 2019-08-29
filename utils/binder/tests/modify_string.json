@@ -1,0 +1,16 @@
+{
+    "name": "modify_string",
+    "module": "test_module_modify_string",
+    "arguments": [
+        {
+            "name": "str_in",
+            "type": "character(kind=c_char,len=100)",
+            "intent": "in"
+        },
+        {
+            "name": "str_out",
+            "type": "character(kind=c_char,len=201)",
+            "intent": "out"
+        }
+    ]
+}

@@ -15,6 +15,7 @@ test-bionic:
     - python3 setup.py install
     - apt install -y python3-jinja2
     - cd ../../utils/binder/tests/
+    - python3 -m pip install ..
     - ./run
 
 test-xenial:
@@ -32,6 +33,7 @@ test-xenial:
     - python3 setup.py install
     - apt install -y python3-jinja2
     - cd ../../utils/binder/tests/
+    - python3 -m pip install ..
     - ./run
 
 test-centos7:
