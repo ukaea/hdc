@@ -7,7 +7,8 @@ import jinja2
 
 @click.command()
 @click.argument('description_file', type=click.File("r"))
-def cli(description_file):
+@click.option('--makefile/--no-makefile', default=False)
+def cli(description_file, makefile):
     """Contructs HDC bindings according to the description
 
     DESCRIPTION_FILE is a JSON file providing the interface description
@@ -17,8 +18,9 @@ def cli(description_file):
     templates = [
         (pkg_resources.resource_string(__name__, 'templates/binder_template.f90.j2'), '{}_bind.f90'.format(description["module"])),
         (pkg_resources.resource_string(__name__, 'templates/python_interface.py.j2'), '{}_interface.py'.format(description["module"])),
-        (pkg_resources.resource_string(__name__, 'templates/Makefile.j2'), 'Makefile'),
         ]
+    if makefile:
+        templates.append((pkg_resources.resource_string(__name__, 'templates/Makefile.j2'), 'Makefile'))
 
     for file_in, file_out in templates:
         template = jinja2.Template(file_in.decode())
