@@ -16,6 +16,7 @@ test-bionic:
     - apt install -y python3-jinja2
     - cd ../../utils/binder/tests/
     - python3 -m pip install ..
+    - export LC_ALL=C.UTF-8 LANG=C.UTF-8
     - ./run
 
 test-xenial:
@@ -34,6 +35,7 @@ test-xenial:
     - apt install -y python3-jinja2
     - cd ../../utils/binder/tests/
     - python3 -m pip install ..
+    - export LC_ALL=C.UTF-8 LANG=C.UTF-8
     - ./run
 
 test-centos7:
