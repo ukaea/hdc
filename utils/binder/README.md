@@ -1,24 +1,27 @@
-This is the example of automatic bindings (Python interface to FORTRAN function) generation.
+`binder` generates bindings (Python interface to FORTRAN function) via HDC containers.
 
-The interface constists from the following stages:
+The `binder` script inputs a JSON interface description file and outputs
+Python and Fortran binding files using HDC containers and a make file
+(`Makefile_binder` by default), which can be used to compile shared libraries.
 
- 1. generating FORTRAN wrapping `module_bind(data_in, data_out)` subroutine with inputs and outputs stored into arguments:
+Internally, `binder` puts all inputs into a single HDC container,
+which is unpacked in the generated binding functions. Similarly,
+all outputs are stored into an output container and unpacked
+in the (Python) interface function.
 
-     type(hdc_t), value ::  data_in
-     type(hdc_t), value ::  data_out
+Command line interface:
 
- 2. generating python interface for FORTRAN wrapping subroutine from the first stage.
+```
+$ binder --help
 
-We assume that the interface specification is provided (see `func` in `generate_bindings.py` for details).
+Usage: binder [OPTIONS] DESCRIPTION_FILE
 
-The example can be run by the following commands (Python module `jinja` has to be installed):
+  Contructs HDC bindings according to the description
 
-    ./generate_bindings.py
-    make
-    ./call.py
+  DESCRIPTION_FILE is a JSON file providing the interface description
 
-List of files:
+Options:
+  --makefile TEXT  Make file name, leave empty for no make file generation
+                   [default: Makefile_binder]
+  --help           Show this message and exit.
 
- - `hdc_fortran_test_module.f90`: example of wrapped module.
- - `generate_bindings.py`: generates `module_bind.f90`, `module_interface.py` and `Makefile`.
- - `call.py`:  prepares the input data and calls the generated python interface.
