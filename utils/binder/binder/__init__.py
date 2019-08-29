@@ -7,7 +7,7 @@ import jinja2
 
 @click.command()
 @click.argument('description_file', type=click.File("r"))
-@click.option('--makefile/--no-makefile', default=False)
+@click.option('--makefile', default='Makefile_binder', show_default=True, help='Make file name, leave empty for no make file generation')
 def cli(description_file, makefile):
     """Contructs HDC bindings according to the description
 
@@ -20,7 +20,7 @@ def cli(description_file, makefile):
         (pkg_resources.resource_string(__name__, 'templates/python_interface.py.j2'), '{}_interface.py'.format(description["module"])),
         ]
     if makefile:
-        templates.append((pkg_resources.resource_string(__name__, 'templates/Makefile.j2'), 'Makefile'))
+        templates.append((pkg_resources.resource_string(__name__, 'templates/Makefile.j2'), makefile))
 
     for file_in, file_out in templates:
         template = jinja2.Template(file_in.decode())
