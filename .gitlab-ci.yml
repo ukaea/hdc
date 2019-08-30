@@ -10,12 +10,9 @@ test-bionic:
     - make test
     - make install
     - cd python
-    - python3 setup.py build
-    - python3 setup.py test
-    - python3 setup.py install
-    - apt install -y python3-jinja2
-    - cd ../../utils/binder/tests/
-    - python3 -m pip install ..
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
     - export LC_ALL=C.UTF-8 LANG=C.UTF-8
     - ./run
 
@@ -29,12 +26,9 @@ test-xenial:
     - make test
     - make install
     - cd python
-    - python3 setup.py build
-    - python3 setup.py test
-    - python3 setup.py install
-    - apt install -y python3-jinja2 pkg-config python3-pytest
-    - cd ../../utils/binder/tests/
-    - python3 -m pip install ..
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
     - export LC_ALL=C.UTF-8 LANG=C.UTF-8
     - ./run
 
