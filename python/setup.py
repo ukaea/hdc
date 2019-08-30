@@ -48,7 +48,7 @@ extensions = [
 
 options = dict(
     name="pyhdc",
-    py_modules=["pyhdc"],
+    packages=["pyhdc"],
     ext_modules=cythonize(extensions),
     license='MIT',
     description='Hierarchical Dynamic Containers',
@@ -56,12 +56,18 @@ options = dict(
     author_email='fridrich@ipp.cas.cz',
     url='https://bitbucket.org/compass-tokamak/hdc',
     install_requires=[
-        'six',
-        'numpy',
-        'pytest',
+        'Click',
         'future',
+        'jinja2',
+        'numpy',
+        'six',
     ],
     tests_require=['pytest','h5py','hypothesis'],
+    entry_points='''
+        [console_scripts]
+        hdc-binder=pyhdc.binder:cli
+    ''',
+    package_data={'pyhdc': ['templates/*.j2']},
     cmdclass={'test': PyTest},
     version='0.10.0',
 )

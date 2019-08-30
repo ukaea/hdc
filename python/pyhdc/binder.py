@@ -18,11 +18,11 @@ def cli(description_file, makefile):
     bind_module_filename = description["module"] if description["module"] else description["function"]
 
     templates = [
-        (pkg_resources.resource_string(__name__, 'templates/binder_template.f90.j2'), '{}_bind.f90'.format(bind_module_filename)),
-        (pkg_resources.resource_string(__name__, 'templates/python_interface.py.j2'), '{}_interface.py'.format(bind_module_filename)),
+        (pkg_resources.resource_string('pyhdc', 'templates/binder_template.f90.j2'), '{}_bind.f90'.format(bind_module_filename)),
+        (pkg_resources.resource_string('pyhdc', 'templates/python_interface.py.j2'), '{}_interface.py'.format(bind_module_filename)),
         ]
     if makefile:
-        templates.append((pkg_resources.resource_string(__name__, 'templates/Makefile.j2'), makefile))
+        templates.append((pkg_resources.resource_string('pyhdc', 'templates/Makefile.j2'), makefile))
 
     for file_in, file_out in templates:
         template = jinja2.Template(file_in.decode())

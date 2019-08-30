@@ -3,7 +3,7 @@ HDC_PREFIX=../../../install
 
 for JSON_FILE in *.json
 do
-    binder $JSON_FILE
+    hdc-binder $JSON_FILE
     PKG_CONFIG_PATH=$HDC_PREFIX/lib/pkgconfig make -f Makefile_binder
 done
 

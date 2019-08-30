@@ -1,10 +1,13 @@
-`binder` generates bindings (Python interface to FORTRAN function) via HDC containers.
+hdc-binder
+==========
 
-The `binder` script inputs a JSON interface description file and outputs
+`hdc-binder` generates bindings (Python interface to FORTRAN function) via HDC containers.
+
+The `hdc-binder` script inputs a JSON interface description file and outputs
 Python and Fortran binding files using HDC containers and a make file
 (`Makefile_binder` by default), which can be used to compile shared libraries.
 
-Internally, `binder` puts all inputs into a single HDC container,
+Internally, `hdc-binder` puts all inputs into a single HDC container,
 which is unpacked in the generated binding functions. Similarly,
 all outputs are stored into an output container and unpacked
 in the (Python) interface function.
