@@ -11,6 +11,7 @@ test-bionic:
     - make install
     - cd python
     - python3 -m pip install .
+    - python3 -m pip install -r dev-requirements.txt
     - pytest
     - cd tests_binder
     - export LC_ALL=C.UTF-8 LANG=C.UTF-8
@@ -27,6 +28,7 @@ test-xenial:
     - make install
     - cd python
     - python3 -m pip install .
+    - python3 -m pip install -r dev-requirements.txt
     - pytest
     - cd tests_binder
     - export LC_ALL=C.UTF-8 LANG=C.UTF-8
