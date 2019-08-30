@@ -55,6 +55,7 @@ options = dict(
     author='David Fridrich, Jakub Urban',
     author_email='fridrich@ipp.cas.cz',
     url='https://bitbucket.org/compass-tokamak/hdc',
+    setup_requires=['Cython'],
     install_requires=[
         'Click',
         'future',
