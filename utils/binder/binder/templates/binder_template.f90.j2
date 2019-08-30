@@ -19,8 +19,6 @@ subroutine {{ func.function }}_hdc(data_in, data_out) bind(c, name="{{ func.func
     {% for var in func.arguments if var.type == 'type(hdc_t)' and var.intent == 'out' %}
     {{ var.name }} = hdc_new()
     {% endfor %}
-    write(*,*)'=== {{ func.function }}_hdc ==='
-    call hdc_dump(data_in)
     {% for var in func.arguments if 'in' in var.intent %}
     call hdc_get(data_in, '{{ var.name }}', {{ var.name }})
     {%- endfor %}
@@ -37,7 +35,4 @@ subroutine {{ func.function }}_hdc(data_in, data_out) bind(c, name="{{ func.func
     call hdc_add_child(data_out, '{{ var.name }}', hdc_node_{{ var.name }})
     {% endif %}
     {%- endfor %}
-    write(*,*)'output tree:'
-    call hdc_dump(data_out)
-    write(*,*)'=== END {{ func.function }} ==='
 end subroutine

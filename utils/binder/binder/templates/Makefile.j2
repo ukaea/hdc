@@ -8,7 +8,7 @@ all: {%- if func.do_compile is sameas true %} {{ func.soname }} {%- endif %} {{ 
 	gfortran  $(HDC_CFLAGS) -shared -o {{ func.soname }} {{ func.source_file }} $(HDC_INCLUDE) $(HDC_LIBS)
 {% endif %}
 
-{{ func.module }}_bind.so: {{ func.module }}_bind.f90
+{{ func.module }}_bind.so: {{ func.module }}_bind.f90 {{ func.soname }}
 	gfortran  $(HDC_CFLAGS) -shared -o {{ func.module }}_bind.so $< -I. -L. -J. -L{{ func.soname }} $(HDC_INCLUDE) $(HDC_LIBS)
 
 {% else %}
@@ -18,6 +18,6 @@ all: {%- if func.do_compile is sameas true %} {{ func.soname }} {%- endif %} {{ 
 	gfortran  $(HDC_CFLAGS) -shared -o {{ func.soname }} {{ func.source_file }} $(HDC_INCLUDE) $(HDC_LIBS)
 {% endif %}
 
-{{ func.function }}_bind.so: {{ func.function }}_bind.f90
+{{ func.function }}_bind.so: {{ func.function }}_bind.f90 {{ func.soname }}
 	gfortran  $(HDC_CFLAGS) -shared -o {{ func.function }}_bind.so $< -I. -L. -J. -L{{ func.soname }} $(HDC_INCLUDE) $(HDC_LIBS)
 {% endif %}
