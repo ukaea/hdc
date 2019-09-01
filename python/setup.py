@@ -1,14 +1,15 @@
-from setuptools import setup
-from setuptools.extension import Extension
-from Cython.Build import cythonize
 import os
 import sys
+
+from setuptools import setup
 from setuptools.command.test import test as TestCommand
+from setuptools.extension import Extension
+
+
 try:
     import numpy
 except ImportError:
-    # should be installed by setuptools
-    pass
+    raise ImportError('numpy must be installed before installing this package')
 
 
 class PyTest(TestCommand):
@@ -49,13 +50,13 @@ extensions = [
 options = dict(
     name="pyhdc",
     packages=["pyhdc"],
-    ext_modules=cythonize(extensions),
+    ext_modules=extensions,
     license='MIT',
     description='Hierarchical Dynamic Containers',
     author='David Fridrich, Jakub Urban',
     author_email='fridrich@ipp.cas.cz',
     url='https://bitbucket.org/compass-tokamak/hdc',
-    setup_requires=['Cython'],
+    setup_requires=['cython', 'setuptools', 'numpy'],
     install_requires=[
         'Click',
         'future',

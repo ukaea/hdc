@@ -39,31 +39,44 @@ There are several cmake options:
 
 Some of them can be edited using `ccmake .` in`build` directory. The example of build follows:
 
+1. clone the git repository
 ```
-# clone the git repository
 git clone git@bitbucket.org:compass-tokamak/hdc.git
 # cd into hdc
 cd hdc
+```
 
-# build in a separate build directory
+2. build in a separate build directory
+```
 mkdir build
 cd build
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
 make -j install
+```
 
-# Optionally build & install python module
+3. Optionally build & install python module. Important: numpy must be installed before pyhdc.
+```
 cd  python
 python setup.py build
 python setup.py install
 cd ..
+```
 
-# Optionally build & run MATLAB mex interface
+4. Optionally, run Python tests (requires building HDC with HDF5).
+```
+cd python
+python setup.py test
+cd ..
+```
+
+5. Optionally build & run MATLAB mex interface
+```
 cd matlab
 make -f Makefile_
 LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
-# You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 ```
+You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 
 Building using IntelStudio
 --------------------------
