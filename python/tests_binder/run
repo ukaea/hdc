@@ -1,0 +1,10 @@
+#!/bin/bash
+HDC_PREFIX=../../../install
+
+for JSON_FILE in *.json
+do
+    hdc-binder $JSON_FILE
+    PKG_CONFIG_PATH=$HDC_PREFIX/lib/pkgconfig make -f Makefile_binder
+done
+
+PYTHONPATH=$PYTHONPATH:. LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HDC_PREFIX/lib:$HDC_PREFIX/lib/hdc:./ pytest .

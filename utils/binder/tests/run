@@ -1,5 +1,0 @@
-#!/bin/bash
-HDC_PREFIX=../../../install
-./generate_bindings_test.py
-make
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HDC_PREFIX/lib:$HDC_PREFIX/lib/hdc:./ ./test_binder.py

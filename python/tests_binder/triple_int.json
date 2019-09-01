@@ -1,0 +1,19 @@
+{
+    "function": "triple_int",
+    "module": "test_module_triple_int",
+    "source_file": "test_module_triple_int.f90",
+    "do_compile": true,
+    "soname": "test_module_triple_int.so",
+    "arguments": [
+        {
+            "name": "int_in",
+            "type": "integer(kind=c_int64_t)",
+            "intent": "in"
+        },
+        {
+            "name": "int_out",
+            "type": "integer(kind=c_int64_t)",
+            "intent": "out"
+        }
+    ]
+}

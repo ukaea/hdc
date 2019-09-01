@@ -1,14 +1,15 @@
-from setuptools import setup
-from setuptools.extension import Extension
-from Cython.Build import cythonize
 import os
 import sys
+
+from setuptools import setup
 from setuptools.command.test import test as TestCommand
+from setuptools.extension import Extension
+
+
 try:
     import numpy
 except ImportError:
-    # should be installed by setuptools
-    pass
+    raise ImportError('numpy must be installed before installing this package')
 
 
 class PyTest(TestCommand):
@@ -28,8 +29,8 @@ class PyTest(TestCommand):
 
 extensions = [
     Extension(
-        name="cyhdc",
-        sources=["cyhdc.pyx"],
+        name="pyhdc.cyhdc",
+        sources=["pyhdc/cyhdc.pyx"],
         extra_compile_args=['-O2', '-std=c++11', '-lgfortran', '-lstdc++', '-lrt', '-fPIC', '-static',],
         language='c++',
         # TODO fix paths after headers are installed
@@ -48,20 +49,27 @@ extensions = [
 
 options = dict(
     name="pyhdc",
-    py_modules=["pyhdc"],
-    ext_modules=cythonize(extensions),
+    packages=["pyhdc"],
+    ext_modules=extensions,
     license='MIT',
     description='Hierarchical Dynamic Containers',
     author='David Fridrich, Jakub Urban',
     author_email='fridrich@ipp.cas.cz',
     url='https://bitbucket.org/compass-tokamak/hdc',
+    setup_requires=['cython', 'setuptools', 'numpy'],
     install_requires=[
-        'six',
-        'numpy',
-        'pytest',
+        'Click',
         'future',
+        'jinja2',
+        'numpy',
+        'six',
     ],
     tests_require=['pytest','h5py','hypothesis'],
+    entry_points='''
+        [console_scripts]
+        hdc-binder=pyhdc.binder:cli
+    ''',
+    package_data={'pyhdc': ['templates/*.j2']},
     cmdclass={'test': PyTest},
     version='0.10.0',
 )

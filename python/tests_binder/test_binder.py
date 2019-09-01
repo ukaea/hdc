@@ -6,7 +6,7 @@ from  test_module_triple_int_interface import triple_int
 from  test_module_add_double_interface import add_double
 from  test_module_modify_string_interface import modify_string
 from  test_module_merge_hdc_trees_interface import merge_hdc_trees
-
+from  add_double_interface import add_double as add_double_function
 
 def test_triple_int():
     int_in = 22
@@ -18,6 +18,13 @@ def test_add_double():
     a = 22.2
     b = 33.3
     c = add_double(a,b)
+    assert a+b == c
+    assert type(a) == type(c)
+
+def test_add_double_function():
+    a = 22.2
+    b = 33.3
+    c = add_double_function(a,b)
     assert a+b == c
     assert type(a) == type(c)
 
