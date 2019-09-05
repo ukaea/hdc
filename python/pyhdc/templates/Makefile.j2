@@ -2,22 +2,22 @@ HDC_INCLUDE=-I. $(shell pkg-config fhdc --cflags)
 HDC_LIBS=$(shell pkg-config fhdc --libs)
 HDC_CFLAGS=-fPIC -g -ffree-line-length-none -pedantic -fbacktrace -std=f2008
 {% if func.module|length %}
-all: {%- if func.do_compile is sameas true %} {{ func.soname }} {%- endif %} {{ func.module }}_bind.so
+all: {%- if func.do_compile is sameas true %} {{ func.soname }} {%- endif %} lib{{ func.module }}_bind.so
 {% if func.do_compile is sameas true %}
 {{ func.soname }}: {{ func.source_file }}
 	gfortran  $(HDC_CFLAGS) -shared -o {{ func.soname }} {{ func.source_file }} $(HDC_INCLUDE) $(HDC_LIBS)
 {% endif %}
 
-{{ func.module }}_bind.so: {{ func.module }}_bind.f90 {{ func.soname }}
-	gfortran  $(HDC_CFLAGS) -shared -o {{ func.module }}_bind.so $< -I. -L. -J. -L{{ func.soname }} $(HDC_INCLUDE) $(HDC_LIBS)
+lib{{ func.module }}_bind.so: {{ func.module }}_bind.f90 {{ func.soname }}
+	gfortran  $(HDC_CFLAGS) -shared -o lib{{ func.module }}_bind.so $< -I. -L. -J. -L{{ func.soname }} $(HDC_INCLUDE) $(HDC_LIBS)
 
 {% else %}
-all: {%- if func.do_compile is sameas true %} {{ func.soname }} {%- endif %} {{ func.function }}_bind.so
+all: {%- if func.do_compile is sameas true %} {{ func.soname }} {%- endif %} lib{{ func.function }}_bind.so
 {% if func.do_compile is sameas true %}
 {{ func.soname }}: {{ func.source_file }}
 	gfortran  $(HDC_CFLAGS) -shared -o {{ func.soname }} {{ func.source_file }} $(HDC_INCLUDE) $(HDC_LIBS)
 {% endif %}
 
-{{ func.function }}_bind.so: {{ func.function }}_bind.f90 {{ func.soname }}
-	gfortran  $(HDC_CFLAGS) -shared -o {{ func.function }}_bind.so $< -I. -L. -J. -L{{ func.soname }} $(HDC_INCLUDE) $(HDC_LIBS)
+lib{{ func.function }}_bind.so: {{ func.function }}_bind.f90 {{ func.soname }}
+	gfortran  $(HDC_CFLAGS) -shared -o lib{{ func.function }}_bind.so $< -I. -L. -J. -L{{ func.soname }} $(HDC_INCLUDE) $(HDC_LIBS)
 {% endif %}

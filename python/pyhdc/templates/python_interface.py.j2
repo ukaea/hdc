@@ -7,9 +7,9 @@ def {{ func.function }}({% for var in func.arguments if 'in' in var.intent %}
                     {%- endfor %}):
     ctypes.CDLL('{{ func.soname }}', ctypes.RTLD_GLOBAL) #This or LD_PRELOAD is needed
     {% if func.module|length %}
-    fm = ctypes.cdll.LoadLibrary('{{ func.module }}_bind.so')
+    fm = ctypes.cdll.LoadLibrary('lib{{ func.module }}_bind.so')
     {% else %}
-    fm = ctypes.cdll.LoadLibrary('{{ func.function }}_bind.so')
+    fm = ctypes.cdll.LoadLibrary('lib{{ func.function }}_bind.so')
     {% endif %}
     input_hdc = HDC()
     output_hdc = HDC()
