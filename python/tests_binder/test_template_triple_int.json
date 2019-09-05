@@ -3,7 +3,7 @@
     "module": "test_module_triple_int",
     "source_file": "test_module_triple_int.f90",
     "do_compile": true,
-    "soname": "test_module_triple_int.so",
+    "soname": "libtest_module_triple_int.so",
     "arguments": [
         {
             "name": "int_in",
