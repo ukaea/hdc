@@ -1,9 +1,9 @@
 {
-    "function": "add_double",
+    "function": "function_add_double",
     "module": "",
-    "source_file": "add_double.f90",
+    "source_file": "test_function_add_double.f90",
     "do_compile": true,
-    "soname": "add_double.so",
+    "soname": "test_function_add_double.so",
     "arguments": [
         {
             "name": "x1",
