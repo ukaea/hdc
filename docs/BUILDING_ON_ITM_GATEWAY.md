@@ -76,12 +76,6 @@ And finally build&install:
 make -j install
 ```
 
-**Note:** As of 6. Sep 2019 there is an issue building with HDF5 and Intel compiler suite. The workaround is to turn off the HDF5 by appending `-DENABLE_HDF5=OFF` to the `cmake` command line, e.g.:
-
-```
-cmake -DENABLE_HDF5=OFF -DCMAKE_INSTALL_PREFIX=../install ..
-```
-
 ## Test
 
 ```
