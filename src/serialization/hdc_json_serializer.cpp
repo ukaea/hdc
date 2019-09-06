@@ -1,10 +1,214 @@
+#include "hdc_json_serializer.h"
+
 #include "hdc.hpp"
 
-#include <sstream>
-//TODO Use this instead of marray???
-#define at2(a,i1,i2) (a)[i2][i1]
-#define at3(a,i1,i2,i3) (a)[i3][i2][i1]
-#define at4(a,i1,i2,i3,i4) (a)[i4][i3][i2][i1]
+namespace {
+
+template <typename T>
+Json::Value buffer_to_json(char* buffer)
+{
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    auto shape = header->shape;
+    char* data = buffer + sizeof(hdc_header_t);
+    if ((header->flags & HDCExternal) != 0) {
+        char* result;
+        memcpy(&result,data,sizeof(void*));
+        data = result;
+    }
+    Json::Value root;
+    andres::CoordinateOrder order;
+    if ((header->flags & HDCFortranOrder) != 0) {
+        order = andres::LastMajorOrder;
+    } else {
+        order = andres::FirstMajorOrder;
+    }
+    andres::View<T> view(shape, shape+header->rank, (T*)data, order);
+    //TODO add fortran - C order switch
+    switch (header->rank) {
+        case (0): {
+            root = ((T*)data)[0];
+            break;
+        }
+        case (1): {
+            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
+                root[i0] = (T)view(i0);
+            break;
+        }
+        case (2): {
+            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
+                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
+                    root[i0][i1] = view(i0, i1);
+            break;
+        }
+        case (3): {
+            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
+                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
+                    for (unsigned int i2 = 0; i2 < shape[2]; i2++)
+                        root[i0][i1][i2] = view(i0, i1, i2);
+            break;
+        }
+        case (4): {
+            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
+                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
+                    for (unsigned int i2 = 0; i2 < shape[2]; i2++)
+                        for (unsigned int i3 = 0; i3 < shape[3]; i3++)
+                            root[i0][i1][i2][i3] = view(i0, i1, i2, i3);
+            break;
+        }
+        case (5): {
+            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
+                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
+                    for (unsigned int i2 = 0; i2 < shape[2]; i2++)
+                        for (unsigned int i3 = 0; i3 < shape[3]; i3++)
+                            for (unsigned int i4 = 0; i4 < shape[4]; i4++)
+                                root[i0][i1][i2][i3][i4] = view(i0, i1, i2, i3, i4);
+            break;
+        }
+            /*
+            case (6):
+            {
+                for (unsigned int i0=0;i0<shape[0];i0++)
+                    for (unsigned int i1=0;i1<shape[1];i1++)
+                        for (unsigned int i2=0;i2<shape[2];i2++)
+                            for (unsigned int i3=0;i3<shape[3];i3++)
+                                for (unsigned int i4=0;i4<shape[4];i4++)
+                                    for (unsigned int i5=0;i5<shape[5];i5++)
+                                        root[i0][i1][i2][i3][i4][i5] = view(i0,i1,i2,i3,i4,i5);
+                break;
+            }
+            case (7):
+            {
+                for (unsigned int i0=0;i0<shape[0];i0++)
+                    for (unsigned int i1=0;i1<shape[1];i1++)
+                        for (unsigned int i2=0;i2<shape[2];i2++)
+                            for (unsigned int i3=0;i3<shape[3];i3++)
+                                for (unsigned int i4=0;i4<shape[4];i4++)
+                                    for (unsigned int i5=0;i5<shape[5];i5++)
+                                        for (unsigned int i6=0;i6<shape[5];i6++)
+                                            root[i0][i1][i2][i3][i4][i5][i6] = view(i0,i1,i2,i3,i4,i5,i6);
+                break;
+            }
+            case (8):
+            {
+                for (unsigned int i0=0;i0<shape[0];i0++)
+                    for (unsigned int i1=0;i1<shape[1];i1++)
+                        for (unsigned int i2=0;i2<shape[2];i2++)
+                            for (unsigned int i3=0;i3<shape[3];i3++)
+                                for (unsigned int i4=0;i4<shape[4];i4++)
+                                    for (unsigned int i5=0;i5<shape[5];i5++)
+                                        for (unsigned int i6=0;i6<shape[5];i6++)
+                                            for (unsigned int i7=0;i7<shape[5];i7++)
+                                                root[i0][i1][i2][i3][i4][i5][i6][i7] = view(i0,i1,i2,i3,i4,i5,i6,i7);
+                break;
+            }*/
+        default: {
+            throw HDCException("buffer_to_json(): unsupported number of dimensions: " + std::to_string(header->rank) + "\n");
+        }
+    }
+    return root;
+}
+
+Json::Value to_json(const HDC& hdc, int mode)
+{
+    auto buffer = hdc.get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    Json::Value root;
+    if (mode == 0) {
+        switch (header->type) {
+            case (HDC_INT8): {
+                root = buffer_to_json<int8_t>(buffer);
+                break;
+            }
+            case (HDC_INT16): {
+                root = buffer_to_json<int16_t>(buffer);
+                break;
+            }
+            case (HDC_INT32): {
+                root = buffer_to_json<int32_t>(buffer);
+                break;
+            }
+            case (HDC_INT64): {
+                root = buffer_to_json<int64_t>(buffer);
+                break;
+            }
+            case (HDC_UINT8): {
+                root = buffer_to_json<uint8_t>(buffer);
+                break;
+            }
+            case (HDC_UINT16): {
+                root = buffer_to_json<uint16_t>(buffer);
+                break;
+            }
+            case (HDC_UINT32): {
+                root = buffer_to_json<uint32_t>(buffer);
+                break;
+            }
+            case(HDC_UINT64): {
+                root =  buffer_to_json<uint64_t>(buffer);
+                break;
+            }
+            case (HDC_FLOAT): {
+                root = buffer_to_json<float>(buffer);
+                break;
+            }
+            case (HDC_DOUBLE): {
+                root = buffer_to_json<double>(buffer);
+                break;
+            }
+            case (HDC_STRUCT): {
+                auto children = hdc.get_children_ptr();
+                for (auto it = children->begin(); it != children->end(); ++it) {
+                    HDC node(hdc.get_storage(), it->address.c_str());
+                    root[it->key.c_str()] = to_json(node, mode);
+                }
+                break;
+            }
+            case (HDC_LIST): {
+                root = Json::arrayValue;
+                auto children = hdc.get_children_ptr();
+                for (size_t i = 0; i < children->size(); i++) {
+                    root[static_cast<int>(i)] = to_json(hdc.get_single(i), mode);
+                }
+                break;
+            }
+            case (HDC_EMPTY): {
+                root = Json::nullValue;
+                break;
+            }
+            case (HDC_STRING): {
+                root = hdc.as_string();
+                break;
+            }
+            case (HDC_BOOL): {
+                root = buffer_to_json<bool>(buffer);
+                break;
+            }
+            default: {
+                throw HDCException("to_json(): Type " + std::string(hdc.get_type_str()) + " not supported yet.");
+            }
+        }
+    } else {
+        throw HDCException("to_json(): Mode " + std::to_string(mode) + " not supported yet.\n");
+    }
+    return root;
+}
+
+void to_json(const HDC& hdc, string filename, int mode)
+{
+    DEBUG_STDOUT("Saving output JSON to " + filename);
+    ofstream json_file;
+    json_file.open(filename.c_str());
+    json_file << to_json(hdc, mode);
+    json_file.close();
+}
+
+string to_json_string(const HDC& hdc, int mode)
+{
+    Json::StreamWriterBuilder writerBuilder;
+    std::ostringstream oss;
+    writerBuilder.newStreamWriter()->write(to_json(hdc, mode), &oss);
+    return oss.str();
+}
 
 bool is_all_numeric(const Json::Value& root)
 {
@@ -47,7 +251,7 @@ bool is_double(const Json::Value& root)
     if (!is_all_numeric(root)) return false;
     if (root.isDouble() && !root.isInt64() && !root.isInt() && !root.isUInt64() && !root.isUInt() &&
         !root.isBool()) {
-            return true;
+        return true;
     } else if (root.isArray()) {
         for (unsigned int i = 0; i < root.size(); i++) {
             if (is_double(root[i])) return true;
@@ -68,32 +272,16 @@ bool is_int(const Json::Value& root)
     return false;
 }
 
-bool is_bool(const Json::Value& root)
+int get_rank(const Json::Value& root)
 {
-    if (!is_all_numeric(root)) return false;
-    if (root.isBool() && !root.isInt64() && !root.isInt() && !root.isUInt() && !root.isUInt64() &&
-        !root.isDouble()) {
-            return true;
-    } else if (root.isArray()) {
-        for (unsigned int i = 0; i < root.size(); i++) {
-            if (is_double(root[i])) return true;
-        }
-    } else { return false; }
-    return false;
-}
-
-bool is_jagged(const Json::Value& root)
-{
-    if (!root.isArray()) return false;
-    unsigned int dim = 0;
-    bool jagged = false;
-    dim = root[0].size();
-    for (unsigned int i = 0; i < root.size(); i++) {
-        if (root[i].size() != dim) {
-            return true;
-        } else { return is_jagged(root[i]); }
+    if (!root.isArray()) return 0;
+    int dim = 0;
+    Json::Value curr = root;
+    while (curr.isArray()) {
+        curr = curr[0];
+        dim++;
     }
-    return jagged;
+    return dim;
 }
 
 std::vector<size_t> get_shape(const Json::Value& root)
@@ -108,30 +296,17 @@ std::vector<size_t> get_shape(const Json::Value& root)
         dim++;
     }
     D(
-        std::cout << "Dimension: " << dim << std::endl;
-        std::cout << "Shape: (" << shape[0];
-        for (unsigned int i = 1; i < dim; i++) std::cout << ", " << shape[i];
-        std::cout << ")" << std::endl;
+            std::cout << "Dimension: " << dim << std::endl;
+            std::cout << "Shape: (" << shape[0];
+            for (unsigned int i = 1; i < dim; i++) std::cout << ", " << shape[i];
+            std::cout << ")" << std::endl;
     )
     std::vector<size_t> res(dim);
     for (unsigned int i = 0; i < dim; i++) res[i] = shape[i];
     return res;
 }
 
-
-int get_rank(const Json::Value& root)
-{
-    if (!root.isArray()) return 0;
-    int dim = 0;
-    Json::Value curr = root;
-    while (curr.isArray()) {
-        curr = curr[0];
-        dim++;
-    }
-    return dim;
-}
-
-HDC HDC::json_to_HDC(const ::Json::Value& root)
+HDC json_to_HDC(const ::Json::Value& root)
 {
     HDC tree;
     switch (root.type()) {
@@ -332,7 +507,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
                 // call recursively -- save list
                 tree.set_type(HDC_LIST);
                 for (unsigned int i = 0; i < root.size(); i++) {
-                    HDC h = HDC::json_to_HDC(root[i]);
+                    HDC h = json_to_HDC(root[i]);
                     tree.append(h);
                 }
             }
@@ -352,215 +527,7 @@ HDC HDC::json_to_HDC(const ::Json::Value& root)
     return tree;
 }
 
-template <typename T>
-Json::Value buffer_to_json(char* buffer)
-{
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    auto shape = header->shape;
-    char* data = buffer + sizeof(hdc_header_t);
-    if ((header->flags & HDCExternal) != 0) {
-        char* result;
-        memcpy(&result,data,sizeof(void*));
-        data = result;
-    }
-    Json::Value root;
-    andres::CoordinateOrder order;
-    if ((header->flags & HDCFortranOrder) != 0) {
-        order = andres::LastMajorOrder;
-    } else {
-        order = andres::FirstMajorOrder;
-    }
-    andres::View<T> view(shape, shape+header->rank, (T*)data, order);
-    //TODO add fortran - C order switch
-    switch (header->rank) {
-        case (0): {
-            root = ((T*)data)[0];
-            break;
-        }
-        case (1): {
-            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
-                root[i0] = (T)view(i0);
-            break;
-        }
-        case (2): {
-            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
-                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
-                    root[i0][i1] = view(i0, i1);
-            break;
-        }
-        case (3): {
-            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
-                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
-                    for (unsigned int i2 = 0; i2 < shape[2]; i2++)
-                        root[i0][i1][i2] = view(i0, i1, i2);
-            break;
-        }
-        case (4): {
-            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
-                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
-                    for (unsigned int i2 = 0; i2 < shape[2]; i2++)
-                        for (unsigned int i3 = 0; i3 < shape[3]; i3++)
-                            root[i0][i1][i2][i3] = view(i0, i1, i2, i3);
-            break;
-        }
-        case (5): {
-            for (unsigned int i0 = 0; i0 < shape[0]; i0++)
-                for (unsigned int i1 = 0; i1 < shape[1]; i1++)
-                    for (unsigned int i2 = 0; i2 < shape[2]; i2++)
-                        for (unsigned int i3 = 0; i3 < shape[3]; i3++)
-                            for (unsigned int i4 = 0; i4 < shape[4]; i4++)
-                                root[i0][i1][i2][i3][i4] = view(i0, i1, i2, i3, i4);
-            break;
-        }
-            /*
-            case (6):
-            {
-                for (unsigned int i0=0;i0<shape[0];i0++)
-                    for (unsigned int i1=0;i1<shape[1];i1++)
-                        for (unsigned int i2=0;i2<shape[2];i2++)
-                            for (unsigned int i3=0;i3<shape[3];i3++)
-                                for (unsigned int i4=0;i4<shape[4];i4++)
-                                    for (unsigned int i5=0;i5<shape[5];i5++)
-                                        root[i0][i1][i2][i3][i4][i5] = view(i0,i1,i2,i3,i4,i5);
-                break;
-            }
-            case (7):
-            {
-                for (unsigned int i0=0;i0<shape[0];i0++)
-                    for (unsigned int i1=0;i1<shape[1];i1++)
-                        for (unsigned int i2=0;i2<shape[2];i2++)
-                            for (unsigned int i3=0;i3<shape[3];i3++)
-                                for (unsigned int i4=0;i4<shape[4];i4++)
-                                    for (unsigned int i5=0;i5<shape[5];i5++)
-                                        for (unsigned int i6=0;i6<shape[5];i6++)
-                                            root[i0][i1][i2][i3][i4][i5][i6] = view(i0,i1,i2,i3,i4,i5,i6);
-                break;
-            }
-            case (8):
-            {
-                for (unsigned int i0=0;i0<shape[0];i0++)
-                    for (unsigned int i1=0;i1<shape[1];i1++)
-                        for (unsigned int i2=0;i2<shape[2];i2++)
-                            for (unsigned int i3=0;i3<shape[3];i3++)
-                                for (unsigned int i4=0;i4<shape[4];i4++)
-                                    for (unsigned int i5=0;i5<shape[5];i5++)
-                                        for (unsigned int i6=0;i6<shape[5];i6++)
-                                            for (unsigned int i7=0;i7<shape[5];i7++)
-                                                root[i0][i1][i2][i3][i4][i5][i6][i7] = view(i0,i1,i2,i3,i4,i5,i6,i7);
-                break;
-            }*/
-        default: {
-            throw HDCException("buffer_to_json(): unsupported number of dimensions: " + std::to_string(header->rank) + "\n");
-        }
-    }
-    return root;
-}
-
-
-Json::Value HDC::to_json(int mode) const
-{
-    auto buffer = get_buffer();
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    Json::Value root;
-    if (mode == 0) {
-        switch (header->type) {
-            case (HDC_INT8): {
-                root = buffer_to_json<int8_t>(buffer);
-                break;
-            }
-            case (HDC_INT16): {
-                root = buffer_to_json<int16_t>(buffer);
-                break;
-            }
-            case (HDC_INT32): {
-                root = buffer_to_json<int32_t>(buffer);
-                break;
-            }
-            case (HDC_INT64): {
-                root = buffer_to_json<int64_t>(buffer);
-                break;
-            }
-            case (HDC_UINT8): {
-                root = buffer_to_json<uint8_t>(buffer);
-                break;
-            }
-            case (HDC_UINT16): {
-                root = buffer_to_json<uint16_t>(buffer);
-                break;
-            }
-            case (HDC_UINT32): {
-                root = buffer_to_json<uint32_t>(buffer);
-                break;
-            }
-            case(HDC_UINT64): {
-                 root =  buffer_to_json<uint64_t>(buffer);
-                 break;
-                }
-            case (HDC_FLOAT): {
-                root = buffer_to_json<float>(buffer);
-                break;
-            }
-            case (HDC_DOUBLE): {
-                root = buffer_to_json<double>(buffer);
-                break;
-            }
-            case (HDC_STRUCT): {
-                auto children = get_children_ptr();
-                for (auto it = children->begin(); it != children->end(); ++it) {
-                    HDC node(storage, it->address.c_str());
-                    root[it->key.c_str()] = node.to_json(mode);
-                }
-                break;
-            }
-            case (HDC_LIST): {
-                root = Json::arrayValue;
-                auto children = get_children_ptr();
-                for (size_t i = 0; i < children->size(); i++) {
-                    root[static_cast<int>(i)] = get_single(i).to_json(mode);
-                }
-                break;
-            }
-            case (HDC_EMPTY): {
-                root = Json::nullValue;
-                break;
-            }
-            case (HDC_STRING): {
-                root = as_string();
-                break;
-            }
-            case (HDC_BOOL): {
-                root = buffer_to_json<bool>(buffer);
-                break;
-            }
-            default: {
-                throw HDCException("to_json(): Type " + std::string(get_type_str()) + " not supported yet.");
-            }
-        }
-    } else {
-        throw HDCException("to_json(): Mode " + std::to_string(mode) + " not supported yet.\n");
-    }
-    return root;
-}
-
-void HDC::to_json(string filename, int mode) const
-{
-    DEBUG_STDOUT("Saving output JSON to " + filename);
-    ofstream json_file;
-    json_file.open(filename.c_str());
-    json_file << this->to_json(mode);
-    json_file.close();
-    return;
-}
-
-string HDC::to_json_string(int mode) const
-{
-    Json::StreamWriterBuilder writerBuilder;
-    std::ostringstream oss;
-    writerBuilder.newStreamWriter()->write(this->to_json(mode), &oss);
-    return oss.str();
-}
-
-HDC HDC::from_json_string(const std::string& json_string)
+HDC from_json_string(const std::string& json_string)
 {
     HDC tree;
     stringstream file = stringstream(json_string);
@@ -568,7 +535,7 @@ HDC HDC::from_json_string(const std::string& json_string)
     try {
         Json::Value root;
         file >> root;
-        tree = HDC::json_to_HDC(root);
+        tree = json_to_HDC(root);
     }
     catch (ifstream::failure& e) {
         cout << "Error reading JSON string." << endl;
@@ -576,22 +543,7 @@ HDC HDC::from_json_string(const std::string& json_string)
     return tree;
 }
 
-/* Saves children to JSON strin in order to store tree hierarchy in KV stores*/
-string HDC::hdc_map_to_json(hdc_map_t& children)
-{
-    Json::Value root;
-    //root["size"] = Json::UInt64(children.size());
-    for (size_t i = 0; i < children.size(); i++) {
-        string key = children.get<by_index>()[i].key.c_str();
-        HDC* node = ((HDC*)(children.get<by_index>()[i].address.c_str()));
-        root[key] = node->get_uuid();
-    }
-    stringstream ss;
-    ss << root;
-    return ss.str();
-}
-
-HDC HDC::from_json(const string& filename, const string& datapath)
+HDC from_json(const string& filename, const string& datapath)
 {
     HDC tree;
     ifstream file;
@@ -610,11 +562,33 @@ HDC HDC::from_json(const string& filename, const string& datapath)
                 }
             }
         }
-        tree = HDC::json_to_HDC(root);
+        tree = json_to_HDC(root);
     }
     catch (ifstream::failure& e) {
         cout << "Error reading / opening file." << endl;
     }
     file.close();
     return tree;
+}
+
+} // anon namespace
+
+void hdc::serialisation::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+{
+    to_json(hdc, filename, 0);
+}
+
+HDC hdc::serialisation::JSONSerialiser::deserialize(const std::string& filename, const std::string& datapath)
+{
+    return from_json(filename, datapath);
+}
+
+std::string hdc::serialisation::JSONSerialiser::to_string(const HDC& hdc)
+{
+    return to_json_string(hdc, 0);
+}
+
+HDC hdc::serialisation::JSONSerialiser::from_string(const std::string& string)
+{
+    return from_json_string(string);
 }

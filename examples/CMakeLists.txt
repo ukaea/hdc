@@ -23,7 +23,7 @@ target_link_libraries(hdc_example_lukas fhdc)
 set_target_properties(hdc_example_lukas PROPERTIES LINKER_LANGUAGE Fortran)
 
 add_executable(hdc_example_interprocess example_interprocess.cpp)
-if( MACOS )
+if( APPLE )
   target_link_libraries(hdc_example_interprocess hdc)
 else()
   target_link_libraries(hdc_example_interprocess hdc rt)

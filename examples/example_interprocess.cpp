@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         cout << "-------------- Master tree dump start --------------" << endl;
         tree.dump();
         cout << "--------------  Master tree dump end  --------------" << endl;
-        std::string settings = tree.serialize();
+        std::string settings = tree.serialize("hdc");
         boost::algorithm::erase_all(settings,"\\"); // hack to remove wrongly escaped path
 
         shared_memory_object shm (create_only, "MySharedMemory", read_write);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
         std::string str(mem);
-        HDC tree = HDC::deserialize_str(str);
+        HDC tree = HDC::deserialize("hdc", str);
         cout << "-------------- Slave tree dump start --------------" << endl;
         tree.dump();
         cout << "--------------  Slave tree dump end  --------------" << endl;

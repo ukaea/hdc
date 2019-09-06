@@ -44,8 +44,7 @@ TEST_CASE("EmptyNode", "[HDC]")
     CHECK(h.get_flags() == HDCDefault);
     CHECK(h.is_external() == false);
     CHECK(h.is_readonly() == false);
-    CHECK(strcmp(h.as_cstring(),"null\n") == 0);
-    CHECK(strcmp(h.as_string().c_str(),"null\n") == 0);
+    CHECK(strcmp(h.as_string().c_str(), "null\n") == 0);
 }
 
 TEST_CASE("EmptyNodePtr", "[HDC]")
@@ -667,7 +666,7 @@ TEMPLATE_TEST_CASE("JSONArrays","[HDC]", bool, int32_t, double) {
         HDC h;
         h.set_data(shape,array);
         auto fname = make_tmp_name("txt");
-        h.to_json(fname);
+        h.save(fname);
         auto __path = std::string("json://") + fname;
         HDC j = HDC::load(__path,"");
         auto array_j = j.as<TestType>();
@@ -687,8 +686,8 @@ TEST_CASE("HDF5Tree", "[HDC]")
     PREPARE_TREE()
     // create temporary file name
     auto fname = make_tmp_name("h5");
-    tree.to_hdf5(fname);
-    HDC tree2 = HDC::from_hdf5(fname);
+    tree.save("hdf5://" + fname);
+    HDC tree2 = HDC::load("hdf5://" + fname);
     double data = tree2.get("aaa/bbb/_scalar").as<double>()[0];
     CHECK(333.333 == data);
     auto path = std::string("hdf5://")+fname+"|/data/aaa/bbb/_scalar";
@@ -726,7 +725,7 @@ TEMPLATE_TEST_CASE("HDF5Arrays", "[HDC]", ALL_NUMERIC_TYPES) {
         HDC h;
         std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
         h.set_data<TestType>(shape,array,testFlags);
-        h.to_hdf5(fname);
+        h.save("hdf5://" + fname);
         auto __path = std::string("hdf5://") + fname;
         HDC j = HDC::load(__path,"");
         auto array_j = j.as<TestType>();
@@ -743,7 +742,7 @@ TEMPLATE_TEST_CASE("HDF5Arrays", "[HDC]", ALL_NUMERIC_TYPES) {
         HDC h;
         std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
         h.set_data<TestType>(shape,array,testFlags);
-        h.to_hdf5(fname);
+        h.save("hdf5://" + fname);
         auto __path = std::string("hdf5://") + fname;
         HDC j = HDC::load(__path,"");
         auto array_j = j.as<TestType>();
@@ -769,7 +768,7 @@ TEST_CASE("UDA", "[HDC]")
             "services()\tReturns a list of available services with descriptions\n"
             "ping()\t\tReturn the Local Server Time in seconds and microseonds\n"
             "servertime()\tReturn the Local Server Time in seconds and microseonds\n\n";
-    CHECK(strcmp(h.as_cstring(), expected.c_str()) == 0);
+    CHECK(h.as_string() == expected);
 #else
     CHECK_THROWS(HDC::load("uda://HELP::help()"));
     CHECK_THROWS(HDC::load("uda_new://HELP::help()"));

@@ -67,7 +67,7 @@ contains
         call hdc_get(node,array2)
         print *,array2
         ! Serialize data to JSON
-        call hdc_to_json(tree,"tree.txt",0)
+!        call hdc_to_json(tree,"tree.txt",0)
         ! test dump
         call hdc_dump(tree)
     end subroutine f_main

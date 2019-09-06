@@ -113,7 +113,9 @@ hdc_type_t to_typeid(std::string a UNUSED) {return HDC_STRING;}
 hdc_type_t to_typeid(char* a UNUSED) {return HDC_STRING;}
 hdc_type_t to_typeid(char const* a UNUSED) {return HDC_STRING;}
 hdc_type_t to_typeid(bool a UNUSED) {return HDC_BOOL;}
+#ifndef __APPLE__
 hdc_type_t to_typeid(std::_Bit_reference a UNUSED) {return HDC_BOOL;}
+#endif
 
 hdc_type_t to_typeid(const std::type_info& t) {
     const std::string type_str = t.name();

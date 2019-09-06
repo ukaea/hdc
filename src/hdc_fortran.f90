@@ -145,12 +145,12 @@ module hdc_fortran
             type(hdc_t), value :: node
         end subroutine hdc_append_slice
 
-        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
-            import
-            type(hdc_t), value :: obj
-            character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int32_t), value :: mode
-        end subroutine c_hdc_to_json
+!        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
+!            import
+!            type(hdc_t), value :: obj
+!            character(kind=c_char), intent(in) :: path(*)
+!            integer(kind=c_int32_t), value :: mode
+!        end subroutine c_hdc_to_json
 
         !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
@@ -637,7 +637,7 @@ module hdc_fortran
                 hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
-                hdc_to_json, &
+!                hdc_to_json, &
                 hdc_insert_slice, &
                 hdc_append_slice, &
                 hdc_set_slice, &
@@ -935,13 +935,13 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
 
-    subroutine hdc_to_json(this,path,mode)
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        integer(kind=c_int32_t) :: mode
-        if (.not.present(path)) path = ""
-        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
-    end subroutine hdc_to_json
+!    subroutine hdc_to_json(this,path,mode)
+!        type(hdc_t) :: this
+!        character(len=*), optional :: path
+!        integer(kind=c_int32_t) :: mode
+!        if (.not.present(path)) path = ""
+!        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
+!    end subroutine hdc_to_json
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding
