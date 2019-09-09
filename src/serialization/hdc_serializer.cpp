@@ -1,12 +1,11 @@
 #include "hdc_serializer.h"
-
-#include "hdc_hdc_serializer.h"
 #include "hdc_json_serializer.h"
 #ifdef _USE_HDF5
-#  include "hdc_hdf5_serializer.h"
+  #include "hdc_hdf5_serializer.h"
+  #include "hdc_hdc_serializer.h"
 #endif
 #ifdef _USE_UDA
-#  include "hdc_uda_serializer.h"
+  #include "hdc_uda_serializer.h"
 #endif
 
 #include <hdc_errors.hpp>
