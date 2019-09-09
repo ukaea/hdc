@@ -251,6 +251,10 @@ else() # BUILD_MDBM_PLUGIN
   message( "MDBM plugin disabled. Skipping..." )
 endif() # BUILD_MDBM_PLUGIN
 
+if( _BUILD_MDBM)
+  add_definitions( -D_USE_MDBM=1 )
+endif()
+
 if( ENABLE_UDA )
   add_definitions( -D_USE_UDA=1 )
 endif() # ENABLE_UDA

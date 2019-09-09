@@ -17,17 +17,21 @@ const SerialiserMap Serialiser::serializers_ = SerialiserMap();
 
 SerialiserMap::SerialiserMap() noexcept
 {
-    serializers_["hdf5"] = std::make_unique<HDF5Serialiser>();
     serializers_["json"] = std::make_unique<JSONSerialiser>(0);
     serializers_["json_string"] = std::make_unique<JSONSerialiser>(0);
+    serializers_["json_verbose"] = std::make_unique<JSONSerialiser>(1);
 #ifdef _USE_UDA
     serializers_["uda"] = std::make_unique<UDASerialiser>(false);
     serializers_["uda_new"] = std::make_unique<UDASerialiser>(false);
 #endif
 #ifdef _USE_HDF5
+    serializers_["hdf5"] = std::make_unique<HDF5Serialiser>();
+#endif
+#ifdef _USE_MDBM
     serializers_["hdc_file"] = std::make_unique<HDCSerialiser>();
     serializers_["hdc_string"] = std::make_unique<HDCSerialiser>();
 #endif
+
 }
 
 

@@ -93,7 +93,6 @@ cdef extern from "hdc.hpp":
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
-        string to_json_string(int mode) except +
         void set_child(string path, CppHDC& n) except +
         void append(CppHDC& h) except +
         void add_child(string path, CppHDC& n) except +
@@ -118,18 +117,12 @@ cdef extern from "hdc.hpp":
         size_t childs_count() except +
         bool is_fortranorder() except +
         vector[size_t] get_strides() except +
-        void to_hdf5(string filename, string dataset_name) except +
+        string serialize(string  protocol) except +
         @staticmethod
-        CppHDC from_hdf5(const string& filename, const string& dataset_name) except +
+        CppHDC deserialize( string protocol, string string) except +
         @staticmethod
-        CppHDC from_json(const string& filename, const string& datapath) except +
-        void to_json(string filename, int mode) except +
-        @staticmethod
-        CppHDC from_json_string(const string& json_string) except +
-        @staticmethod
-        CppHDC load(const string& uri, const string& datapath) except +
-
-
+        CppHDC load(string uri, string datapath) except +
+        void save(string uri) except +
 cdef class HDC:
     """
     Python wrapper class for the HDC C++ class
@@ -314,22 +307,25 @@ cdef class HDC:
         new_hdc = HDC(data)
         self._this.append(new_hdc._this)
 
-    def dumps(self, mode=0):
+    def dumps(self, verbose=False):
         """
         Dump to JSON string
 
         Parameters
         ----------
-        mode : int
-            0 .. just pure JSON (default)
-            1 .. append additional metadata
+        verbose : bool
+            False .. just pure JSON (default)
+            True  .. append additional metadata
 
         Returns
         -------
         string
             A JSON string.
         """
-        return self._this.to_json_string(mode).decode()
+        if verbose:
+            return self._this.serialize("json_verbose".encode()).decode()
+        else:
+            return self._this.serialize("json".encode()).decode()
 
     @staticmethod
     def loads(s):
@@ -342,12 +338,11 @@ cdef class HDC:
             JSON string to be loaded
         """
         res = HDC()
-        cdef CppHDC new_hdc = CppHDC.from_json_string(s.encode())
-        #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
+        cdef CppHDC new_hdc = CppHDC.deserialize("json".encode(),s.encode())
         res._this = new_hdc
         return res
 
-    def dump(self, filename, mode=0):
+    def dump(self, filename, verbose=False):
         """
         Save to json file
 
@@ -355,13 +350,14 @@ cdef class HDC:
         ----------
         filename : .write supporting object (open file)
             target to write to
-        mode : int
-            0 .. just pure JSON (default)
-            1 .. append additional metadata
+        verbose : bool
+            False .. just pure JSON (default)
+            True  .. append additional metadata
         """
-        self._this.to_json(filename.encode(), mode)
-        # with open(filename, 'w') as fp:
-        #     fp.write(self.dumps())
+        if verbose:
+            self._this.save(("json://"+filename).encode())
+        else:
+            self._this.save(("json_verbose://"+filename).encode())
 
     @staticmethod
     def load(uri, datapath=''):
@@ -378,7 +374,6 @@ cdef class HDC:
         """
         res = HDC()
         cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
-        #res._this = CppHDC(new_hdc.get_storage(), new_hdc.get_uuid())
         res._this = new_hdc
         return res
 
@@ -527,7 +522,7 @@ cdef class HDC:
         dataset_name : string
             HDF5 dataset name within the file (default "data")
         """
-        self._this.to_hdf5(filename.encode(), dataset_name.encode())
+        self._this.save(("hdf5://"+filename).encode())
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
@@ -542,5 +537,5 @@ cdef class HDC:
             HDF5 dataset name within the file (default "data")
         """
         res = HDC()
-        res._this = CppHDC.from_hdf5(filename.encode(), dataset_name.encode())
+        res._this = CppHDC.load(("hdf5://"+filename).encode(), dataset_name.encode())
         return res

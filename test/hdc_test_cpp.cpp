@@ -481,8 +481,8 @@ TEST_CASE("JsonComplete", "[HDC]")
     for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get(i).get_type());
     // Test string
     CHECK(strcmp(tree.get("aaa/string").as_cstring(), tree2.get("aaa/string").as_cstring()) == 0);
-    auto __path = std::string("json://") + fname2;
-    HDC j = HDC::load(__path,"aaa/string");
+    auto uri = std::string("json://") + fname2;
+    HDC j = HDC::load(uri,"aaa/string");
     CHECK(strcmp(j.as_cstring(), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
     if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
     if(remove(fname2.c_str()) != 0) std::cerr << "Error removing file " << fname2 << std::endl;
@@ -666,9 +666,9 @@ TEMPLATE_TEST_CASE("JSONArrays","[HDC]", bool, int32_t, double) {
         HDC h;
         h.set_data(shape,array);
         auto fname = make_tmp_name("txt");
-        h.save(fname);
-        auto __path = std::string("json://") + fname;
-        HDC j = HDC::load(__path,"");
+        auto uri = std::string("json://") + fname;
+        h.save(uri);
+        HDC j = HDC::load(uri,"");
         auto array_j = j.as<TestType>();
         CHECK(memcmp(array,array_j,n*sizeof(TestType)) == 0);
         auto shape_j = j.get_shape();
@@ -726,8 +726,8 @@ TEMPLATE_TEST_CASE("HDF5Arrays", "[HDC]", ALL_NUMERIC_TYPES) {
         std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
         h.set_data<TestType>(shape,array,testFlags);
         h.save("hdf5://" + fname);
-        auto __path = std::string("hdf5://") + fname;
-        HDC j = HDC::load(__path,"");
+        auto uri = std::string("hdf5://") + fname;
+        HDC j = HDC::load(uri,"");
         auto array_j = j.as<TestType>();
         CHECK(memcmp(array,array_j,sizeof(TestType)*n) == 0);
         auto shape_j = j.get_shape();
@@ -743,8 +743,8 @@ TEMPLATE_TEST_CASE("HDF5Arrays", "[HDC]", ALL_NUMERIC_TYPES) {
         std::vector<size_t> shape(&(shapes[d-1][0]),&(shapes[d-1][0])+d);
         h.set_data<TestType>(shape,array,testFlags);
         h.save("hdf5://" + fname);
-        auto __path = std::string("hdf5://") + fname;
-        HDC j = HDC::load(__path,"");
+        auto uri = std::string("hdf5://") + fname;
+        HDC j = HDC::load(uri,"");
         auto array_j = j.as<TestType>();
         CHECK(memcmp(array,array_j,sizeof(TestType)*n) == 0);
         auto shape_j = j.get_shape();
