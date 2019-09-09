@@ -2,7 +2,7 @@
 
 #include "hdc_test_common.hpp"
 
-TEST_CASE("SerializeString", "[HDC]")
+TEST_CASE("SerializeDeserialize", "[HDC]")
 {
     HDC::destroy();
     auto fname = make_tmp_name("mdbm");
@@ -10,7 +10,7 @@ TEST_CASE("SerializeString", "[HDC]")
     HDC::init("mdbm", settings_str);
     PREPARE_TREE();
     auto tree_dump = tree.serialize("json");
-    auto ser = tree.serialize("hdc");
+    auto ser = tree.serialize("hdc_string");
     auto uuid = tree.get_uuid();
     //Check serialized string for arbitrary filelds.
     std::stringstream ss(ser);
@@ -24,7 +24,7 @@ TEST_CASE("SerializeString", "[HDC]")
     CHECK(strcmp(fname.c_str(), fname_out.c_str()) == 0);
     HDC::destroy();
     // load back from the file
-    HDC tree2 = HDC::deserialize("hdc", ser);
+    HDC tree2 = HDC::deserialize("hdc_string",ser);
     auto tree2_dump = tree2.serialize("json");
     CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
     HDC::destroy();
@@ -34,7 +34,7 @@ TEST_CASE("SerializeString", "[HDC]")
     }
 }
 
-TEST_CASE("SerializeFile", "[HDC]")
+TEST_CASE("LoadSave", "[HDC]")
 {
     // the same thing to/from file
     HDC::destroy();
@@ -44,69 +44,11 @@ TEST_CASE("SerializeFile", "[HDC]")
     PREPARE_TREE();
     auto tree_dump = tree.serialize("json");
     auto fname_hdc = make_tmp_name("hdc");
-    tree.serialize(fname_hdc);
+    auto uri_hdc = "hdc_file://" + fname_hdc;
+    tree.save(uri_hdc);
     HDC::destroy();
     // load back from the file
-    HDC from_file = HDC::load(fname_hdc);
-    auto file_dump = from_file.serialize("json");
-    CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
-    HDC::destroy();
-    //Remove hdc file
-    if (remove(fname_hdc.c_str()) != 0) {
-        std::cerr << "Error removing file " << fname_hdc << std::endl;
-    }
-    //Remove mdbm file
-    if (remove(fname.c_str()) != 0) {
-        std::cerr << "Error removing file " << fname << std::endl;
-    }
-}
-
-TEST_CASE("LoadString", "[HDC]")
-{
-    HDC::destroy();
-    auto fname = make_tmp_name("mdbm");
-    auto settings_str = "{\"filename\": \"" + fname + "\", \"persistent\": true}";
-    HDC::init("mdbm", settings_str);
-    PREPARE_TREE();
-    auto tree_dump = tree.serialize("json");
-    auto ser = tree.serialize("hdc");
-    auto uuid = tree.get_uuid();
-    //Check serialized string for arbitrary filelds.
-    std::stringstream ss(ser);
-    Json::Value root;
-    ss >> root;
-    auto fname_out = root["filename"].asString();
-    auto persistent_out = root["persistent"].asBool();
-    auto uuid_out = root["uuid"].asString();
-    CHECK(strcmp(fname.c_str(), fname_out.c_str()) == 0);
-    CHECK(persistent_out == true);
-    CHECK(strcmp(fname.c_str(), fname_out.c_str()) == 0);
-    HDC::destroy();
-    // load back from the file
-    HDC tree2 = HDC::load("hdc_string://" + ser);
-    auto tree2_dump = tree2.serialize("json");
-    CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
-    HDC::destroy();
-    //Remove mdbm file
-    if (remove(fname.c_str()) != 0) {
-        std::cerr << "Error removing file " << fname << std::endl;
-    }
-}
-
-TEST_CASE("LoadFile", "[HDC]")
-{
-    // the same thing to/from file
-    HDC::destroy();
-    auto fname = make_tmp_name("mdbm");
-    auto settings_str = "{\"filename\": \"" + fname + "\", \"persistent\": true}";
-    HDC::init("mdbm", settings_str);
-    PREPARE_TREE();
-    auto tree_dump = tree.serialize("json");
-    auto fname_hdc = make_tmp_name("hdc");
-    tree.serialize(fname_hdc);
-    HDC::destroy();
-    // load back from the file
-    HDC from_file = HDC::load("hdc_file://" + fname_hdc);
+    HDC from_file = HDC::load(uri_hdc);
     auto file_dump = from_file.serialize("json");
     CHECK(strcmp(tree_dump.c_str(), file_dump.c_str()) == 0);
     HDC::destroy();

@@ -8,6 +8,13 @@ set( SOURCES
   hdc_uda_serializer.cpp
 )
 
+if( HDF5_FOUND )
+  list (APPEND SOURCES hdc_hdf5_serializer.cpp hdc_hdc_serializer.cpp)
+endif( HDF5_FOUND )
+if( ENABLE_UDA )
+  list (APPEND SOURCES hdc_uda_serializer.cpp )
+endif( ENABLE_UDA )
+
 add_library( serialization ${SOURCES} )
 target_include_directories( serialization PUBLIC ${CMAKE_CURRENT_LIST_DIR} )
 
@@ -16,6 +23,9 @@ if( Flatbuffers_FOUND )
   add_definitions( -D_USE_FLATBUFFERS )
   target_link_libraries( serialization PUBLIC flatbuffers::flatbuffers )
 endif( Flatbuffers_FOUND )
+
+#install headers
+install(DIRECTORY ./ DESTINATION include/hdc FILES_MATCHING PATTERN "*.h*")
 
 if( HDF5_FOUND )
   target_link_libraries( serialization PRIVATE ${_hdf5_libs} )
