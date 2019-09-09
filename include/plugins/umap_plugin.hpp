@@ -1,5 +1,6 @@
 #ifndef UMAP_PLUGIN_HPP
 #define UMAP_PLUGIN_HPP
+
 #include <unordered_map>
 #include <string>
 #include <cstdio>
@@ -12,72 +13,82 @@
 // Stolen from MDBM:
 struct datum {
     char* dptr;                 /**< Pointer to key or value data */
-    size_t  dsize;                 /**< Number of bytes */
+    size_t dsize;               /**< Number of bytes */
 };
-
-using namespace std;
 
 class UnorderedMapStorage : public Storage {
 private:
-    unordered_map<string,vector<char> > _map;
+    std::unordered_map<std::string, std::vector<char> > _map;
+
 public:
     UnorderedMapStorage() {
         DEBUG_STDOUT("UnorderedMapStorage()\n");
-    };
-    ~UnorderedMapStorage() {
-        DEBUG_STDOUT("~UnorderedMapStorage()\n");
-    };
-    void lock(string path UNUSED) {};
-    void unlock(string path UNUSED) {};
-    bool locked() {
-        return false;
-    };
-    void sync() {};
+    }
 
-    string getDescription() {
+    ~UnorderedMapStorage() override {
+        DEBUG_STDOUT("~UnorderedMapStorage()\n");
+    }
+
+    void lock(std::string path UNUSED) override {}
+
+    void unlock(std::string path UNUSED) override {}
+
+    bool locked() override {
+        return false;
+    }
+
+    void sync() override {}
+
+    std::string getDescription() override {
         return "This is unordered_map based storage.";
-    };
-    std::string get_settings() {
+    }
+
+    std::string get_settings() override {
         return "{}";
     }
-    void set(string key, char* data, size_t size) {
+
+    void set(std::string key, char* data, size_t size) override {
         if (_map.find(key) != _map.end() && &(_map[key])[0] != data) {
             _map.erase(key);
         }
         //_map[key] = {data,size};
-        _map.emplace(key,vector<char>(data,data+size));
-        return;
+        _map.emplace(key, std::vector<char>(data,data+size));
     };
-    char* get(string key) {
+
+    char* get(std::string key) override {
         if (_map.find(key) == _map.end()) {
             throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
         return &(_map[key])[0];
-    };
-    size_t get_size(string key) {
+    }
+
+    size_t get_size(std::string key) override {
         if (_map.find(key) == _map.end()) {
             throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
         }
         return _map[key].size();
-    };
-    bool has(string key) {
+    }
+
+    bool has(std::string key) override {
         return (_map.find(key) != _map.end());
-    };
-    void cleanup () {
+    }
+
+    void cleanup () override {
         DEBUG_STDOUT("UnorderedMapStorage::cleanup()\n");
         _map.clear();
-        return;
-    };
-    void remove(string key) {
+    }
+
+    void remove(std::string key) override {
         if (has(key)) {
             _map.erase(key);
         }
-        return;
-    };
-    void init(std::string settings UNUSED) {
+    }
+
+    void init(std::string settings UNUSED) override {
         DEBUG_STDOUT("UnorderedMapStorage::init()\n");
-    };
-    string name() {
+    }
+
+    std::string name() override {
         return "umap";
     }
 };

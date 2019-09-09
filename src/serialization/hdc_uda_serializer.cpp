@@ -209,12 +209,12 @@ HDC udaResult2HDC(const uda::Result& uda_result, bool withMetadata = false)
 
 } // anon namespace
 
-void hdc::serialisation::UDASerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void hdc::serialization::UDASerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
 {
 
 }
 
-HDC hdc::serialisation::UDASerialiser::deserialize(const std::string& filename, const std::string& datapath)
+HDC hdc::serialization::UDASerialiser::deserialize(const std::string& filename, const std::string& datapath)
 {
     uda::Client client;
     try {
@@ -227,12 +227,12 @@ HDC hdc::serialisation::UDASerialiser::deserialize(const std::string& filename, 
     }
 }
 
-std::string hdc::serialisation::UDASerialiser::to_string(const HDC& hdc)
+std::string hdc::serialization::UDASerialiser::to_string(const HDC& hdc)
 {
     return std::string();
 }
 
-HDC hdc::serialisation::UDASerialiser::from_string(const std::string& string)
+HDC hdc::serialization::UDASerialiser::from_string(const std::string& string)
 {
     return HDC();
 }

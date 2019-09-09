@@ -1,13 +1,21 @@
 set( SOURCES
+  hdc_flatbuffers_serializer.cpp
   hdc_hdc_serializer.cpp
   hdc_hdf5_serializer.cpp
   hdc_json_serializer.cpp
+  hdc_s3_serializer.cpp
   hdc_serializer.cpp
   hdc_uda_serializer.cpp
 )
 
 add_library( serialization ${SOURCES} )
 target_include_directories( serialization PUBLIC ${CMAKE_CURRENT_LIST_DIR} )
+
+find_package( Flatbuffers REQUIRED )
+if( Flatbuffers_FOUND )
+  add_definitions( -D_USE_FLATBUFFERS )
+  target_link_libraries( serialization PUBLIC flatbuffers::flatbuffers )
+endif( Flatbuffers_FOUND )
 
 if( HDF5_FOUND )
   target_link_libraries( serialization PRIVATE ${_hdf5_libs} )

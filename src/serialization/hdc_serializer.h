@@ -7,7 +7,7 @@
 class HDC;
 
 namespace hdc {
-namespace serialisation {
+namespace serialization {
 
 class Serialiser;
 

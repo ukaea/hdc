@@ -507,7 +507,9 @@ public:
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
         auto data_size = sizeof(T);
-        for (size_t i = 0; i < rank; i++) data_size *= shape[i];
+        for (size_t i = 0; i < rank; i++) {
+            data_size *= shape[i];
+        }
         auto buffer_size = data_size + sizeof(hdc_header_t);
         if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
@@ -523,7 +525,9 @@ public:
             header->buffer_size = buffer_size;
             header->data_size = data_size;
             memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-            for (size_t i = 0; i < rank; i++) header->shape[i] = shape[i];
+            for (size_t i = 0; i < rank; i++) {
+                header->shape[i] = shape[i];
+            }
             header->flags = flags;
             header->type = to_typeid(data[0]);
             header->rank = rank;
@@ -561,7 +565,9 @@ public:
             header->buffer_size = buffer_size;
             header->data_size = data_size;
             memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
-            for (size_t i = 0; i < rank; i++) header->shape[i] = shape[i];
+            for (size_t i = 0; i < rank; i++) {
+                header->shape[i] = shape[i];
+            }
             header->flags = flags | HDCExternal;
             header->type = to_typeid(data[0]);
             header->rank = rank;
@@ -634,7 +640,6 @@ public:
         }
         std::vector<size_t> shape = { data.size() };
         set_data<T>(shape, &data[0]);
-        return;
     }
 
     /**
@@ -678,6 +683,7 @@ public:
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     void set_external_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+
     /**
      * @brief ...
      *
@@ -689,6 +695,7 @@ public:
      */
     void
     set_data_Py(std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
+
     /**
      * @brief ...
      *
@@ -700,6 +707,7 @@ public:
      */
     void
     set_external_Py(std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
+
     /**
     * @brief ...
     *
@@ -773,6 +781,7 @@ public:
     * @return std::vector< size_t >
     */
     std::vector<size_t> get_strides() const;
+
     /**
     * @brief ...
     *

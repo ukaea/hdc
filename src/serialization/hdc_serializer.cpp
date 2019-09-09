@@ -8,10 +8,13 @@
 #ifdef _USE_UDA
 #  include "hdc_uda_serializer.h"
 #endif
+#ifdef _USE_FLATBUFFERS
+#  include "hdc_flatbuffers_serializer.h"
+#endif
 
 #include <hdc_errors.hpp>
 
-using namespace hdc::serialisation;
+using namespace hdc::serialization;
 
 const SerialiserMap Serialiser::serializers_ = SerialiserMap();
 
@@ -27,6 +30,9 @@ SerialiserMap::SerialiserMap() noexcept
 #ifdef _USE_HDF5
     serializers_["hdc_file"] = std::make_unique<HDCSerialiser>();
     serializers_["hdc_string"] = std::make_unique<HDCSerialiser>();
+#endif
+#ifdef _USE_FLATBUFFERS
+    serializers_["flatbuffers"] = std::make_unique<FlatBuffersSerializer>();
 #endif
 }
 

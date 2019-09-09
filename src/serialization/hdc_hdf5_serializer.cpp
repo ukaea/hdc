@@ -494,23 +494,21 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
     }
     H5std_string DATASET_NAME(path);
     try {
-        hdc_map_t* children;
-        DataSet dataset;
         if (header->type == HDC_STRUCT) {
-            children = h.get_children_ptr();
+            hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
                 auto group = new Group(file->createGroup(path));
                 hdc_map_t::nth_index<1>::type& ri = children->get<1>();
-                for (auto it = ri.begin(); it != ri.end(); ++it) {
-                    auto key = it->key.c_str();
-                    auto uuid = it->address.c_str();
+                for (const auto& child : children->get<1>()) {
+                    auto key = child.key.c_str();
+                    auto uuid = child.address.c_str();
                     write_node(HDC(hdc_global.storage, uuid), file, path + "/" + key);
                 }
                 delete group;
             }
             return;
         } else if (header->type == HDC_LIST) {
-            children = h.get_children_ptr();
+            hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
                 Group ref_group;
                 try {
@@ -523,15 +521,17 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
                 size_t n_child = children->size();
                 auto wbuf = new hobj_ref_t[n_child];
                 size_t i = 0;
-                for (auto it = ri.begin(); it != ri.end(); ++it) {
+                for (const auto& child : children->get<1>()) {
+                    auto uuid = child.address.c_str();
                     //TODO: We could probably re-do this using get_children() method
-                    auto uuid = it->address.c_str();
                     HDC hh(hdc_global.storage, uuid);
                     auto _uuid = hh.get_uuid();
                     std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                     write_node(hh, file, full_path.c_str());
                     auto ret = H5Rcreate(&wbuf[i], file->getId(), full_path.c_str(), H5R_OBJECT, -1);
-                    if (ret < 0) throw HDCException("Could not create refference to " + full_path);
+                    if (ret < 0) {
+                        throw HDCException("Could not create refference to " + full_path);
+                    }
                     i++;
                 }
 
@@ -547,7 +547,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
             hsize_t dims1[] = { 1 };
             DataSpace edataspace(1, dims1);
             double edata[] = { NAN };
-            dataset = file->createDataSet(DATASET_NAME, PredType::NATIVE_DOUBLE, edataspace);
+            DataSet dataset = file->createDataSet(DATASET_NAME, PredType::NATIVE_DOUBLE, edataspace);
             dataset.write(edata, PredType::NATIVE_DOUBLE);
         } else {
             hsize_t rank = header->rank;
@@ -557,7 +557,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
             };
             DataSpace dataspace(rank, dimsf);
             auto t = HDCtype2HDF5(header->type);
-            dataset = file->createDataSet(DATASET_NAME, t, dataspace);
+            DataSet dataset = file->createDataSet(DATASET_NAME, t, dataspace);
             dataset.write(data, t);
             return;
         }
@@ -598,7 +598,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
 
 } // anon namespace
 
-HDC hdc::serialisation::HDF5Serialiser::deserialize(const std::string& filename, const std::string& datapath)
+HDC hdc::serialization::HDF5Serialiser::deserialize(const std::string& filename, const std::string& datapath)
 {
     DEBUG_STDOUT("from_hdf5(const std::string& filename, const std::string& datapath)");
     HDC hdc;
@@ -610,12 +610,12 @@ HDC hdc::serialisation::HDF5Serialiser::deserialize(const std::string& filename,
     return hdc;
 }
 
-void hdc::serialisation::HDF5Serialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
 {
     try {
         H5std_string h5_filename(filename);
         H5File file(h5_filename, H5F_ACC_TRUNC);
-        write_node(HDC(hdc), &file, "data");
+        write_node(hdc, &file, "data");
     } catch (FileIException& error) {
 #if H5_VERSION_GE(1, 8, 13)
         Exception::printErrorStack();
@@ -626,12 +626,12 @@ void hdc::serialisation::HDF5Serialiser::serialize(const HDC& hdc, const std::st
     }
 }
 
-std::string hdc::serialisation::HDF5Serialiser::to_string(const HDC& hdc)
+std::string hdc::serialization::HDF5Serialiser::to_string(const HDC& hdc)
 {
     return {};
 }
 
-HDC hdc::serialisation::HDF5Serialiser::from_string(const std::string& string)
+HDC hdc::serialization::HDF5Serialiser::from_string(const std::string& string)
 {
     return HDC();
 }

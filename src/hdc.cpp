@@ -98,13 +98,23 @@ void HDC::init(const std::string& _storage_str, const std::string& settings_str)
 
     // create settings from environment
     Json::Value so_env;
-    if (!env_persistent_str.empty()) so_env["persistent"] = (env_persistent_str == "true");
-    if (!env_filename_str.empty()) so_env["filename"] = env_filename_str;
+    if (!env_persistent_str.empty()) {
+        so_env["persistent"] = (env_persistent_str == "true");
+    }
+    if (!env_filename_str.empty()) {
+        so_env["filename"] = env_filename_str;
+    }
     Json::Value so_arg;
     std::stringstream ss_arg(settings_str);
-    if (!settings_str.empty()) ss_arg >> so_arg;
-    if (so_arg.isMember("persistent")) so_env["persistent"] = so_arg["persistent"];
-    if (so_arg.isMember("filename")) so_env["filename"] = so_arg["filename"];
+    if (!settings_str.empty()) {
+        ss_arg >> so_arg;
+    }
+    if (so_arg.isMember("persistent")) {
+        so_env["persistent"] = so_arg["persistent"];
+    }
+    if (so_arg.isMember("filename")) {
+        so_env["filename"] = so_arg["filename"];
+    }
     std::stringstream ss_stor;
     ss_stor << so_env;
 
@@ -1239,7 +1249,7 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
         }
         auto prefix = result[0];
 
-        auto& serializer = hdc::serialisation::Serialiser::find_serializer(prefix);
+        auto& serializer = hdc::serialization::Serialiser::find_serializer(prefix);
         return serializer.deserialize(split_res[0], split_res[1]);
     } else {
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
@@ -1254,7 +1264,7 @@ void HDC::save(const std::string& uri) const
     if (result.size() > 1) {
         auto prefix = result[0];
 
-        auto& serializer = hdc::serialisation::Serialiser::find_serializer(prefix);
+        auto& serializer = hdc::serialization::Serialiser::find_serializer(prefix);
         return serializer.serialize(*this, result[1], "");
     } else {
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
@@ -1263,13 +1273,13 @@ void HDC::save(const std::string& uri) const
 
 HDC HDC::deserialize(const std::string& protocol, const std::string& string)
 {
-    auto& serializer = hdc::serialisation::Serialiser::find_serializer(protocol);
+    auto& serializer = hdc::serialization::Serialiser::find_serializer(protocol);
     return serializer.from_string(string);
 }
 
 std::string HDC::serialize(const std::string& protocol) const
 {
-    auto& serializer = hdc::serialisation::Serialiser::find_serializer(protocol);
+    auto& serializer = hdc::serialization::Serialiser::find_serializer(protocol);
     return serializer.to_string(*this);
 }
 
@@ -1347,7 +1357,9 @@ hdc_data_t HDC::get_data() const
     obj.type = header->type;
     obj.flags = header->flags;
     obj.rank = header->rank;
-    for (size_t i = 0; i < HDC_MAX_DIMS; i++) obj.shape[i] = header->shape[i];
+    for (size_t i = 0; i < HDC_MAX_DIMS; i++) {
+        obj.shape[i] = header->shape[i];
+    }
     obj.data = buffer + sizeof(hdc_header_t);
     return obj;
 }

@@ -1,4 +1,5 @@
 #include "hdc_json_serializer.h"
+#include "hdc_json_serializer.h"
 
 #include "hdc.hpp"
 
@@ -12,7 +13,7 @@ Json::Value buffer_to_json(char* buffer)
     char* data = buffer + sizeof(hdc_header_t);
     if ((header->flags & HDCExternal) != 0) {
         char* result;
-        memcpy(&result,data,sizeof(void*));
+        memcpy(&result, data, sizeof(void*));
         data = result;
     }
     Json::Value root;
@@ -573,22 +574,22 @@ HDC from_json(const string& filename, const string& datapath)
 
 } // anon namespace
 
-void hdc::serialisation::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
 {
     to_json(hdc, filename, 0);
 }
 
-HDC hdc::serialisation::JSONSerialiser::deserialize(const std::string& filename, const std::string& datapath)
+HDC hdc::serialization::JSONSerialiser::deserialize(const std::string& filename, const std::string& datapath)
 {
     return from_json(filename, datapath);
 }
 
-std::string hdc::serialisation::JSONSerialiser::to_string(const HDC& hdc)
+std::string hdc::serialization::JSONSerialiser::to_string(const HDC& hdc)
 {
     return to_json_string(hdc, 0);
 }
 
-HDC hdc::serialisation::JSONSerialiser::from_string(const std::string& string)
+HDC hdc::serialization::JSONSerialiser::from_string(const std::string& string)
 {
     return from_json_string(string);
 }

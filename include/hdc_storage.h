@@ -8,19 +8,18 @@
 #include <cstdio>
 #include <hdc_helpers.h>
 
-using namespace std;
-
 class HDCStorage {
 private:
     pluma::Pluma _pluma;
     Storage* _store;
-    string pluginPath;
+    std::string pluginPath;
     size_t _id;
     bool _do_init;
+
 public:
-    HDCStorage(size_t _id, std::string plugin_path, std::string settings_str, bool do_init=true) {
+    HDCStorage(size_t _id, const std::string& plugin_path, const std::string& settings_str, bool do_init=true) {
         _pluma.acceptProviderType<StorageProvider>();
-        if (plugin_path.size() != 0) {
+        if (!plugin_path.empty()) {
             if (!_pluma.load(plugin_path)) {
                 DEBUG_STDERR("Could not load plugin \"" + plugin_path +"\"\n");
                 DEBUG_STDERR("Using std::unordered_map as fallback\n");
@@ -33,55 +32,72 @@ public:
         _pluma.getProviders(providers);
         _store = providers.front()->create();
         _do_init = do_init;
-        if (_do_init) _store->init(settings_str);
+        if (_do_init) {
+            _store->init(settings_str);
+        }
         this->pluginPath = plugin_path;
         this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }
+
     ~HDCStorage() {
         if (_do_init) _store->cleanup();
         delete _store;
         _pluma.unloadAll();
     }
-    string getDescription() {
+
+    std::string getDescription() {
         return _store->getDescription();
     }
+
     std::string get_settings() {
         return _store->get_settings();
     }
-    void set(string path, char* data, size_t size) {
+
+    void set(const std::string& path, char* data, size_t size) {
         _store->set(path, data, size);
     }
-    char* get(string path) {
+
+    char* get(const std::string& path) {
         return _store->get(path);
     }
+
     void cleanup() {
         _store->cleanup();
     }
-    size_t get_size(string path) {
+
+    size_t get_size(const std::string& path) {
         return _store->get_size(path);
     }
-    bool has(string path) {
+
+    bool has(const std::string& path) {
         return _store->has(path);
     }
-    void remove(string path) {
+
+    void remove(const std::string& path) {
         _store->remove(path);
     }
-    void lock(string path) {
+
+    void lock(const std::string& path) {
         _store->lock(path);
-    };
-    void unlock(string path) {
+    }
+
+    void unlock(const std::string& path) {
         _store->unlock(path);
-    };
+    }
+
     bool locked() {
         return _store->locked();
-    };
+    }
+
     void sync() {
         _store-> sync();
-    };
-    string name() {
+    }
+
+    std::string name() {
         return _store->name();
     }
+
     size_t id() {
         return _id;
     }

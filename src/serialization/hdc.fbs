@@ -1,0 +1,76 @@
+namespace hdc.serialization;
+
+table DoubleData {
+    data:[double];
+}
+
+table FloatData {
+    data:[float];
+}
+
+table Int8Data {
+    data:[int8];
+}
+
+table Int16Data {
+    data:[int16];
+}
+
+table Int32Data {
+    data:[int32];
+}
+
+table Int64Data {
+    data:[int64];
+}
+
+table UInt8Data {
+    data:[uint8];
+}
+
+table UInt16Data {
+    data:[uint16];
+}
+
+table UInt32Data {
+    data:[uint32];
+}
+
+table UInt64Data {
+    data:[uint64];
+}
+
+table StringData {
+    data:[string];
+}
+
+table BoolData {
+    data:[bool];
+}
+
+union Data { DoubleData, FloatData, Int8Data, Int16Data, Int32Data, Int64Data, UInt8Data, UInt16Data, UInt32Data, UInt64Data, StringData, BoolData }
+
+table List {
+    items:[HDCBuffer];
+}
+
+table DictItem {
+    key:string;
+    value:HDCBuffer;
+}
+
+table Dict {
+    items:[DictItem];
+}
+
+union Collection { List, Dict }
+
+table HDCBuffer {
+    uuid:string;
+    children:Collection;
+    data:Data;
+    size:uint64;
+    shape:[uint64];
+}
+
+root_type HDCBuffer;

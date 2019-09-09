@@ -3,7 +3,7 @@
 #include "hdc_serializer.h"
 
 namespace hdc {
-namespace serialisation {
+namespace serialization {
 
 class HDF5Serialiser : public Serialiser {
 public:

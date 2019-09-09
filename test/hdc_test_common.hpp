@@ -4,32 +4,34 @@
 
 size_t factorial(size_t n)
 {
-  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+    return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
 }
 
-bool in_vector(std::string str, const std::vector<std::string>& vector)
+bool in_vector(const std::string& str, const std::vector<std::string>& vector)
 {
     return (std::find(vector.begin(), vector.end(), str) != vector.end());
 }
 
-bool in_map(std::string str, const std::unordered_map<std::string,std::string>& map)
+bool in_map(const std::string& str, const std::unordered_map<std::string, std::string>& map)
 {
     return (map.find(str) != map.end());
 }
 
-const std::string make_tmp_name(const std::string& suffix = "h5")
+std::string make_tmp_name(const std::string& suffix = "h5")
 {
     boost::filesystem::path temp = boost::filesystem::unique_path();
-    temp += std::string(".")+suffix;
+    temp += std::string(".") + suffix;
     const std::string tempstr = temp.native();
     return tempstr;
 }
 
 #ifndef HDC_TEST_COMMON_HPP
 #define HDC_TEST_COMMON_HPP
-template<typename T, typename U>
-bool arrcmp(T* arr1, U* arr2, size_t n_elem) {
-    for (size_t i=0; i<n_elem; i++) {
+
+template <typename T, typename U>
+bool arrcmp(T* arr1, U* arr2, size_t n_elem)
+{
+    for (size_t i = 0; i < n_elem; i++) {
         if (arr1[i] != arr2[i]) return false;
     }
     return true;
@@ -70,7 +72,7 @@ bool arrcmp(T* arr1, U* arr2, size_t n_elem) {
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
     HDC lch;                                                                                        \
-    for (int i=0;i<5;i++) {                                                                         \
+    for (int i=0; i<5; i++) {                                                                       \
         HDC lch;                                                                                    \
         list.append(lch);                                                                           \
     }                                                                                               \
