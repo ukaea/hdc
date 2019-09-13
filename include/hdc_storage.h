@@ -85,6 +85,9 @@ public:
     size_t id() {
         return _id;
     }
+    bool memory_mapped() {
+        return _store->memory_mapped();
+    }
 };
 
 #endif

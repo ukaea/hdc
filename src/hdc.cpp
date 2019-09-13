@@ -428,7 +428,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
     buffer = get_buffer();
     header = reinterpret_cast<hdc_header_t*>(buffer);
     vector<char> new_buffer;
-    auto segment = get_segment();
+    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
     auto children = segment.find<hdc_map_t>("d").first;
     if (children == nullptr) throw HDCException("add_child_single(): Could not get the children.\n");
     if (children->count(path.c_str()) == 0) {
@@ -469,7 +469,7 @@ void HDC::add_child_single(const std::string& path, HDC& n)
             }
         }
         header->shape[0] = children->size();
-        if (header->buffer_size != old_size) storage->set(uuid, buffer, header->buffer_size);
+        if (header->buffer_size != old_size || !storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
     }
     return;
 }
@@ -529,7 +529,8 @@ void HDC::delete_child(hdc_path_t& path)
     }
     auto first = path.front();
     path.pop_front();
-    hdc_map_t* children = get_children_ptr();
+    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
+    auto children = segment.find<hdc_map_t>("d").first;
     if (path.empty()) {
         if (first.type() == typeid(size_t)) {
             auto it = children->get<by_index>()[boost::get<size_t>(first)];
@@ -543,6 +544,7 @@ void HDC::delete_child(hdc_path_t& path)
             }
         }
         header->shape[0] = children->size();
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
     } else {
         get(boost::get<std::string>(first)).delete_child(path);
     }
@@ -824,10 +826,10 @@ void HDC::set_type(hdc_type_t type)
     // More to be added here later
     auto old_buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
-    DEBUG_STDOUT(std::string("set_type(") + to_string(header->type) + " -> " + to_string(type) + ")\n");
-    if (header->type == type) return; // Nothing to do
+    DEBUG_STDOUT(std::string(std::cout << "set_type(") + to_string(header->type) + " -> " + to_string(type) + ")\n");
+    if (header->type == type) return;
     header->type = type;
-    if (is_terminal()) return;
+    if (is_terminal() && storage->memory_mapped()) return; // Nothing to do
     auto dest_buffer = old_buffer;
     vector<char> new_buffer(0);
     if (header->data_size < HDC_NODE_SIZE_DEFAULT) {
@@ -1123,22 +1125,7 @@ size_t HDC::get_rank() const
 char* HDC::get_buffer() const
 {
     auto buffer = storage->get(uuid);
-
-    auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    printf("Size:\t\t%zu\n", header->buffer_size);
-    printf("NDim:\t\t%zu\n", header->rank);
-    printf("Shape:\t\t");
-    for (size_t i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", header->shape[i]);
-    printf("\n");
-    printf("Data Size:\t\t%zu\n", header->data_size);
-    printf("External:\t\t%d\n", is_external());
-    printf("ReadOnly:\t\t%d\n", is_readonly());
-    printf("FortranOrder:\t%d\n", is_fortranorder());
-    std::cout << "Type:\t" << get_type_str() << "\n";
-
-
     return buffer;
-//     return storage->get(uuid);
 }
 
 string HDC::get_uuid() const

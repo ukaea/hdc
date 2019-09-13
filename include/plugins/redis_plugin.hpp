@@ -70,6 +70,7 @@ public:
         return ss.str();
     };
     void set(string key, char* data, size_t size) {
+//         std::cout << "-- RedisStorage::set(" << key << ", " << size << ")\n";
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"SET %b %b", key.c_str(), (size_t) key.size(), data, (size_t) size);
         if ( !this->reply ) throw ;//RedisStorageException("RedisStorage->set() has returned an error\n");
@@ -78,17 +79,21 @@ public:
     };
     char* get(string key) {
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
-        this->reply = (redisReply*)redisCommand(this->context,"GET %b", key.c_str(), (size_t) key.size());
-        if ( !this->reply ) {
+        redisReply* rep;
+        rep = (redisReply*)redisCommand(this->context,"GET %b", key.c_str(), (size_t) key.size());
+        if ( !rep ) {
             throw ;//RedisStorageException("RedisStorage->get() has returned an error\n");
         } else {
-            if ( this->reply->type != REDIS_REPLY_STRING ) {
+            if ( rep->type != REDIS_REPLY_STRING ) {
                 throw ;//RedisStorageException("RedisStorage->get() has returned wrong this->reply type\n");
             } else {
-                vector<char> array_out((char*)this->reply->str, (char*)this->reply->str + this->reply->len);
-                auto data = array_out;
-                freeReplyObject(this->reply);
-                return (char*)(&data[0]);
+//                 std::cout << "-- RedisStorage::get(" << key << ") size:\t" << reply->len <<"\n";
+//                 vector<char> array_out((char*)rep->str, (char*)rep->str + rep->len);
+
+                char* data = new char[rep->len];
+                memcpy(data, rep->str, rep->len);
+                freeReplyObject(rep);
+                return data;
             }
         }
     };
@@ -170,6 +175,9 @@ public:
     };
     string name() {
         return "redis";
+    };
+    bool memory_mapped() {
+        return false;
     };
 };
 

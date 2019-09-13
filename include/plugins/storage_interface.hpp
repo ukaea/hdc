@@ -22,6 +22,7 @@ public:
     virtual void init(std::string settings) = 0;
     virtual std::string get_settings() = 0;
     virtual string name() = 0;
+    virtual bool memory_mapped() = 0;
 };
 
 PLUMA_PROVIDER_HEADER(Storage)

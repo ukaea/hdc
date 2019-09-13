@@ -80,6 +80,9 @@ public:
     string name() {
         return "umap";
     }
+    bool memory_mapped() {
+        return true;
+    };
 };
 
 PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage)

@@ -130,6 +130,9 @@ public:
     string name() {
         return "mdbm";
     };
+    bool memory_mapped() {
+        return true;
+    }
 };
 
 PLUMA_INHERIT_PROVIDER(MDBMStorage, Storage)
