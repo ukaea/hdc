@@ -1122,7 +1122,23 @@ size_t HDC::get_rank() const
 
 char* HDC::get_buffer() const
 {
-    return storage->get(uuid);
+    auto buffer = storage->get(uuid);
+
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    printf("Size:\t\t%zu\n", header->buffer_size);
+    printf("NDim:\t\t%zu\n", header->rank);
+    printf("Shape:\t\t");
+    for (size_t i = 0; i < HDC_MAX_DIMS; i++) printf("%zu,", header->shape[i]);
+    printf("\n");
+    printf("Data Size:\t\t%zu\n", header->data_size);
+    printf("External:\t\t%d\n", is_external());
+    printf("ReadOnly:\t\t%d\n", is_readonly());
+    printf("FortranOrder:\t%d\n", is_fortranorder());
+    std::cout << "Type:\t" << get_type_str() << "\n";
+
+
+    return buffer;
+//     return storage->get(uuid);
 }
 
 string HDC::get_uuid() const
