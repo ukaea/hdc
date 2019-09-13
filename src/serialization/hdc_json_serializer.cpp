@@ -23,32 +23,32 @@ Json::Value buffer_to_json(char* buffer)
     } else {
         order = andres::FirstMajorOrder;
     }
-    andres::View<T> view(shape, shape+header->rank, (T*)data, order);
+    andres::View<T> view(shape, shape + header->rank, (T*)data, order);
     //TODO add fortran - C order switch
     switch (header->rank) {
-        case (0): {
+        case 0: {
             root = ((T*)data)[0];
             break;
         }
-        case (1): {
+        case 1: {
             for (unsigned int i0 = 0; i0 < shape[0]; i0++)
                 root[i0] = (T)view(i0);
             break;
         }
-        case (2): {
+        case 2: {
             for (unsigned int i0 = 0; i0 < shape[0]; i0++)
                 for (unsigned int i1 = 0; i1 < shape[1]; i1++)
                     root[i0][i1] = view(i0, i1);
             break;
         }
-        case (3): {
+        case 3: {
             for (unsigned int i0 = 0; i0 < shape[0]; i0++)
                 for (unsigned int i1 = 0; i1 < shape[1]; i1++)
                     for (unsigned int i2 = 0; i2 < shape[2]; i2++)
                         root[i0][i1][i2] = view(i0, i1, i2);
             break;
         }
-        case (4): {
+        case 4: {
             for (unsigned int i0 = 0; i0 < shape[0]; i0++)
                 for (unsigned int i1 = 0; i1 < shape[1]; i1++)
                     for (unsigned int i2 = 0; i2 < shape[2]; i2++)
@@ -56,7 +56,7 @@ Json::Value buffer_to_json(char* buffer)
                             root[i0][i1][i2][i3] = view(i0, i1, i2, i3);
             break;
         }
-        case (5): {
+        case 5: {
             for (unsigned int i0 = 0; i0 < shape[0]; i0++)
                 for (unsigned int i1 = 0; i1 < shape[1]; i1++)
                     for (unsigned int i2 = 0; i2 < shape[2]; i2++)
@@ -66,7 +66,7 @@ Json::Value buffer_to_json(char* buffer)
             break;
         }
             /*
-            case (6):
+            case 6:
             {
                 for (unsigned int i0=0;i0<shape[0];i0++)
                     for (unsigned int i1=0;i1<shape[1];i1++)
@@ -77,7 +77,7 @@ Json::Value buffer_to_json(char* buffer)
                                         root[i0][i1][i2][i3][i4][i5] = view(i0,i1,i2,i3,i4,i5);
                 break;
             }
-            case (7):
+            case 7:
             {
                 for (unsigned int i0=0;i0<shape[0];i0++)
                     for (unsigned int i1=0;i1<shape[1];i1++)
@@ -89,7 +89,7 @@ Json::Value buffer_to_json(char* buffer)
                                             root[i0][i1][i2][i3][i4][i5][i6] = view(i0,i1,i2,i3,i4,i5,i6);
                 break;
             }
-            case (8):
+            case 8:
             {
                 for (unsigned int i0=0;i0<shape[0];i0++)
                     for (unsigned int i1=0;i1<shape[1];i1++)
@@ -103,7 +103,8 @@ Json::Value buffer_to_json(char* buffer)
                 break;
             }*/
         default: {
-            throw HDCException("buffer_to_json(): unsupported number of dimensions: " + std::to_string(header->rank) + "\n");
+            throw HDCException(
+                    "buffer_to_json(): unsupported number of dimensions: " + std::to_string(header->rank) + "\n");
         }
     }
     return root;
@@ -116,47 +117,47 @@ Json::Value to_json(const HDC& hdc, int mode)
     Json::Value root;
     if (mode == 0) {
         switch (header->type) {
-            case (HDC_INT8): {
+            case HDC_INT8: {
                 root = buffer_to_json<int8_t>(buffer);
                 break;
             }
-            case (HDC_INT16): {
+            case HDC_INT16: {
                 root = buffer_to_json<int16_t>(buffer);
                 break;
             }
-            case (HDC_INT32): {
+            case HDC_INT32: {
                 root = buffer_to_json<int32_t>(buffer);
                 break;
             }
-            case (HDC_INT64): {
+            case HDC_INT64: {
                 root = buffer_to_json<int64_t>(buffer);
                 break;
             }
-            case (HDC_UINT8): {
+            case HDC_UINT8: {
                 root = buffer_to_json<uint8_t>(buffer);
                 break;
             }
-            case (HDC_UINT16): {
+            case HDC_UINT16: {
                 root = buffer_to_json<uint16_t>(buffer);
                 break;
             }
-            case (HDC_UINT32): {
+            case HDC_UINT32: {
                 root = buffer_to_json<uint32_t>(buffer);
                 break;
             }
-            case(HDC_UINT64): {
-                root =  buffer_to_json<uint64_t>(buffer);
+            case HDC_UINT64: {
+                root = buffer_to_json<uint64_t>(buffer);
                 break;
             }
-            case (HDC_FLOAT): {
+            case HDC_FLOAT: {
                 root = buffer_to_json<float>(buffer);
                 break;
             }
-            case (HDC_DOUBLE): {
+            case HDC_DOUBLE: {
                 root = buffer_to_json<double>(buffer);
                 break;
             }
-            case (HDC_STRUCT): {
+            case HDC_STRUCT: {
                 auto children = hdc.get_children_ptr();
                 for (auto it = children->begin(); it != children->end(); ++it) {
                     HDC node(hdc.get_storage(), it->address.c_str());
@@ -164,7 +165,7 @@ Json::Value to_json(const HDC& hdc, int mode)
                 }
                 break;
             }
-            case (HDC_LIST): {
+            case HDC_LIST: {
                 root = Json::arrayValue;
                 auto children = hdc.get_children_ptr();
                 for (size_t i = 0; i < children->size(); i++) {
@@ -172,15 +173,15 @@ Json::Value to_json(const HDC& hdc, int mode)
                 }
                 break;
             }
-            case (HDC_EMPTY): {
+            case HDC_EMPTY: {
                 root = Json::nullValue;
                 break;
             }
-            case (HDC_STRING): {
+            case HDC_STRING: {
                 root = hdc.as_string();
                 break;
             }
-            case (HDC_BOOL): {
+            case HDC_BOOL: {
                 root = buffer_to_json<bool>(buffer);
                 break;
             }
@@ -287,7 +288,7 @@ int get_rank(const Json::Value& root)
 
 std::vector<size_t> get_shape(const Json::Value& root)
 {
-    if (!root.isArray()) return {0};
+    if (!root.isArray()) return { 0 };
     unsigned int dim = 0;
     size_t shape[HDC_MAX_DIMS];
     Json::Value curr = root;
@@ -311,38 +312,37 @@ HDC json_to_HDC(const ::Json::Value& root)
 {
     HDC tree;
     switch (root.type()) {
-        {
-            case (Json::nullValue):
-                DEBUG_STDOUT("root is null");
+        case Json::nullValue: {
+            DEBUG_STDOUT("root is null");
             tree.set_type(HDC_EMPTY);
             break;
         }
-        case (Json::intValue): {
+        case Json::intValue: {
             DEBUG_STDOUT("root is int, value = " + to_string(root.asInt()));
             tree.set_data<int32_t>(root.asInt());
             break;
         }
-        case (Json::uintValue): {
+        case Json::uintValue: {
             DEBUG_STDOUT("root is uint, value = " + to_string(root.asUInt()));
             tree.set_data<uint32_t>(root.asUInt());
             break;
         }
-        case (Json::realValue): {
+        case Json::realValue: {
             DEBUG_STDOUT("root is double, value = " + to_string(root.asDouble()));
             tree.set_data(root.asDouble());
             break;
         }
-        case (Json::stringValue): {
+        case Json::stringValue: {
             DEBUG_STDOUT("root is string, value = " + string(root.asString()));
             tree.set_string(root.asString());
             break;
         }
-        case (Json::booleanValue): {
+        case Json::booleanValue: {
             DEBUG_STDOUT("root is bool, value = " + to_string(root.asBool()));
             tree.set_data<bool>(root.asBool());
             break;
         }
-        case (Json::arrayValue): {
+        case Json::arrayValue: {
             DEBUG_STDOUT("root is array, size = " + to_string(root.size()));
             if (is_all_numeric(root) || is_all_bool(root)) {
                 int8_t rank = ::get_rank(root);
@@ -368,14 +368,16 @@ HDC json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 2: {
-                            andres::View<double> view(&shape[0], &shape[0] + 2, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 2, (double*)data_ptr,
+                                                      andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i, j) = root[i][j].asDouble();
                             break;
                         }
                         case 3: {
-                            andres::View<double> view(&shape[0], &shape[0] + 3, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 3, (double*)data_ptr,
+                                                      andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -383,7 +385,8 @@ HDC json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 4: {
-                            andres::View<double> view(&shape[0], &shape[0] + 4, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 4, (double*)data_ptr,
+                                                      andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -392,7 +395,8 @@ HDC json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 5: {
-                            andres::View<double> view(&shape[0], &shape[0] + 5, (double*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<double> view(&shape[0], &shape[0] + 5, (double*)data_ptr,
+                                                      andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -464,14 +468,16 @@ HDC json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 2: {
-                            andres::View<int32_t> view(&shape[0], &shape[0] + 2, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 2, (int32_t*)data_ptr,
+                                                       andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     view(i, j) = root[i][j].asInt();
                             break;
                         }
                         case 3: {
-                            andres::View<int32_t> view(&shape[0], &shape[0] + 3, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 3, (int32_t*)data_ptr,
+                                                       andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -479,7 +485,8 @@ HDC json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 4: {
-                            andres::View<int32_t> view(&shape[0], &shape[0] + 4, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 4, (int32_t*)data_ptr,
+                                                       andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -488,7 +495,8 @@ HDC json_to_HDC(const ::Json::Value& root)
                             break;
                         }
                         case 5: {
-                            andres::View<int32_t> view(&shape[0], &shape[0] + 5, (int32_t*)data_ptr, andres::FirstMajorOrder);
+                            andres::View<int32_t> view(&shape[0], &shape[0] + 5, (int32_t*)data_ptr,
+                                                       andres::FirstMajorOrder);
                             for (unsigned int i = 0; i < shape[0]; i++)
                                 for (unsigned int j = 0; j < shape[1]; j++)
                                     for (unsigned int k = 0; k < shape[2]; k++)
@@ -514,7 +522,7 @@ HDC json_to_HDC(const ::Json::Value& root)
             }
             break;
         }
-        case (Json::objectValue): {
+        case Json::objectValue: {
             DEBUG_STDOUT("root is object, children:\n");
             for (auto it = root.begin(); it != root.end(); ++it) {
                 DEBUG_STDOUT("KEY: " + it.key().asString());
@@ -523,7 +531,8 @@ HDC json_to_HDC(const ::Json::Value& root)
             }
             break;
         }
-        default: throw HDCException("Bad JSON type");
+        default:
+            throw HDCException("Bad JSON type");
     }
     return tree;
 }
@@ -574,7 +583,8 @@ HDC from_json(const string& filename, const string& datapath)
 
 } // anon namespace
 
-void hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void
+hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
 {
     to_json(hdc, filename, 0);
 }

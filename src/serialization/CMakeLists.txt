@@ -18,11 +18,20 @@ endif( ENABLE_UDA )
 add_library( serialization ${SOURCES} )
 target_include_directories( serialization PUBLIC ${CMAKE_CURRENT_LIST_DIR} )
 
-find_package( Flatbuffers REQUIRED )
+find_package( Flatbuffers )
 if( Flatbuffers_FOUND )
   add_definitions( -D_USE_FLATBUFFERS )
   target_link_libraries( serialization PUBLIC flatbuffers::flatbuffers )
 endif( Flatbuffers_FOUND )
+
+find_package( LibS3 )
+if( LIBS3_FOUND )
+  add_definitions( -D_USE_S3 )
+  target_include_directories( serialization PRIVATE ${LIBS3_INCLUDE_DIR} )
+  target_link_libraries( serialization PUBLIC ${LIBS3_LIBRARIES} )
+else()
+#  message( FATAL_ERROR "APDIJADWOPIDJ" )
+endif( LIBS3_FOUND )
 
 #install headers
 install(DIRECTORY ./ DESTINATION include/hdc FILES_MATCHING PATTERN "*.h*")

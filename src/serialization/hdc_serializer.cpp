@@ -1,7 +1,7 @@
 #include "hdc_serializer.h"
 
 #include "hdc_json_serializer.h"
-#ifdef _USER_MDBM
+#ifdef _USE_MDBM
 #  include "hdc_hdc_serializer.h"
 #endif
 #ifdef _USE_HDF5
@@ -12,6 +12,9 @@
 #endif
 #ifdef _USE_FLATBUFFERS
 #  include "hdc_flatbuffers_serializer.h"
+#endif
+#ifdef _USE_S3
+#  include "hdc_s3_serializer.h"
 #endif
 
 #include <hdc_errors.hpp>
@@ -39,7 +42,9 @@ SerialiserMap::SerialiserMap() noexcept
 #ifdef _USE_FLATBUFFERS
     serializers_["flatbuffers"] = std::make_unique<FlatBuffersSerializer>();
 #endif
-
+#ifdef _USE_S3
+    serializers_["s3"] = std::make_unique<S3Serializer>();
+#endif
 }
 
 

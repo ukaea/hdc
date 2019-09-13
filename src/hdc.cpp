@@ -9,6 +9,7 @@
 #include <memory>
 
 using namespace std;
+namespace bip = boost::interprocess;
 
 HDCGlobal hdc_global;
 
@@ -895,7 +896,9 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     // Start with determining of the buffer size
     size_t data_size = hdc_sizeof(type);
-    for (size_t i = 0; i < rank; i++) data_size *= shape[i];
+    for (size_t i = 0; i < rank; i++) {
+        data_size *= shape[i];
+    }
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header->buffer_size == buffer_size) {
         storage->lock(uuid);
@@ -1256,16 +1259,25 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
     }
 }
 
-void HDC::save(const std::string& uri) const
+void HDC::save(const std::string& uri, const std::string& datapath) const
 {
     // start by parsing the string
     std::vector<std::string> result;
     boost::algorithm::split_regex(result, uri, boost::regex("://"));
     if (result.size() > 1) {
+        std::vector<std::string> split_res;
+        boost::split(split_res, result[1], boost::is_any_of("|"), boost::token_compress_on);
+        if (split_res.size() > 1 && !datapath.empty()) {
+            throw HDCException("Both second argument and | in path specified. Use just one of them.");
+        }
+        if (split_res.size() == 1) split_res.emplace_back("");
+        if (!datapath.empty()) {
+            split_res[1] = datapath;
+        }
         auto prefix = result[0];
 
         auto& serializer = hdc::serialization::Serialiser::find_serializer(prefix);
-        return serializer.serialize(*this, result[1], "");
+        return serializer.serialize(*this, split_res[0], split_res[1]);
     } else {
         throw HDCException("Missing protocol, The URI should look like: protocol://address|optional arguments\n");
     }

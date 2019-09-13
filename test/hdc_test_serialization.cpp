@@ -79,7 +79,9 @@ TEST_CASE("TestSettings", "[HDC]")
     CHECK(settings["persistent"].asBool() == true);
     CHECK(strcmp(settings["filename"].asCString(), fname.c_str()) == 0);
     HDC::destroy();
-    if (remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
+    if (remove(fname.c_str()) != 0) {
+        std::cerr << "Error removing file " << fname << std::endl;
+    }
     //test that arguments have preffered
     HDC::init("mdbm", "{\"filename\":\"/tmp/aaa.mdbm\",\"persistent\": false}");
     Json::Value settings2;
@@ -88,4 +90,21 @@ TEST_CASE("TestSettings", "[HDC]")
     CHECK(settings2["persistent"].asBool() == false);
     CHECK(strcmp(settings2["filename"].asCString(), "/tmp/aaa.mdbm") == 0);
     HDC::destroy();
+}
+
+TEST_CASE("Test serialise to S3", "[HDC][S3]")
+{
+    HDC::destroy();
+    HDC::init();
+    PREPARE_TREE();
+    tree.save("s3://10.209.2.145:9000/test/test1");
+}
+
+TEST_CASE("Test deserialise from S3", "[HDC][S3]")
+{
+    HDC::destroy();
+    HDC::init();
+    PREPARE_TREE();
+    HDC hdc = tree.load("s3://10.209.2.145:9000/test/test1");
+    std::cout << hdc.serialize("json") << std::endl;
 }

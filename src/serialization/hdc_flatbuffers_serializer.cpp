@@ -4,6 +4,8 @@
 
 #include "hdc_generated.h"
 
+namespace {
+
 const char* ref_group_name = "__hdc";
 
 size_t get_data_size(const hdc_header_t& hdc_header)
@@ -33,80 +35,92 @@ template <> hdc::serialization::Data TypeConverter<double>::type = hdc::serializ
 template <> hdc::serialization::Data TypeConverter<bool>::type = hdc::serialization::Data::Data_BoolData;
 
 template <typename T>
-flatbuffers::Offset<void> get_data(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data);
+flatbuffers::Offset<void>
+get_data(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data);
 
 template <>
-flatbuffers::Offset<void> get_data<int8_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<int8_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const int8_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateInt8Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<int16_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<int16_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const int16_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateInt16Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<int32_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<int32_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const int32_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateInt32Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<int64_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<int64_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const int64_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateInt64Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<uint8_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<uint8_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const uint8_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateUInt8Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<uint16_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<uint16_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const uint16_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateUInt16Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<uint32_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<uint32_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const uint32_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateUInt32Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<uint64_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<uint64_t>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const uint64_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateUInt64Data(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<float>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<float>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const float*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateFloatData(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<double>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<double>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const double*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateDoubleData(builder, data).Union();
 }
 
 template <>
-flatbuffers::Offset<void> get_data<char*>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<char*>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     const std::vector<std::string> vec{}; // TODO: How does HDC handle strings?
     auto data = builder.CreateVectorOfStrings(vec);
@@ -114,27 +128,41 @@ flatbuffers::Offset<void> get_data<char*>(flatbuffers::FlatBufferBuilder& builde
 }
 
 template <>
-flatbuffers::Offset<void> get_data<bool>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data<bool>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     auto data = builder.CreateVector(reinterpret_cast<const uint8_t*>(hdc_data), get_data_size(hdc_header));
     return hdc::serialization::CreateBoolData(builder, data).Union();
 }
 
-flatbuffers::Offset<void> get_data(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+flatbuffers::Offset<void>
+get_data(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
 {
     switch (hdc_header.type) {
-        case HDC_INT8: return get_data<int8_t>(builder, hdc_header, hdc_data);
-        case HDC_INT16: return get_data<int16_t>(builder, hdc_header, hdc_data);
-        case HDC_INT32: return get_data<int32_t>(builder, hdc_header, hdc_data);
-        case HDC_INT64: return get_data<int64_t>(builder, hdc_header, hdc_data);
-        case HDC_UINT8: return get_data<uint8_t>(builder, hdc_header, hdc_data);
-        case HDC_UINT16: return get_data<uint16_t>(builder, hdc_header, hdc_data);
-        case HDC_UINT32: return get_data<uint32_t>(builder, hdc_header, hdc_data);
-        case HDC_UINT64: return get_data<uint64_t>(builder, hdc_header, hdc_data);
-        case HDC_FLOAT: return get_data<float>(builder, hdc_header, hdc_data);
-        case HDC_DOUBLE: return get_data<double>(builder, hdc_header, hdc_data);
-        case HDC_STRING: return get_data<char*>(builder, hdc_header, hdc_data);
-        case HDC_BOOL: return get_data<bool>(builder, hdc_header, hdc_data);
+        case HDC_INT8:
+            return get_data<int8_t>(builder, hdc_header, hdc_data);
+        case HDC_INT16:
+            return get_data<int16_t>(builder, hdc_header, hdc_data);
+        case HDC_INT32:
+            return get_data<int32_t>(builder, hdc_header, hdc_data);
+        case HDC_INT64:
+            return get_data<int64_t>(builder, hdc_header, hdc_data);
+        case HDC_UINT8:
+            return get_data<uint8_t>(builder, hdc_header, hdc_data);
+        case HDC_UINT16:
+            return get_data<uint16_t>(builder, hdc_header, hdc_data);
+        case HDC_UINT32:
+            return get_data<uint32_t>(builder, hdc_header, hdc_data);
+        case HDC_UINT64:
+            return get_data<uint64_t>(builder, hdc_header, hdc_data);
+        case HDC_FLOAT:
+            return get_data<float>(builder, hdc_header, hdc_data);
+        case HDC_DOUBLE:
+            return get_data<double>(builder, hdc_header, hdc_data);
+        case HDC_STRING:
+            return get_data<char*>(builder, hdc_header, hdc_data);
+        case HDC_BOOL:
+            return get_data<bool>(builder, hdc_header, hdc_data);
         default:
             throw HDCException();
     }
@@ -143,31 +171,43 @@ flatbuffers::Offset<void> get_data(flatbuffers::FlatBufferBuilder& builder, cons
 hdc::serialization::Data get_type(const hdc_header_t& hdc_header)
 {
     switch (hdc_header.type) {
-        case HDC_INT8: return TypeConverter<int8_t>::type;
-        case HDC_INT16: return TypeConverter<int16_t>::type;
-        case HDC_INT32: return TypeConverter<int32_t>::type;
-        case HDC_INT64: return TypeConverter<int64_t>::type;
-        case HDC_UINT8: return TypeConverter<int8_t>::type;
-        case HDC_UINT16: return TypeConverter<int16_t>::type;
-        case HDC_UINT32: return TypeConverter<int32_t>::type;
-        case HDC_UINT64: return TypeConverter<int64_t>::type;
-        case HDC_FLOAT: return TypeConverter<float>::type;
-        case HDC_DOUBLE: return TypeConverter<double>::type;
-        case HDC_BOOL: return TypeConverter<bool>::type;
+        case HDC_INT8:
+            return TypeConverter<int8_t>::type;
+        case HDC_INT16:
+            return TypeConverter<int16_t>::type;
+        case HDC_INT32:
+            return TypeConverter<int32_t>::type;
+        case HDC_INT64:
+            return TypeConverter<int64_t>::type;
+        case HDC_UINT8:
+            return TypeConverter<int8_t>::type;
+        case HDC_UINT16:
+            return TypeConverter<int16_t>::type;
+        case HDC_UINT32:
+            return TypeConverter<int32_t>::type;
+        case HDC_UINT64:
+            return TypeConverter<int64_t>::type;
+        case HDC_FLOAT:
+            return TypeConverter<float>::type;
+        case HDC_DOUBLE:
+            return TypeConverter<double>::type;
+        case HDC_BOOL:
+            return TypeConverter<bool>::type;
         default:
             throw HDCException();
     }
 }
 
-
-void write_node(const HDC& hdc, flatbuffers::FlatBufferBuilder& builder, hdc::serialization::HDCBufferBuilder& hdc_buffer_builder)
+void write_node(const HDC& hdc, flatbuffers::FlatBufferBuilder& builder,
+                hdc::serialization::HDCBufferBuilder& hdc_buffer_builder)
 {
     auto hdc_buffer = hdc.get_buffer();
     auto hdc_header = reinterpret_cast<hdc_header_t*>(hdc_buffer);
     auto hdc_data = hdc_buffer + sizeof(hdc_header_t);
     std::vector<char> new_buffer(hdc_header->buffer_size);
     if (hdc.is_fortranorder()) {
-        transpose_buffer(new_buffer.data() + sizeof(hdc_header_t), hdc.get_buffer() + sizeof(hdc_header_t), hdc.get_rank(),
+        transpose_buffer(new_buffer.data() + sizeof(hdc_header_t), hdc.get_buffer() + sizeof(hdc_header_t),
+                         hdc.get_rank(),
                          hdc.get_shape(), (hdc_type_t)hdc.get_type(),
                          hdc.is_fortranorder());
         hdc_data = new_buffer.data() + sizeof(hdc_header_t);
@@ -182,7 +222,8 @@ void write_node(const HDC& hdc, flatbuffers::FlatBufferBuilder& builder, hdc::se
                 auto uuid = child.address.c_str();
                 hdc::serialization::HDCBufferBuilder hdc_child_buffer_builder(builder);
                 write_node(HDC(hdc_global.storage, uuid), builder, hdc_child_buffer_builder);
-                auto elem = hdc::serialization::CreateDictItem(builder, builder.CreateString(key), hdc_child_buffer_builder.Finish());
+                auto elem = hdc::serialization::CreateDictItem(builder, builder.CreateString(key),
+                                                               hdc_child_buffer_builder.Finish());
                 children_vec.push_back(elem);
             }
 
@@ -244,29 +285,40 @@ HDC read_data(const hdc::serialization::HDCBuffer& hdc_buffer)
 
         switch (hdc_buffer.data_type()) {
             case hdc::serialization::Data_DoubleData:
-                hdc.set_data(shape, hdc_buffer.data_as_DoubleData()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_DoubleData()->data()->data());
+                break;
             case hdc::serialization::Data_FloatData:
-                hdc.set_data(shape, hdc_buffer.data_as_FloatData()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_FloatData()->data()->data());
+                break;
             case hdc::serialization::Data_Int8Data:
-                hdc.set_data(shape, hdc_buffer.data_as_Int8Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_Int8Data()->data()->data());
+                break;
             case hdc::serialization::Data_Int16Data:
-                hdc.set_data(shape, hdc_buffer.data_as_Int16Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_Int16Data()->data()->data());
+                break;
             case hdc::serialization::Data_Int32Data:
-                hdc.set_data(shape, hdc_buffer.data_as_Int32Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_Int32Data()->data()->data());
+                break;
             case hdc::serialization::Data_Int64Data:
-                hdc.set_data(shape, hdc_buffer.data_as_Int64Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_Int64Data()->data()->data());
+                break;
             case hdc::serialization::Data_UInt8Data:
-                hdc.set_data(shape, hdc_buffer.data_as_UInt8Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_UInt8Data()->data()->data());
+                break;
             case hdc::serialization::Data_UInt16Data:
-                hdc.set_data(shape, hdc_buffer.data_as_UInt16Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_UInt16Data()->data()->data());
+                break;
             case hdc::serialization::Data_UInt32Data:
-                hdc.set_data(shape, hdc_buffer.data_as_UInt32Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_UInt32Data()->data()->data());
+                break;
             case hdc::serialization::Data_UInt64Data:
-                hdc.set_data(shape, hdc_buffer.data_as_UInt64Data()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_UInt64Data()->data()->data());
+                break;
 //            case hdc::serialization::Data_StringData:
 //                hdc.set_data(shape, hdc_buffer.data_as_StringData()->data()->data()); break;
             case hdc::serialization::Data_BoolData:
-                hdc.set_data(shape, hdc_buffer.data_as_BoolData()->data()->data()); break;
+                hdc.set_data(shape, hdc_buffer.data_as_BoolData()->data()->data());
+                break;
             default:
                 throw HDCException(std::string{ "Unknown data type " } + EnumNameData(hdc_buffer.data_type()));
         }
@@ -306,6 +358,8 @@ HDC to_hdc(const hdc::serialization::HDCBuffer& hdc_buffer)
             throw HDCException(std::string{ "Unknown child type " } + EnumNameCollection(hdc_buffer.children_type()));
     }
 }
+
+} // anon namespace
 
 void hdc::serialization::FlatBuffersSerializer::serialize(const HDC& hdc, const std::string& filename,
                                                           const std::string& datapath)

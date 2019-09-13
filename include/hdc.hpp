@@ -1093,7 +1093,7 @@ public:
     *
     * @return boost::interprocess::managed_external_buffer
     */
-    bip::managed_external_buffer get_segment() const;
+    boost::interprocess::managed_external_buffer get_segment() const;
 
     /**
     * @brief ...
@@ -1128,7 +1128,7 @@ public:
     */
     static HDC load(const std::string& uri, const std::string& datapath = "");
 
-    void save(const std::string& uri) const;
+    void save(const std::string& uri, const std::string& datapath = "") const;
 
     static HDC deserialize(const std::string& protocol, const std::string& string);
 
