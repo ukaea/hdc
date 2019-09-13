@@ -761,7 +761,10 @@ const HDC HDC::operator[](size_t index) const
 void HDC::set_child_single(hdc_index_t path, HDC& n)
 {
     DEBUG_STDOUT(std::string("set_child_single(")+boost::lexical_cast<std::string>(path)+")\n");
-    hdc_map_t* children = get_children_ptr();
+    auto buffer = get_buffer();
+    auto header = reinterpret_cast<hdc_header_t*>(buffer); //TODO: maybe some type checking here...
+    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
+    auto children = segment.find<hdc_map_t>("d").first;
     auto ca = get_segment().get_allocator<record>();
     if (path.type() == typeid(size_t)) {
         size_t i = boost::get<size_t>(path);
@@ -782,6 +785,7 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
             children->insert(record(boost::get<std::string>(path).c_str(), n.get_uuid().c_str(), ca));
         }
     }
+    if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
     return;
 }
 
@@ -891,6 +895,7 @@ void HDC::set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hd
         storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), data, data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
     } else {
         std::vector<char> new_buffer(buffer_size);
         header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
@@ -920,6 +925,7 @@ void HDC::set_external_c(std::vector<size_t>& shape, void* data, hdc_type_t type
         storage->lock(uuid);
         memcpy(buffer+sizeof(hdc_header_t),&data,data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return;
     } else {
         std::vector<char> new_buffer(buffer_size);
@@ -1019,7 +1025,7 @@ void HDC::insert(size_t index, HDC& h)
         }
     }
     header->shape[0] = children->size();
-    if (header->buffer_size != old_size) {
+    if (header->buffer_size != old_size || !storage->memory_mapped()) {
         storage->set(uuid, buffer, header->buffer_size);
     }
     return;
@@ -1370,6 +1376,7 @@ void HDC::set_data(hdc_data_t obj)
         header->flags = obj.flags;
         memcpy(buffer + sizeof(hdc_header_t), obj.data, data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return;
     } else {
         storage->remove(uuid);
@@ -1401,6 +1408,7 @@ void HDC::set_external(hdc_data_t obj)
         memcpy(buffer,header,sizeof(hdc_header_t));
         memcpy(buffer + sizeof(hdc_header_t), &(obj.data), data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return;
     } else {
         storage->remove(uuid);

@@ -256,6 +256,10 @@ if(ENABLE_UDA)
     add_definitions(-D_USE_UDA=1)
 endif() # ENABLE_UDA
 
+if(ENABLE_REDIS)
+    add_definitions(-D_USE_REDIS=1)
+endif() # ENABLE_REDIS
+
 if(DEBUG)
     add_definitions(-DDEBUG)
 endif() # DEBUG

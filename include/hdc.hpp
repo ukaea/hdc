@@ -459,6 +459,7 @@ public:
             storage->lock(uuid);
             memcpy(buffer+sizeof(hdc_header_t),data,data_size);
             storage->unlock(uuid);
+            if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
             return;
         } else {
             std::vector<char> new_buffer(buffer_size);
@@ -496,6 +497,7 @@ public:
             storage->lock(uuid);
             memcpy(buffer+sizeof(hdc_header_t),&data,data_size);
             storage->unlock(uuid);
+            if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
             return;
         } else {
             std::vector<char> new_buffer(buffer_size);

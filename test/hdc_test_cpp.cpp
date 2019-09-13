@@ -29,6 +29,9 @@ TEST_CASE("GetPlugins","[HDC]")
     // "mdbm" has been built and  should be found
     CHECK(in_map("mdbm",plugins));
 #endif // _USE_MDBM
+#ifdef _USE_REDIS
+    CHECK(in_map("redis",plugins));
+#endif // _USE_REDIS
 }
 
 TEST_CASE("EmptyNode", "[HDC]")
@@ -167,12 +170,12 @@ TEST_CASE("ListManipulation", "[HDC]")
     CHECK(h.get("k[1]").as_string() == "data1");
     CHECK(h.get("l[1]").as_string() == "data10");
 }
-/*
+
 TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
 {
     std::vector<size_t> shape = { 4 };
     TestType data[] = { 7, 20, 3, 5 };
-    HDC h = HDC();
+    HDC h;
     h.set_data(shape, data);
     CHECK(to_typeid(data[0]) == h.get_type());
     CHECK(1 == h.get_rank());
@@ -541,7 +544,7 @@ TEST_CASE("BufferGrowList", "[HDC]")
         CHECK(strcmp(h[i].as_string().c_str(), std::to_string(i).c_str()) == 0);
     }
 }
-*/
+
 TEST_CASE("GetChildren", "[HDC]")
 {
     std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
