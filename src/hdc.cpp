@@ -456,7 +456,6 @@ void HDC::add_child_single(const std::string& path, HDC& n)
                if (new_buffer.data() == buffer) {
                    throw HDCException("grow called, but buffer == new_buffer.\n");
                }
-               //if (!storage->usesBuffersDirectly()) delete[] buffer;
                storage->remove(uuid);
                buffer = new_buffer.data();
                header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
@@ -469,7 +468,10 @@ void HDC::add_child_single(const std::string& path, HDC& n)
             }
         }
         header->shape[0] = children->size();
-        if (header->buffer_size != old_size || !storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
+         if (header->buffer_size != old_size || !storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
+    } else {
+        //TODO: enable this ??
+//         throw HDCException("add_child_single(): key \""+path+"\" already present, use set_child() instead.\n");
     }
     return;
 }
@@ -830,22 +832,22 @@ void HDC::set_type(hdc_type_t type)
     // More to be added here later
     auto old_buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
-    DEBUG_STDOUT(std::string(std::cout << "set_type(") + to_string(header->type) + " -> " + to_string(type) + ")\n");
+    DEBUG_STDOUT(std::cout << "set_type(" + to_string(header->type) + " -> " + to_string(type) + ")\n");
     if (header->type == type) return;
     header->type = type;
-    if (is_terminal() && storage->memory_mapped()) return; // Nothing to do
+//     if (is_terminal() && storage->memory_mapped()) return; // Nothing to do
     auto dest_buffer = old_buffer;
     vector<char> new_buffer(0);
     if (header->data_size < HDC_NODE_SIZE_DEFAULT) {
         new_buffer.reserve(HDC_NODE_SIZE_DEFAULT);
-        header->data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
-        header->buffer_size = HDC_NODE_SIZE_DEFAULT;
         dest_buffer = new_buffer.data();
         memcpy(dest_buffer, old_buffer, sizeof(hdc_header_t));
         header = reinterpret_cast<hdc_header_t*>(dest_buffer);
+        header->data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
+        header->buffer_size = HDC_NODE_SIZE_DEFAULT;
     }
     bip::managed_external_buffer segment(bip::create_only, dest_buffer + sizeof(hdc_header_t), header->data_size);
-    auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
+    auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(),hdc_map_t::allocator_type(segment.get_segment_manager()));
     if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
     storage->set(uuid, dest_buffer, header->buffer_size);
     return;

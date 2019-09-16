@@ -12,19 +12,20 @@
 #include <json/json.h>
 #include <vector>
 #include <sys/time.h>
+#include <unordered_map>
 
 using namespace std;
 
-// class RedisStorageException: public std::exception {
-// private:
-//     std::string message_;
-// public:
-//     explicit RedisStorageException(const std::string& message);
-//     explicit RedisStorageException();
-//     virtual const char* what() const throw() {
-//         return message_.c_str();
-//     }
-// };
+class RedisStorageException: public std::exception {
+private:
+    std::string message_;
+public:
+    explicit RedisStorageException(const std::string& message);
+    explicit RedisStorageException();
+    virtual const char* what() const throw() {
+        return message_.c_str();
+    }
+};
 
 class RedisStorage : public Storage {
 private:
@@ -36,6 +37,7 @@ private:
     struct timeval timeout = { 1, 500000 }; // 1.5 seconds
     bool initialized = false;
     bool persistent = false;
+    std::unordered_map<std::string,std::vector<char>> _cache;
 public:
     RedisStorage() {
         DEBUG_STDOUT("RedisStorage()\n");
@@ -70,6 +72,8 @@ public:
         return ss.str();
     };
     void set(string key, char* data, size_t size) {
+//          if (_cache.find(key) != _cache.end()) _cache.erase(key);
+//          _cache.emplace(key,vector<char>(data,data+size));
 //         std::cout << "-- RedisStorage::set(" << key << ", " << size << ")\n";
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"SET %b %b", key.c_str(), (size_t) key.size(), data, (size_t) size);
@@ -79,21 +83,17 @@ public:
     };
     char* get(string key) {
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
-        redisReply* rep;
-        rep = (redisReply*)redisCommand(this->context,"GET %b", key.c_str(), (size_t) key.size());
-        if ( !rep ) {
+        this->reply = (redisReply*)redisCommand(this->context,"GET %b", key.c_str(), (size_t) key.size());
+        if ( !this->reply ) {
             throw ;//RedisStorageException("RedisStorage->get() has returned an error\n");
         } else {
-            if ( rep->type != REDIS_REPLY_STRING ) {
+            if ( this->reply->type != REDIS_REPLY_STRING ) {
                 throw ;//RedisStorageException("RedisStorage->get() has returned wrong this->reply type\n");
             } else {
-//                 std::cout << "-- RedisStorage::get(" << key << ") size:\t" << reply->len <<"\n";
-//                 vector<char> array_out((char*)rep->str, (char*)rep->str + rep->len);
-
-                char* data = new char[rep->len];
-                memcpy(data, rep->str, rep->len);
-                freeReplyObject(rep);
-                return data;
+                if (_cache.find(key) != _cache.end())  _cache.erase(key);
+                _cache.emplace(key,std::vector<char>(this->reply->len));
+                std::copy(reply->str, reply->str+reply->len, _cache[key].begin());
+                return &(_cache[key])[0];
             }
         }
     };
@@ -118,6 +118,7 @@ public:
         if (this->context != NULL) {
             redisFree(this->context);
         }
+        _cache.clear();
         initialized = false;
         return;
     };
