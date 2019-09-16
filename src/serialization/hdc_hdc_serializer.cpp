@@ -1,6 +1,7 @@
-#include "hdc_hdc_serializer.h"
+#include "serialization/hdc_hdc_serializer.h"
 
 #include "hdc.hpp"
+#include <json/json.h>
 
 namespace {
 
@@ -11,15 +12,15 @@ HDC deserialize_str(const std::string& string)
     stringstream ss;
     ss << string;
     ss >> root;
-    auto storage_str = root.get("storage","not_found").asString();
+    auto storage_str = root.get("storage", "not_found").asString();
     if (storage_str == "not_found") {
         throw HDCException("deserialize_str(): \"storage\" field not found in string...");
     }
-    auto uuid = root.get("uuid","not_found").asString();
+    auto uuid = root.get("uuid", "not_found").asString();
     if (uuid == "not_found") {
         throw HDCException("deserialize_str(): \"uuid\" field not found in string...");
     }
-    auto persistent = root.get("persistent",false);
+    auto persistent = root.get("persistent", false);
     if (persistent == false) {
         throw HDCException("deserialize_str(): \"persistent\" field not found or false in string...");
     }
@@ -32,14 +33,15 @@ HDC deserialize_str(const std::string& string)
 
 } // anon namespace
 
-void hdc::serialization::HDCSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void hdc::serialization::HDCSerialiser::serialize(const HDC& hdc, const std::string& filename,
+                                                  const std::string& datapath UNUSED)
 {
     ofstream file(filename);
     file << to_string(hdc);
     file.close();
 }
 
-HDC hdc::serialization::HDCSerialiser::deserialize(const std::string& filename, const std::string& datapath)
+HDC hdc::serialization::HDCSerialiser::deserialize(const std::string& filename, const std::string& datapath UNUSED)
 {
     std::ifstream file(filename);
     std::string string{ (std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>() };

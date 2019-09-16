@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include "hdc_test_common.hpp"
+#include <json/json.h>
 
 TEST_CASE("SerializeDeserialize", "[HDC]")
 {
@@ -92,6 +93,7 @@ TEST_CASE("TestSettings", "[HDC]")
     HDC::destroy();
 }
 
+#ifdef _USE_S3
 TEST_CASE("Test serialise to S3", "[HDC][S3]")
 {
     HDC::destroy();
@@ -104,7 +106,13 @@ TEST_CASE("Test deserialise from S3", "[HDC][S3]")
 {
     HDC::destroy();
     HDC::init();
+    HDC hdc = HDC::load("s3://10.209.2.145:9000/test/test1");
+    //std::cout << hdc.serialize("json") << std::endl;
+
     PREPARE_TREE();
-    HDC hdc = tree.load("s3://10.209.2.145:9000/test/test1");
-    std::cout << hdc.serialize("json") << std::endl;
+    auto tree_dump = tree.serialize("json");
+    auto hdc_dump = hdc.serialize("json");
+
+    CHECK(tree_dump == hdc_dump);
 }
+#endif

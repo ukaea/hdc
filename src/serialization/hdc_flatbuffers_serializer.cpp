@@ -1,4 +1,4 @@
-#include "hdc_flatbuffers_serializer.h"
+#include "serialization/hdc_flatbuffers_serializer.h"
 
 #include "hdc.hpp"
 
@@ -6,12 +6,10 @@
 
 namespace {
 
-const char* ref_group_name = "__hdc";
-
 size_t get_data_size(const hdc_header_t& hdc_header)
 {
     size_t size = 1;
-    for (int i = 0; i < hdc_header.rank; ++i) {
+    for (size_t i = 0; i < hdc_header.rank; ++i) {
         size *= hdc_header.shape[i];
     }
     return size;
@@ -120,7 +118,7 @@ get_data<double>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hd
 
 template <>
 flatbuffers::Offset<void>
-get_data<char*>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header, const char* hdc_data)
+get_data<char*>(flatbuffers::FlatBufferBuilder& builder, const hdc_header_t& hdc_header UNUSED, const char* hdc_data UNUSED)
 {
     const std::vector<std::string> vec{}; // TODO: How does HDC handle strings?
     auto data = builder.CreateVectorOfStrings(vec);
@@ -180,13 +178,13 @@ hdc::serialization::Data get_type(const hdc_header_t& hdc_header)
         case HDC_INT64:
             return TypeConverter<int64_t>::type;
         case HDC_UINT8:
-            return TypeConverter<int8_t>::type;
+            return TypeConverter<uint8_t>::type;
         case HDC_UINT16:
-            return TypeConverter<int16_t>::type;
+            return TypeConverter<uint16_t>::type;
         case HDC_UINT32:
-            return TypeConverter<int32_t>::type;
+            return TypeConverter<uint32_t>::type;
         case HDC_UINT64:
-            return TypeConverter<int64_t>::type;
+            return TypeConverter<uint64_t>::type;
         case HDC_FLOAT:
             return TypeConverter<float>::type;
         case HDC_DOUBLE:
@@ -362,17 +360,18 @@ HDC to_hdc(const hdc::serialization::HDCBuffer& hdc_buffer)
 } // anon namespace
 
 void hdc::serialization::FlatBuffersSerializer::serialize(const HDC& hdc, const std::string& filename,
-                                                          const std::string& datapath)
+                                                          const std::string& datapath UNUSED)
 {
     flatbuffers::FlatBufferBuilder builder(1024);
     hdc::serialization::HDCBufferBuilder hdc_buffer_builder(builder);
+    write_node(hdc, builder, hdc_buffer_builder);
     auto hdc_buffer = hdc_buffer_builder.Finish();
     builder.Finish(hdc_buffer);
     std::ofstream out{ filename, std::ios::binary };
     out.write(reinterpret_cast<char*>(builder.GetBufferPointer()), builder.GetSize());
 }
 
-HDC hdc::serialization::FlatBuffersSerializer::deserialize(const std::string& filename, const std::string& datapath)
+HDC hdc::serialization::FlatBuffersSerializer::deserialize(const std::string& filename, const std::string& datapath UNUSED)
 {
     std::ifstream in{ filename, std::ios::binary };
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(in), {});
@@ -385,6 +384,7 @@ std::string hdc::serialization::FlatBuffersSerializer::to_string(const HDC& hdc)
 {
     flatbuffers::FlatBufferBuilder builder(1024);
     hdc::serialization::HDCBufferBuilder hdc_buffer_builder(builder);
+    write_node(hdc, builder, hdc_buffer_builder);
     auto hdc_buffer = hdc_buffer_builder.Finish();
     builder.Finish(hdc_buffer);
     return { reinterpret_cast<char*>(builder.GetBufferPointer()), builder.GetSize() };
@@ -392,5 +392,6 @@ std::string hdc::serialization::FlatBuffersSerializer::to_string(const HDC& hdc)
 
 HDC hdc::serialization::FlatBuffersSerializer::from_string(const std::string& string)
 {
-    return HDC();
+    auto hdc_buffer = hdc::serialization::GetHDCBuffer(string.data());
+    return to_hdc(*hdc_buffer);
 }

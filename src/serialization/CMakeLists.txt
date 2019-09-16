@@ -29,8 +29,6 @@ if( LIBS3_FOUND )
   add_definitions( -D_USE_S3 )
   target_include_directories( serialization PRIVATE ${LIBS3_INCLUDE_DIR} )
   target_link_libraries( serialization PUBLIC ${LIBS3_LIBRARIES} )
-else()
-#  message( FATAL_ERROR "APDIJADWOPIDJ" )
 endif( LIBS3_FOUND )
 
 #install headers

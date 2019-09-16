@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hdc_serializer.h"
+#include "hdc_helpers.h"
 
 namespace hdc {
 namespace serialization {

@@ -1,4 +1,4 @@
-#include "hdc_hdf5_serializer.h"
+#include "serialization/hdc_hdf5_serializer.h"
 
 #include "hdc.hpp"
 #include "hdc_errors.hpp"
@@ -61,8 +61,7 @@ struct h5_read_opdata {
     {}
 };
 
-void write_node(H5File* file, std::string path);
-HDC hdf_dataset_to_node();
+void write_node(const HDC& h, H5File* file, const std::string& path);
 hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path);
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& dest);
 int h5_group_check(h5_read_opdata* od, haddr_t target_addr);
@@ -498,7 +497,6 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
             hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
                 auto group = new Group(file->createGroup(path));
-                hdc_map_t::nth_index<1>::type& ri = children->get<1>();
                 for (const auto& child : children->get<1>()) {
                     auto key = child.key.c_str();
                     auto uuid = child.address.c_str();
@@ -517,7 +515,6 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
                 } catch (FileIException& e) {
                     ref_group = file->createGroup(ref_group_name);
                 }
-                hdc_map_t::nth_index<1>::type& ri = children->get<1>();
                 size_t n_child = children->size();
                 auto wbuf = new hobj_ref_t[n_child];
                 size_t i = 0;
@@ -610,7 +607,7 @@ HDC hdc::serialization::HDF5Serialiser::deserialize(const std::string& filename,
     return hdc;
 }
 
-void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath UNUSED)
 {
     try {
         H5std_string h5_filename(filename);
@@ -626,12 +623,12 @@ void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::st
     }
 }
 
-std::string hdc::serialization::HDF5Serialiser::to_string(const HDC& hdc)
+std::string hdc::serialization::HDF5Serialiser::to_string(const HDC& hdc UNUSED)
 {
     return {};
 }
 
-HDC hdc::serialization::HDF5Serialiser::from_string(const std::string& string)
+HDC hdc::serialization::HDF5Serialiser::from_string(const std::string& string UNUSED)
 {
     return HDC();
 }

@@ -7,6 +7,7 @@
 #include <fstream>
 #include <glob.h>
 #include <memory>
+#include <json/json.h>
 
 using namespace std;
 namespace bip = boost::interprocess;

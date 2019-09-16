@@ -1,20 +1,20 @@
-#include "hdc_serializer.h"
+#include "serialization/hdc_serializer.h"
 
-#include "hdc_json_serializer.h"
+#include "serialization/hdc_json_serializer.h"
 #ifdef _USE_MDBM
-#  include "hdc_hdc_serializer.h"
+#  include "serialization/hdc_hdc_serializer.h"
 #endif
 #ifdef _USE_HDF5
-#  include "hdc_hdf5_serializer.h"
+#  include "serialization/hdc_hdf5_serializer.h"
 #endif
 #ifdef _USE_UDA
-  #include "hdc_uda_serializer.h"
+  #include "serialization/hdc_uda_serializer.h"
 #endif
 #ifdef _USE_FLATBUFFERS
-#  include "hdc_flatbuffers_serializer.h"
+#  include "serialization/hdc_flatbuffers_serializer.h"
 #endif
 #ifdef _USE_S3
-#  include "hdc_s3_serializer.h"
+#  include "serialization/hdc_s3_serializer.h"
 #endif
 
 #include <hdc_errors.hpp>

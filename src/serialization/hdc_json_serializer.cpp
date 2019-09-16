@@ -1,7 +1,7 @@
-#include "hdc_json_serializer.h"
-#include "hdc_json_serializer.h"
+#include "serialization/hdc_json_serializer.h"
 
 #include "hdc.hpp"
+#include <json/json.h>
 
 namespace {
 
@@ -288,7 +288,9 @@ int get_rank(const Json::Value& root)
 
 std::vector<size_t> get_shape(const Json::Value& root)
 {
-    if (!root.isArray()) return { 0 };
+    if (!root.isArray()) {
+        return { 0 };
+    }
     unsigned int dim = 0;
     size_t shape[HDC_MAX_DIMS];
     Json::Value curr = root;
@@ -304,7 +306,9 @@ std::vector<size_t> get_shape(const Json::Value& root)
             std::cout << ")" << std::endl;
     )
     std::vector<size_t> res(dim);
-    for (unsigned int i = 0; i < dim; i++) res[i] = shape[i];
+    for (unsigned int i = 0; i < dim; i++) {
+        res[i] = shape[i];
+    }
     return res;
 }
 
@@ -352,9 +356,13 @@ HDC json_to_HDC(const ::Json::Value& root)
                 }
                 auto shape = ::get_shape(root);
                 hdc_type_t dt;
-                if (is_double(root)) { dt = HDC_DOUBLE; }
-                else if (is_int(root)) { dt = HDC_INT32; }
-                else { dt = HDC_BOOL; }
+                if (is_double(root)) {
+                    dt = HDC_DOUBLE;
+                } else if (is_int(root)) {
+                    dt = HDC_INT32;
+                } else {
+                    dt = HDC_BOOL;
+                }
                 HDC d(shape, dt);
                 tree = d;
                 void* data_ptr = tree.as_void_ptr();
@@ -584,9 +592,9 @@ HDC from_json(const string& filename, const string& datapath)
 } // anon namespace
 
 void
-hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath UNUSED)
 {
-    to_json(hdc, filename, 0);
+    to_json(hdc, filename, mode_);
 }
 
 HDC hdc::serialization::JSONSerialiser::deserialize(const std::string& filename, const std::string& datapath)
@@ -596,7 +604,7 @@ HDC hdc::serialization::JSONSerialiser::deserialize(const std::string& filename,
 
 std::string hdc::serialization::JSONSerialiser::to_string(const HDC& hdc)
 {
-    return to_json_string(hdc, 0);
+    return to_json_string(hdc, mode_);
 }
 
 HDC hdc::serialization::JSONSerialiser::from_string(const std::string& string)

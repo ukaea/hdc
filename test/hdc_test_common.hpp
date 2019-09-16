@@ -72,8 +72,9 @@ bool arrcmp(T* arr1, U* arr2, size_t n_elem)
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
     HDC lch;                                                                                        \
-    for (int i=0; i<5; i++) {                                                                       \
+    for (int i = 0; i < 5; i++) {                                                                   \
         HDC lch;                                                                                    \
+        lch.set_data(i);                                                                            \
         list.append(lch);                                                                           \
     }                                                                                               \
     tree.add_child("aaa/list", list);                                                               \

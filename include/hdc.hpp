@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <exception>
 #include <fstream>
-#include <json/json.h>
 #include <list>
 #include <map>
 #include <sstream>
@@ -24,10 +23,10 @@
 #include "hdc_global.hpp"
 #include "hdc_helpers.h"
 #include "hdc_map.h"
-#include "hdc_serializer.h"
 #include "hdc_storage.h"
 #include "hdc_types.h"
 #include "hdc_utils.h"
+#include "serialization/hdc_serializer.h"
 
 #ifdef _USE_HDF5
 #  include <H5Cpp.h>

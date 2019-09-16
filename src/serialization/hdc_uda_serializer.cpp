@@ -1,4 +1,4 @@
-#include "hdc_uda_serializer.h"
+#include "serialization/hdc_uda_serializer.h"
 
 #include "hdc.hpp"
 
@@ -47,9 +47,11 @@ HDC udaData2HDC(uda::Data* uda_data, int rank)
         } else {
             uda::Array* value = dynamic_cast<uda::Array*>(uda_data);
             auto shape = value->shape();
-            size_t rank = shape.size();
+//            size_t rank = shape.size();
             vector<size_t> myshape(rank);
-            for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
+            for (int i = 0; i < rank; i++) {
+                myshape[i] = shape[i];
+            }
 //             result.set_data(rank,myshape,value->byte_data(),static_cast<size_t>(to_typeid(type)));
             if (type_name == typeid(short).name()) result.set_data(myshape, &(value->as<short>())[0]);
             if (type_name == typeid(int).name()) result.set_data(myshape, &(value->as<int>())[0]);
@@ -144,7 +146,9 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     auto shape = value.shape();
                     auto rank = shape.size();
                     vector<size_t> myshape(rank);
-                    for (size_t i = 0; i < rank; i++) myshape[i] = shape[i];
+                    for (size_t j = 0; j < rank; j++) {
+                        myshape[j] = shape[j];
+                    }
                     if (type_name == "short") result.set_data(myshape, &(value.as<short>())[0]);
                     if (type_name == "int") result.set_data(myshape, &(value.as<int>())[0]);
                     if (type_name == "float") result.set_data(myshape, &(value.as<float>())[0]);
@@ -166,7 +170,9 @@ HDC udaTreeNode2HDC(uda::TreeNode& tree)
                     vector<size_t> myshape(HDC_MAX_DIMS);
                     int rank = a_rank[i];
                     std::vector<size_t> shape = value.shape();
-                    for (int i = 0; i < rank; i++) myshape[i] = shape[i];
+                    for (int j = 0; j < rank; j++) {
+                        myshape[j] = shape[j];
+                    }
                     auto& type = value.type();
                     if (type.name() == typeid(int).name()) { result.set_data(myshape, &(value.as<int>())[0]); }
                     else if (type.name() == typeid(short).name()) {
@@ -209,12 +215,12 @@ HDC udaResult2HDC(const uda::Result& uda_result, bool withMetadata = false)
 
 } // anon namespace
 
-void hdc::serialization::UDASerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
+void hdc::serialization::UDASerialiser::serialize(const HDC& hdc UNUSED, const std::string& filename UNUSED, const std::string& datapath UNUSED)
 {
 
 }
 
-HDC hdc::serialization::UDASerialiser::deserialize(const std::string& filename, const std::string& datapath)
+HDC hdc::serialization::UDASerialiser::deserialize(const std::string& filename, const std::string& datapath UNUSED)
 {
     uda::Client client;
     try {
@@ -227,12 +233,12 @@ HDC hdc::serialization::UDASerialiser::deserialize(const std::string& filename, 
     }
 }
 
-std::string hdc::serialization::UDASerialiser::to_string(const HDC& hdc)
+std::string hdc::serialization::UDASerialiser::to_string(const HDC& hdc UNUSED)
 {
     return std::string();
 }
 
-HDC hdc::serialization::UDASerialiser::from_string(const std::string& string)
+HDC hdc::serialization::UDASerialiser::from_string(const std::string& string UNUSED)
 {
     return HDC();
 }
