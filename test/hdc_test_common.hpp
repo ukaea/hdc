@@ -69,10 +69,10 @@ bool arrcmp(T* arr1, U* arr2, size_t n_elem) {
     HDC ch;                                                                                         \
     tree.add_child("aaa/bbb/empty", ch);                                                            \
     HDC list;                                                                                       \
-    HDC lch;                                                                                        \
-    for (int i=0;i<5;i++) {                                                                         \
-        HDC lch;                                                                                    \
-        list.append(lch);                                                                           \
+    HDC h1, h2, h3, h4, h5;                                                                         \
+    std::vector<HDC> hdc_list = {h1, h2, h3, h4, h5};                                               \
+    for (auto it : hdc_list) {                                                                      \
+        list.append(it);                                                                            \
     }                                                                                               \
     tree.add_child("aaa/list", list);                                                               \
     HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \

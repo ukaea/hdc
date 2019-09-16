@@ -612,7 +612,7 @@ HDC HDC::get_single(hdc_index_t index)
 {
     DEBUG_STDOUT(std::string("get_single(") + boost::lexical_cast<std::string>(index) + ")\n");
 
-    hdc_map_t* children = get_children_ptr();
+    auto children = get_children_ptr();
 
     if (index.type() == typeid(std::string)) {
         auto str = boost::get<std::string>(index).c_str();
@@ -635,7 +635,7 @@ const HDC HDC::get_single(hdc_index_t index) const
 {
     DEBUG_STDOUT(std::string("get_single(") + boost::lexical_cast<std::string>(index) + ")\n");
 
-    hdc_map_t* children = get_children_ptr();
+    auto children = get_children_ptr();
 
     if (index.type() == typeid(std::string)) {
         auto str = boost::get<std::string>(index).c_str();

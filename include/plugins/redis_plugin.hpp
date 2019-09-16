@@ -16,17 +16,6 @@
 
 using namespace std;
 
-class RedisStorageException: public std::exception {
-private:
-    std::string message_;
-public:
-    explicit RedisStorageException(const std::string& message);
-    explicit RedisStorageException();
-    virtual const char* what() const throw() {
-        return message_.c_str();
-    }
-};
-
 class RedisStorage : public Storage {
 private:
     redisContext* context;
@@ -49,13 +38,13 @@ public:
         } else std::cout << "Storage has been set persistent. The data will can be preserved in redis instance" << std::endl;
     };
     void lock(string path) {
-        std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
+//         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
     };
     void unlock(string path) {
-        std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
+//         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
     };
     bool locked() {
-        std::cout << "RedisStorage.locked(): Redis is locking by design. Hence returning false..." << std::endl;
+//         std::cout << "RedisStorage.locked(): Redis is locking by design. Hence returning false..." << std::endl;
         return false;
     };
     void sync() {};
@@ -72,12 +61,9 @@ public:
         return ss.str();
     };
     void set(string key, char* data, size_t size) {
-//          if (_cache.find(key) != _cache.end()) _cache.erase(key);
-//          _cache.emplace(key,vector<char>(data,data+size));
-//         std::cout << "-- RedisStorage::set(" << key << ", " << size << ")\n";
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"SET %b %b", key.c_str(), (size_t) key.size(), data, (size_t) size);
-        if ( !this->reply ) throw ;//RedisStorageException("RedisStorage->set() has returned an error\n");
+        if ( !this->reply ) throw std::runtime_error("RedisStorage->set() has returned an error\n");
         freeReplyObject(this->reply);
         return;
     };
@@ -85,14 +71,15 @@ public:
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"GET %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) {
-            throw ;//RedisStorageException("RedisStorage->get() has returned an error\n");
+            throw std::runtime_error("RedisStorage->get() has returned an error\n");
         } else {
             if ( this->reply->type != REDIS_REPLY_STRING ) {
-                throw ;//RedisStorageException("RedisStorage->get() has returned wrong this->reply type\n");
+                throw std::runtime_error("RedisStorage->get() has returned wrong this->reply type\n");
             } else {
                 if (_cache.find(key) != _cache.end())  _cache.erase(key);
                 _cache.emplace(key,std::vector<char>(this->reply->len));
                 std::copy(reply->str, reply->str+reply->len, _cache[key].begin());
+                freeReplyObject(this->reply);
                 return &(_cache[key])[0];
             }
         }
@@ -101,10 +88,10 @@ public:
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"STRLEN %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) {
-            throw;// RedisStorageException("RedisStorage->get() has returned an error\n");
+            throw std::runtime_error("RedisStorage->get() has returned an error\n");
         } else {
             if ( this->reply->type != REDIS_REPLY_INTEGER ) {
-                throw;// RedisStorageException("RedisStorage->get() has returned wrong this->reply type\n");
+                throw std::runtime_error("RedisStorage->get() has returned wrong this->reply type\n");
             } else {
                 size_t size = this->reply->integer;
                 freeReplyObject(this->reply);
@@ -120,16 +107,15 @@ public:
         }
         _cache.clear();
         initialized = false;
-        return;
     };
     bool has(string key) {
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"EXISTS %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) {
-            throw;// RedisStorageException("RedisStorage->get() has returned an error\n");
+            throw std::runtime_error("RedisStorage->get() has returned an error\n");
         } else {
             if ( this->reply->type != REDIS_REPLY_INTEGER ) {
-                throw;// RedisStorageException("RedisStorage->get() has returned wrong this->reply type\n");
+                throw std::runtime_error("RedisStorage->get() has returned wrong this->reply type\n");
             } else {
                 size_t exists = this->reply->integer;
                 freeReplyObject(this->reply);
@@ -141,11 +127,10 @@ public:
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         this->reply = (redisReply*)redisCommand(this->context,"DEL %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) {
-            throw;// RedisStorageException("RedisStorage->get() has returned an error\n");
+            throw std::runtime_error("RedisStorage->get() has returned an error\n");
         } else {
             freeReplyObject(this->reply);
         }
-        return;
     };
     void init(std::string settings) {
 /*        Json::Value root;
@@ -158,9 +143,7 @@ public:
         if (this->use_unix_socket) {
             this->context = redisConnectUnixWithTimeout(this->hostname.c_str(), this->timeout);
         } else {
-            std::cout << "connect start\n";
             this->context = redisConnectWithTimeout(this->hostname.c_str(), this->port, this->timeout);
-            std::cout << "connect done\n";
         }
         if (this->context == NULL || this->context->err) {
             if (this->context) {
@@ -172,7 +155,6 @@ public:
             exit(1);
         }
         initialized = true;
-        return;
     };
     string name() {
         return "redis";
