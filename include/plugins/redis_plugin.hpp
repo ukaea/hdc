@@ -25,17 +25,14 @@ private:
     bool use_unix_socket = false;
     struct timeval timeout = { 1, 500000 }; // 1.5 seconds
     bool initialized = false;
-    bool persistent = false;
     std::unordered_map<std::string,std::vector<char>> _cache;
 public:
     RedisStorage() {
         DEBUG_STDOUT("RedisStorage()\n");
     };
     ~RedisStorage() {
+        _cache.clear();
         DEBUG_STDOUT("~RedisStorage()\n");
-        if(!persistent) {
-            cleanup();
-        } else std::cout << "Storage has been set persistent. The data will can be preserved in redis instance" << std::endl;
     };
     void lock(string path) {
 //         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
@@ -49,13 +46,14 @@ public:
     };
     void sync() {};
     string getDescription() {
-        return "This is MDBM based storage.";
+        return "This is Redis based storage.";
     };
     std::string get_settings() {
         Json::Value root;
-        root["persistent"] = persistent;
-        root["filename"] = NULL;
         root["storage"] = "redis";
+        root["hostname"] = hostname;
+        root["port"] = port;
+        root["use_unix_socket"] = use_unix_socket;
         std::stringstream ss;
         ss << root;
         return ss.str();
@@ -133,13 +131,15 @@ public:
         }
     };
     void init(std::string settings) {
-/*        Json::Value root;
+        Json::Value root;
         if (settings != "") {
             std::stringstream ss(settings);
             ss >> root;
         }
-        persistent = root.get("persistent", false).asBool();
-*/
+        hostname = root.get("hostname", "127.0.0.1").asString();
+        port = root.get("port", 6379).asInt();
+        use_unix_socket = root.get("use_unix_socket",false).asBool();
+
         if (this->use_unix_socket) {
             this->context = redisConnectUnixWithTimeout(this->hostname.c_str(), this->timeout);
         } else {
