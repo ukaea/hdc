@@ -22,12 +22,27 @@ add_executable(hdc_example_lukas example_lukas.f90)
 target_link_libraries(hdc_example_lukas fhdc)
 set_target_properties(hdc_example_lukas PROPERTIES LINKER_LANGUAGE Fortran)
 
-add_executable(hdc_example_interprocess example_interprocess.cpp)
-if( MACOS )
-  target_link_libraries(hdc_example_interprocess hdc)
-else()
-  target_link_libraries(hdc_example_interprocess hdc rt)
-endif()
+set(HDC_EXAMPLES hdc_example_cpp hdc_example_c hdc_example_fortran hdc_example_cpo)
+
+if (_BUILD_MDBM)
+    add_executable(hdc_example_interprocess example_interprocess.cpp)
+    if( MACOS )
+    target_link_libraries(hdc_example_interprocess hdc)
+    else()
+    target_link_libraries(hdc_example_interprocess hdc rt)
+    endif()
+    list(APPEND HDC_EXAMPLES hdc_example_interprocess)
+endif (_BUILD_MDBM)
+
+if(ENABLE_REDIS)
+    add_executable(hdc_example_redis example_redis.cpp)
+    if( MACOS )
+    target_link_libraries(hdc_example_redis hdc)
+    else()
+    target_link_libraries(hdc_example_redis hdc rt)
+    endif()
+    list(APPEND HDC_EXAMPLES hdc_example_redis)
+endif(ENABLE_REDIS)
 
 if(ENABLE_UDA)
     add_executable(hdc_example_uda example_uda.cpp)
@@ -37,11 +52,6 @@ if(ENABLE_UDA)
     RUNTIME DESTINATION bin)
 endif(ENABLE_UDA)
 
-install(TARGETS hdc_fortran_module
-            hdc_example_cpp
-            hdc_example_c
-            hdc_example_fortran
-            hdc_example_cpo
-            hdc_example_interprocess
+install(TARGETS ${HDC_EXAMPLES}
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)

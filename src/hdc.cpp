@@ -1255,7 +1255,7 @@ HDC HDC::deserialize_str(const std::string& str)
     auto uuid = root.get("uuid","not_found").asString();
     if (uuid == "not_found") throw HDCException("deserialize_str(): \"uuid\" field not found in string...");
     auto persistent = root.get("persistent",false);
-    if (persistent == false) throw HDCException("deserialize_str(): \"persistent\" field not found or false in string...");
+    if (persistent == false && storage_str == "mdbm") throw HDCException("deserialize_str(): \"persistent\" field not found or false in string...");
     if (hdc_global.storage != nullptr) throw HDCException("deserialize_str(): HDC is already initialized, call this only at the beginning...");
     HDC::init(storage_str,str);
     return HDC(hdc_global.storage,uuid);
