@@ -74,12 +74,12 @@ bool arrcmp(T* arr1, U* arr2, size_t n_elem)
     HDC lch;                                                                                        \
     for (int i = 0; i < 5; i++) {                                                                   \
         HDC lch;                                                                                    \
-        lch.set_data(i);                                                                            \
+        if (i % 2 == 0) { lch.set_data(i); } else { lch.set_string(std::to_string(i)); }            \
         list.append(lch);                                                                           \
     }                                                                                               \
     tree.add_child("aaa/list", list);                                                               \
     HDC str("Lorem ipsum dolor sit amet, consectetuer adipiscing elit.");                           \
-    tree.add_child("aaa/string",str);                                                               \
+    tree.add_child("aaa/string", str);                                                              \
 
 
 #endif //HDC_TEST_COMMON_HPP

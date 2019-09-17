@@ -98,6 +98,30 @@ size_t hdc_sizeof(hdc_type_t type)
     }
 }
 
+std::string hdc_type_str(hdc_type_t type)
+{
+    switch (type) {
+        case HDC_EMPTY: return "HDC_EMPTY";
+        case HDC_LIST: return "HDC_LIST";
+        case HDC_STRUCT: return "HDC_STRUCT";
+        case HDC_ERROR: return "HDC_ERROR";
+        case HDC_STRING: return "HDC_STRING";
+        case HDC_UINT8: return "HDC_UINT8";
+        case HDC_INT8: return "HDC_INT8";
+        case HDC_UINT16: return "HDC_UINT16";
+        case HDC_INT16: return "HDC_INT16";
+        case HDC_UINT32: return "HDC_UINT32";
+        case HDC_INT32: return "HDC_INT32";
+        case HDC_UINT64: return "HDC_UINT64";
+        case HDC_INT64: return "HDC_INT64";
+        case HDC_FLOAT: return "HDC_FLOAT";
+        case HDC_DOUBLE: return "HDC_DOUBLE";
+        case HDC_BOOL: return "HDC_BOOL";
+        default:
+            throw HDCException("Unknown type " + std::to_string(type));
+    }
+}
+
 template <typename T>
 hdc_type_t to_typeid(T a)
 {

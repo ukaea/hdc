@@ -116,3 +116,28 @@ TEST_CASE("Test deserialise from S3", "[HDC][S3]")
     CHECK(tree_dump == hdc_dump);
 }
 #endif
+
+#ifdef _USE_FLATBUFFERS
+TEST_CASE("Test serialise to flatbuffer", "[HDC][FLATBUFFERS]")
+{
+    HDC::destroy();
+    HDC::init();
+    PREPARE_TREE();
+    tree.save("flatbuffers://flatbuffer-test.dat");
+}
+
+TEST_CASE("Test deserialise from flatbuffer", "[HDC][FLATBUFFERS]")
+{
+    HDC::destroy();
+    HDC::init();
+    HDC hdc = HDC::load("flatbuffers://flatbuffer-test.dat");
+
+    PREPARE_TREE();
+    auto tree_dump = tree.serialize("json");
+    auto hdc_dump = hdc.serialize("json");
+
+    std::cout << tree_dump;
+
+    CHECK(tree_dump == hdc_dump);
+}
+#endif

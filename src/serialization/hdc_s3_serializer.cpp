@@ -3,19 +3,11 @@
 #include "hdc.hpp"
 
 #include "libs3.h"
-#include <iostream>
-#include <fstream>
 #include <json/json.h>
-#include <sstream>
+
+using namespace hdc::serialization;
 
 namespace {
-
-const char access_key[] = "SDKF33R4IJ4HGQ6XKJX1";
-const char secret_key[] = "i0XTHx4uwxpILPGHdsq+8kZxX14qnzUMirFpHFpg";
-//const char host[] = "HOST";
-//const char sample_bucket[] = "sample_bucket";
-
-const char* list_identifier = "__list_";
 
 struct Data {
     S3Status status;
@@ -107,34 +99,11 @@ S3Status listBucketCallback(int isTruncated UNUSED,
     return S3StatusOK;
 }
 
-//HDC json_to_HDC(const Json::Value& node UNUSED)
-//{
-//    auto type_str = node.get("type", "not_found").asString();
-//    if (type_str == "not_found") {
-//        throw HDCException("json_to_HDC(): \"storage\" field not found in string...");
-//    }
-//
-//    auto rank_str = node.get("rank", "not_found").asString();
-//    if (rank_str == "not_found") {
-//        throw HDCException("json_to_HDC(): \"storage\" field not found in string...");
-//    }
-//
-//    auto shape_str = node.get("shape", "not_found").asString();
-//    if (shape_str == "not_found") {
-//        throw HDCException("json_to_HDC(): \"storage\" field not found in string...");
-//    }
-//
-//    auto data_str = node.get("data", "not_found").asString();
-//    if (data_str == "not_found") {
-//        throw HDCException("json_to_HDC(): \"storage\" field not found in string...");
-//    }
-//
-//    HDC data = HDC::deserialize("json", data_str);
-//
-//    return data;
-//}
+} // anon namespace
 
-void read_node(HDC& hdc, const char* host, const char* bucket, const std::string& path)
+const char* S3Serializer::list_identifier_ = "__list_";
+
+void S3Serializer::read_node(HDC& hdc, const char* host, const char* bucket, const std::string& path) const
 {
     GetData data = { S3StatusOK, "", {}};
 
@@ -156,8 +125,8 @@ void read_node(HDC& hdc, const char* host, const char* bucket, const std::string
                     bucket,
                     S3ProtocolHTTP,
                     S3UriStylePath,
-                    access_key,
-                    secret_key
+                    access_key_,
+                    secret_key_
             };
 
     S3_get_object(&bucketContext, path.c_str(), nullptr, 0, 0, nullptr, &getHandler, reinterpret_cast<void*>(&data));
@@ -174,8 +143,8 @@ void read_node(HDC& hdc, const char* host, const char* bucket, const std::string
     boost::split(tokens, path, boost::is_any_of("/"));
     tokens.pop_front();
 
-    if (boost::starts_with(tokens.back(), list_identifier)) {
-        boost::replace_first(tokens.back(), list_identifier, "");
+    if (boost::starts_with(tokens.back(), list_identifier_)) {
+        boost::replace_first(tokens.back(), list_identifier_, "");
         long index = std::strtol(tokens.back().c_str(), nullptr, 10);
         tokens.pop_back();
         std::string node_name = boost::join(tokens, "/");
@@ -187,7 +156,7 @@ void read_node(HDC& hdc, const char* host, const char* bucket, const std::string
     }
 }
 
-HDC read(const char* host, const char* bucket, const std::string& path)
+HDC S3Serializer::read(const char* host, const char* bucket, const std::string& path) const
 {
     S3ResponseHandler responseHandler =
             {
@@ -207,8 +176,8 @@ HDC read(const char* host, const char* bucket, const std::string& path)
                     bucket,
                     S3ProtocolHTTP,
                     S3UriStylePath,
-                    access_key,
-                    secret_key
+                    access_key_,
+                    secret_key_
             };
 
     ListData list_data = { S3StatusOK, "", {}};
@@ -228,7 +197,7 @@ HDC read(const char* host, const char* bucket, const std::string& path)
     return hdc;
 }
 
-void write_node(const HDC& hdc, const char* host, const char* bucket, const std::string& path)
+void S3Serializer::write_node(const HDC& hdc, const char* host, const char* bucket, const std::string& path) const
 {
     auto buffer = hdc.get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -257,7 +226,7 @@ void write_node(const HDC& hdc, const char* host, const char* bucket, const std:
             int index = 0;
             for (const auto& child : hdc_children->get<1>()) {
                 auto uuid = child.address.c_str();
-                write_node(HDC(hdc_global.storage, uuid), host, bucket, path + "/" + list_identifier + std::to_string(index));
+                write_node(HDC(hdc_global.storage, uuid), host, bucket, path + "/" + list_identifier_ + std::to_string(index));
                 ++index;
             }
         }
@@ -297,8 +266,8 @@ void write_node(const HDC& hdc, const char* host, const char* bucket, const std:
                         bucket,
                         S3ProtocolHTTP,
                         S3UriStylePath,
-                        access_key,
-                        secret_key
+                        access_key_,
+                        secret_key_
                 };
 
         S3ResponseHandler responseHandler =
@@ -326,10 +295,14 @@ void write_node(const HDC& hdc, const char* host, const char* bucket, const std:
     }
 }
 
-} // anon namespace
+S3Serializer::S3Serializer()
+{
+    access_key_ = "SDKF33R4IJ4HGQ6XKJX1";
+    secret_key_ = "i0XTHx4uwxpILPGHdsq+8kZxX14qnzUMirFpHFpg";
+}
 
 void
-hdc::serialization::S3Serializer::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath UNUSED)
+S3Serializer::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath UNUSED)
 {
     S3_initialize(nullptr, S3_INIT_ALL, nullptr);
 
@@ -349,7 +322,7 @@ hdc::serialization::S3Serializer::serialize(const HDC& hdc, const std::string& f
     S3_deinitialize();
 }
 
-HDC hdc::serialization::S3Serializer::deserialize(const std::string& filename, const std::string& datapath UNUSED)
+HDC S3Serializer::deserialize(const std::string& filename, const std::string& datapath UNUSED)
 {
     S3_initialize(nullptr, S3_INIT_ALL, nullptr);
 
@@ -370,12 +343,12 @@ HDC hdc::serialization::S3Serializer::deserialize(const std::string& filename, c
     S3_deinitialize();
 }
 
-std::string hdc::serialization::S3Serializer::to_string(const HDC& hdc UNUSED)
+std::string S3Serializer::to_string(const HDC& hdc UNUSED)
 {
     return std::string();
 }
 
-HDC hdc::serialization::S3Serializer::from_string(const std::string& string UNUSED)
+HDC S3Serializer::from_string(const std::string& string UNUSED)
 {
     return HDC();
 }
