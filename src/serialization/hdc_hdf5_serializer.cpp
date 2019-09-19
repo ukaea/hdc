@@ -25,6 +25,7 @@ using namespace H5;
     }                                                                     \
 }
 
+
 #define HDC_CHECK_HDF5_ERROR_WITH_REF(hdf5_err, ref_path, msg)          \
 {                                                                         \
     if( hdf5_err < 0 )                                                    \

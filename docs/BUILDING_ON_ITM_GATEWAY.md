@@ -1,62 +1,110 @@
-This shows how to build HDC with Anaconda3 based Python, MDBM and UDA support on ITM gateway.
+# Building on ITM Gateway How-to
 
-# Source my env
-Sourcing this script replaces loading of modules and setting UDA
-```bash
-. ~g2dfrid/hdc.env
-```
+This shows how to build HDC with MDBM support on ITM gateway.
 
-# load modules, set paths
+## Load modules (GCC)
+
 ```bash
-module load gnu/6.1.0 cmake/3.5.2
-module load profile/advanced
+module load cmake/3.5.2
+module load itm-gcc/6.1.0
+module load zlib/1.2.8--gnu--6.1.0  szip/2.1--gnu--6.1.0
+module load hdf5/1.8.17--gnu--6.1.0
+module load openmpi/1.10.7--gnu--6.1.0
 module load boost/1.61.0--gnu--6.1.0
-module load zlib/1.2.8--gnu--6.1.0 szip/2.1--gnu--6.1.0 hdf5/1.8.17--gnu--6.1.0
-module load netcdf/4.4.1--gnu--6.1.0
-module use /afs/eufus.eu/user/g/g2jhollo/imas/etc/modulefiles
-module load imas/3.17.0/ual/3.7.3
-
-export BOOST_ROOT=$BOOST_HOME
-export HDF5_ROOT=$HDF5_HOME
-export NETCDF_DIR=$NETCDF_HOME
-
-source /marconi_work/eufus_gw/work/g2jurban/miniconda3/etc/profile.d/conda.sh
-conda activate base
 ```
-# set UDA stuff
+
+## Load modules (Intel compiler suite)
+
 ```bash
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:~g2jhollo/uda/etc/
-
-export UDA_LOG=$HOME
-export UDA_HOME=/afs/eufus.eu/user/g/g2jhollo/uda
-export UDA_LOG_MODE=a
-export UDA_PLUGIN_CONFIG=$UDA_HOME/etc/plugins/udaPlugins.conf
-export UDA_SARRAY_CONFIG=$UDA_HOME/etc/udagenstruct.conf
-export UDA_LOG_LEVEL=DEBUG
-export UDA_PLUGIN_DIR=$UDA_HOME/lib/plugins
-export UDA_EXP2IMAS_MAPPING_FILE_DIRECTORY=$UDA_HOME/source/plugins/exp2imas/mappings
-export UDA_PLUGIN_DEBUG_SINGLEFILE=1
-
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:~g2jhollo/uda/etc/
+module load cmake/3.5.2
+module load intel/pe-xe-2017--binary
+module load intelmpi/2017--binary
+module load boost/1.61.0--intelmpi--2017--binary
+module load zlib/1.2.8--gnu--6.1.0  szip/2.1--gnu--6.1.0
+module load hdf5/1.8.17--intelmpi--2017--binary
+export CC=mpiicc CXX=mpiicpc FC=mpiifort
 ```
-# obtain the sources
-```bash
-git clone https://d_fridrich@bitbucket.org/compass-tokamak/hdc.git
+
+## Build MDBM backend (optional)
+Clone **MDBM**:
+
+```
+git clone https://github.com/yahoo/mdbm
+cd mdbm
+```
+Set install prefix:
+```
+MDBM_PREFIX=$(realpath ~/projects/mdbm)/install
+sed "s|/tmp/install|$MDBM_PREFIX|g" Makefile.base
+```
+Optionally disable tests (they need libcppunit):
+```
+sed -i.bak '/SUBDIRS/s/test //' src/Makefile
+```
+And finally build & install:
+```
+make install
+```
+In order to use MDBM, please, append this to `cmake` command line:
+```
+-DMDBM_LIBRARY=$MDBM_PREFIX/lib64 -DMDBM_INCLUDE_DIR=$MDBM_PREFIX/include
+```
+
+## Clone project
+
+```
+git clone https://bitbucket.org/compass-tokamak/hdc.git
 cd hdc
+```
+Optionally checkout develop branch:
+```
 git checkout develop
 ```
-# configure and build 
 
-HDC will be installed into hdc/install
-```bash
+## Build & install
+```
 mkdir build
 cd build
-cmake -DPYTHON_INCLUDE_DIR=/marconi_work/eufus_gw/work/g2jurban/miniconda3/include/python3.6m/ \
--DPYTHON_LIBRARY=/marconi_work/eufus_gw/work/g2jurban/miniconda3/lib/libpython3.6m.so.1.0 \
--DCYTHON_EXECUTABLE=/marconi_work/eufus_gw/work/g2jurban/miniconda3/bin/cython \
--DCMAKE_INSTALL_PREFIX=$PWD/../install -DMDBM_INCLUDE_DIR=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/include \
--DMDBM_LIBRARY=/afs/eufus.eu/user/g/g2dfrid/projects/mdbm/lib64/libmdbm.so -DENABLE_UDA=ON ..
-
+cmake -DCMAKE_INSTALL_PREFIX=../install ..
+```
+If you have set up **MDBM** and you still have `MDBM_PREFIX` variable:
+```
+cmake -DCMAKE_INSTALL_PREFIX=../install -DMDBM_LIBRARY=$MDBM_PREFIX/lib64/libmdbm.so -DMDBM_INCLUDE_DIR=$MDBM_PREFIX/include ..
+```
+And finally build&install:
+```
 make -j install
 ```
 
+## Test
+
+```
+make test
+```
+
+# Build Python bindings (optional)
+
+Load some Python
+```
+module load itm-python/3.6
+```
+
+We will use virtual env here, butr it can be skipped. Assuming we are still in `hdc/build` directory and have `python3` interpreter:
+```
+cd python
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install numpy
+python3 -m pip install .
+python3 -m pip install -r dev-requirements.txt
+pytest
+```
+
+## Test hdc-binder
+
+```
+cd tests_binder
+# we we do not have C.UTF-8 locale:
+export LC_ALL=en_GB.utf8 LANG=en_GB.utf8
+./run
+```
