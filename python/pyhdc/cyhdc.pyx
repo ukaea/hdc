@@ -42,10 +42,6 @@ cdef int from_str_to_chararray(source, char *dest, size_t N, bint ensure_nullter
     memcpy(dest, as_ptr, source_len)
     return 0
 
-
-
-
-
 # we have to cdef all the constants and types we need
 cdef extern from "hdc_types.h":
     cdef size_t HDC_EMPTY
@@ -128,7 +124,8 @@ cdef extern from "hdc.hpp":
         CppHDC from_json_string(const string& json_string) except +
         @staticmethod
         CppHDC load(const string& uri, const string& datapath) except +
-
+        @staticmethod
+        void init(storage_str, settings_str)
 
 cdef class HDC:
     """
@@ -544,3 +541,6 @@ cdef class HDC:
         res = HDC()
         res._this = CppHDC.from_hdf5(filename.encode(), dataset_name.encode())
         return res
+
+    def init(storage_str, settings_str):
+        CppHDC.init(storage_str.encode(), settings_str.encode())
