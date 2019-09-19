@@ -355,9 +355,9 @@ cdef class HDC:
             True  .. append additional metadata
         """
         if verbose:
-            self._this.save(("json://"+filename).encode())
-        else:
             self._this.save(("json_verbose://"+filename).encode())
+        else:
+            self._this.save(("json://"+filename).encode())
 
     @staticmethod
     def load(uri, datapath=''):
