@@ -125,7 +125,7 @@ cdef extern from "hdc.hpp":
         @staticmethod
         CppHDC load(const string& uri, const string& datapath) except +
         @staticmethod
-        void init(storage_str, settings_str)
+        void init(string storage_str, string settings_str)
 
 cdef class HDC:
     """
