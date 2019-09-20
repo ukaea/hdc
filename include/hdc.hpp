@@ -54,7 +54,7 @@ private:
     * @param path p_path: path under which to add node
     * @param n p_n: node
     */
-    void add_child(hdc_path_t& path, HDC& n);
+    void add_child(hdc_path_t& path, const HDC& n);
 
     /**
     * @brief Sets child under the path
@@ -62,7 +62,7 @@ private:
     * @param path p_path: path uder which to set node
     * @param n p_n: node
     */
-    void set_child(hdc_path_t& path, HDC& n);
+    void set_child(hdc_path_t& path, const HDC& n);
 
     /**
     * @brief ...
@@ -101,7 +101,7 @@ private:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void add_child_single(const std::string& path, HDC& n);
+    void add_child_single(const std::string& path, const HDC& n);
 
     /**
     * @brief Returns copy of header containing metadata
@@ -123,7 +123,7 @@ private:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void set_child_single(hdc_index_t path, HDC& n);
+    void set_child_single(hdc_index_t path, const HDC& n);
 
 public:
     /**
@@ -814,7 +814,7 @@ public:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void add_child(const std::string& path, HDC& n);
+    void add_child(const std::string& path, const HDC& n);
 
     /**
     * @brief Sets HDC subtree to given path.
@@ -822,7 +822,7 @@ public:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void set_child(const std::string& path, HDC& n);
+    void set_child(const std::string& path, const HDC& n);
 
     /**
     * @brief ...
@@ -837,7 +837,7 @@ public:
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @param n p_n: HDC node
     */
-    void set_child(size_t index, HDC& n);
+    void set_child(size_t index, const HDC& n);
 
     /**
     * @brief Deletes HDC subtree.
@@ -876,14 +876,14 @@ public:
     * @param i p_i:...
     * @param h p_h:...
     */
-    void insert(size_t i, HDC& h);
+    void insert(size_t i, const HDC& h);
 
     /**
     * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
     *
     * @param h p_h:...
     */
-    void append(HDC& h);
+    void append(const HDC& h);
 
     /**
     * @brief Sets HDC type of current node.

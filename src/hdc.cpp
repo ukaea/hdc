@@ -411,7 +411,7 @@ bool HDC::exists(hdc_path_t& path) const
     }
 }
 
-void HDC::add_child(hdc_path_t& path, HDC& n)
+void HDC::add_child(hdc_path_t& path, const HDC& n)
 {
     auto first = path.front();
     path.pop_front();
@@ -435,7 +435,7 @@ void HDC::add_child(hdc_path_t& path, HDC& n)
     }
 }
 
-void HDC::add_child_single(const std::string& path, HDC& n)
+void HDC::add_child_single(const std::string& path, const HDC& n)
 {
     D(std::cout << "add_child_single(" + path + ")\n";)
     // sync buffer
@@ -513,7 +513,7 @@ std::vector<std::string> HDC::keys() const
     return k;
 }
 
-void HDC::add_child(const std::string& path, HDC& n)
+void HDC::add_child(const std::string& path, const HDC& n)
 {
     DEBUG_STDOUT(std::string("add_child(") + path + ")\n");
     if (path.empty()) throw HDCException("HDC::add_child(): empty path.");
@@ -779,7 +779,7 @@ HDC HDC::operator[](size_t index) const
     return get_single(index);
 }
 
-void HDC::set_child_single(hdc_index_t path, HDC& n)
+void HDC::set_child_single(hdc_index_t path, const HDC& n)
 {
     DEBUG_STDOUT(std::string("set_child_single(") + boost::lexical_cast<std::string>(path) + ")\n");
     hdc_map_t* children = get_children_ptr();
@@ -805,12 +805,12 @@ void HDC::set_child_single(hdc_index_t path, HDC& n)
     }
 }
 
-void HDC::set_child(size_t index, HDC& n)
+void HDC::set_child(size_t index, const HDC& n)
 {
     set_child_single(index, n);
 }
 
-void HDC::set_child(hdc_path_t& path, HDC& n)
+void HDC::set_child(hdc_path_t& path, const HDC& n)
 {
     D(
             std::cout << "set_child(";
@@ -831,7 +831,7 @@ void HDC::set_child(hdc_path_t& path, HDC& n)
     }
 }
 
-void HDC::set_child(const std::string& path, HDC& n)
+void HDC::set_child(const std::string& path, const HDC& n)
 {
     auto pth = split(path);
     set_child(pth, n);
@@ -967,7 +967,7 @@ hdc_t HDC::as_obj()
     return res;
 }
 
-void HDC::insert(size_t index, HDC& h)
+void HDC::insert(size_t index, const HDC& h)
 {
     DEBUG_STDOUT(std::string("insert(") + std::to_string(index) + ")\n");
     //sync buffer
@@ -1034,7 +1034,7 @@ void HDC::insert(size_t index, HDC& h)
     }
 }
 
-void HDC::append(HDC& h)
+void HDC::append(const HDC& h)
 {
     insert(get_header_ptr()->shape[0], h);
 }
