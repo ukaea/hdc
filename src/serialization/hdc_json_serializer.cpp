@@ -580,12 +580,12 @@ HDC from_json(const string& filename, const string& datapath)
                 }
             }
         }
-        tree = json_to_HDC(root);
+        file.close();
+        return json_to_HDC(root);
     }
     catch (ifstream::failure& e) {
         cout << "Error reading / opening file." << endl;
     }
-    file.close();
     return tree;
 }
 

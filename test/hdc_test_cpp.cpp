@@ -166,7 +166,7 @@ TEST_CASE("ListManipulation", "[HDC]")
     CHECK(h.get("k[1]").as_string() == "data1");
     CHECK(h.get("l[1]").as_string() == "data10");
 }
-/*
+
 TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
 {
     std::vector<size_t> shape = { 4 };
@@ -196,8 +196,8 @@ TEST_CASE("SetExternal", "[HDC]")
     CHECK(*array_in == *array_out);
     CHECK(*array_in == *(int64_t*)(external.as_void_ptr()));
     CHECK(external.is_external() == true);
-    auto external_str = external.to_json_string();
-    auto node_str = node.to_json_string();
+    auto external_str = external.serialize("json");
+    auto node_str = node.serialize("json");
     CHECK(strcmp(external_str.c_str(),node_str.c_str()) == 0);
 
     //update
@@ -358,18 +358,18 @@ TEST_CASE("SliceManipulation", "[HDC]")
     CHECK(strcmp("list", h.get_type_str()) == 0);
     CHECK(1 == h.get_rank());
     CHECK(2 == h.get_shape()[0]);
-    CHECK(strcmp("1", h[0].as_cstring()) == 0);
-    CHECK(strcmp("2", h[1].as_cstring()) == 0);
+    CHECK(strcmp("1", h[0].as_string().c_str()) == 0);
+    CHECK(strcmp("2", h[1].as_string().c_str()) == 0);
     HDC sl3;
     sl3.set_string("3");
     h.insert(1, sl3);
     auto keys = h.keys();
-    CHECK(strcmp("3", h[1].as_cstring()) == 0);
-    CHECK(strcmp("2", h[2].as_cstring()) == 0);
+    CHECK(strcmp("3", h[1].as_string().c_str()) == 0);
+    CHECK(strcmp("2", h[2].as_string().c_str()) == 0);
     HDC sl4;
     sl4.set_string("4");
     h.set_child(1, sl4);
-    CHECK(strcmp("4", h[1].as_cstring()) == 0);
+    CHECK(strcmp("4", h[1].as_string().c_str()) == 0);
     HDC n;
     n.set_type(HDC_LIST);
     HDC ch;
@@ -422,6 +422,11 @@ TEST_CASE("BracketOperatorsOthers", "[HDC]")
     CHECK(tree.exists("aaa/bbb/ccc"));
     CHECK(tree["aaa/bbb/ccc"].get_type() == HDC_EMPTY);
 
+    HDC subtree;
+    subtree["ddd"] = HDC("node");
+    tree["aaa/kkk"] = subtree["ddd"];
+    CHECK(strcmp(tree["aaa/kkk"].as_string().c_str(),"node") == 0);
+
     std::string str = "test";
     tree["str"] = str;
     tree["empty"] = HDC();
@@ -429,7 +434,7 @@ TEST_CASE("BracketOperatorsOthers", "[HDC]")
     CHECK(tree.exists("empty"));
     CHECK(tree["str"].get_type() == HDC_STRING);
     CHECK(tree["empty"].get_type() == HDC_EMPTY);
-    CHECK(strcmp(tree["str"].as_cstring(),str.c_str()) == 0);
+    CHECK(strcmp(tree["str"].as_string().c_str(),str.c_str()) == 0);
 
     HDC list;
     list[0] = HDC();
@@ -449,12 +454,13 @@ TEST_CASE("JsonComplete", "[HDC]")
     auto fname = make_tmp_name("txt");
     auto fname2 = make_tmp_name("txt");
     // Save JSON
-    tree.to_json(fname);
+    tree.save("json://"+fname);
     // Load JSON
-    HDC tree2 = HDC::from_json(fname);
-    tree2.to_json(fname2);
+    HDC tree2 = HDC::load("json://"+fname);
+    tree2.save("json://"+fname2);
     // test tree
     HDC s = tree2.get("aaa/bbb/double");
+
     // Test double
     CHECK(1 == s.get_rank());
     CHECK(4 == s.get_shape()[0]);
@@ -462,6 +468,7 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(strcmp(tree.get("aaa/bbb/double").get_type_str(), s.get_type_str()) == 0);
     double* data_double_in = s.as<double>();
     CHECK(memcmp(data_double,data_double_in,sizeof(double)*4) == 0);
+
     // Test int
     s = tree2.get("aaa/bbb/int32");
     CHECK(1 == s.get_rank());
@@ -470,20 +477,27 @@ TEST_CASE("JsonComplete", "[HDC]")
     CHECK(strcmp(tree.get("aaa/bbb/int32").get_type_str(), tree2.get("aaa/bbb/int32").get_type_str()) == 0);
     int32_t* data_int_in = s.as<int32_t>();
     CHECK(memcmp(data_int32,data_int_in,sizeof(int32_t)*4) == 0);
+
     // Test empty
     CHECK(HDC_EMPTY == tree2["aaa/bbb/empty"].get_type());
+
     // Test list
     s = tree2.get("aaa/list");
     CHECK(1 == s.get_rank());
     CHECK(5 == s.get_shape()[0]);
     CHECK(HDC_LIST == s.get_type());
     CHECK(strcmp(tree.get("aaa/list").get_type_str(), tree2.get("aaa/list").get_type_str()) == 0);
-    for (int i = 0; i < 5; i++) CHECK(HDC_EMPTY == s.get(i).get_type());
+    for (int i = 0; i < 5; i++)
+    {
+        auto t = s.get(i).get_type();
+        if (i % 2 == 0) { CHECK(t == HDC_INT32); } else { CHECK(t == HDC_STRING); }
+    }
+
     // Test string
-    CHECK(strcmp(tree.get("aaa/string").as_cstring(), tree2.get("aaa/string").as_cstring()) == 0);
+    CHECK(strcmp(tree.get("aaa/string").as_string().c_str(), tree2.get("aaa/string").as_string().c_str()) == 0);
     auto uri = std::string("json://") + fname2;
     HDC j = HDC::load(uri,"aaa/string");
-    CHECK(strcmp(j.as_cstring(), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
+    CHECK(strcmp(j.as_string().c_str(), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.") == 0);
     if(remove(fname.c_str()) != 0) std::cerr << "Error removing file " << fname << std::endl;
     if(remove(fname2.c_str()) != 0) std::cerr << "Error removing file " << fname2 << std::endl;
 }
@@ -492,8 +506,8 @@ TEST_CASE("Copy", "[HDC]")
 {
     PREPARE_TREE()
     HDC _copy = tree.copy();
-    auto tree_dump = tree.to_json_string();
-    auto copy_dump = _copy.to_json_string();
+    auto tree_dump = tree.serialize("json");
+    auto copy_dump = _copy.serialize("json");
     CHECK(strcmp(tree_dump.c_str(), copy_dump.c_str()) == 0);
     // Check also that UUIDs are the same - this behaviour can be changed later
     CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), _copy["aaa/bbb/double"].get_uuid().c_str()) != 0);
@@ -540,12 +554,12 @@ TEST_CASE("BufferGrowList", "[HDC]")
         CHECK(strcmp(h[i].as_string().c_str(), std::to_string(i).c_str()) == 0);
     }
 }
-*/
+
 TEST_CASE("GetChildren", "[HDC]")
 {
     std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
     HDC h;
-    for (auto& str: lst) {
+    for (const auto& str: lst) {
         HDC ch(str);
         h.add_child(str,ch);
     }

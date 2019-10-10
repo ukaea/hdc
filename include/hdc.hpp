@@ -18,6 +18,7 @@
 #include <cstdbool>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 // our stuff
 #include "hdc_errors.hpp"
 #include "hdc_global.hpp"
@@ -421,6 +422,28 @@ public:
      * @return HDC
      */
     HDC get_or_create(hdc_path_t& path);
+
+    /**
+     * @brief ...
+     *
+     * @param lhs p_lhs:...
+     * @param rhs p_rhs:...
+     * @return bool
+     */
+    inline bool operator==(const HDC& other) {
+        return (this->get_storage() == other.get_storage() && this->get_uuid() == other.get_uuid());
+    }
+
+    /**
+     * @brief ...
+     *
+     * @param lhs p_lhs:...
+     * @param rhs p_rhs:...
+     * @return bool
+     */
+    inline bool operator!=(const HDC& other) {
+        return !operator==(other);
+    }
 
     /**
     * @brief Stores data in node's buffer
@@ -915,15 +938,15 @@ public:
     template <typename T>
     T* as() const
     {
+        DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
+        if (!storage->has(uuid)) {
+            throw HDCException("as(): Not found: " + uuid + "\n");
+        }
         auto buffer = get_buffer();
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
         auto data = buffer + sizeof(hdc_header_t);
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw HDCException("This is not a terminal node...");
-        }
-        DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
-        if (!storage->has(uuid)) {
-            throw HDCException("as(): Not found: " + uuid + "\n");
         }
         T tp{};
         if (header->type != to_typeid(tp)) {
@@ -987,7 +1010,7 @@ public:
         auto size_elem = hdc_sizeof(header->type);
         size_t n_elem = 0;
         if (size_elem) n_elem = header->data_size / size_elem;
-        std::vector<T> result{ n_elem };
+        std::vector<T> result(n_elem);
         if (header->type == HDC_INT8) {
             // return std::vector<T>(reinterpret_cast<int8_t*>(data),reinterpret_cast<int8_t*>(data)+n_elem); // does not work on bionic
             for (size_t i = 0; i < n_elem; i++) result[i] = reinterpret_cast<int8_t*>(data)[i];
@@ -1072,6 +1095,13 @@ public:
     * @return char*
     */
     char* get_buffer() const;
+
+    /**
+     * @brief ...
+     *
+     * @param buffer p_buffer:...
+     */
+    void set_buffer(char* buffer);
 
     /**
     * @brief ...
@@ -1287,6 +1317,23 @@ public:
      * @param obj p_obj:...
      */
     void set_external(hdc_data_t obj);
+
+//     void set_parent(hdc_t parent) {
+//         auto buffer = get_buffer();
+//         auto header = reinterpret_cast<hdc_header_t*>(buffer);
+//         memcpy(&(header->parent),&parent,sizeof(hdc_t));
+//     }
+//
+//     void set_parent(HDC& parent) {
+//         return set_parent(parent.as_obj());
+//     }
+//
+//     HDC get_parent() {
+//         auto buffer = get_buffer();
+//         auto header = reinterpret_cast<hdc_header_t*>(buffer);
+//         hdc_t parent = header->parent;
+//         return HDC(parent);
+//     };
 };
 
 #endif // HDC_HPP
