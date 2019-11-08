@@ -14,22 +14,19 @@ from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 from libcpp.vector cimport vector
 from cpython cimport Py_buffer, PyBUF_ND, PyBUF_C_CONTIGUOUS
 import ctypes
-
 import six
 import numbers
-if six.PY3:
-    import collections.abc as collections_abc
-else:
-    import collections as collections_abc
-import six
 import numpy as np
+from libc.string cimport memcpy
+import collections
+try:
+    collections_abc = collections.abc
+except AttributeError:
+    collections_abc = collections
 
 # TODO workaroud for https://github.com/cython/cython/issues/534
 ctypedef double* doubleptr
 ctypedef void* voidptr
-
-
-from libc.string cimport memcpy
 
 cdef int from_str_to_chararray(source, char *dest, size_t N, bint ensure_nullterm) except -1:
     cdef size_t source_len = len(source)
@@ -41,10 +38,6 @@ cdef int from_str_to_chararray(source, char *dest, size_t N, bint ensure_nullter
         raise IndexError("destination array too small")
     memcpy(dest, as_ptr, source_len)
     return 0
-
-
-
-
 
 # we have to cdef all the constants and types we need
 cdef extern from "hdc_types.h":
@@ -74,12 +67,10 @@ cdef extern from "hdc_types.h":
         char uuid[37]
         voidptr storage
 
-
 class hdc_t_(ctypes.Structure):
     """The ctypes equivalent of hdc_t"""
     _fields_ = [("uuid", ctypes.c_char * 37),
                 ("storage_id", ctypes.c_size_t)]
-
 
 # cdef the C++ interface, any method we need must be here
 cdef extern from "hdc.hpp":
@@ -90,15 +81,19 @@ cdef extern from "hdc.hpp":
         CppHDC(string str) except +
         CppHDC(HDCStorage* _storage, const string& _uuid) except +
         CppHDC(hdc_t h) except +
+        CppHDC(CppHDC& h) except +
         string serialize() except +
         size_t get_itemsize() except +
         size_t get_datasize() except +
-        void set_child(string path, CppHDC& n) except +
+        void set_child(string& path, CppHDC& n) except +
+        void set_child_i "set_child"(size_t index, CppHDC& n) except +
         void append(CppHDC& h) except +
-        void add_child(string path, CppHDC& n) except +
-        CppHDC get(size_t i) except +
+        void insert(size_t index, CppHDC& n) except +
+        void add_child(const string& path, CppHDC& n) except +
+        CppHDC get_i "get"(size_t i) except +
         CppHDC get(string path) except +
         bool exists(string path) except +
+        bool exists_i "exists"(size_t index) except +
         void set_string(string data) except +
         void print_info() except +
         size_t get_type() except +
@@ -144,7 +139,7 @@ cdef class HDC:
             self._this = CppHDC()
         elif isinstance(data, self.__class__):
             #  copy constructor
-            self._this = (<HDC> data)._this
+            self._this = CppHDC((<HDC> data)._this)
         elif isinstance(data, six.string_types):
             self._this = CppHDC(<string> str(data).encode('utf-8'))
         else:
@@ -154,20 +149,26 @@ cdef class HDC:
     def __contains__(self, key):
         if isinstance(key, six.string_types):
             return self._this.exists(key.encode())
+        elif isinstance(key, numbers.Integral):
+            return self._this.exists_i(<size_t> key)
         else:
-            raise ValueError('key must be a string')
+            raise ValueError("key must be either string or integer")
 
     def __setitem__(self, key, value):
+        new_hdc = HDC(value)
         if isinstance(key, six.string_types):
             if key not in self:
-                new_hdc = HDC(value)
-                self._this.add_child(key.encode(), new_hdc._this)
+                self._this.add_child(<string> key.encode(), new_hdc._this)
             else:
-                self[key].set_data(value)
+                self._this.set_child(<string> key.encode(), new_hdc._this)
+        elif isinstance(key, numbers.Integral):
+            if key not in self:
+                self._this.insert(<size_t> key, new_hdc._this)
+                pass
+            else:
+                self._this.set_child_i(<size_t> key, new_hdc._this)
         else:
-            raise NotImplementedError('Non-string keys not supported')
-            # TODO support set_slice
-            # libchdc.hdc_set_slice(self._c_ptr, int(key), value._c_ptr)
+            raise ValueError("key must be either string or integer")
 
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
@@ -177,11 +178,13 @@ cdef class HDC:
             res = <HDC> self.__class__()
             # TODO move to constructor
             res._this = self._this.get(<string> ckey)
+            self._this.set_child(<string> ckey, res._this) # Workaround for nested brackets op
             return res
         elif isinstance(key, numbers.Integral):
             res = <HDC> self.__class__()
             # TODO move to constructor
-            res._this = self._this.get(<size_t> key)
+            res._this = self._this.get_i(<size_t> key)
+            self._this.set_child_i(<size_t> key, res._this) # Workaround for nested brackets op
             return res
         else:
             raise ValueError("key must be either string or integer")
@@ -213,7 +216,7 @@ cdef class HDC:
                 return [x for x in self]
         elif self.is_array():
             if len(self.shape) == 0:
-                return np.asscalar(np.asarray(self))
+                return np.asarray(self).item()
             else:
                 return np.asarray(self)
         else:
@@ -407,7 +410,6 @@ cdef class HDC:
     def __str__(self):
         # return string representation
         if self.get_type() == HDC_STRING:
-            print(self._this.as_string())
             return self._this.as_string().decode()
 
         if self.is_array():

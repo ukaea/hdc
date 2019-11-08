@@ -56,7 +56,6 @@ private:
     * @param n p_n: node
     */
     void add_child(hdc_path_t& path, HDC& n);
-
     /**
     * @brief Sets child under the path
     *

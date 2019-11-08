@@ -452,12 +452,6 @@ void HDC::add_child(hdc_path_t& path, HDC& n)
 void HDC::add_child_single(const std::string& path, HDC& n)
 {
     D(std::cout << "add_child_single(" + path + ")\n";)
-    // set parent
-//     n.set_parent(this->as_obj());
-
-
-    // sync buffer
-
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     size_t old_size = header->buffer_size;
@@ -514,7 +508,8 @@ void HDC::add_child_single(const std::string& path, HDC& n)
             }
         }
         header->shape[0] = children->size();
-        if (header->buffer_size != old_size) storage->set(uuid, buffer, header->buffer_size);
+        if (header->buffer_size != old_size)
+        storage->set(uuid, buffer, header->buffer_size);
     }
 }
 
