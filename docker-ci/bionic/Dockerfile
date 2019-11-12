@@ -1,0 +1,45 @@
+FROM ubuntu:18.04
+
+MAINTAINER David Fridrich <fridrich@ipp.cas.cz>
+
+# Update & upgrade
+RUN apt-get update
+RUN apt-get -y upgrade
+
+# Install some dependencies
+RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales
+
+# Set environment
+# RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
+#ENV LC_ALL=en_US.UTF-8
+#ENV LANG=en_US.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+# Download, build and install MDBM
+WORKDIR /tmp
+RUN git clone https://github.com/yahoo/mdbm
+WORKDIR mdbm
+RUN sed -i.bak 's|/tmp/install|/usr/local|g' Makefile.base
+RUN make
+RUN make install
+
+# Download, build and install flatbuffers
+WORKDIR /tmp
+RUN git clone https://github.com/google/flatbuffers.git
+WORKDIR flatbuffers
+RUN cmake -G "Unix Makefiles" 
+RUN make
+RUN make install
+
+# Install pyHDC stuff
+WORKDIR /tmp
+COPY requirements.txt /tmp
+COPY dev-requirements.txt /tmp
+RUN pip3 install -r /tmp/requirements.txt
+RUN pip3 install -r /tmp/dev-requirements.txt
+
+# Final cleanup
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /tmp/*

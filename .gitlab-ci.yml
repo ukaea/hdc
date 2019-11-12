@@ -1,3 +1,18 @@
+test-pokus: #This is the new bionic
+  image: dockerhub.tok.ipp.cas.cz:5000/pokus
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - ./run
+
 test-bionic:
   #variables:
     #CI_DEBUG_TRACE: "true"
