@@ -10,9 +10,6 @@ RUN apt-get -y upgrade
 RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales
 
 # Set environment
-# RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
-#ENV LC_ALL=en_US.UTF-8
-#ENV LANG=en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
