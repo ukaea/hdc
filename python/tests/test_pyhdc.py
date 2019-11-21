@@ -1,18 +1,19 @@
-import collections
 import itertools
 import json
 import random
 import string
 import tempfile
-
 from pyhdc import HDC
 import hypothesis.extra.numpy
 import hypothesis.strategies
 import numpy as np
 import pytest
-
 import future.builtins
-
+import collections
+try:
+    collections_abc = collections.abc
+except AttributeError:
+    collections_abc = collections
 
 @pytest.fixture
 def test_trees():
@@ -39,7 +40,7 @@ def test_trees():
 
 
 def tree_equal(py_obj, hdc_obj, exception=False):
-    if isinstance(py_obj, collections.Mapping):
+    if isinstance(py_obj, collections_abc.Mapping):
         try:
             res = (len(py_obj) == len(hdc_obj)) and all(
                 (
@@ -57,7 +58,7 @@ def tree_equal(py_obj, hdc_obj, exception=False):
         res = py_obj == future.builtins.str(hdc_obj)
         if exception and not res:
             raise ValueError("{} != {}".format(py_obj, future.builtins.str(hdc_obj)))
-    elif isinstance(py_obj, collections.Sequence):
+    elif isinstance(py_obj, collections_abc.Sequence):
         res = len(py_obj) == len(hdc_obj) and all(
             (tree_equal(v1, v2, exception=exception) for v1, v2 in zip(py_obj, hdc_obj))
         )
@@ -114,7 +115,7 @@ def test_ndarray(dtype, shape, external):
     x_in=hypothesis.extra.numpy.arrays(
         dtype=hypothesis.extra.numpy.floating_dtypes(endianness="<", sizes=(32, 64)),
         shape=hypothesis.extra.numpy.array_shapes(max_dims=5),
-        elements=hypothesis.strategies.floats(allow_nan=True, allow_infinity=True),
+        elements=hypothesis.strategies.floats(allow_nan=True, allow_infinity=True, width=32),
     )
 )
 def test_floating_ndarray_equality(x_in, external):

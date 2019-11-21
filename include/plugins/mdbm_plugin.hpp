@@ -89,6 +89,9 @@ public:
         }
         datum key = { &path[0u], static_cast<int>(path.length()) };
         datum found = mdbm_fetch(this->db, key);
+        if (found.dptr == NULL || found.dsize == 0) {
+            throw std::runtime_error("MDBMStorage::get(\""+path+"\"): not found\n");
+        }
         return (char*) found.dptr;
     }
 

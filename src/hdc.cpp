@@ -233,7 +233,21 @@ HDC::HDC(hdc_data_t obj)
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
 HDC::HDC(const std::string& str) : HDC()
 {
-    this->set_string(str);
+    HDC_STORAGE_INIT()
+    auto data_size = str.length() + 1;
+    auto buffer_size = data_size + sizeof(hdc_header_t);
+    std::vector<char> buffer(buffer_size);
+    auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+    header->data_size = data_size;
+    header->type = HDC_STRING;
+    header->rank = 1;
+    header->shape[0] = str.length();
+    header->buffer_size = buffer_size;
+    memcpy(buffer.data() + sizeof(hdc_header_t), str.c_str(), header->data_size);
+
+    uuid = generate_uuid_str();
+    storage = hdc_global.storage;
+    storage->set(uuid, buffer.data(), header->buffer_size);
 }
 
 /** Copy constructor */
@@ -448,7 +462,6 @@ void HDC::add_child(hdc_path_t& path, const HDC& n)
 void HDC::add_child_single(const std::string& path, const HDC& n)
 {
     D(std::cout << "add_child_single(" + path + ")\n";)
-    // sync buffer
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     size_t old_size = header->buffer_size;
@@ -505,7 +518,9 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
             }
         }
         header->shape[0] = children->size();
-        if (header->buffer_size != old_size) storage->set(uuid, buffer, header->buffer_size);
+        if (header->buffer_size != old_size) {
+            storage->set(uuid, buffer, header->buffer_size);
+        }
     }
 }
 
@@ -768,11 +783,16 @@ HDC HDC::get_or_create(size_t index)
 
 HDC& HDC::operator=(const HDC& other)
 {
-//    if (this != &other && uuid != other.get_uuid()) {
-//        //remove unused (orphaned) buffer here?
-//    }
-    uuid = other.uuid;
-    storage = other.storage;
+    if (*this != other) {
+        auto buffer = other.get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        auto size = header->buffer_size;
+
+        vector<char> copy(size);
+        memcpy(copy.data(),buffer,size);
+
+        set_buffer(copy.data());
+    }
     return *this;
 }
 
@@ -1176,6 +1196,13 @@ size_t HDC::get_rank() const
 char* HDC::get_buffer() const
 {
     return storage->get(uuid);
+}
+
+void HDC::set_buffer(char* buffer)
+{
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    auto size = header->buffer_size;
+    storage->set(uuid,buffer,size);
 }
 
 string HDC::get_uuid() const
