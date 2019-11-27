@@ -37,12 +37,14 @@
 
 using hdc_index_t = boost::variant<size_t,std::string>;
 using hdc_path_t = std::list<hdc_index_t>;
+using uuid_str_t = std::string;
 
 /* ------------------------- UUID generation ----------------------------- */
 
 void print_uuid(std::vector<char> uuid);
 std::vector<char> generate_uuid();
-std::string generate_uuid_str();
+
+uuid_str_t generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */
 hdc_path_t split(const std::string& s);
 hdc_path_t split_no_brackets(const std::string& s);
@@ -69,6 +71,9 @@ hdc_type_t to_typeid(char* a);
 hdc_type_t to_typeid(bool a);
 #ifndef __APPLE__
 hdc_type_t to_typeid(std::_Bit_reference a); //workaround for bool
+#else
+hdc_type_t to_typeid(long a);
+hdc_type_t to_typeid(unsigned long a);
 #endif
 hdc_type_t numpy_format_to_typeid(std::string format, size_t itemsize);
 hdc_type_t to_typeid(const std::type_info& t);

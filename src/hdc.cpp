@@ -252,16 +252,14 @@ HDC::HDC(const std::string& str) : HDC()
 
 /** Copy constructor */
 HDC::HDC(const HDC& h)
-    : uuid(h.uuid)
-    , storage(h.storage)
+        : uuid(h.uuid), storage(h.storage)
 {
     HDC_STORAGE_INIT()
 }
 
 /* Move constructor */
 HDC::HDC(HDC&& h) noexcept
-    : uuid(std::move(h.uuid))
-    , storage(h.storage)
+        : uuid(std::move(h.uuid)), storage(h.storage)
 {
     HDC_STORAGE_INIT()
     h.storage = nullptr;
@@ -789,7 +787,7 @@ HDC& HDC::operator=(const HDC& other)
         auto size = header->buffer_size;
 
         vector<char> copy(size);
-        memcpy(copy.data(),buffer,size);
+        memcpy(copy.data(), buffer, size);
 
         set_buffer(copy.data());
     }
@@ -798,9 +796,10 @@ HDC& HDC::operator=(const HDC& other)
 
 HDC& HDC::operator=(HDC&& other) noexcept
 {
+    storage->set(uuid, other.storage->get(other.uuid), other.storage->get_size(other.uuid));
+//    other.storage->set(other.uuid, nullptr, 0);
     uuid = std::move(other.uuid);
-    storage = other.storage;
-    other.storage = nullptr;
+    storage = std::exchange(other.storage, nullptr);
     return *this;
 }
 
@@ -1202,7 +1201,7 @@ void HDC::set_buffer(char* buffer)
 {
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     auto size = header->buffer_size;
-    storage->set(uuid,buffer,size);
+    storage->set(uuid, buffer, size);
 }
 
 string HDC::get_uuid() const
@@ -1224,7 +1223,7 @@ hdc_map_t* HDC::get_children_ptr() const
     return segment.find<hdc_map_t>("d").first;
 }
 
-const std::map<std::string, HDC> HDC::get_children() const
+std::map<std::string, HDC> HDC::get_children() const
 {
     auto children = get_children_ptr();
     std::map<std::string, HDC> ch;
@@ -1575,7 +1574,8 @@ bool array_equals(const T* lhs, const T* rhs, size_t size)
 }
 
 template <typename T>
-bool nearly_equal(T a, T b, float epsilon) {
+bool nearly_equal(T a, T b, float epsilon)
+{
     T absA = std::abs(a);
     T absB = std::abs(b);
     T diff = std::abs(a - b);
@@ -1627,7 +1627,7 @@ bool operator!=(const hdc_header_t& lhs, const hdc_header_t& rhs)
 
 } // anon namespace
 
-bool HDC::operator==(const HDC& other) const
+bool HDC::equals(const HDC& other) const
 {
     if (get_header() != other.get_header()) {
         return false;
@@ -1640,7 +1640,8 @@ bool HDC::operator==(const HDC& other) const
     }
 
     switch (get_type()) {
-        case HDC_EMPTY: return true;
+        case HDC_EMPTY:
+            return true;
         case HDC_STRUCT: {
             auto my_keys = keys();
             auto other_keys = other.keys();
@@ -1671,23 +1672,31 @@ bool HDC::operator==(const HDC& other) const
             }
             return true;
         }
-        case HDC_INT8: return array_equals(as<int8_t>(), other.as<int8_t>(), size);
-        case HDC_INT16: return array_equals(as<int16_t>(), other.as<int16_t>(), size);
-        case HDC_INT32: return array_equals(as<int32_t>(), other.as<int32_t>(), size);
-        case HDC_INT64: return array_equals(as<int64_t>(), other.as<int64_t>(), size);
-        case HDC_UINT8: return array_equals(as<uint8_t>(), other.as<uint8_t>(), size);
-        case HDC_UINT16: return array_equals(as<uint16_t>(), other.as<uint16_t>(), size);
-        case HDC_UINT32: return array_equals(as<uint32_t>(), other.as<uint32_t>(), size);
-        case HDC_UINT64: return array_equals(as<uint64_t>(), other.as<uint64_t>(), size);
-        case HDC_FLOAT: return array_equals(as<float>(), other.as<float>(), size);
-        case HDC_DOUBLE: return array_equals(as<double>(), other.as<double>(), size);
-        case HDC_BOOL: return array_equals(as<bool>(), other.as<bool>(), size);
-        case HDC_STRING: return as_string() == other.as_string();
-        default: return false;
+        case HDC_INT8:
+            return array_equals(as<int8_t>(), other.as<int8_t>(), size);
+        case HDC_INT16:
+            return array_equals(as<int16_t>(), other.as<int16_t>(), size);
+        case HDC_INT32:
+            return array_equals(as<int32_t>(), other.as<int32_t>(), size);
+        case HDC_INT64:
+            return array_equals(as<int64_t>(), other.as<int64_t>(), size);
+        case HDC_UINT8:
+            return array_equals(as<uint8_t>(), other.as<uint8_t>(), size);
+        case HDC_UINT16:
+            return array_equals(as<uint16_t>(), other.as<uint16_t>(), size);
+        case HDC_UINT32:
+            return array_equals(as<uint32_t>(), other.as<uint32_t>(), size);
+        case HDC_UINT64:
+            return array_equals(as<uint64_t>(), other.as<uint64_t>(), size);
+        case HDC_FLOAT:
+            return array_equals(as<float>(), other.as<float>(), size);
+        case HDC_DOUBLE:
+            return array_equals(as<double>(), other.as<double>(), size);
+        case HDC_BOOL:
+            return array_equals(as<bool>(), other.as<bool>(), size);
+        case HDC_STRING:
+            return as_string() == other.as_string();
+        default:
+            return false;
     }
-}
-
-bool HDC::operator!=(const HDC& other) const
-{
-    return !(*this == other);
 }

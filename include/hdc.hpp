@@ -297,7 +297,7 @@ public:
     *
     * @return std::map< HDC >
     */
-    const std::map<std::string, HDC> get_children() const;
+    std::map<std::string, HDC> get_children() const;
 
     bool has_children() const;
 
@@ -521,8 +521,7 @@ public:
 
     HDC& operator=(HDC&& other) noexcept;
 
-    bool operator==(const HDC& other) const;
-    bool operator!=(const HDC& other) const;
+    bool equals(const HDC& other) const;
 
     /**
     * @brief ...
