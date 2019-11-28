@@ -11,12 +11,11 @@ extern HDCGlobal hdc_global;
 
 /* ------------------------- UUID generation ----------------------------- */
 
-std::string generate_uuid_str()
+uuid_str_t generate_uuid_str()
 {
     boost::uuids::basic_random_generator<boost::mt19937> gen(&(hdc_global.ran));
     boost::uuids::uuid u = gen();
-    const std::string str = boost::lexical_cast<std::string>(u);
-    return str;
+    return boost::lexical_cast<uuid_str_t>(u);
 }
 
 /* -------------------------  String manipulation ----------------------------- */
@@ -175,6 +174,9 @@ hdc_type_t to_typeid(bool a UNUSED)
 
 #ifndef __APPLE__
 hdc_type_t to_typeid(std::_Bit_reference a UNUSED) {return HDC_BOOL;}
+#else
+hdc_type_t to_typeid(unsigned long a UNUSED) { return HDC_UINT64; }
+hdc_type_t to_typeid(long a UNUSED) { return HDC_INT64; }
 #endif
 
 hdc_type_t to_typeid(const std::type_info& t)

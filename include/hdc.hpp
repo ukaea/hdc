@@ -55,21 +55,22 @@ private:
     * @param path p_path: path under which to add node
     * @param n p_n: node
     */
-    void add_child(hdc_path_t& path, HDC& n);
+    void add_child(hdc_path_t& path, const HDC& n);
+
     /**
     * @brief Sets child under the path
     *
     * @param path p_path: path uder which to set node
     * @param n p_n: node
     */
-    void set_child(hdc_path_t& path, HDC& n);
+    void set_child(hdc_path_t& path, const HDC& n);
 
     /**
     * @brief ...
     *
     * @param path p_path: path in the subtree of this node
     */
-    void delete_child(hdc_path_t& path);
+    bool delete_child(hdc_path_t& path, bool prune);
 
     /**
     * @brief ...
@@ -101,7 +102,7 @@ private:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void add_child_single(const std::string& path, HDC& n);
+    void add_child_single(const std::string& path, const HDC& n);
 
     /**
     * @brief Returns copy of header containing metadata
@@ -123,7 +124,7 @@ private:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void set_child_single(hdc_index_t path, HDC& n);
+    void set_child_single(hdc_index_t path, const HDC& n);
 
 public:
     /**
@@ -162,7 +163,7 @@ public:
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    HDC(std::vector<size_t>& shape, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    HDC(const std::vector<size_t>& shape, hdc_type_t type, hdc_flags_t flags = HDCDefault);
 
     explicit HDC(hdc_data_t obj);
 
@@ -171,7 +172,7 @@ public:
     *
     * @param str p_str:...
     */
-    HDC(const std::string& str);
+    explicit HDC(const std::string& str);
 
     /**
     * @brief Copy contructor
@@ -179,6 +180,8 @@ public:
     * @param h p_h: pointer to HDC object
     */
     HDC(const HDC& h);
+
+    HDC(HDC&& h) noexcept;
 
     /**
     * @brief Deserializing constructor
@@ -294,14 +297,16 @@ public:
     *
     * @return std::map< HDC >
     */
-    const std::map<std::string, HDC> get_children() const;
+    std::map<std::string, HDC> get_children() const;
+
+    bool has_children() const;
 
     /**
     * @brief Returns map of children if there are any, otherwise it returns empty map
     *
     * @return int
     */
-    const std::vector<HDC> get_slices() const;
+    std::vector<HDC> get_slices() const;
 
     /**
     * @brief Makes copy of object. Copies at least node buffer. If deep_copy specified, it also copies all children nodes.
@@ -497,6 +502,7 @@ public:
     * @return HDC&
     */
     HDC& operator=(char const* str);
+
     /**
     * @brief ...
     *
@@ -504,6 +510,7 @@ public:
     * @return HDC&
     */
     HDC& operator=(const std::string& str);
+
     /**
     * @brief ...
     *
@@ -511,6 +518,10 @@ public:
     * @return HDC&
     */
     HDC& operator=(const HDC& other);
+
+    HDC& operator=(HDC&& other) noexcept;
+
+    bool equals(const HDC& other) const;
 
     /**
     * @brief ...
@@ -521,7 +532,7 @@ public:
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template <typename T>
-    void set_data(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault)
+    void set_data(const std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault)
     {
         auto rank = shape.size();
         auto buffer = get_buffer();
@@ -567,7 +578,7 @@ public:
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     template <typename T>
-    void set_external(std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault)
+    void set_external(const std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault)
     {
         auto rank = shape.size();
         auto buffer = get_buffer();
@@ -686,6 +697,25 @@ public:
         storage->set(uuid, buffer.data(), header->buffer_size);
     }
 
+    void set_string(const char* str, size_t len)
+    {
+        if (storage->has(uuid)) {
+            storage->remove(uuid);
+        }
+        auto data_size = len + 1;
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        std::vector<char> buffer(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        header->data_size = data_size;
+        header->type = HDC_STRING;
+        header->rank = 1;
+        header->shape[0] = len;
+        header->buffer_size = buffer_size;
+        memcpy(buffer.data() + sizeof(hdc_header_t), str, len);
+        *(buffer.data() + sizeof(hdc_header_t) + len) = '\0';
+        storage->set(uuid, buffer.data(), header->buffer_size);
+    }
+
     /**
     * @brief ...
     *
@@ -694,7 +724,7 @@ public:
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    void set_data_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
     /**
     * @brief ...
     *
@@ -703,7 +733,7 @@ public:
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    void set_external_c(std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_external_c(const std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
 
     /**
      * @brief ...
@@ -715,7 +745,7 @@ public:
      * @param flags p_flags:...
      */
     void
-    set_data_Py(std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
+    set_data_Py(const std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
 
     /**
      * @brief ...
@@ -727,7 +757,7 @@ public:
      * @param flags p_flags:...
      */
     void
-    set_external_Py(std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
+    set_external_Py(const std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
 
     /**
     * @brief ...
@@ -737,7 +767,7 @@ public:
     * @param type p_type: Type of the data (e.g. HDC_INT32)
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
-    void set_data_c(std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+    void set_data_c(const std::vector<size_t>& shape, const void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
 
     /**
     * @brief Sets scalar data to given node.
@@ -836,7 +866,7 @@ public:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void add_child(const std::string& path, HDC& n);
+    void add_child(const std::string& path, const HDC& n);
 
     /**
     * @brief Sets HDC subtree to given path.
@@ -844,7 +874,7 @@ public:
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
     */
-    void set_child(const std::string& path, HDC& n);
+    void set_child(const std::string& path, const HDC& n);
 
     /**
     * @brief ...
@@ -859,14 +889,16 @@ public:
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @param n p_n: HDC node
     */
-    void set_child(size_t index, HDC& n);
+    void set_child(size_t index, const HDC& n);
 
     /**
     * @brief Deletes HDC subtree.
     *
     * @param path p_path: path in the subtree of this node
     */
-    void delete_child(const std::string& path);
+    bool delete_child(const std::string& path, bool prune=false);
+
+    bool delete_slice(int index, bool prune=false);
 
     /**
     * @brief ...
@@ -898,14 +930,14 @@ public:
     * @param i p_i:...
     * @param h p_h:...
     */
-    void insert(size_t i, HDC& h);
+    void insert(size_t i, const HDC& h);
 
     /**
     * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
     *
     * @param h p_h:...
     */
-    void append(HDC& h);
+    void append(const HDC& h);
 
     /**
     * @brief Sets HDC type of current node.
@@ -1280,7 +1312,7 @@ public:
      * @param flags p_flags:...
      * @return HDC
      */
-    static HDC make_external(std::vector<size_t>& shape, hdc_type_t type, long flags);
+    static HDC make_external(const std::vector<size_t>& shape, hdc_type_t type, long flags);
 
     /**
     * @brief Returns pointer to storage of HDC object
@@ -1316,23 +1348,6 @@ public:
      * @param obj p_obj:...
      */
     void set_external(hdc_data_t obj);
-
-//     void set_parent(hdc_t parent) {
-//         auto buffer = get_buffer();
-//         auto header = reinterpret_cast<hdc_header_t*>(buffer);
-//         memcpy(&(header->parent),&parent,sizeof(hdc_t));
-//     }
-//
-//     void set_parent(HDC& parent) {
-//         return set_parent(parent.as_obj());
-//     }
-//
-//     HDC get_parent() {
-//         auto buffer = get_buffer();
-//         auto header = reinterpret_cast<hdc_header_t*>(buffer);
-//         hdc_t parent = header->parent;
-//         return HDC(parent);
-//     };
 };
 
 #endif // HDC_HPP
