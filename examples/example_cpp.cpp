@@ -6,18 +6,6 @@
 
 using namespace std;
 
-class THDC {
-    THDC(int size) {
-        std::cout << "AAA" << size << "\n";
-    }
-    THDC(): THDC(0lu) {};
-    THDC(HDCStorage* _storage, const std::string& _uuid): THDC(0lu) {}
-    template <typename T> THDC(std::vector<T> data, hdc_flags_t flags = HDCDefault) {}
-private:
-    boost::uuids::uuid uuid;
-    HDCStorage* storage;
-};
-
 int main()
 {
 
