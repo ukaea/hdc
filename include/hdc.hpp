@@ -44,7 +44,7 @@ using hdc_path_t = std::list<hdc_index_t>;
 
 class HDC {
 private:
-    std::string uuid;
+    boost::uuids::uuid uuid;
     HDCStorage* storage;
 
 /* ------------------------------- methods ----------------------------------------- */
@@ -229,9 +229,9 @@ public:
         header->buffer_size = buffer_size;
         header->shape[0] = data.size();
         memcpy(buffer.data() + sizeof(hdc_header_t), data.data(), data_size);
-        uuid = generate_uuid_str();
+        uuid = generate_uuid();
         storage = hdc_global.storage;
-        storage->set(uuid, buffer.data(), buffer_size);
+        storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), buffer_size);
     }
 
     /**
@@ -544,9 +544,9 @@ public:
         }
         auto buffer_size = data_size + sizeof(hdc_header_t);
         if (header->buffer_size == buffer_size) {
-            storage->lock(uuid);
+            storage->lock(boost::lexical_cast<uuid_str_t>(uuid));
             memcpy(buffer + sizeof(hdc_header_t), data, data_size);
-            storage->unlock(uuid);
+            storage->unlock(boost::lexical_cast<uuid_str_t>(uuid));
             return;
         } else {
             std::vector<char> new_buffer(buffer_size);
@@ -564,7 +564,7 @@ public:
             header->type = to_typeid(data[0]);
             header->rank = rank;
             memcpy(new_buffer.data() + sizeof(hdc_header_t), data, data_size);
-            storage->set(uuid, new_buffer.data(), buffer_size);
+            storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), buffer_size);
             return;
         }
     }
@@ -587,9 +587,9 @@ public:
         auto data_size = sizeof(void*);
         auto buffer_size = data_size + sizeof(hdc_header_t);
         if (header->buffer_size == buffer_size) {
-            storage->lock(uuid);
+            storage->lock(boost::lexical_cast<uuid_str_t>(uuid));
             memcpy(buffer + sizeof(hdc_header_t), &data, data_size);
-            storage->unlock(uuid);
+            storage->unlock(boost::lexical_cast<uuid_str_t>(uuid));
             return;
         } else {
             std::vector<char> new_buffer(buffer_size);
@@ -604,7 +604,7 @@ public:
             header->type = to_typeid(data[0]);
             header->rank = rank;
             memcpy(new_buffer.data() + sizeof(hdc_header_t), &data, data_size);
-            storage->set(uuid, new_buffer.data(), buffer_size);
+            storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), buffer_size);
             return;
         }
     }
@@ -681,8 +681,8 @@ public:
     */
     void set_string(const std::string& str)
     {
-        if (storage->has(uuid)) {
-            storage->remove(uuid);
+        if (storage->has(boost::lexical_cast<uuid_str_t>(uuid))) {
+            storage->remove(boost::lexical_cast<uuid_str_t>(uuid));
         }
         auto data_size = str.length() + 1;
         auto buffer_size = data_size + sizeof(hdc_header_t);
@@ -694,13 +694,13 @@ public:
         header->shape[0] = str.length();
         header->buffer_size = buffer_size;
         memcpy(buffer.data() + sizeof(hdc_header_t), str.c_str(), header->data_size);
-        storage->set(uuid, buffer.data(), header->buffer_size);
+        storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), header->buffer_size);
     }
 
     void set_string(const char* str, size_t len)
     {
-        if (storage->has(uuid)) {
-            storage->remove(uuid);
+        if (storage->has(boost::lexical_cast<uuid_str_t>(uuid))) {
+            storage->remove(boost::lexical_cast<uuid_str_t>(uuid));
         }
         auto data_size = len + 1;
         auto buffer_size = data_size + sizeof(hdc_header_t);
@@ -713,7 +713,7 @@ public:
         header->buffer_size = buffer_size;
         memcpy(buffer.data() + sizeof(hdc_header_t), str, len);
         *(buffer.data() + sizeof(hdc_header_t) + len) = '\0';
-        storage->set(uuid, buffer.data(), header->buffer_size);
+        storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), header->buffer_size);
     }
 
     /**
@@ -786,7 +786,7 @@ public:
         header->data_size = data_size;
         header->buffer_size = buffer_size;
         memcpy(buffer.data() + sizeof(hdc_header_t), &data, data_size);
-        storage->set(uuid, buffer.data(), buffer_size);
+        storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), buffer_size);
     }
 
     /**
@@ -805,7 +805,7 @@ public:
         header->data_size = data_size;
         header->buffer_size = buffer_size;
         memcpy(buffer.data() + sizeof(hdc_header_t), data, data_size);
-        storage->set(uuid, buffer.data(), buffer_size);
+        storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), buffer_size);
     }
 
     /**
@@ -970,8 +970,8 @@ public:
     T* as() const
     {
         DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
-        if (!storage->has(uuid)) {
-            throw HDCException("as(): Not found: " + uuid + "\n");
+        if (!storage->has(boost::lexical_cast<uuid_str_t>(uuid))) {
+            throw HDCException("as(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
         auto buffer = get_buffer();
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -1007,8 +1007,8 @@ public:
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
-        if (!storage->has(uuid)) {
-            throw HDCException("as_void_ptr(): Not found: " + uuid + "\n");
+        if (!storage->has(boost::lexical_cast<uuid_str_t>(uuid))) {
+            throw HDCException("as_void_ptr(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
         if (header.flags & HDCExternal) {
             void* result;
@@ -1034,8 +1034,8 @@ public:
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT(std::string("as_vector<") + get_type_str() + ">()");
-        if (!storage->has(uuid)) {
-            throw HDCException("as_vector(): Not found: " + uuid + "\n");
+        if (!storage->has(boost::lexical_cast<uuid_str_t>(uuid))) {
+            throw HDCException("as_vector(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
         auto data = buffer + sizeof(hdc_header_t);
         auto size_elem = hdc_sizeof(header->type);
@@ -1085,8 +1085,8 @@ public:
             throw std::runtime_error("This is not a terminal node...");
         }
         DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
-        if (!storage->has(uuid)) {
-            throw HDCException("as_scalar(): Not found: " + uuid + "\n");
+        if (!storage->has(boost::lexical_cast<uuid_str_t>(uuid))) {
+            throw HDCException("as_scalar(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
         T result;
         memcpy(&result, buffer + sizeof(hdc_header_t), sizeof(T));

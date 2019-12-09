@@ -42,7 +42,7 @@ using uuid_str_t = std::string;
 /* ------------------------- UUID generation ----------------------------- */
 
 void print_uuid(std::vector<char> uuid);
-std::vector<char> generate_uuid();
+boost::uuids::uuid generate_uuid();
 
 uuid_str_t generate_uuid_str();
 /* -------------------------  String manipulation ----------------------------- */

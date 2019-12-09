@@ -2,11 +2,31 @@
 #include "hdc.hpp"
 #include <vector>
 #include <string>
+#include <boost/functional/hash.hpp>
 
 using namespace std;
 
+class THDC {
+    THDC(int size) {
+        std::cout << "AAA" << size << "\n";
+    }
+    THDC(): THDC(0lu) {};
+    THDC(HDCStorage* _storage, const std::string& _uuid): THDC(0lu) {}
+    template <typename T> THDC(std::vector<T> data, hdc_flags_t flags = HDCDefault) {}
+private:
+    boost::uuids::uuid uuid;
+    HDCStorage* storage;
+};
+
 int main()
 {
+
+    std::cout << "is_trivial " << std::is_trivial<HDC>::value << '\n';
+    std::cout << "is_trivially_copyable " << std::is_trivially_copyable<HDC>::value << '\n';
+    std::cout << "is_standard_layout " << std::is_standard_layout<HDC>::value << '\n';
+    std::cout << "is_pod " << std::is_pod<HDC>::value << '\n';
+    return 0;
+
     HDC::init();
     // Create new HDC tree
     HDC tree;

@@ -18,6 +18,13 @@ uuid_str_t generate_uuid_str()
     return boost::lexical_cast<uuid_str_t>(u);
 }
 
+boost::uuids::uuid generate_uuid()
+{
+    boost::uuids::basic_random_generator<boost::mt19937> gen(&(hdc_global.ran));
+    boost::uuids::uuid u = gen();
+    return u;
+}
+
 /* -------------------------  String manipulation ----------------------------- */
 
 hdc_path_t split(const std::string& s)
