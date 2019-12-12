@@ -7,6 +7,8 @@
 #include <iostream>
 #include <cstdio>
 #include <hdc_helpers.h>
+#include <boost/uuid/uuid.hpp>
+#include <boost/lexical_cast.hpp>
 
 class HDCStorage {
 private:
@@ -54,36 +56,36 @@ public:
         return _store->get_settings();
     }
 
-    void set(const std::string& path, char* data, size_t size) {
-        _store->set(path, data, size);
+    void set(boost::uuids::uuid uuid, char* data, size_t size) {
+        _store->set(uuid, data, size);
     }
 
-    char* get(const std::string& path) {
-        return _store->get(path);
+    char* get(boost::uuids::uuid uuid) {
+        return _store->get(uuid);
     }
 
     void cleanup() {
         _store->cleanup();
     }
 
-    size_t get_size(const std::string& path) {
-        return _store->get_size(path);
+    size_t get_size(boost::uuids::uuid uuid) {
+        return _store->get_size(uuid);
     }
 
-    bool has(const std::string& path) {
-        return _store->has(path);
+    bool has(boost::uuids::uuid uuid) {
+        return _store->has(uuid);
     }
 
-    void remove(const std::string& path) {
-        _store->remove(path);
+    void remove(boost::uuids::uuid uuid) {
+        _store->remove(uuid);
     }
 
-    void lock(const std::string& path) {
-        _store->lock(path);
+    void lock(boost::uuids::uuid uuid) {
+        _store->lock(uuid);
     }
 
-    void unlock(const std::string& path) {
-        _store->unlock(path);
+    void unlock(boost::uuids::uuid uuid) {
+        _store->unlock(uuid);
     }
 
     bool locked() {

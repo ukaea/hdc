@@ -16,10 +16,22 @@ struct datum {
     size_t dsize;               /**< Number of bytes */
 };
 
+namespace std
+{
+    template<>
+    struct hash<boost::uuids::uuid>
+    {
+        size_t operator () (const boost::uuids::uuid& uid)
+        {
+            return boost::hash<boost::uuids::uuid>()(uid);
+        }
+    };
+}
+
 class UnorderedMapStorage : public Storage {
 private:
-    std::unordered_map<std::string, std::vector<char> > _map;
-
+    //std::unordered_map<std::string, std::vector<char> > _map;
+    std::unordered_map<boost::uuids::uuid, std::vector<char>, boost::hash<boost::uuids::uuid>> _map;
 public:
     UnorderedMapStorage() {
         DEBUG_STDOUT("UnorderedMapStorage()\n");
@@ -29,9 +41,9 @@ public:
         DEBUG_STDOUT("~UnorderedMapStorage()\n");
     }
 
-    void lock(std::string path UNUSED) override {}
+    void lock(boost::uuids::uuid uuid UNUSED) override {}
 
-    void unlock(std::string path UNUSED) override {}
+    void unlock(boost::uuids::uuid uuid UNUSED) override {}
 
     bool locked() override {
         return false;
@@ -47,30 +59,30 @@ public:
         return "{}";
     }
 
-    void set(std::string key, char* data, size_t size) override {
-        if (_map.find(key) != _map.end() && &(_map[key])[0] != data) {
-            _map.erase(key);
+    void set(boost::uuids::uuid uuid, char* data, size_t size) override {
+        if (_map.find(uuid) != _map.end() && &(_map[uuid])[0] != data) {
+            _map.erase(uuid);
         }
-        //_map[key] = {data,size};
-        _map.emplace(key, std::vector<char>(data,data+size));
+        //_map[uuid] = {data,size};
+        _map.emplace(uuid, std::vector<char>(data,data+size));
     };
 
-    char* get(std::string key) override {
-        if (_map.find(key) == _map.end()) {
-            throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
+    char* get(boost::uuids::uuid uuid) override {
+        if (_map.find(uuid) == _map.end()) {
+            throw std::runtime_error("UnorderedMapStorage::get("+boost::lexical_cast<std::string>(uuid)+"): not found\n");
         }
-        return &(_map[key])[0];
+        return &(_map[uuid])[0];
     }
 
-    size_t get_size(std::string key) override {
-        if (_map.find(key) == _map.end()) {
-            throw std::runtime_error("UnorderedMapStorage::get("+key+"): not found\n");
+    size_t get_size(boost::uuids::uuid uuid) override {
+        if (_map.find(uuid) == _map.end()) {
+            throw std::runtime_error("UnorderedMapStorage::get("+boost::lexical_cast<std::string>(uuid)+"): not found\n");
         }
-        return _map[key].size();
+        return _map[uuid].size();
     }
 
-    bool has(std::string key) override {
-        return (_map.find(key) != _map.end());
+    bool has(boost::uuids::uuid uuid) override {
+        return (_map.find(uuid) != _map.end());
     }
 
     void cleanup () override {
@@ -78,9 +90,9 @@ public:
         _map.clear();
     }
 
-    void remove(std::string key) override {
-        if (has(key)) {
-            _map.erase(key);
+    void remove(boost::uuids::uuid uuid) override {
+        if (has(uuid)) {
+            _map.erase(uuid);
         }
     }
 

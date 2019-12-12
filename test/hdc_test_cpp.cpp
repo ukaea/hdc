@@ -188,6 +188,7 @@ TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
 TEST_CASE("SetExternal", "[HDC]")
 {
     HDC node, external, e2, e3;
+
     int64_t array_in[4] = { 7, 2, 3, 4 };
     std::vector<size_t> shape = {4};
     node.set_data(shape,array_in);
@@ -231,13 +232,11 @@ TEST_CASE("SetExternal", "[HDC]")
     e3.set_external(data2);
     array_out = e3.as<int64_t>();
     CHECK(*array_in2 == *array_out);
-
-    //constructor
-    data2.flags |= HDCExternal;
-    HDC e5(data2);
-    array_out = e5.as<int64_t>();
-    CHECK(*array_in2 == *array_out);
-
+   //constructor
+   data2.flags |= HDCExternal;
+   HDC e5(data2);
+   array_out = e5.as<int64_t>();
+   CHECK(*array_in2 == *array_out);
 }
 
 TEMPLATE_TEST_CASE("as_vector_int8", "[HDC]", ALL_NUMERIC_TYPES) {
@@ -563,7 +562,10 @@ TEST_CASE("GetChildren", "[HDC]")
         HDC ch(str);
         h.add_child(str,ch);
     }
+    h.dump();
     auto children = h.get_children();
+    std::cerr << "shape = " << h.get_shape()[0] << std::endl;
+    h.dump();
     CHECK(children.size() == lst.size());
     for (size_t i=0;i<children.size();i++) {
         CHECK(strcmp(h[lst[i]].as_string().c_str(),lst[i].c_str()) == 0);
@@ -592,8 +594,8 @@ TEST_CASE("clean", "[HDC]")
     tree["ch"] = HDC();
     auto ch_uuid = tree["ch"].get_uuid();
     tree.clean();
-    CHECK(hdc_global.storage->has(uuid) == false);
-    CHECK(hdc_global.storage->has(ch_uuid) == false);
+    CHECK(hdc_global.storage->has(boost::lexical_cast<boost::uuids::uuid>(uuid)) == false);
+    CHECK(hdc_global.storage->has(boost::lexical_cast<boost::uuids::uuid>(ch_uuid)) == false);
 }
 
 TEST_CASE("load", "[HDC]")

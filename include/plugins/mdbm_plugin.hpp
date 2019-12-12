@@ -40,15 +40,15 @@ public:
         } else std::cout << "Storage has been set persistent. The data are stored in file \"" << filename << "\""<< std::endl;
     }
 
-    void lock(std::string path) override {
+    void lock(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         mdbm_lock_smart (this->db, &key, 0);
     }
 
-    void unlock(std::string path) override {
+    void unlock(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         mdbm_unlock_smart (this->db, &key, 0);
     }
 
@@ -72,34 +72,34 @@ public:
         return ss.str();
     }
 
-    void set(std::string path, char* data, size_t size) override {
+    void set(boost::uuids::uuid _uuid, char* data, size_t size) override {
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         datum value = {(char*)data, static_cast<int>(size)};
         mdbm_lock_smart (this->db, &key, 0);
         mdbm_store(this->db,key,value,MDBM_REPLACE);
         mdbm_unlock_smart (this->db, &key, 0);
     }
 
-    char* get(std::string path) override {
+    char* get(boost::uuids::uuid _uuid) override {
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         datum found = mdbm_fetch(this->db, key);
         if (found.dptr == NULL || found.dsize == 0) {
-            throw std::runtime_error("MDBMStorage::get(\""+path+"\"): not found\n");
+            throw std::runtime_error("MDBMStorage::get(\""+boost::lexical_cast<std::string>(_uuid)+"\"): not found\n");
         }
         return (char*) found.dptr;
     }
 
-    size_t get_size(std::string path) override {
+    size_t get_size(boost::uuids::uuid _uuid) override {
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         datum found = mdbm_fetch(this->db, key);
         return found.dsize;
     }
@@ -121,19 +121,19 @@ public:
         initialized = false;
     }
 
-    bool has(std::string path) override {
+    bool has(boost::uuids::uuid _uuid) override {
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         return (mdbm_fetch(this->db, key).dsize != 0);
     }
 
-    void remove(std::string path) override {
+    void remove(boost::uuids::uuid _uuid) override {
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { &path[0u], static_cast<int>(path.length()) };
+        datum key = { (char*)(&_uuid), _uuid.size() };
         mdbm_delete(this->db,key);
     }
 

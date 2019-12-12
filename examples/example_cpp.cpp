@@ -8,6 +8,19 @@ using namespace std;
 
 int main()
 {
+    HDC::init("mdbm","{\"filename\": \"/tmp/db.mdbm\", \"persistent\": false}");
+    std::vector<std::string> lst = {"aaa","bbb","ccc","ddd"};
+    HDC h;
+    for (const auto& str: lst) {
+        HDC ch(str);
+        h.add_child(str,ch);
+    }
+    auto children = h.get_children();
+    std::cout << (children.size() == lst.size()) << std::endl;
+    for (size_t i=0;i<children.size();i++) {
+        std::cout << (strcmp(h[lst[i]].as_string().c_str(),lst[i].c_str()) == 0) << std::endl;
+    }
+    return 0;
 
     std::cout << "is_trivial " << std::is_trivial<HDC>::value << '\n';
     std::cout << "is_trivially_copyable " << std::is_trivially_copyable<HDC>::value << '\n';

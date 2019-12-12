@@ -14,7 +14,6 @@
 #include <boost/random/random_device.hpp>
 #include <boost/random.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
 #include "hdc_types.h"
 #include "hdc_errors.hpp"

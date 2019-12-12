@@ -171,7 +171,7 @@ HDC::HDC(size_t data_size)
     //Store to some storage
     uuid = generate_uuid();
     storage = hdc_global.storage;
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), buffer_size);
+    storage->set(uuid, buffer.data(), buffer_size);
 }
 
 /** Default constructor. Creates empty HDC */
@@ -199,7 +199,7 @@ HDC::HDC(const std::vector<size_t>& shape, hdc_type_t type, hdc_flags_t flags)
     for (size_t i = 0; i < rank; i++) header->shape[i] = shape[i];
     uuid = generate_uuid();
     storage = hdc_global.storage;
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), buffer_size);
+    storage->set(uuid, buffer.data(), buffer_size);
 }
 
 HDC::HDC(hdc_data_t obj)
@@ -227,7 +227,7 @@ HDC::HDC(hdc_data_t obj)
     }
     uuid = generate_uuid();
     storage = hdc_global.storage;
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), buffer_size);
+    storage->set(uuid, buffer.data(), header->buffer_size);
 }
 
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
@@ -247,7 +247,7 @@ HDC::HDC(const std::string& str) : HDC()
 
     uuid = generate_uuid();
     storage = hdc_global.storage;
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer.data(), header->buffer_size);
+    storage->set(uuid, buffer.data(), header->buffer_size);
 }
 
 /** Copy constructor */
@@ -504,7 +504,7 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
                     throw HDCException("grow called, but buffer == new_buffer.\n");
                 }
                 //if (!storage->usesBuffersDirectly()) delete[] buffer;
-                storage->remove(boost::lexical_cast<uuid_str_t>(uuid));
+                storage->remove(uuid);
                 buffer = new_buffer.data();
                 header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
                 segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
@@ -517,7 +517,7 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
         }
         header->shape[0] = children->size();
         if (header->buffer_size != old_size) {
-            storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer, header->buffer_size);
+            storage->set(uuid, buffer, header->buffer_size);
         }
     }
 }
@@ -525,8 +525,7 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
 std::vector<std::string> HDC::keys() const
 {
     std::vector<std::string> k;
-    hdc_map_t* children;
-    children = get_children_ptr();
+    hdc_map_t* children = get_children_ptr();
     if (children == nullptr) return k;
     k.reserve(children->size());
     auto& ri = children->get<by_index>();
@@ -552,13 +551,13 @@ void HDC::clean()
             if (children == nullptr) return;
             for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
                 //HDC(this->storage,it->key.c_str()).clean();
-                storage->remove(it->address.c_str());
+                storage->remove(boost::lexical_cast<boost::uuids::uuid>(it->address));
             }
         } catch (...) {
             return;
         }
     }
-    storage->remove(boost::lexical_cast<uuid_str_t>(uuid)); // This is responsibility of storage from now
+    storage->remove(uuid); // This is responsibility of storage from now
 }
 
 bool HDC::delete_child(hdc_path_t& path, bool prune)
@@ -585,13 +584,13 @@ bool HDC::delete_child(hdc_path_t& path, bool prune)
             }
             auto it = children->find(str);
             if (it != children->end()) {
-                storage->remove(it->address.c_str());
+                storage->remove(boost::lexical_cast<boost::uuids::uuid>(it->address));
                 children->erase(it);
             }
         } else {
             size_t i = boost::get<size_t>(first);
             auto record = children->get<by_index>()[i];
-            storage->remove(record.address.c_str());
+            storage->remove(boost::lexical_cast<boost::uuids::uuid>(record.address));
             auto it = children->find(record.key);
             children->erase(it);
             //children->erase(children->iterator_to(it));
@@ -796,7 +795,7 @@ HDC& HDC::operator=(const HDC& other)
 
 HDC& HDC::operator=(HDC&& other) noexcept
 {
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), other.storage->get(boost::lexical_cast<uuid_str_t>(other.uuid)), other.storage->get_size(boost::lexical_cast<uuid_str_t>(other.uuid)));
+    storage->set(uuid, other.storage->get(other.uuid), other.storage->get_size(other.uuid));
 //    other.storage->set(other.uuid, nullptr, 0);
     uuid = std::move(other.uuid);
     storage = std::exchange(other.storage, nullptr);
@@ -918,7 +917,7 @@ void HDC::set_type(hdc_type_t type)
     auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(), hdc_map_t::allocator_type(
             segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
     if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), dest_buffer, header->buffer_size);
+    storage->set(uuid, dest_buffer, header->buffer_size);
 }
 
 void HDC::dump() const
@@ -958,9 +957,9 @@ void HDC::set_data_c(const std::vector<size_t>& shape, void* data, hdc_type_t ty
     }
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header->buffer_size == buffer_size) {
-        storage->lock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), data, data_size);
-        storage->unlock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->unlock(uuid);
     } else {
         std::vector<char> new_buffer(buffer_size);
         header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
@@ -974,7 +973,7 @@ void HDC::set_data_c(const std::vector<size_t>& shape, void* data, hdc_type_t ty
         header->type = type;
         header->rank = rank;
         memcpy(new_buffer.data() + sizeof(hdc_header_t), data, header->data_size);
-        storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), header->buffer_size);
+        storage->set(uuid, new_buffer.data(), header->buffer_size);
     }
 }
 
@@ -987,9 +986,9 @@ void HDC::set_external_c(const std::vector<size_t>& shape, void* data, hdc_type_
     auto data_size = sizeof(void*);
     auto buffer_size = data_size + sizeof(hdc_header_t);
     if (header->buffer_size == buffer_size) {
-        storage->lock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), &data, data_size);
-        storage->unlock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->unlock(uuid);
         return;
     } else {
         std::vector<char> new_buffer(buffer_size);
@@ -1004,7 +1003,7 @@ void HDC::set_external_c(const std::vector<size_t>& shape, void* data, hdc_type_
         header->type = type;
         header->rank = rank;
         memcpy(new_buffer.data() + sizeof(hdc_header_t), &data, data_size);
-        storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), buffer_size);
+        storage->set(uuid, new_buffer.data(), buffer_size);
         return;
     }
 }
@@ -1078,7 +1077,7 @@ void HDC::insert(size_t index, const HDC& h)
                 throw HDCException("grow called, but buffer == new_buffer.\n");
             }
             //if (!storage->usesBuffersDirectly()) delete[] buffer;
-            storage->remove(boost::lexical_cast<uuid_str_t>(uuid));
+            storage->remove(uuid);
             buffer = new_buffer.data();
             header = reinterpret_cast<hdc_header_t*>(buffer);
             segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
@@ -1091,7 +1090,7 @@ void HDC::insert(size_t index, const HDC& h)
     }
     header->shape[0] = children->size();
     if (header->buffer_size != old_size) {
-        storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer, header->buffer_size);
+        storage->set(uuid, buffer, header->buffer_size);
     }
 }
 
@@ -1195,14 +1194,14 @@ size_t HDC::get_rank() const
 
 char* HDC::get_buffer() const
 {
-    return storage->get(boost::lexical_cast<uuid_str_t>(uuid));
+    return storage->get(uuid);
 }
 
 void HDC::set_buffer(char* buffer)
 {
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
     auto size = header->buffer_size;
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), buffer, size);
+    storage->set(uuid, buffer, size);
 }
 
 string HDC::get_uuid() const
@@ -1230,8 +1229,10 @@ std::map<std::string, HDC> HDC::get_children() const
     std::map<std::string, HDC> ch;
     if (children != nullptr) {
         size_t n = children->size(), i = 0;
+        std::cerr << "n = " << n << std::endl;
         for (auto it = children->begin(); it != children->end(); ++it) {
             if (i++ == n) break;
+            std::cerr << "\"" << it->key.c_str() << "\": \"" <<  it->address.c_str() << "\"\n";
             ch[it->key.c_str()] = HDC(storage, it->address.c_str());
         }
     }
@@ -1268,7 +1269,7 @@ void HDC::grow(size_t extra_size)
     D(printf("Growing %luB->%luB\n", header->data_size, new_size);)
     vector<char> new_buffer = buffer_grow(old_buffer, extra_size);
     header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
-    storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), new_size);
+    storage->set(uuid, new_buffer.data(), new_size);
 }
 
 /* grows buffer provided buffer (copies to larger), it does nothing if extra_size <= 0.*/
@@ -1461,14 +1462,14 @@ void HDC::set_data(hdc_data_t obj)
     for (size_t i = 0; i < obj.rank; i++) data_size *= obj.shape[i];
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header->buffer_size == buffer_size) {
-        storage->lock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->lock(uuid);
         header->type = obj.type;
         header->flags = obj.flags;
         memcpy(buffer + sizeof(hdc_header_t), obj.data, data_size);
-        storage->unlock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->unlock(uuid);
         return;
     } else {
-        storage->remove(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->remove(uuid);
         std::vector<char> new_buffer(buffer_size);
         header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
         header->type = obj.type;
@@ -1479,7 +1480,7 @@ void HDC::set_data(hdc_data_t obj)
         header->data_size = data_size;
         header->buffer_size = buffer_size;
         memcpy(new_buffer.data() + sizeof(hdc_header_t), obj.data, header->data_size);
-        storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), header->buffer_size);
+        storage->set(uuid, new_buffer.data(), header->buffer_size);
     }
 }
 
@@ -1491,15 +1492,15 @@ void HDC::set_external(hdc_data_t obj)
     size_t data_size = sizeof(intptr_t);
     size_t buffer_size = data_size + sizeof(hdc_header_t);
     if (header->buffer_size == buffer_size) {
-        storage->lock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->lock(uuid);
         header->type = obj.type;
         header->flags = obj.flags | HDCExternal;
         memcpy(buffer, header, sizeof(hdc_header_t));
         memcpy(buffer + sizeof(hdc_header_t), &(obj.data), data_size);
-        storage->unlock(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->unlock(uuid);
         return;
     } else {
-        storage->remove(boost::lexical_cast<uuid_str_t>(uuid));
+        storage->remove(uuid);
         std::vector<char> new_buffer(buffer_size);
         header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
         header->type = obj.type;
@@ -1510,7 +1511,7 @@ void HDC::set_external(hdc_data_t obj)
         for (size_t i = 0; i < header->rank; i++) header->shape[i] = obj.shape[i];
         header->buffer_size = buffer_size;
         memcpy(new_buffer.data() + sizeof(hdc_header_t), &(obj.data), header->data_size);
-        storage->set(boost::lexical_cast<uuid_str_t>(uuid), new_buffer.data(), header->buffer_size);
+        storage->set(uuid, new_buffer.data(), header->buffer_size);
     }
 }
 
@@ -1557,7 +1558,7 @@ HDC HDC::copy(const HDC& h, bool deep_copy)
             c_children->insert(rec);
         }
     }
-    storage->set(boost::lexical_cast<uuid_str_t>(c_uuid), c_buffer.data(), c_header->buffer_size);
+    storage->set(c_uuid, c_buffer.data(), c_header->buffer_size);
     return HDC(storage, boost::lexical_cast<uuid_str_t>(c_uuid));
 }
 
