@@ -1022,8 +1022,7 @@ hdc_t HDC::as_obj()
 {
     hdc_t res;
     res.storage_id = storage->id();
-    std::string uuid_str = boost::lexical_cast<uuid_str_t>(uuid);
-    strcpy(res.uuid, uuid_str.c_str());
+    strcpy(res.uuid, boost::lexical_cast<uuid_str_t>(uuid).c_str());
     return res;
 }
 
@@ -1225,15 +1224,21 @@ hdc_map_t* HDC::get_children_ptr() const
 
 std::map<std::string, HDC> HDC::get_children() const
 {
-    auto children = get_children_ptr();
+    //TODO: try to get rid of this extra copy
+    auto buffer = storage->get(uuid);
+    auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    char buffer2[header->buffer_size];
+    memcpy(buffer2,buffer,header->buffer_size);
+    bip::managed_external_buffer segment(bip::open_only, buffer2 + sizeof(hdc_header_t), 0);
+    hdc_map_t* children = segment.find<hdc_map_t>("d").first;
+
     std::map<std::string, HDC> ch;
     if (children != nullptr) {
         size_t n = children->size(), i = 0;
-        std::cerr << "n = " << n << std::endl;
         for (auto it = children->begin(); it != children->end(); ++it) {
             if (i++ == n) break;
-            std::cerr << "\"" << it->key.c_str() << "\": \"" <<  it->address.c_str() << "\"\n";
-            ch[it->key.c_str()] = HDC(storage, it->address.c_str());
+            HDC node(this->get_storage(), it->address.c_str());
+            ch[it->key.c_str()] = node;
         }
     }
     return ch;

@@ -562,10 +562,7 @@ TEST_CASE("GetChildren", "[HDC]")
         HDC ch(str);
         h.add_child(str,ch);
     }
-    h.dump();
     auto children = h.get_children();
-    std::cerr << "shape = " << h.get_shape()[0] << std::endl;
-    h.dump();
     CHECK(children.size() == lst.size());
     for (size_t i=0;i<children.size();i++) {
         CHECK(strcmp(h[lst[i]].as_string().c_str(),lst[i].c_str()) == 0);
