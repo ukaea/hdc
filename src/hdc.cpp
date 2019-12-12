@@ -558,7 +558,7 @@ void HDC::clean()
             if (children == nullptr) return;
             for (hdc_map_t::iterator it = children->begin(); it != children->end(); ++it) {
                 //HDC(this->storage,it->key.c_str()).clean();
-                storage->remove(boost::lexical_cast<boost::uuids::uuid>(it->address));
+                storage->remove(it->address);
             }
         } catch (...) {
             return;
@@ -591,13 +591,13 @@ bool HDC::delete_child(hdc_path_t& path, bool prune)
             }
             auto it = children->find(str);
             if (it != children->end()) {
-                storage->remove(boost::lexical_cast<boost::uuids::uuid>(it->address));
+                storage->remove(it->address);
                 children->erase(it);
             }
         } else {
             size_t i = boost::get<size_t>(first);
             auto record = children->get<by_index>()[i];
-            storage->remove(boost::lexical_cast<boost::uuids::uuid>(record.address));
+            storage->remove(record.address);
             auto it = children->find(record.key);
             children->erase(it);
             //children->erase(children->iterator_to(it));
@@ -1571,7 +1571,7 @@ HDC HDC::copy(const HDC& h, bool deep_copy)
         }
     }
     storage->set(c_uuid, c_buffer.data(), c_header->buffer_size);
-    return HDC(storage, boost::lexical_cast<uuid_str_t>(c_uuid));
+    return HDC(storage, c_uuid);
 }
 
 namespace {
