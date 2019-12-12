@@ -221,7 +221,7 @@ flatbuffers::Offset<HDCBuffer> write_node(const HDC& hdc, flatbuffers::FlatBuffe
 
             for (const auto& child : hdc_children->get<1>()) {
                 auto key = child.key;
-                auto uuid = child.address.c_str();
+                auto uuid = child.address;
                 auto node = write_node(HDC(hdc_global.storage, uuid), builder);
                 auto elem = CreateDictItem(builder, builder.CreateString(key), node);
                 children_vec.push_back(elem);
@@ -239,7 +239,7 @@ flatbuffers::Offset<HDCBuffer> write_node(const HDC& hdc, flatbuffers::FlatBuffe
             std::vector<flatbuffers::Offset<HDCBuffer>> children_vec;
 
             for (const auto& child : hdc_children->get<1>()) {
-                auto uuid = child.address.c_str();
+                auto uuid = child.address;
                 auto node = write_node(HDC(hdc_global.storage, uuid), builder);
                 children_vec.push_back(node);
             }

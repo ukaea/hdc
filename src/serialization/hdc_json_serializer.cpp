@@ -160,7 +160,7 @@ Json::Value to_json(const HDC& hdc, int mode)
             case HDC_STRUCT: {
                 auto children = hdc.get_children_ptr();
                 for (auto it = children->begin(); it != children->end(); ++it) {
-                    HDC node(hdc.get_storage(), it->address.c_str());
+                    HDC node(hdc.get_storage(), it->address);
                     root[it->key.c_str()] = to_json(node, mode);
                 }
                 break;

@@ -192,6 +192,14 @@ public:
     HDC(HDCStorage* _storage, const std::string& _uuid);
 
     /**
+    * @brief Intermediate node constructor from boost::uuids::uuid
+    *
+    * @param _storage p__storage:...
+    * @param _uuid p__uuid:...
+    */
+    HDC(HDCStorage* _storage, boost::uuids::uuid _uuid);
+
+    /**
     * @brief Constructs HDC object from hdc_obj_t struct - C/FORTRAN interoperability
     *
     * @param obj p_obj:...

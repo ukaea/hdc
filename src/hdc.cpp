@@ -273,6 +273,13 @@ HDC::HDC(HDCStorage* _storage, const std::string& _uuid)
     storage = _storage;
 }
 
+HDC::HDC(HDCStorage* _storage, boost::uuids::uuid _uuid)
+{
+    HDC_STORAGE_INIT()
+    uuid = _uuid;
+    storage = _storage;
+}
+
 HDC::HDC(hdc_t& obj)
 {
     HDC_STORAGE_INIT()
@@ -411,7 +418,7 @@ bool HDC::exists(hdc_path_t& path) const
                 size_t index = boost::get<size_t>(first);
                 if (children->size() <= index) return false;
                 auto it = children->get<by_index>()[index];
-                HDC child(storage, it.address.c_str());
+                HDC child(storage, it.address);
                 return child.exists(path);
             } catch (std::exception& e) {
                 std::cerr << "exists(): Caught exception: index" << "\n";
@@ -422,7 +429,7 @@ bool HDC::exists(hdc_path_t& path) const
             try {
                 auto it = children->find(boost::get<std::string>(first).c_str());
                 if (it != children->end()) {
-                    HDC ch(storage, it->address.c_str());
+                    HDC ch(storage, it->address);
                     return ch.exists(path);
                 } else { return false; }
             } catch (...) {
@@ -678,7 +685,7 @@ HDC HDC::get_single(hdc_index_t index)
         auto str = boost::get<std::string>(index).c_str();
         if (strlen(str) == 0) return *this;
         if (children->count(str)) {
-            return HDC(storage, children->find(str)->address.c_str());
+            return HDC(storage, children->find(str)->address);
         } else {
             throw HDCException("get(std::string): Not found\n");
         }
@@ -687,7 +694,7 @@ HDC HDC::get_single(hdc_index_t index)
         if (i >= children->size()) {
             throw HDCException("get(index): index > size()\n");
         }
-        return HDC(storage, children->get<by_index>()[i].address.c_str());
+        return HDC(storage, children->get<by_index>()[i].address);
     }
 }
 
@@ -701,7 +708,7 @@ HDC HDC::get_single(hdc_index_t index) const
         auto str = boost::get<std::string>(index).c_str();
         if (strlen(str) == 0) return *this;
         if (children->count(str)) {
-            return HDC(storage, children->find(str)->address.c_str());
+            return HDC(storage, children->find(str)->address);
         } else {
             throw HDCException("get(std::string): Not found\n");
         }
@@ -710,7 +717,7 @@ HDC HDC::get_single(hdc_index_t index) const
         if (i >= children->size()) {
             throw HDCException("get(index): index > size()\n");
         }
-        return HDC(storage, children->get<by_index>()[i].address.c_str());
+        return HDC(storage, children->get<by_index>()[i].address);
     }
 }
 
@@ -1237,7 +1244,7 @@ std::map<std::string, HDC> HDC::get_children() const
         size_t n = children->size(), i = 0;
         for (auto it = children->begin(); it != children->end(); ++it) {
             if (i++ == n) break;
-            HDC node(this->get_storage(), it->address.c_str());
+            HDC node(this->get_storage(), it->address);
             ch[it->key.c_str()] = node;
         }
     }
@@ -1256,7 +1263,7 @@ std::vector<HDC> HDC::get_slices() const
     if (children != nullptr) {
         ch.reserve(children->size());
         for (auto it = children->begin(); it != children->end(); ++it) {
-            ch.push_back(HDC(storage, it->address.c_str()));
+            ch.push_back(HDC(storage, it->address));
         }
     }
     return ch;
@@ -1303,7 +1310,7 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
                                                                             new_segment.get_segment_manager());
             hdc_map_t::nth_index<1>::type& ri = old_children->get<1>();
             for (auto it = ri.begin(); it != ri.end(); ++it) {
-                record rec(it->key.c_str(), it->address.c_str(), new_segment.get_segment_manager());
+                record rec(it->key.c_str(), it->address, new_segment.get_segment_manager());
                 new_children->insert(rec);
             }
         }
@@ -1552,9 +1559,9 @@ HDC HDC::copy(const HDC& h, bool deep_copy)
                                                                     hdc_map_t::allocator_type(
                                                                             c_segment.get_segment_manager()));
         // The children seem to have to be copied before iterating over them, otherwise the recursion fails and we get multiple instances of deepest terminal nodes spreaded all over the tree copy..
-        std::vector<std::pair<std::string, std::string>> children_list;
+        std::vector<std::pair<std::string, boost::uuids::uuid>> children_list;
         for (hdc_map_t::iterator it = h_children->get<by_key>().begin(); it != h_children->get<by_key>().end(); ++it) {
-            children_list.emplace_back(std::make_pair(it->key.c_str(), it->address.c_str()));
+            children_list.emplace_back(std::make_pair(it->key.c_str(), it->address));
         }
         for (auto it: children_list) {
             HDC n(storage, it.second);

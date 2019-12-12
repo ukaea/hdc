@@ -27,6 +27,12 @@
 
 #include <boost/aligned_storage.hpp>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/lexical_cast.hpp>
+
 // Allocator definition
 typedef boost::interprocess::managed_external_buffer::allocator<char>::type char_allocator;
 
@@ -78,23 +84,29 @@ struct by_sequence {
 
 // We want to store (key,address) pairs
 struct record {
-    record(const char* _key, const char* _address, const char_allocator& a) : key(_key, a), address(_address, a)
+    record(const char* _key, const char* _address, const char_allocator& a) : key(_key, a), address(boost::lexical_cast<boost::uuids::uuid>(_address))
     {};
 
     record(std::string& _key, std::string& _address, const char_allocator& a) : key(_key.c_str(), a),
-                                                                                address(_address.c_str(), a)
+                                                                                address(boost::lexical_cast<boost::uuids::uuid>(_address))
     {};
 
     record(std::string& _key, const char* _address, const char_allocator& a) : key(_key.c_str(), a),
-                                                                               address(_address, a)
+                                                                               address(boost::lexical_cast<boost::uuids::uuid>(_address))
     {};
 
     record(const char* _key, std::string& _address, const char_allocator& a) : key(_key, a),
-                                                                               address(_address.c_str(), a)
+                                                                               address(boost::lexical_cast<boost::uuids::uuid>(_address))
+    {};
+    record(std::string& _key, boost::uuids::uuid _address, const char_allocator& a) : key(_key.c_str(), a),
+                                                                               address(_address)
     {};
 
+    record(const char* _key, boost::uuids::uuid _address, const char_allocator& a) : key(_key, a),
+                                                                               address(_address)
+    {};
     shared_string key;
-    shared_string address;
+    boost::uuids::uuid address;
 
     friend std::ostream& operator<<(std::ostream& os, const record& r)
     {
@@ -110,7 +122,7 @@ struct change_node {
 
     void operator()(record& r)
     {
-        r.address = new_address;
+        r.address = boost::lexical_cast<boost::uuids::uuid>(new_address);
     }
 
 private:
