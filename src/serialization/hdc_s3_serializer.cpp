@@ -215,7 +215,7 @@ void S3Serializer::write_node(const HDC& hdc, const char* host, const char* buck
         if (hdc_children != nullptr) {
             for (const auto& child : hdc_children->get<1>()) {
                 auto key = child.key;
-                auto uuid = child.address.c_str();
+                auto uuid = child.address;
                 write_node(HDC(hdc_global.storage, uuid), host, bucket, path + "/" + key.c_str());
             }
         }
@@ -225,7 +225,7 @@ void S3Serializer::write_node(const HDC& hdc, const char* host, const char* buck
         if (hdc_children != nullptr) {
             int index = 0;
             for (const auto& child : hdc_children->get<1>()) {
-                auto uuid = child.address.c_str();
+                auto uuid = child.address;
                 write_node(HDC(hdc_global.storage, uuid), host, bucket, path + "/" + list_identifier_ + std::to_string(index));
                 ++index;
             }
