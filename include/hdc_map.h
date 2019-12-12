@@ -133,7 +133,7 @@ private:
 using hdc_map_t = boost::multi_index::multi_index_container<
         record,
         boost::multi_index::indexed_by<
-                boost::multi_index::hashed_non_unique< // TODO unique here??
+                boost::multi_index::hashed_non_unique<
                         boost::multi_index::tag<by_key>,
                         boost::multi_index::member<
                                 record, shared_string, &record::key
@@ -145,9 +145,6 @@ using hdc_map_t = boost::multi_index::multi_index_container<
                 >,
                 boost::multi_index::random_access<
                         boost::multi_index::tag<by_index>
-                >,
-                boost::multi_index::sequenced< // TODO remove this??
-                        boost::multi_index::tag<by_sequence>
                 >
         >,
         boost::interprocess::managed_external_buffer::allocator<record>::type // our allocator
