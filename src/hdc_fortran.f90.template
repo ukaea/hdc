@@ -4,7 +4,7 @@ module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        character(kind=c_char) :: uuid(37)
+        character(kind=c_char) :: uuid(16)
         integer(kind=c_size_t) :: storage_id
     end type hdc_t
 
@@ -142,12 +142,12 @@ module hdc_fortran
             type(hdc_t), value :: node
         end subroutine hdc_append_slice
 
-        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
-            import
-            type(hdc_t), value :: obj
-            character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int32_t), value :: mode
-        end subroutine c_hdc_to_json
+!        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
+!            import
+!            type(hdc_t), value :: obj
+!            character(kind=c_char), intent(in) :: path(*)
+!            integer(kind=c_int32_t), value :: mode
+!       end subroutine c_hdc_to_json
 
         !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
@@ -370,7 +370,6 @@ module hdc_fortran
                 hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
-                hdc_to_json, &
                 hdc_insert_slice, &
                 hdc_append_slice, &
                 hdc_set_slice, &

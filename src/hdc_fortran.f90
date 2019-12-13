@@ -1,5 +1,5 @@
 
-! This file was generated on 2019-08-28 14:37:33.801437 by ./generate_fortran_api.py
+! This file was generated on 2019-12-13 11:16:53.664482 by ./generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -7,7 +7,7 @@ module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        character(kind=c_char) :: uuid(37)
+        character(kind=c_char) :: uuid(16)
         integer(kind=c_size_t) :: storage_id
     end type hdc_t
 
@@ -150,7 +150,7 @@ module hdc_fortran
 !            type(hdc_t), value :: obj
 !            character(kind=c_char), intent(in) :: path(*)
 !            integer(kind=c_int32_t), value :: mode
-!        end subroutine c_hdc_to_json
+!       end subroutine c_hdc_to_json
 
         !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
@@ -637,7 +637,6 @@ module hdc_fortran
                 hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
-!                hdc_to_json, &
                 hdc_insert_slice, &
                 hdc_append_slice, &
                 hdc_set_slice, &
@@ -935,13 +934,13 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
 
-!    subroutine hdc_to_json(this,path,mode)
-!        type(hdc_t) :: this
-!        character(len=*), optional :: path
-!        integer(kind=c_int32_t) :: mode
-!        if (.not.present(path)) path = ""
-!        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
-!    end subroutine hdc_to_json
+    subroutine hdc_to_json(this,path,mode)
+        type(hdc_t) :: this
+        character(len=*), optional :: path
+        integer(kind=c_int32_t) :: mode
+        if (.not.present(path)) path = ""
+        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
+    end subroutine hdc_to_json
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding

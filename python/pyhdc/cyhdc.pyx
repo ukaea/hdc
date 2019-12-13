@@ -64,12 +64,19 @@ cdef extern from "hdc_types.h":
     cdef size_t HDC_UUID_LENGTH
 
     ctypedef struct hdc_t:
-        char uuid[37]
+        char uuid[16]
         voidptr storage
+
+cdef extern from "<array>" namespace "std" nogil:
+    cdef cppclass uuid_array "std::array<char, 16>":
+        uuid_array() except+
+        size_t begin()
+        size_t end()
+
 
 class hdc_t_(ctypes.Structure):
     """The ctypes equivalent of hdc_t"""
-    _fields_ = [("uuid", ctypes.c_char * 37),
+    _fields_ = [("uuid", ctypes.c_char * 16),
                 ("storage_id", ctypes.c_size_t)]
 
 # cdef the C++ interface, any method we need must be here
@@ -101,7 +108,7 @@ cdef extern from "hdc.hpp":
         int8_t get_rank() except +
         vector[size_t] get_shape() except +
         size_t get_storage_id() except +
-        string get_uuid() except +
+        uuid_array get_uuid_array() except +
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         void set_data_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
         void set_external_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
@@ -387,7 +394,9 @@ cdef class HDC:
     @property
     def _as_parameter_(self):
         # used by ctypes automatic conversion
-        uuid = self._this.get_uuid()
+        ua = self._this.get_uuid_array()
+        cdef char uuid[16]
+        memcpy(uuid,&ua,16)
         cdef size_t storage = self._this.get_storage_id()
         return hdc_t_(uuid,storage)
 

@@ -523,7 +523,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
                     auto uuid = child.address;
                     //TODO: We could probably re-do this using get_children() method
                     HDC hh(hdc_global.storage, uuid);
-                    auto _uuid = hh.get_uuid();
+                    auto _uuid = hh.get_uuid_str();
                     std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                     write_node(hh, file, full_path.c_str());
                     auto ret = H5Rcreate(&wbuf[i], file->getId(), full_path.c_str(), H5R_OBJECT, -1);

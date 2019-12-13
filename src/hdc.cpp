@@ -284,7 +284,7 @@ HDC::HDC(hdc_t& obj)
 {
     HDC_STORAGE_INIT()
     storage = hdc_global.stores[obj.storage_id];
-    uuid = boost::lexical_cast<boost::uuids::uuid>(obj.uuid);
+    memcpy(&uuid,obj.uuid,uuid.size());
 }
 
 HDC::HDC(void* data, hdc_type_t t) : HDC(hdc_sizeof(t))
@@ -495,7 +495,7 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
                 if (segment.get_free_memory() < 4 * path.size()) {
                     throw (HDCBadAllocException()); // There can be problem to store large strings
                 }
-                record rec(path.c_str(), n.get_uuid().c_str(), segment.get_segment_manager());
+                record rec(path.c_str(), n.get_uuid(), segment.get_segment_manager());
                 try {
                     children->insert(rec);
                 }
@@ -851,18 +851,18 @@ void HDC::set_child_single(hdc_index_t path, const HDC& n)
         if (i >= children->size()) {
             throw HDCException("set_child_single(): Index " + std::to_string(i) + " >= list size.\n");
         }
-        shared_string str(n.get_uuid().c_str(), ca);
+        shared_string str(n.get_uuid_str().c_str(), ca);
         children->modify(children->iterator_to(children->get<by_index>()[i]), change_node(str));
     } else {
         // check whether children container exists
         if (children == nullptr) children = get_children_ptr();
         // check whether given path exists
         if (children->count(boost::get<std::string>(path).c_str())) {
-            shared_string str(n.get_uuid().c_str(), ca); // TODO wrap this up to try catch block
+            shared_string str(n.get_uuid_str().c_str(), ca); // TODO wrap this up to try catch block
             children->modify(children->find(boost::get<std::string>(path).c_str()), change_node(str));
         } else {
             // TODO: get_allocator -- viz vyse...
-            children->insert(record(boost::get<std::string>(path).c_str(), n.get_uuid().c_str(), ca));
+            children->insert(record(boost::get<std::string>(path).c_str(), n.get_uuid(), ca));
         }
     }
 }
@@ -1029,7 +1029,7 @@ hdc_t HDC::as_obj()
 {
     hdc_t res;
     res.storage_id = storage->id();
-    strcpy(res.uuid, boost::lexical_cast<uuid_str_t>(uuid).c_str());
+    memcpy(res.uuid, reinterpret_cast<char*>(&uuid), uuid.size());
     return res;
 }
 
@@ -1068,7 +1068,7 @@ void HDC::insert(size_t index, const HDC& h)
         if (redo == 0) break;
         try {
             hdc_map_t::nth_index<1>::type& ri = children->get<1>();
-            record rec(to_string(index).c_str(), h.get_uuid().c_str(), segment.get_segment_manager());
+            record rec(to_string(index).c_str(), h.get_uuid_str().c_str(), segment.get_segment_manager());
             try {
                 ri.insert(ri.begin() + index, rec);
             }
@@ -1210,9 +1210,21 @@ void HDC::set_buffer(char* buffer)
     storage->set(uuid, buffer, size);
 }
 
-string HDC::get_uuid() const
+string HDC::get_uuid_str() const
 {
     return boost::lexical_cast<uuid_str_t>(uuid);
+}
+
+boost::uuids::uuid HDC::get_uuid() const
+{
+    return uuid;
+}
+
+std::array<char,HDC_UUID_LENGTH> HDC::get_uuid_array() const
+{
+    std::array<char,HDC_UUID_LENGTH> a;
+    memcpy(&a,&uuid,HDC_UUID_LENGTH);
+    return a;
 }
 
 // allocator stuff
@@ -1566,7 +1578,7 @@ HDC HDC::copy(const HDC& h, bool deep_copy)
         for (auto it: children_list) {
             HDC n(storage, it.second);
             HDC cpy = copy(n, deep_copy);
-            record rec(it.first, cpy.get_uuid().c_str(), c_segment.get_segment_manager());
+            record rec(it.first, cpy.get_uuid(), c_segment.get_segment_manager());
             c_children->insert(rec);
         }
     }

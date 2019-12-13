@@ -90,9 +90,9 @@ TEST_CASE("NodeManipulation", "[HDC]")
     HDC n1;
     HDC n2;
     // Try different
-    CHECK(strcmp(n1.get_uuid().c_str(), tree.get_uuid().c_str()) != 0);
-    CHECK(strcmp(n2.get_uuid().c_str(), tree.get_uuid().c_str()) != 0);
-    CHECK(strcmp(n1.get_uuid().c_str(), n2.get_uuid().c_str()) != 0);
+    CHECK(n1.get_uuid() != tree.get_uuid());
+    CHECK(n2.get_uuid() != tree.get_uuid());
+    CHECK(n1.get_uuid() != n2.get_uuid());
 
     // Try add
     tree.add_child("aaa/bbb", n1);
@@ -100,9 +100,10 @@ TEST_CASE("NodeManipulation", "[HDC]")
     CHECK(strcmp("struct", tree.get_type_str()) == 0);
     CHECK(true == tree.exists("aaa/bbb"));
     CHECK(true == tree.exists("aaa"));
-    CHECK(strcmp(n1.get_uuid().c_str(), tree.get("aaa/bbb").get_uuid().c_str()) == 0);
+    CHECK(n1.get_uuid() == tree.get("aaa/bbb").get_uuid());
+    CHECK(n1.get_uuid() ==  tree.get("aaa/bbb").get_uuid());
     CHECK_THROWS(tree.get("not_here"));
-    CHECK(strcmp(n2.get_uuid().c_str(), tree.get("aaa/bbb").get_uuid().c_str()) != 0);
+    CHECK(n2.get_uuid() != tree.get("aaa/bbb").get_uuid());
     // Try add and get index
     HDC n3 = HDC();
     tree.add_child("aaa/list[0]/ddd", n3);
@@ -122,12 +123,12 @@ TEST_CASE("NodeManipulation", "[HDC]")
     // Try subtree
     HDC sub = tree.get("aaa");
     CHECK(true == sub.exists("bbb"));
-    CHECK(strcmp(n1.get_uuid().c_str(), sub.get("bbb").get_uuid().c_str()) == 0);
+    CHECK(n1.get_uuid() == sub.get("bbb").get_uuid());
     // Test set
     tree.set_child("aaa/bbb", n2);
     CHECK(true == sub.exists("bbb"));
-    CHECK(strcmp(n2.get_uuid().c_str(), sub.get("bbb").get_uuid().c_str()) == 0);
-    CHECK(strcmp(n1.get_uuid().c_str(), tree.get("aaa/bbb").get_uuid().c_str()) != 0);
+    CHECK(n2.get_uuid() == sub.get("bbb").get_uuid());
+    CHECK(n1.get_uuid() != tree.get("aaa/bbb").get_uuid());
     // Test delete
     tree.delete_child("aaa/bbb");
     CHECK(false == tree.exists("aaa/bbb"));
@@ -509,7 +510,7 @@ TEST_CASE("Copy", "[HDC]")
     auto copy_dump = _copy.serialize("json");
     CHECK(strcmp(tree_dump.c_str(), copy_dump.c_str()) == 0);
     // Check also that UUIDs are the same - this behaviour can be changed later
-    CHECK(strcmp(tree["aaa/bbb/double"].get_uuid().c_str(), _copy["aaa/bbb/double"].get_uuid().c_str()) != 0);
+    CHECK(tree["aaa/bbb/double"].get_uuid() != _copy["aaa/bbb/double"].get_uuid());
 }
 
 TEST_CASE("BufferGrowArray", "[HDC]")
@@ -591,8 +592,8 @@ TEST_CASE("clean", "[HDC]")
     tree["ch"] = HDC();
     auto ch_uuid = tree["ch"].get_uuid();
     tree.clean();
-    CHECK(hdc_global.storage->has(boost::lexical_cast<boost::uuids::uuid>(uuid)) == false);
-    CHECK(hdc_global.storage->has(boost::lexical_cast<boost::uuids::uuid>(ch_uuid)) == false);
+    CHECK(hdc_global.storage->has(uuid) == false);
+    CHECK(hdc_global.storage->has(ch_uuid) == false);
 }
 
 TEST_CASE("load", "[HDC]")
@@ -647,11 +648,8 @@ TEST_CASE("hdc_t_manipulation", "[HDC]")
 {
     HDC h;
     auto obj = h.as_obj();
-    CHECK(strcmp(h.get_uuid().c_str(), obj.uuid) == 0);
-    CHECK(h.get_storage_id() == obj.storage_id);
     HDC h2(obj);
-    CHECK(strcmp(h2.get_uuid().c_str(), obj.uuid) == 0);
-    CHECK(h2.get_storage_id() == obj.storage_id);
+    CHECK(h.get_uuid() == h2.get_uuid());
 }
 
 TEMPLATE_TEST_CASE("JSONArrays","[HDC]", bool, int32_t, double) {

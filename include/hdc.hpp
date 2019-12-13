@@ -1143,11 +1143,25 @@ public:
     void set_buffer(char* buffer);
 
     /**
-    * @brief ...
+    * @brief Returns uuid string
     *
     * @return std::__cxx11::string
     */
-    std::string get_uuid() const;
+    std::string get_uuid_str() const;
+
+    /**
+    * @brief Returns uuid
+    *
+    * @return boost::uuids::uuid
+    */
+    boost::uuids::uuid get_uuid() const;
+
+    /**
+    * @brief Returns uuid as char array (used in Python)
+    *
+    * @return std::array<char,HDC_UUID_LENGTH>
+    */
+    std::array<char,HDC_UUID_LENGTH> get_uuid_array() const;
 
     /**
     * @brief ...

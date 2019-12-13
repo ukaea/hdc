@@ -11,7 +11,7 @@
 #define HDC_MAX_DIMS           10
 #define HDC_LIST_INIT_CAPACITY 10
 #define HDC_LIST_RESIZE_STEP   10
-#define HDC_UUID_LENGTH        37
+#define HDC_UUID_LENGTH        16
 
 typedef enum {
     HDC_EMPTY  =  0,

@@ -54,7 +54,7 @@ std::string hdc::serialization::HDCSerialiser::to_string(const HDC& hdc)
     std::stringstream ss_in(hdc.get_storage()->get_settings());
     ss_in >> root;
     //TODO: switch persistent flag when wrongly initialized?
-    root["uuid"] = hdc.get_uuid();
+    root["uuid"] = hdc.get_uuid_str();
     std::stringstream ss_out;
     ss_out << root;
     return ss_out.str();

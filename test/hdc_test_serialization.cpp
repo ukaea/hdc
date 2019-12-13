@@ -12,7 +12,6 @@ TEST_CASE("SerializeDeserialize", "[HDC]")
     PREPARE_TREE();
     auto tree_dump = tree.serialize("json");
     auto ser = tree.serialize("hdc_string");
-    auto uuid = tree.get_uuid();
     //Check serialized string for arbitrary filelds.
     std::stringstream ss(ser);
     Json::Value root;

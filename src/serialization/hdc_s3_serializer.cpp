@@ -201,14 +201,12 @@ void S3Serializer::write_node(const HDC& hdc, const char* host, const char* buck
 {
     auto buffer = hdc.get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    auto data = buffer + sizeof(hdc_header_t);
     std::vector<char> new_buffer(header->buffer_size);
     if (hdc.is_fortranorder()) {
         transpose_buffer(new_buffer.data() + sizeof(hdc_header_t), hdc.get_buffer() + sizeof(hdc_header_t),
                          hdc.get_rank(),
                          hdc.get_shape(), (hdc_type_t)hdc.get_type(),
                          hdc.is_fortranorder());
-        data = new_buffer.data() + sizeof(hdc_header_t);
     }
     if (header->type == HDC_STRUCT) {
         hdc_map_t* hdc_children = hdc.get_children_ptr();
