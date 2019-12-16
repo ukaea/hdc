@@ -1157,13 +1157,6 @@ public:
     boost::uuids::uuid get_uuid() const;
 
     /**
-    * @brief Returns uuid as char array (used in Python)
-    *
-    * @return std::array<char,HDC_UUID_LENGTH>
-    */
-    std::array<char,HDC_UUID_LENGTH> get_uuid_array() const;
-
-    /**
     * @brief ...
     *
     * @param extra_size p_extra_size:...

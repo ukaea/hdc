@@ -67,13 +67,6 @@ cdef extern from "hdc_types.h":
         char uuid[16]
         voidptr storage
 
-cdef extern from "<array>" namespace "std" nogil:
-    cdef cppclass uuid_array "std::array<char, 16>":
-        uuid_array() except+
-        size_t begin()
-        size_t end()
-
-
 class hdc_t_(ctypes.Structure):
     """The ctypes equivalent of hdc_t"""
     _fields_ = [("uuid", ctypes.c_char * 16),
@@ -108,7 +101,7 @@ cdef extern from "hdc.hpp":
         int8_t get_rank() except +
         vector[size_t] get_shape() except +
         size_t get_storage_id() except +
-        uuid_array get_uuid_array() except +
+        string get_uuid_str() except +
         void set_data[T](vector[size_t]& _shape, T* _data, unsigned long _flags) except +
         void set_data_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
         void set_external_Py(vector[size_t]& _shape, voidptr _data, char kind, int8_t itemsize, unsigned long _flags) except +
@@ -119,6 +112,7 @@ cdef extern from "hdc.hpp":
         size_t childs_count() except +
         bool is_fortranorder() except +
         vector[size_t] get_strides() except +
+        hdc_t as_obj() except +
         string serialize(string  protocol) except +
         @staticmethod
         CppHDC deserialize( string protocol, string string) except +
@@ -394,11 +388,11 @@ cdef class HDC:
     @property
     def _as_parameter_(self):
         # used by ctypes automatic conversion
-        ua = self._this.get_uuid_array()
-        cdef char uuid[16]
-        memcpy(uuid,&ua,16)
-        cdef size_t storage = self._this.get_storage_id()
-        return hdc_t_(uuid,storage)
+        cdef hdc_t obj = self._this.as_obj()
+        ret = hdc_t_()
+        cdef size_t ctypes_buffer = ctypes.addressof(ret)
+        memcpy(<void*> ctypes_buffer, &obj, sizeof(hdc_t))
+        return ret
 
     def get_type_str(self):
         """Returns string type description of HDC node, e.g. int32"""

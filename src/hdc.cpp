@@ -1220,13 +1220,6 @@ boost::uuids::uuid HDC::get_uuid() const
     return uuid;
 }
 
-std::array<char,HDC_UUID_LENGTH> HDC::get_uuid_array() const
-{
-    std::array<char,HDC_UUID_LENGTH> a;
-    memcpy(&a,&uuid,HDC_UUID_LENGTH);
-    return a;
-}
-
 // allocator stuff
 bip::managed_external_buffer HDC::get_segment() const
 {
