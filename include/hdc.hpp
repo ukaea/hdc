@@ -177,10 +177,15 @@ public:
     /**
     * @brief Copy contructor
     *
-    * @param h p_h: pointer to HDC object
+    * @param h p_h: HDC object to be copied
     */
     HDC(const HDC& h);
 
+    /**
+     * @brief Move constructor
+     *
+     * @param h p_h: reference to HDC object to be copied
+     */
     HDC(HDC&& h) noexcept;
 
     /**
