@@ -50,7 +50,7 @@ private:
 /* ------------------------------- methods ----------------------------------------- */
 
     /**
-    * @brief Adds node as child under the path
+    * @brief Adds node as child under the given path.
     *
     * @param path p_path: path under which to add node
     * @param n p_n: node
@@ -58,7 +58,7 @@ private:
     void add_child(hdc_path_t& path, const HDC& n);
 
     /**
-    * @brief Sets child under the path
+    * @brief Sets child node under the given path.
     *
     * @param path p_path: path uder which to set node
     * @param n p_n: node
@@ -66,14 +66,14 @@ private:
     void set_child(hdc_path_t& path, const HDC& n);
 
     /**
-    * @brief ...
+    * @brief Deletes the child node from the given path.
     *
     * @param path p_path: path in the subtree of this node
     */
     bool delete_child(hdc_path_t& path, bool prune);
 
     /**
-    * @brief ...
+    * @brief Returns the child node at given path.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC
@@ -81,7 +81,7 @@ private:
     HDC get(hdc_path_t& path);
 
     /**
-    * @brief ...
+    * @brief Returns the child node at given path.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC
@@ -89,7 +89,7 @@ private:
     HDC get(hdc_path_t& path) const;
 
     /**
-    * @brief ...
+    * @brief Returns true if a child node exists under given path. Single (no-recursive) version. This is not mentioned to be run by users.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return bool
@@ -97,7 +97,7 @@ private:
     bool exists_single(hdc_index_t index) const;
 
     /**
-    * @brief ...
+    * @brief Adds node as child under the given path. Single (no-recursive) version. This is not mentioned to be run by users.
     *
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
@@ -105,7 +105,7 @@ private:
     void add_child_single(const std::string& path, const HDC& n);
 
     /**
-    * @brief Returns copy of header containing metadata
+    * @brief Returns a copy of header containing metadata
     *
     * @return hdc_header_t
     */
@@ -119,7 +119,7 @@ private:
     hdc_header_t* get_header_ptr() const;
 
     /**
-    * @brief ...
+    * @brief Sets a child node (single level = no recursion)
     *
     * @param path p_path: path in the subtree of this node
     * @param n p_n: HDC node
@@ -128,7 +128,7 @@ private:
 
 public:
     /**
-    * @brief ...
+    * @brief Returns a child node under a given path. Single (no-recursive) version. This is not mentioned to be run by users.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
@@ -136,7 +136,7 @@ public:
     HDC get_single(hdc_index_t index);
 
     /**
-    * @brief ...
+    * @brief Returns a child node under a given path. Single (no-recursive) version. This is not mentioned to be run by users.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
@@ -144,14 +144,14 @@ public:
     HDC get_single(hdc_index_t index) const;
 
     /**
-    * @brief Creates empty HDC with specified buffer size
+    * @brief Creates empty HDC with specified data size.
     *
-    * @param byte_size p_byte_size:...
+    * @param byte_size p_byte_size: Size in bytes.
     */
-    explicit HDC(size_t byte_size);
+    HDC(size_t byte_size);
 
     /**
-    * @brief Default constructor. Creates empty HDC
+    * @brief Default constructor. Creates empty HDC.
     *
     */
     HDC();
@@ -165,6 +165,11 @@ public:
     */
     HDC(const std::vector<size_t>& shape, hdc_type_t type, hdc_flags_t flags = HDCDefault);
 
+    /**
+     * @brief Creates HDC node filled by data from hdc_data_t struct
+     *
+     * @param obj p_obj: hdc_data_t struct
+     */
     explicit HDC(hdc_data_t obj);
 
     /**
@@ -205,17 +210,17 @@ public:
     HDC(HDCStorage* _storage, boost::uuids::uuid _uuid);
 
     /**
-    * @brief Constructs HDC object from hdc_obj_t struct - C/FORTRAN interoperability
+    * @brief Constructs HDC object from hdc_t struct - C/FORTRAN interoperability
     *
-    * @param obj p_obj:...
+    * @param obj p_obj: reference to hdc_t object.
     */
     explicit HDC(hdc_t& obj);
 
     /**
     * @brief Constructs HDC object from scalar and type - MATLAB interoperability
     *
-    * @param data p_data:...
-    * @param t p_t:...
+    * @param data p_data: void pointer to scalar
+    * @param t p_t: type of the data (hdc_type_t)
     */
     HDC(void* data, hdc_type_t t);
 
@@ -251,34 +256,35 @@ public:
     * @brief Destructor
     *
     */
-    ~HDC();
+    ~HDC() = default;
 
     /**
-    * @brief Parses command line arguments
+    * @brief Parses command line arguments.
     *
-    * @param argc p_argc:...
-    * @param argv p_argv:...
+    * @param argc p_argc: Number of arguments.
+    * @param argv p_argv: char* array of arguments.
     */
     static void parse_cmdline(int argc, const char* argv[]);
 
     /**
-    * @brief Loads settings from file
+    * @brief Loads settings from file.
     *
-    * @param configPath p_configPath:...
+    * @param configPath p_configPath: Path to the settings file.
     */
     static void load_config(std::string configPath = "./hdc.conf:~/.config/hdc.conf");
 
     /**
-    * @brief Searches for available storage plugins
+    * @brief Searches for available storage plugins.
     *
-    * @param searchPath p_searchPath:...
+    * @param searchPath p_searchPath: Comma separated list of folders where to look for storage plugins.
     */
     static std::unordered_map<std::string, std::string> search_plugins(const std::string& customSearchPath = "");
 
     /**
     * @brief Sets the default storage to be used.
     *
-    * @param storage p_storage:...
+    * @param storage p_storage: string name of storage to be used - e.g. "umap", "mdbm", or "redis"
+    * @param storage_cmd p_storage_cmd: JSON string with parameters specific for each storage.
     */
     static void set_storage(std::string storage = "umap", std::string storage_cmd = "");
 
@@ -292,8 +298,8 @@ public:
     /**
     * @brief Initializes hdc_global.storage  -- mainly due to C and Fortran
     *
-    * @param storage p_storage:...
-    * @param storage_options p_storage_options:...
+    * @param storage p_storage: string name of storage to be used - e.g. "umap", "mdbm", or "redis"
+    * @param storage_options p_storage_options: JSON string with parameters specific for each storage.
     */
     static void init(const std::string& storage = "", const std::string& storage_options = "");
 
@@ -336,13 +342,13 @@ public:
     void clean();
 
     /**
-    * @brief Cleans up the hdc_global.storage  -- mainly due to C and Fortran
+    * @brief Cleans up the hdc_global.storage  -- mainly due to C and Fortran.
     *
     */
     static void destroy();
 
     /**
-    * @brief ...
+    * @brief Returns true if a node under specified path exists and false otherwise.
     *
     * @param path p_path: path in the subtree of this node
     * @return bool
@@ -350,7 +356,7 @@ public:
     bool exists(hdc_path_t& path) const;
 
     /**
-    * @brief ...
+    * @brief Returns true if a node under specified path exists and false otherwise.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return bool
@@ -358,7 +364,7 @@ public:
     bool exists(size_t index) const;
 
     /**
-    * @brief ...
+    * @brief Returns true if a node under specified index exists and false otherwise.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
@@ -366,7 +372,7 @@ public:
     HDC get(size_t index);
 
     /**
-    * @brief ...
+    * @brief Returns true if a node under specified index exists and false otherwise.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
@@ -374,7 +380,7 @@ public:
     HDC get(size_t index) const;
 
     /**
-    * @brief Returns the available space in buffer (in bytes)
+    * @brief Returns the available space for data in buffer (in bytes)
     *
     * @return size_t
     */
@@ -417,7 +423,14 @@ public:
     bool is_terminal() const;
 
     /**
-    * @brief ...
+    * @brief Returns true if type is not one of HDC_LIST or HDC_STRUCT
+    *
+    * @return bool
+    */
+    static bool _is_terminal(size_t t);
+
+    /**
+    * @brief Returns a child node. If not found it will be created first.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
@@ -425,7 +438,7 @@ public:
     HDC get_or_create(size_t index);
 
     /**
-    * @brief ...
+    * @brief Returns a child node. If not found it will be created first.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC
@@ -433,7 +446,7 @@ public:
     HDC get_or_create(const std::string& path);
 
     /**
-     * @brief ...
+     * @brief Returns a child node. If not found it will be created first.
      *
      * @param path p_path: path in the subtree of this node
      * @return HDC
@@ -441,21 +454,18 @@ public:
     HDC get_or_create(hdc_path_t& path);
 
     /**
-     * @brief ...
+     * @brief Returns true if storages and uuids are the same.
      *
-     * @param lhs p_lhs:...
-     * @param rhs p_rhs:...
-     * @return bool
+     * @param path other: a node to compare with
      */
     inline bool operator==(const HDC& other) {
         return (this->get_storage() == other.get_storage() && this->get_uuid() == other.get_uuid());
     }
 
     /**
-     * @brief ...
+     * @brief Returns true if storages or uuids are different.
      *
-     * @param lhs p_lhs:...
-     * @param rhs p_rhs:...
+     * @param path other: a node to compare with
      * @return bool
      */
     inline bool operator!=(const HDC& other) {
@@ -463,7 +473,7 @@ public:
     }
 
     /**
-    * @brief Stores data in node's buffer
+    * @brief Access the node under provided path. The node is automatically created if not found.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC
@@ -471,7 +481,7 @@ public:
     HDC operator[](size_t index) const;
 
     /**
-    * @brief ...
+    * @brief Access the node under provided path. The node is automatically created if not found.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @return HDC&
@@ -479,7 +489,7 @@ public:
     HDC operator[](size_t index);
 
     /**
-    * @brief ...
+    * @brief Access the node under provided path. The node is automatically created if not found.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC
@@ -487,7 +497,7 @@ public:
     HDC operator[](const std::string& path) const;
 
     /**
-    * @brief ...
+    * @brief Access the node under provided path. The node is automatically created if not found.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC&
@@ -495,7 +505,7 @@ public:
     HDC operator[](const std::string& path);
 
     /**
-    * @brief ...
+    * @brief Assigns data to a node.
     *
     * @param T p_T: Desired data type.
     * @param d p_d:...
@@ -509,7 +519,7 @@ public:
     }
 
     /**
-    * @brief ...
+    * @brief Assigns char* data to a node.
     *
     * @param str p_str:...
     * @return HDC&
@@ -517,27 +527,39 @@ public:
     HDC& operator=(char const* str);
 
     /**
-    * @brief ...
+    * @brief Assigns string data to a node.
     *
-    * @param str p_str:...
+    * @param str p_str: string to be set.
     * @return HDC&
     */
     HDC& operator=(const std::string& str);
 
     /**
-    * @brief ...
+    * @brief Assigns copy of a supplied node to a node.
     *
-    * @param other p_other:...
+    * @param other p_other: source node.
     * @return HDC&
     */
     HDC& operator=(const HDC& other);
 
+    /**
+     * @brief Assigns copy of a supplied node to a node.
+     *
+     * @param other p_other: source node.
+     * @return HDC&
+     */
     HDC& operator=(HDC&& other) noexcept;
 
+    /**
+     * @brief returns true if this node and other are the same (uuids and storages are the same).
+     *
+     * @param other p_other: node to compare with.
+     * @return bool
+     */
     bool equals(const HDC& other) const;
 
     /**
-    * @brief ...
+    * @brief Sets provided data to a HDC node.
     *
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
@@ -548,25 +570,36 @@ public:
     void set_data(const std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault)
     {
         auto rank = shape.size();
-        auto buffer = get_buffer();
-        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
         auto data_size = sizeof(T);
         for (size_t i = 0; i < rank; i++) {
             data_size *= shape[i];
         }
         auto buffer_size = data_size + sizeof(hdc_header_t);
+
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->flags & HDCExternal) {
+                throw HDCException("set_data(): I can't enlarge your external buffer for you...");
+        }
         if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
+            // update header
+            memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
+            for (size_t i = 0; i < rank; i++) {
+                header->shape[i] = shape[i];
+            }
+            header->flags = flags;
+            header->type = to_typeid(data[0]);
+            header->rank = rank;
+            // set data
             memcpy(buffer + sizeof(hdc_header_t), data, data_size);
             storage->unlock(uuid);
-            return;
         } else {
+            // create new buffer
             std::vector<char> new_buffer(buffer_size);
+            // set header
             header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
-            if (header->flags & HDCExternal) {
-                throw HDCException("set_data(): I can't enlarge your external buffer for you...");
-            }
             header->buffer_size = buffer_size;
             header->data_size = data_size;
             memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
@@ -576,14 +609,16 @@ public:
             header->flags = flags;
             header->type = to_typeid(data[0]);
             header->rank = rank;
+            // set data
             memcpy(new_buffer.data() + sizeof(hdc_header_t), data, data_size);
+            // replace buffer
             storage->set(uuid, new_buffer.data(), buffer_size);
-            return;
         }
+        return;
     }
 
     /**
-    * @brief ...
+    * @brief Sets provided data to a HDC node.
     *
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
@@ -594,18 +629,29 @@ public:
     void set_external(const std::vector<size_t>& shape, T* data, hdc_flags_t flags = HDCDefault)
     {
         auto rank = shape.size();
-        auto buffer = get_buffer();
-        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         // Start with determining of the buffer size
         auto data_size = sizeof(void*);
         auto buffer_size = data_size + sizeof(hdc_header_t);
+
+        auto buffer = get_buffer();
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
         if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
+            // update header
+            memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
+            for (size_t i = 0; i < rank; i++) {
+                header->shape[i] = shape[i];
+            }
+            header->flags = flags | HDCExternal;
+            header->type = to_typeid(data[0]);
+            header->rank = rank;
+            // set data
             memcpy(buffer + sizeof(hdc_header_t), &data, data_size);
             storage->unlock(uuid);
-            return;
         } else {
+            // create new buffer
             std::vector<char> new_buffer(buffer_size);
+            // set header
             header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
             header->buffer_size = buffer_size;
             header->data_size = data_size;
@@ -616,14 +662,15 @@ public:
             header->flags = flags | HDCExternal;
             header->type = to_typeid(data[0]);
             header->rank = rank;
+            // set data
             memcpy(new_buffer.data() + sizeof(hdc_header_t), &data, data_size);
             storage->set(uuid, new_buffer.data(), buffer_size);
-            return;
         }
+        return;
     }
 
     /**
-    * @brief ...
+    * @brief Sets provided data to a HDC node.
     *
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
@@ -638,7 +685,7 @@ public:
     }
 
     /**
-     * @brief ...
+     * @brief Sets provided data pointer to a HDC node. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
      *
     * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
@@ -653,7 +700,7 @@ public:
     }
 
     /**
-    * @brief ...
+    * @brief Sets provided data to a HDC node.
     *
     * @param T p_T: Desired data type.
     * @param data p_data: Pointer to data
@@ -694,11 +741,11 @@ public:
     */
     void set_string(const std::string& str)
     {
+        auto data_size = str.length() + 1;
+        auto buffer_size = data_size + sizeof(hdc_header_t);
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
-        auto data_size = str.length() + 1;
-        auto buffer_size = data_size + sizeof(hdc_header_t);
         std::vector<char> buffer(buffer_size);
         auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
         header->data_size = data_size;
@@ -710,13 +757,19 @@ public:
         storage->set(uuid, buffer.data(), header->buffer_size);
     }
 
+    /**
+     * @brief Sets provided string to a node. Mostly for a FORTAN purposes
+     *
+     * @param str p_str: char* with the string
+     * @param len p_len: length of string without terminal null character.
+     */
     void set_string(const char* str, size_t len)
     {
+        auto data_size = len + 1;
+        auto buffer_size = data_size + sizeof(hdc_header_t);
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
-        auto data_size = len + 1;
-        auto buffer_size = data_size + sizeof(hdc_header_t);
         std::vector<char> buffer(buffer_size);
         auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
         header->data_size = data_size;
@@ -730,7 +783,7 @@ public:
     }
 
     /**
-    * @brief ...
+    * @brief Sets data based on shape and type. Used for C bindings.
     *
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
@@ -738,8 +791,9 @@ public:
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
     */
     void set_data_c(const std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
+
     /**
-    * @brief ...
+    * @brief Sets external data based on shape and type. Used for C bindings. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
     *
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
@@ -749,31 +803,31 @@ public:
     void set_external_c(const std::vector<size_t>& shape, void* data, hdc_type_t type, hdc_flags_t flags = HDCDefault);
 
     /**
-     * @brief ...
+     * @brief Sets data based on shape and type. Used for Python bindings.
      *
-     * @param shape p_shape:...
-     * @param data p_data:...
-     * @param kind p_kind:...
-     * @param itemsize p_itemsize:...
-     * @param flags p_flags:...
+     * @param shape p_shape: Shape of the data
+     * @param data p_data: Pointer to data
+     * @param kind p_kind: Type of the data: "i" integer, "u" unsigned int, "f" float/double, "b" bool
+     * @param itemsize p_itemsize: Byte size of a data item - eg. 1 (u)int8/bool/char, 2 (u)int16, 4 (u)int32/float, 8 (u)int64/double
+     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
      */
     void
     set_data_Py(const std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
 
     /**
-     * @brief ...
+     * @brief Sets external data based on shape and type. Used for Python bindings. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
      *
-     * @param shape p_shape:...
-     * @param data p_data:...
-     * @param kind p_kind:...
-     * @param itemsize p_itemsize:...
-     * @param flags p_flags:...
+     * @param shape p_shape: Shape of the data
+     * @param data p_data: Pointer to data
+     * @param kind p_kind: Type of the data: "i" integer, "u" unsigned int, "f" float/double, "b" bool
+     * @param itemsize p_itemsize: Byte size of a data item - eg. 1 (u)int8/bool/char, 2 (u)int16, 4 (u)int32/float, 8 (u)int64/double
+     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
      */
     void
     set_external_Py(const std::vector<size_t>& shape, void* data, char kind, int8_t itemsize, hdc_flags_t flags = HDCDefault);
 
     /**
-    * @brief ...
+    * @brief Sets const data based on shape and type. Used for C bindings.
     *
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
@@ -806,7 +860,7 @@ public:
     * @brief Sets scalar data to given node - UDA version.
     *
     * @param data p_data: Pointer to data
-    * @param _type p__type:...
+    * @param _type p__type: Specification of data type (e.g. HDC_INT8)
     */
     void set_data(const unsigned char* data, hdc_type_t _type)
     {
@@ -840,35 +894,44 @@ public:
     std::vector<size_t> get_shape() const;
 
     /**
-    * @brief ...
+    * @brief Returns strides (Mostly for Python).
     *
     * @return std::vector< size_t >
     */
     std::vector<size_t> get_strides() const;
 
     /**
-    * @brief ...
+    * @brief Returns true if a a current node is not HDC_STRUCT or HDC_LIST
     *
+    * @param t p_t: type
     * @return bool
     */
+    static bool is_external(size_t t);
+
+    /**
+     * @brief Returns true if a buffer type is not HDC_STRUCT or HDC_LIST
+     *
+     * @param t p_t: type
+     * @return bool
+     */
     bool is_external() const;
 
     /**
-    * @brief ...
+    * @brief Returns true if a node is read-only.
     *
     * @return bool
     */
     bool is_readonly() const;
 
     /**
-    * @brief ...
+    * @brief Returns true if a node is FORTRAN order (Cloumn-major order), false for C/C++ like row-major order (which is default).
     *
     * @return bool
     */
     bool is_fortranorder() const;
 
     /**
-    * @brief ...
+    * @brief Prints some metadata found in header (e.g. rank, shape, data, type, flags, data/buffer size)
     *
     */
     void print_info() const;
@@ -890,14 +953,14 @@ public:
     void set_child(const std::string& path, const HDC& n);
 
     /**
-    * @brief ...
+    * @brief Returns HDC node as hdc_t object, used mostly for bindings.
     *
-    * @return hdc_obj_t
+    * @return hdc_t
     */
     hdc_t as_obj();
 
     /**
-    * @brief ...
+    * @brief Sets HDC node n under given index.
     *
     * @param index p_index: size_t index if this node has/should have type HDC_LIST, or std::string if this node has/should have type HDC_STRUCT
     * @param n p_n: HDC node
@@ -914,7 +977,7 @@ public:
     bool delete_slice(int index, bool prune=false);
 
     /**
-    * @brief ...
+    * @brief Returns the child node at given path.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC
@@ -922,7 +985,7 @@ public:
     HDC get(const std::string& path);
 
     /**
-    * @brief ...
+    * @brief Returns the child node at given path.
     *
     * @param path p_path: path in the subtree of this node
     * @return HDC
@@ -940,17 +1003,24 @@ public:
     /**
     * @brief Inserts node to i-th slice of current node.
     *
-    * @param i p_i:...
-    * @param h p_h:...
+    * @param i p_i: index of position
+    * @param h p_h: HDC node.
     */
     void insert(size_t i, const HDC& h);
 
     /**
     * @brief Appends given node as next available slice (similar to push_back() method seen in C++ STL containers).
     *
-    * @param h p_h:...
+    * @param h p_h: HDC node stored at the end.
     */
     void append(const HDC& h);
+
+    /**
+    * @brief Allocates HDC node data into storage. It does nothing if sufficient space is already allocated.
+    *
+    * @param type p_data_size: desired size of the data to be allocated.
+    */
+    void alloc(size_t data_size);
 
     /**
     * @brief Sets HDC type of current node.
@@ -1134,16 +1204,16 @@ public:
     std::vector<std::string> keys() const;
 
     /**
-    * @brief ...
+    * @brief Returns pointer to data buffer.
     *
     * @return char*
     */
     char* get_buffer() const;
 
     /**
-     * @brief ...
+     * @brief Sets data buffer to a node.
      *
-     * @param buffer p_buffer:...
+     * @param buffer p_buffer: Pointer to buffer to save.
      */
     void set_buffer(char* buffer);
 
@@ -1162,28 +1232,28 @@ public:
     boost::uuids::uuid get_uuid() const;
 
     /**
-    * @brief ...
+    * @brief Increase size of underlying storage by extra_size.
     *
     * @param extra_size p_extra_size:...
     */
     void grow(size_t extra_size);
 
     /**
-    * @brief "allocator stuff"
+    * @brief "Returns boost::managed_external_buffer object which usually contains addresses of child nodes."
     *
     * @return boost::interprocess::managed_external_buffer
     */
     boost::interprocess::managed_external_buffer get_segment() const;
 
     /**
-    * @brief ...
+    * @brief Returns pointer to map with stored children nodes.
     *
     * @return hdc_map_t*
     */
     hdc_map_t* get_children_ptr() const;
 
     /**
-    * @brief ...
+    * @brief Returns string containing JSON representation of this node and all its descendants.
     *
     * @param children p_children:...
     * @return std::__cxx11::string
@@ -1191,23 +1261,29 @@ public:
     static string hdc_map_to_json(hdc_map_t& children);
 
     /**
-    * @brief ...
+    * @brief Enlarges old buffer by extra_size parameter. Copies all data
     *
-    * @param old_buffer p_old_buffer:...
-    * @param extra_size p_extra_size:...
+    * @param old_buffer p_old_buffer: pointer to oldbuffer
+    * @param extra_size p_extra_size: extra size of which the new buffer size shoul increase.
     * @return char*
     */
     static std::vector<char> buffer_grow(char* old_buffer, size_t extra_size);
 
     /**
-    * @brief ...
+    * @brief Loads HDC from given URI and datapath. (deserialization)
     *
-    * @param str p_str:...
-    * @param datapath p_datapath:...
+    * @param uri p_uri: URI of file/redis hostname
+    * @param datapath p_datapath: datapath within the file/redis addres
     * @return HDC
     */
     static HDC load(const std::string& uri, const std::string& datapath = "");
 
+    /**
+     * @brief Saves HDC to given URI and datapath. (serialization)
+     *
+    * @param uri p_uri: URI of file/redis hostname
+    * @param datapath p_datapath: datapath within the file/redis addres
+     */
     void save(const std::string& uri, const std::string& datapath = "") const;
 
     static HDC deserialize(const std::string& protocol, const std::string& string);
@@ -1234,7 +1310,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: scalar of a intended type
     * @return HDC
     */
     static HDC make_scalar(float data);
@@ -1242,14 +1318,14 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: float scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(double data);
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: double scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(bool data);
@@ -1257,7 +1333,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: int8_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(int8_t data);
@@ -1265,7 +1341,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: int16_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(int16_t data);
@@ -1273,7 +1349,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: int32_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(int32_t data);
@@ -1281,7 +1357,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: int64_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(int64_t data);
@@ -1289,7 +1365,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: uint8_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(uint8_t data);
@@ -1297,7 +1373,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: uint16_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(uint16_t data);
@@ -1305,7 +1381,7 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
-    * @param data p_data:...
+    * @param data p_data: uint32_t scalar to be saved
     * @return HDC
     */
     static HDC make_scalar(uint32_t data);
@@ -1313,11 +1389,12 @@ public:
     /**
     * @brief Creates scalar HDC object
     *
+    * @param data p_data: uint64_t scalar to be saved
     * @return hdc_data_t
     */
     static HDC make_scalar(uint64_t data);
     /**
-     * @brief ...
+     * @brief Creates HDC node from given hdc_data_t object. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
      *
      * @param obj p_obj:...
      * @return HDC
@@ -1325,11 +1402,11 @@ public:
     static HDC make_external(hdc_data_t obj);
 
     /**
-     * @brief ...
+     * @brief Creates HDC node of given shape, type and flags with external data. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
      *
-     * @param shape p_shape:...
-     * @param type p_type:...
-     * @param flags p_flags:...
+     * @param shape p_shape: Shape.
+     * @param type p_type: Data type e.g. HDC_FLOAT
+     * @param flags p_flags: HDC Flags, e.g. HDCFortranOrder
      * @return HDC
      */
     static HDC make_external(const std::vector<size_t>& shape, hdc_type_t type, long flags);
@@ -1349,23 +1426,23 @@ public:
     size_t get_storage_id() const { return this->storage->id(); }
 
     /**
-    * @brief ...
+    * @brief Returns data packed as hdc_data_t struct
     *
     * @return hdc_data_t
     */
     hdc_data_t get_data() const;
 
     /**
-    * @brief ...
+    * @brief Sets data from hdc_data_t struct
     *
-    * @param obj p_obj:...
+    * @param obj p_obj: Data to be set.
     */
     void set_data(hdc_data_t obj);
 
     /**
-     * @brief ...
+     * @brief Sets data from hdc_data_t struct. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
      *
-     * @param obj p_obj:...
+     * @param obj p_obj: Data to be set.
      */
     void set_external(hdc_data_t obj);
 };

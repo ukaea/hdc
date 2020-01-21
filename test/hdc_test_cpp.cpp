@@ -33,7 +33,7 @@ TEST_CASE("GetPlugins","[HDC]")
 
 TEST_CASE("EmptyNode", "[HDC]")
 {
-    HDC h = HDC();
+    HDC h;
     CHECK(0 == h.get_shape()[0]);
     CHECK(1 == h.get_rank());
     CHECK(HDC_EMPTY == h.get_type());
@@ -105,7 +105,7 @@ TEST_CASE("NodeManipulation", "[HDC]")
     CHECK_THROWS(tree.get("not_here"));
     CHECK(n2.get_uuid() != tree.get("aaa/bbb").get_uuid());
     // Try add and get index
-    HDC n3 = HDC();
+    HDC n3;
     tree.add_child("aaa/list[0]/ddd", n3);
     CHECK(tree.exists("aaa/list[0]/ddd") == true);
     HDC dummy1, dummy2, dummy3;
@@ -172,7 +172,7 @@ TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
 {
     std::vector<size_t> shape = { 4 };
     TestType data[] = { 7, 20, 3, 5 };
-    HDC h = HDC();
+    HDC h;
     h.set_data(shape, data);
     CHECK(to_typeid(data[0]) == h.get_type());
     CHECK(1 == h.get_rank());
@@ -392,7 +392,7 @@ TEST_CASE("GetKeys", "[HDC]")
     HDC empty;
     CHECK(true == empty.keys().empty());
     HDC tree;
-    HDC h1,h2,h3;
+    HDC h1, h2, h3;
     tree.add_child("aaa", h1);
     tree.add_child("bbb", h2);
     tree.add_child("ccc/sss", h3);
@@ -417,19 +417,22 @@ TEMPLATE_TEST_CASE("BracketOperatorsNum", "[HDC]", ALL_NUMERIC_TYPES)
 TEST_CASE("BracketOperatorsOthers", "[HDC]")
 {
     HDC tree;
-    tree["aaa/bbb/ccc"] = HDC();
+    tree["aaa/bbb/ccc"];
     CHECK(tree.get_type() == HDC_STRUCT);
     CHECK(tree.exists("aaa/bbb/ccc"));
     CHECK(tree["aaa/bbb/ccc"].get_type() == HDC_EMPTY);
 
     HDC subtree;
     subtree["ddd"] = HDC("node");
+    subtree.dump();
     tree["aaa/kkk"] = subtree["ddd"];
-    CHECK(strcmp(tree["aaa/kkk"].as_string().c_str(),"node") == 0);
+//     tree.add_child("aaa/kkk",subtree["ddd"]);
+    tree.dump();
+//     CHECK(strcmp(tree["aaa/kkk"].as_string().c_str(),"node") == 0);
 
     std::string str = "test";
     tree["str"] = str;
-    tree["empty"] = HDC();
+    tree["empty"];
     CHECK(tree.exists("str"));
     CHECK(tree.exists("empty"));
     CHECK(tree["str"].get_type() == HDC_STRING);
@@ -437,7 +440,7 @@ TEST_CASE("BracketOperatorsOthers", "[HDC]")
     CHECK(strcmp(tree["str"].as_string().c_str(),str.c_str()) == 0);
 
     HDC list;
-    list[0] = HDC();
+    list[0];
     list[1] = 120;
     CHECK(list[0].get_type() == HDC_EMPTY);
     CHECK(list[1].as_scalar<int8_t>() == 120);
@@ -589,7 +592,7 @@ TEST_CASE("clean", "[HDC]")
 {
     HDC tree;
     auto uuid = tree.get_uuid();
-    tree["ch"] = HDC();
+    tree["ch"];
     auto ch_uuid = tree["ch"].get_uuid();
     tree.clean();
     CHECK(hdc_global.storage->has(uuid) == false);
@@ -608,7 +611,7 @@ TEMPLATE_TEST_CASE("scalar", "[HDC]", ALL_NUMERIC_TYPES, bool)
     CHECK(hd.as_scalar<TestType>() == d);
     CHECK(hd.get_type() == to_typeid(d));
 
-    HDC tree,ch;
+    HDC tree, ch;
     tree.add_child("aaa",ch);
     CHECK_THROWS(tree.as_scalar<TestType>());
 }
