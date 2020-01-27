@@ -22,6 +22,9 @@ add_executable(hdc_example_lukas example_lukas.f90)
 target_link_libraries(hdc_example_lukas fhdc)
 set_target_properties(hdc_example_lukas PROPERTIES LINKER_LANGUAGE Fortran)
 
+add_executable(show_type_traits show_type_traits.cpp)
+target_link_libraries(show_type_traits hdc)
+
 add_executable(hdc_example_interprocess example_interprocess.cpp)
 if( APPLE )
   target_link_libraries(hdc_example_interprocess hdc)
@@ -43,5 +46,6 @@ install(TARGETS hdc_fortran_module
             hdc_example_fortran
             hdc_example_cpo
             hdc_example_interprocess
+            show_type_traits
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)
