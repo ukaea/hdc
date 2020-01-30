@@ -29,6 +29,9 @@ TEST_CASE("GetPlugins","[HDC]")
     // "mdbm" has been built and  should be found
     CHECK(in_map("mdbm",plugins));
 #endif // _USE_MDBM
+#ifdef _USE_REDIS
+    CHECK(in_map("redis",plugins));
+#endif // _USE_REDIS
 }
 
 TEST_CASE("EmptyNode", "[HDC]")
@@ -424,11 +427,8 @@ TEST_CASE("BracketOperatorsOthers", "[HDC]")
 
     HDC subtree;
     subtree["ddd"] = HDC("node");
-    subtree.dump();
     tree["aaa/kkk"] = subtree["ddd"];
-//     tree.add_child("aaa/kkk",subtree["ddd"]);
-    tree.dump();
-//     CHECK(strcmp(tree["aaa/kkk"].as_string().c_str(),"node") == 0);
+    CHECK(strcmp(tree["aaa/kkk"].as_string().c_str(),"node") == 0);
 
     std::string str = "test";
     tree["str"] = str;

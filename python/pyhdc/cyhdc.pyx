@@ -119,6 +119,8 @@ cdef extern from "hdc.hpp":
         @staticmethod
         CppHDC load(string uri, string datapath) except +
         void save(string uri) except +
+        @staticmethod
+        void init(string storage_str, string settings_str)
 cdef class HDC:
     """
     Python wrapper class for the HDC C++ class
@@ -544,3 +546,6 @@ cdef class HDC:
         res = HDC()
         res._this = CppHDC.load(("hdf5://"+filename).encode(), dataset_name.encode())
         return res
+
+    def init(storage_str, settings_str):
+        CppHDC.init(storage_str.encode(), settings_str.encode())

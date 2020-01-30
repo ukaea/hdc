@@ -482,7 +482,7 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
     buffer = get_buffer();
     header = reinterpret_cast<hdc_header_t*>(buffer);
     vector<char> new_buffer;
-    auto segment = get_segment();
+    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
     auto children = segment.find<hdc_map_t>("d").first;
     if (children == nullptr) throw HDCException("add_child_single(): Could not get the children.\n");
     if (children->count(path.c_str()) == 0) {
@@ -582,7 +582,8 @@ bool HDC::delete_child(hdc_path_t& path, bool prune)
     }
     auto first = path.front();
     path.pop_front();
-    hdc_map_t* children = get_children_ptr();
+    auto segment = bip::managed_external_buffer(bip::open_only, buffer + sizeof(hdc_header_t), 0);
+    auto children = segment.find<hdc_map_t>("d").first;
     if (path.empty()) {
         if (first.type() == typeid(std::string)) {
             auto str = boost::get<std::string>(first).c_str();
@@ -603,6 +604,7 @@ bool HDC::delete_child(hdc_path_t& path, bool prune)
             //children->erase(children->iterator_to(it));
         }
         header->shape[0] = children->size();
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return true;
     } else {
         auto child = get_single(first);
@@ -679,7 +681,7 @@ HDC HDC::get_single(hdc_index_t index)
 {
     DEBUG_STDOUT(std::string("get_single(") + boost::lexical_cast<std::string>(index) + ")\n");
 
-    hdc_map_t* children = get_children_ptr();
+    auto children = get_children_ptr();
 
     if (index.type() == typeid(std::string)) {
         auto str = boost::get<std::string>(index).c_str();
@@ -702,7 +704,7 @@ HDC HDC::get_single(hdc_index_t index) const
 {
     DEBUG_STDOUT(std::string("get_single(") + boost::lexical_cast<std::string>(index) + ")\n");
 
-    hdc_map_t* children = get_children_ptr();
+    auto children = get_children_ptr();
 
     if (index.type() == typeid(std::string)) {
         auto str = boost::get<std::string>(index).c_str();
@@ -844,6 +846,8 @@ HDC HDC::operator[](size_t index) const
 void HDC::set_child_single(hdc_index_t path, const HDC& n)
 {
     DEBUG_STDOUT(std::string("set_child_single(") + boost::lexical_cast<std::string>(path) + ")\n");
+    auto buffer = get_buffer();
+    hdc_header_t* header = reinterpret_cast<hdc_header_t*>(buffer);
     hdc_map_t* children = get_children_ptr();
     auto ca = get_segment().get_allocator<record>();
     if (path.type() == typeid(size_t)) {
@@ -865,6 +869,7 @@ void HDC::set_child_single(hdc_index_t path, const HDC& n)
             children->insert(record(boost::get<std::string>(path).c_str(), n.get_uuid(), ca));
         }
     }
+    if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
 }
 
 void HDC::set_child(size_t index, const HDC& n)
@@ -925,23 +930,23 @@ void HDC::set_type(hdc_type_t type)
     alloc(HDC_NODE_SIZE_DEFAULT);
     old_buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(old_buffer);
-    DEBUG_STDOUT(std::string("set_type(") + to_string(header->type) + " -> " + to_string(type) + ")\n");
-    if (header->type == type) return; // Nothing to do
+    DEBUG_STDOUT(std::cout << "set_type(" + to_string(header->type) + " -> " + to_string(type) + ")\n");
+    if (header->type == type) return;
     header->type = type;
-    if (is_terminal()) return;
+//     if (is_terminal() && storage->memory_mapped()) return; // Nothing to do
     auto dest_buffer = old_buffer;
     vector<char> new_buffer(0);
     if (header->buffer_size < HDC_NODE_SIZE_DEFAULT) {
         new_buffer.reserve(HDC_NODE_SIZE_DEFAULT);
-        header->data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
-        header->buffer_size = HDC_NODE_SIZE_DEFAULT;
         dest_buffer = new_buffer.data();
         memcpy(dest_buffer, old_buffer, sizeof(hdc_header_t));
         header = reinterpret_cast<hdc_header_t*>(dest_buffer);
+        header->data_size = HDC_NODE_SIZE_DEFAULT - sizeof(hdc_header_t);
+        header->buffer_size = HDC_NODE_SIZE_DEFAULT;
     }
     bip::managed_external_buffer segment(bip::create_only, dest_buffer + sizeof(hdc_header_t), header->data_size);
     auto children = segment.construct<hdc_map_t>("d")(hdc_map_t::ctor_args_list(), hdc_map_t::allocator_type(
-            segment.get_segment_manager())); // TODO: Wrap this to auto-growing???
+            segment.get_segment_manager()));
     if (children == nullptr) throw HDCException("HDC::set_type(hdc_type_t type): Could not create the children");
     storage->set(uuid, dest_buffer, header->buffer_size);
 }
@@ -987,6 +992,7 @@ void HDC::set_data_c(const std::vector<size_t>& shape, void* data, hdc_type_t ty
         storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), data, data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
     } else {
         std::vector<char> new_buffer(buffer_size);
         header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
@@ -1017,6 +1023,7 @@ void HDC::set_external_c(const std::vector<size_t>& shape, void* data, hdc_type_
         storage->lock(uuid);
         memcpy(buffer + sizeof(hdc_header_t), &data, data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return;
     } else {
         std::vector<char> new_buffer(buffer_size);
@@ -1117,7 +1124,7 @@ void HDC::insert(size_t index, const HDC& h)
         }
     }
     header->shape[0] = children->size();
-    if (header->buffer_size != old_size) {
+    if (header->buffer_size != old_size || !storage->memory_mapped()) {
         storage->set(uuid, buffer, header->buffer_size);
     }
 }
@@ -1222,7 +1229,8 @@ size_t HDC::get_rank() const
 
 char* HDC::get_buffer() const
 {
-    return storage->get(uuid);
+    auto buffer = storage->get(uuid);
+    return buffer;
 }
 
 void HDC::set_buffer(char* buffer)
@@ -1367,7 +1375,6 @@ HDC HDC::load(const std::string& uri, const std::string& datapath)
             split_res[1] = datapath;
         }
         auto prefix = result[0];
-
         auto& serializer = hdc::serialization::Serialiser::find_serializer(prefix);
         return serializer.deserialize(split_res[0], split_res[1]);
     } else {
@@ -1511,6 +1518,7 @@ void HDC::set_data(hdc_data_t obj)
         // update data
         memcpy(buffer + sizeof(hdc_header_t), obj.data, data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return;
     } else {
         storage->remove(uuid);
@@ -1549,6 +1557,7 @@ void HDC::set_external(hdc_data_t obj)
         memcpy(buffer, header, sizeof(hdc_header_t));
         memcpy(buffer + sizeof(hdc_header_t), &(obj.data), data_size);
         storage->unlock(uuid);
+        if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         return;
     } else {
         storage->remove(uuid);

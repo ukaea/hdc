@@ -365,7 +365,10 @@ HDC json_to_HDC(const ::Json::Value& root)
                 }
                 HDC d(shape, dt);
                 tree = d;
-                void* data_ptr = tree.as_void_ptr();
+//                 void* data_ptr = tree.as_void_ptr();
+                auto buffer = tree.get_buffer();
+                auto header = reinterpret_cast<hdc_header_t*>(buffer);
+                void* data_ptr = buffer + sizeof(hdc_header_t);
                 if (dt == HDC_DOUBLE) {
                     switch (rank) {
                         case 1: {
@@ -520,6 +523,7 @@ HDC json_to_HDC(const ::Json::Value& root)
                         }
                     }
                 }
+                if (!tree.get_storage()->memory_mapped()) tree.get_storage()->set(tree.get_uuid(),buffer,header->buffer_size);
             } else {
                 // call recursively -- save list
                 tree.set_type(HDC_LIST);

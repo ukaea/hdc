@@ -154,6 +154,10 @@ public:
     std::string name() override {
         return "mdbm";
     }
+
+    bool memory_mapped() override {
+        return true;
+    }
 };
 
 PLUMA_INHERIT_PROVIDER(MDBMStorage, Storage)

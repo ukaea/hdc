@@ -134,6 +134,7 @@ option( BUILD_EXAMPLES "Build and install examples" ON )
 option( BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF )
 option( ENABLE_HDF5 "Enable HDF5 support" ON )
 option( ENABLE_UDA "Enable UDA support" OFF )
+option( ENABLE_REDIS "Enable redis storage backend" OFF )
 option( ENABLE_MATLAB "Enable MATLAB support" OFF )
 option( ENABLE_COVERAGE "Enable coverage testing (using gcovr)" ON )
 option( BUILD_OWN_HDF5 "Build own HDF5" OFF )
@@ -265,8 +266,12 @@ if( ENABLE_UDA )
   add_definitions( -D_USE_UDA=1 )
 endif() # ENABLE_UDA
 
+if( ENABLE_REDIS )
+    add_definitions( -D_USE_REDIS=1 )
+endif() # ENABLE_REDIS
+
 if( DEBUG )
-  add_definitions( -DDEBUG )
+    add_definitions( -DDEBUG )
 endif() # DEBUG
 
 if( CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "DEBUG" AND ENABLE_COVERAGE )

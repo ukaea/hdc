@@ -103,6 +103,10 @@ public:
     std::string name() override {
         return "umap";
     }
+
+    bool memory_mapped() override {
+        return true;
+    }
 };
 
 PLUMA_INHERIT_PROVIDER(UnorderedMapStorage, Storage)

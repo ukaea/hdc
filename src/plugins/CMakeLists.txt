@@ -7,6 +7,16 @@ if( _BUILD_MDBM )
   endif( BUILD_OWN_MDBM )
   install( TARGETS hdc_plugin_mdbm DESTINATION lib/hdc )
 endif()
+
+if (ENABLE_REDIS)
+    include( Findhiredis )
+    find_package(hiredis REQUIRED)
+    add_library(hdc_plugin_redis SHARED redis_plugin.cpp storage_interface.cpp)
+    target_include_directories(hdc_plugin_redis PRIVATE ${HIREDIS_INCLUDE_DIRS})
+    target_link_libraries(hdc_plugin_redis ${HIREDIS_LIBRARIES} Pluma dl hdcjsoncpp hiredis)
+    install(TARGETS hdc_plugin_redis DESTINATION lib/hdc)
+endif (ENABLE_REDIS)
+
 # Create Unordered map storage
 include_directories()
 add_library( hdc_plugin_umap SHARED umap_plugin.cpp storage_interface.cpp )

@@ -595,6 +595,7 @@ public:
             // set data
             memcpy(buffer + sizeof(hdc_header_t), data, data_size);
             storage->unlock(uuid);
+            if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         } else {
             // create new buffer
             std::vector<char> new_buffer(buffer_size);
@@ -648,6 +649,9 @@ public:
             // set data
             memcpy(buffer + sizeof(hdc_header_t), &data, data_size);
             storage->unlock(uuid);
+
+            if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
+
         } else {
             // create new buffer
             std::vector<char> new_buffer(buffer_size);
@@ -1063,8 +1067,8 @@ public:
             throw HDCException("This is not a terminal node...");
         }
         T tp{};
-        if (header->type != to_typeid(tp)) {
-            std::cerr << "*** " << header->type << " " << to_typeid(tp) << std::endl;
+        if (header->type != to_typeid(tp))
+        {
             throw HDCException("as() stored and requested types do not match\n");
         }
         if (header->flags & HDCExternal) {
