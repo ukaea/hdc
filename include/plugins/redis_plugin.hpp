@@ -63,6 +63,7 @@ public:
         root["hostname"] = hostname;
         root["port"] = port;
         root["use_unix_socket"] = use_unix_socket;
+        root["persistent"] = true;
         std::stringstream ss;
         ss << root;
         return ss.str();

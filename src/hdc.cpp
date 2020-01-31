@@ -523,9 +523,7 @@ void HDC::add_child_single(const std::string& path, const HDC& n)
             }
         }
         header->shape[0] = children->size();
-        if (header->buffer_size != old_size) {
-            storage->set(uuid, buffer, header->buffer_size);
-        }
+        if (header->buffer_size != old_size || !storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
     }
 }
 

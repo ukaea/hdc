@@ -60,10 +60,12 @@ int main(int argc, char *argv[]) {
         // get settings string
         cout << "-------------- Master tree dump start --------------" << endl;
         tree.dump();
-        cout << "--------------  Master tree dump end  --------------" << endl;
-        std::string settings = tree.serialize("hdc");
+        cout << "--------------  Master tree dump end  --------------" << endl << endl << endl;
+        std::string settings = tree.serialize("hdc_string");
+        cout << "********* Serialization string dump start **********" << endl;
+        cout <<  settings << std::endl;
+        cout << "*********  Serialization string dump end  **********" << endl << endl << endl;
         boost::algorithm::erase_all(settings,"\\"); // hack to remove wrongly escaped path
-
         shared_memory_object shm (create_only, "MySharedMemory", read_write);
         shm.truncate(65536);
         mapped_region region(shm, read_write);
@@ -80,10 +82,10 @@ int main(int argc, char *argv[]) {
         mapped_region region(shm, read_only);
         char *mem = static_cast<char*>(region.get_address());
         std::string str(mem);
-        HDC tree = HDC::deserialize("hdc",str);
-        cout << "-------------- Slave tree dump start --------------" << endl;
+        HDC tree = HDC::deserialize("hdc_string",str);
+        cout << "-------------- Slave tree dump start ---------------" << endl;
         tree.dump();
-        cout << "--------------  Slave tree dump end  --------------" << endl;
+        cout << "--------------  Slave tree dump end  ---------------" << endl;
     }
     return 0;
 }
