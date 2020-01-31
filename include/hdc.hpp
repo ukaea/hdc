@@ -1087,18 +1087,16 @@ public:
      */
     void* as_void_ptr() const
     {
-        DEBUG_STDOUT(std::string("as_void_ptr()"));
+        hdc_header_t header = get_header(); // This is needed in Python for some reason
         auto buffer = get_buffer();
         auto data = buffer + sizeof(hdc_header_t);
-        hdc_header_t header;
-        memcpy(&header,buffer,sizeof(hdc_header_t));
         if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
-            throw std::runtime_error("as_void_ptr(): This is not a terminal node...");
+            throw std::runtime_error("This is not a terminal node...");
         }
-        if (header.type == HDC_EMPTY) {
-            throw std::runtime_error("as_void_ptr(): This node is empty...");
+        DEBUG_STDOUT(std::string("as_void_ptr()"));
+        if (!storage->has(uuid)) {
+            throw HDCException("as_void_ptr(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
-
         if (header.flags & HDCExternal) {
             void* result;
             memcpy(&result, data, sizeof(result));
