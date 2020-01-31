@@ -1089,15 +1089,18 @@ public:
     {
         auto buffer = get_buffer();
         auto data = buffer + sizeof(hdc_header_t);
-        hdc_header_t header = get_header(); // This is needed in Python for some reason
-        if (header.type == HDC_STRUCT || header.type == HDC_LIST) {
-            throw std::runtime_error("This is not a terminal node...");
+        auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
+            throw std::runtime_error("as_void_ptr(): This is not a terminal node...");
         }
-        DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
+        if (header->type == HDC_EMPTY) {
+            throw std::runtime_error("as_void_ptr(): This node is empty...");
+        }
+        DEBUG_STDOUT(std::string("as_void_ptr()"));
         if (!storage->has(uuid)) {
             throw HDCException("as_void_ptr(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
-        if (header.flags & HDCExternal) {
+        if (header->flags & HDCExternal) {
             void* result;
             memcpy(&result, data, sizeof(result));
             return result;
@@ -1171,7 +1174,7 @@ public:
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
-        DEBUG_STDOUT(std::string("as<") + get_type_str() + ">()");
+        DEBUG_STDOUT(std::string("as_scalar<") + get_type_str() + ">()");
         if (!storage->has(uuid)) {
             throw HDCException("as_scalar(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }

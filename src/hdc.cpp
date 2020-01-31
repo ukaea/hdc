@@ -1174,7 +1174,7 @@ const char* HDC::get_type_str() const
 
 hdc_header_t HDC::get_header() const
 {
-    hdc_header_t h = {};
+    hdc_header_t h;
     memcpy(&h, get_buffer(), sizeof(hdc_header_t));
     return h;
 }
