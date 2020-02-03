@@ -189,59 +189,60 @@ TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
     CHECK(120 == data2[3]);
 }
 
-// TEST_CASE("SetExternal", "[HDC]")
-// {
-//     HDC node, external, e2, e3;
-//
-//     int64_t array_in[4] = { 7, 2, 3, 4 };
-//     std::vector<size_t> shape = {4};
-//     node.set_data(shape,array_in);
-//     external.set_external(shape, array_in);
-//     int64_t* array_out = external.as<int64_t>();
-//     CHECK(*array_in == *array_out);
-//     CHECK(*array_in == *(int64_t*)(external.as_void_ptr()));
-// //     CHECK(external.is_external() == true);
-// //     auto external_str = external.serialize("json");
-// //     auto node_str = node.serialize("json");
-// //     CHECK(strcmp(external_str.c_str(),node_str.c_str()) == 0);
-//
-// //     //update
-// //     int64_t array_in2[4] = { 70, 20, 30, 40 };
-// //     external.set_external(shape, array_in2);
-// //     array_out = external.as<int64_t>();
-// //     CHECK(*array_in2 == *array_out);
-// //
-// //     e2.set_external({1},array_in);
-// //     array_out = e2.as<int64_t>();
-// //     CHECK(*array_in == *array_out);
-//
-// //     hdc_data_t data;
-// //     data.data = (char*)array_in;
-// //     data.rank = 1;
-// //     data.shape[0] = 4;
-// //     data.flags = HDCDefault;
-// //     data.type = HDC_INT64;
-// //     e3.set_external(data);
-// //     array_out = e3.as<int64_t>();
-// //     CHECK(*array_in == *array_out);
-// //
-// //     HDC e4 = HDC::make_external(data);
-// //     array_out = e3.as<int64_t>();
-// //     CHECK(*array_in == *array_out);
-// //
-// //     //update
-// //     hdc_data_t data2;
-// //     memcpy(&data2,&data,sizeof(hdc_data_t));
-// //     data2.data = (char*)array_in2;
-// //     e3.set_external(data2);
-// //     array_out = e3.as<int64_t>();
-// //     CHECK(*array_in2 == *array_out);
-// //    //constructor
-// //    data2.flags |= HDCExternal;
-// //    HDC e5(data2);
-// //    array_out = e5.as<int64_t>();
-// //    CHECK(*array_in2 == *array_out);
-// }
+TEST_CASE("SetExternal", "[HDC]")
+{
+    HDC node, external, e2, e3;
+
+    int64_t array_in[4] = { 7, 2, 3, 4 };
+    std::vector<size_t> shape = {4};
+    node.set_data(shape,array_in);
+    external.set_external(shape, array_in);
+    int64_t* array_out = external.as<int64_t>();
+    CHECK(*array_in == *array_out);
+    CHECK(*array_in == *(int64_t*)(external.as_void_ptr()));
+    CHECK(external.is_external() == true);
+    auto external_str = external.serialize("json");
+    auto node_str = node.serialize("json");
+    CHECK(strcmp(external_str.c_str(),node_str.c_str()) == 0);
+
+    //update
+    int64_t array_in2[4] = { 70, 20, 30, 40 };
+    external.set_external(shape, array_in2);
+    array_out = external.as<int64_t>();
+    CHECK(*array_in2 == *array_out);
+
+    e2.set_external({1},array_in);
+    array_out = e2.as<int64_t>();
+    CHECK(*array_in == *array_out);
+
+    hdc_data_t data;
+    data.data = (char*)array_in;
+    data.rank = 1;
+    data.shape[0] = 4;
+    data.flags = HDCDefault;
+    data.type = HDC_INT64;
+    e3.set_external(data);
+    array_out = e3.as<int64_t>();
+    CHECK(*array_in == *array_out);
+
+    HDC e4 = HDC::make_external(data);
+    array_out = e3.as<int64_t>();
+    CHECK(*array_in == *array_out);
+
+    //update
+    hdc_data_t data2;
+    memcpy(&data2,&data,sizeof(hdc_data_t));
+    data2.data = (char*)array_in2;
+    e3.set_external(data2);
+    array_out = e3.as<int64_t>();
+    CHECK(*array_in2 == *array_out);
+
+    //constructor
+    data2.flags |= HDCExternal;
+    HDC e5(data2);
+    array_out = e5.as<int64_t>();
+    CHECK(*array_in2 == *array_out);
+}
 
 TEMPLATE_TEST_CASE("as_vector_int8", "[HDC]", ALL_NUMERIC_TYPES) {
     std::vector<int8_t> array_in = { 7, 2, 3, 4 };

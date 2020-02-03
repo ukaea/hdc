@@ -72,8 +72,13 @@ public:
     void set(boost::uuids::uuid _uuid, char* data, size_t size) {
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         auto key = boost::lexical_cast<std::string>(_uuid);
+        // Still not knowing why this is needed, but it makes the tests pass...
+        this->reply = (redisReply*)redisCommand(this->context,"DEL %b", key.c_str(), (size_t) key.size());
+        if ( !this->reply ) throw std::runtime_error("RedisStorage->set() [DEL] has returned an error\n");
+        freeReplyObject(this->reply);
+        // Actual SET
         this->reply = (redisReply*)redisCommand(this->context,"SET %b %b", key.c_str(), (size_t) key.size(), data, (size_t) size);
-        if ( !this->reply ) throw std::runtime_error("RedisStorage->set() has returned an error\n");
+        if ( !this->reply ) throw std::runtime_error("RedisStorage->set() [SET] has returned an error\n");
         freeReplyObject(this->reply);
         return;
     }
