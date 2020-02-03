@@ -625,13 +625,13 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
 
-    subroutine hdc_to_json(this,path,mode)
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        integer(kind=c_int32_t) :: mode
-        if (.not.present(path)) path = ""
-        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
-    end subroutine hdc_to_json
+!    subroutine hdc_to_json(this,path,mode)
+!        type(hdc_t) :: this
+!        character(len=*), optional :: path
+!        integer(kind=c_int32_t) :: mode
+!        if (.not.present(path)) path = ""
+!        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
+!    end subroutine hdc_to_json
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding

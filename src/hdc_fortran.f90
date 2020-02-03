@@ -1,5 +1,5 @@
 
-! This file was generated on 2019-12-13 11:16:53.664482 by ./generate_fortran_api.py
+! This file was generated on 2020-02-03 16:19:55.147040 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -934,13 +934,13 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
 
-    subroutine hdc_to_json(this,path,mode)
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        integer(kind=c_int32_t) :: mode
-        if (.not.present(path)) path = ""
-        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
-    end subroutine hdc_to_json
+!    subroutine hdc_to_json(this,path,mode)
+!        type(hdc_t) :: this
+!        character(len=*), optional :: path
+!        integer(kind=c_int32_t) :: mode
+!        if (.not.present(path)) path = ""
+!        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
+!    end subroutine hdc_to_json
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding
