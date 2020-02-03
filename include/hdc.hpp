@@ -175,7 +175,7 @@ public:
     /**
     * @brief Constructor from string
     *
-    * @param str p_str:...
+    * @param str p_str: String
     */
     explicit HDC(const std::string& str);
 
@@ -196,16 +196,16 @@ public:
     /**
     * @brief Deserializing constructor
     *
-    * @param _storage p__storage:...
-    * @param _uuid p__uuid:...
+    * @param _storage p__storage: storage of source node
+    * @param _uuid p__uuid: UUID of source node
     */
     HDC(HDCStorage* _storage, const std::string& _uuid);
 
     /**
     * @brief Intermediate node constructor from boost::uuids::uuid
     *
-    * @param _storage p__storage:...
-    * @param _uuid p__uuid:...
+    * @param _storage p__storage: storage of source node
+    * @param _uuid p__uuid: UUID of source node
     */
     HDC(HDCStorage* _storage, boost::uuids::uuid _uuid);
 
@@ -306,8 +306,8 @@ public:
     /**
     * @brief Sets the default storage options, builds the boost::property_tree with default settings structure to be redefined later by parse_cmdline(), load_config() or set_storage() functions.
     *
-    * @param storage p_storage:...
-    * @param storage_options p_storage_options:...
+    * @param storage p_storage: Storage string specifier - e.g. "umap", "mdb", "redis"
+    * @param storage_options p_storage_options: JSON encoded settings string
     */
     static void set_default_storage_options(const std::string& storage, const std::string& storage_options = "");
 
@@ -330,7 +330,7 @@ public:
     /**
     * @brief Makes copy of object. Copies at least node buffer. If deep_copy specified, it also copies all children nodes.
     *
-    * @param deep_copy p_deep_copy:...
+    * @param deep_copy p_deep_copy: true = deep copy (copies also all the children), false = copy just current node, keeping children references untouched
     * @return HDC
     */
     HDC copy(bool deep_copy = true);
@@ -508,7 +508,6 @@ public:
     * @brief Assigns data to a node.
     *
     * @param T p_T: Desired data type.
-    * @param d p_d:...
     * @return HDC&
     */
     template <typename T>
@@ -521,7 +520,7 @@ public:
     /**
     * @brief Assigns char* data to a node.
     *
-    * @param str p_str:...
+    * @param str p_str: char* string
     * @return HDC&
     */
     HDC& operator=(char const* str);
@@ -1238,7 +1237,7 @@ public:
     /**
     * @brief Increase size of underlying storage by extra_size.
     *
-    * @param extra_size p_extra_size:...
+    * @param extra_size p_extra_size: Size to grow by
     */
     void grow(size_t extra_size);
 
@@ -1259,7 +1258,7 @@ public:
     /**
     * @brief Returns string containing JSON representation of this node and all its descendants.
     *
-    * @param children p_children:...
+    * @param children p_children: hdc_map_t object storing children
     * @return std::__cxx11::string
     */
     static string hdc_map_to_json(hdc_map_t& children);
@@ -1297,8 +1296,8 @@ public:
     /**
     * @brief Returns copy of HDC object, if deep_copy == true provides deep copy (i.e. copy of current node and also all children)
     *
-    * @param h p_h:...
-    * @param deep_copy p_deep_copy:...
+    * @param h p_h: source node
+    * @param deep_copy p_deep_copy: deep_copy == true provides deep copy (i.e. copy of current node and also all children)
     * @return HDC
     */
     static HDC copy(const HDC& h, bool deep_copy = false);
@@ -1400,7 +1399,7 @@ public:
     /**
      * @brief Creates HDC node from given hdc_data_t object. This function stores only pointer to data, not the data itself. User is responsible for its proper (de)allocation.
      *
-     * @param obj p_obj:...
+     * @param obj p_obj: hdc_data_t struct.
      * @return HDC
      */
     static HDC make_external(hdc_data_t obj);
