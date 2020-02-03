@@ -1,9 +1,16 @@
 HDC - Hierarchical Dynamic Containers                         {#mainpage}
 =====================================
 
-HDC is tiny library for exchanging hierarchical data (arrays of structures) in shared memory between multiple programming languages, currently supporting C, C++, Python and Fortran.
+HDC is tiny library for exchanging hierarchical data (arrays of structures) in shared memory between multiple programming languages, currently supporting C, C++, Python, Fortran and MATLAB.
 
-As of January 2019 it should mostly work
+
+Repository
+==========
+The master repository lives in [IPP CAS gitlab instance](https://repo.tok.ipp.cas.cz/compass-tokamak/HDC).
+
+The bitbucket repo is just a read-only mirror.
+
+The access to the master repo can be requested via email *fridrich at ipp.cas.cz*
 
 Building instructions
 =====================
@@ -13,20 +20,39 @@ Prerequisites
 
 To build HDC, you will need:
 - c++11 compliant compiler (tested with intelstudio>=2018 and gcc>=5.0)
-- gfortran>=4.9
+- gfortran >= 4.9
 - Boost >= 1.48
-- Yahoo MDBM (optional, but recommended)
-- Python 2.7 or any Python 3 (tested only with 3.4, 3.5, 3.6 and 3.7)
 - CMake >= 3.3
 - Doxygen for documentation building
 - Cython > 0.23 (there is some parsing error in 0.23)
-- HDF5 devel libraries (optional, tested with 1.8 and 1.10)
+
+Optionally it can use:
+- Python > 3.4 (Python HDC bindings "pyHCD" and hdc-binder support)
+- MATLAB > 2018a (MATLAB mex interface)
+- Yahoo MDBM (recommended storage plugin working within shared memory)
+- Redis + libhiredis-dev (storage plugin working within distributed memory)
+- HDF5 devel libraries ((de)serialization, tested with 1.8 and 1.10)
+- libs3 ((de)serialization plugin)
+- flatbuffers ((de)serialization plugin)
+
+Supported OS:
+-------------
+
+Currently all commits are automatically tested against:
+
+ - Ubuntu 16.04 (xenial)
+ - Ubuntu 18.04 (bionic)
+ - Fedora 31
+ - Centos 7
+
+But HDC should work on any not-too-obsolette distro. If you face any problems, please, report it via email or [project issue tracker](https://repo.tok.ipp.cas.cz/dashboard/issues).
+
 
 Building HDC
 ------------
 For building on ITM gateway, please, follow [these instructions](docs/BUILDING_ON_ITM_GATEWAY.md).
 
-There are several cmake options:
+There are several cmake options. The most important are:
 
   - `-DCMAKE_INSTALL_PREFIX=/where/to/install` make install destination.
   - `-DBUILD_DOC=ON` Whether to build and install documentation.
@@ -37,45 +63,47 @@ There are several cmake options:
     - `-DPYTHON_INCLUDE_DIR=/path/to/python/include`
   - `-DDEBUG=ON` Whether to print debugging messages.
 
-Some of them can be edited using `ccmake .` in`build` directory. The example of build follows:
+Some of them can be edited using `ccmake .` in `build` directory.
 
-1. clone the git repository
-```
-git clone git@bitbucket.org:compass-tokamak/hdc.git
-# cd into hdc
-cd hdc
-```
+The example of build follows:
 
-2. build in a separate build directory
-```
-mkdir build
-cd build
+ 1. clone the git repository
+ ```
+ git clone git@bitbucket.org:compass-tokamak/hdc.git
+ # cd into hdc
+ cd hdc
+ ```
+ 2. build in a separate build directory
+ ```
+ mkdir build
+ cd build
+ cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+ make -j install
+ ```
 
-cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
-make -j install
-```
+ 3. Optionally build & install python module. Important: numpy must be installed before pyhdc.
+ ```
+ cd  python
+ python setup.py build
+ python setup.py install
+ cd ..
+ ```
 
-3. Optionally build & install python module. Important: numpy must be installed before pyhdc.
-```
-cd  python
-python setup.py build
-python setup.py install
-cd ..
-```
+ 4. Optionally, run Python tests (requires building HDC with HDF5).
+ ```
+ cd python
+ python setup.py test
+ cd tests_binder
+ ./run
+ cd ..
+ ```
 
-4. Optionally, run Python tests (requires building HDC with HDF5).
-```
-cd python
-python setup.py test
-cd ..
-```
-
-5. Optionally build & run MATLAB mex interface
-```
-cd matlab
-make -f Makefile_
-LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
-```
+ 5. Optionally build & run MATLAB mex interface
+ ```
+ cd matlab
+ make -f Makefile_
+ LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
+ ```
 You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 
 Building using IntelStudio
@@ -121,7 +149,7 @@ Basic ideas
   + Empty node - this is the initial state of node. Empty node does not store any data and does not have any children. By adding subnode, slice or data it's type is automaticaly changed to another type.
   + Structure/list node - the node has at least one children indexed by string path. It can only store subtrees indexed by path/integer index.
   + Array node - the node has at least one children indexed by integer. It can only store subtrees indexed by integer.
-  + Data node - it only can be terminal node, it stores some data, currently in DyND array object.
+  + Data node - it only can be terminal node, it stores some data, currently char* buffer.
 
 
 Examples
@@ -162,4 +190,5 @@ Conduit
 -------
 Citing [Conduit](http://software.llnl.gov/conduit/): provides an intuitive model for describing hierarchical scientific data in C++, C, Fortran, and Python and is used for data coupling between packages in-core, serialization, and I/O tasks.
 
-*The goals are very close to ours, merging these two projects in near future is being considered.*
+- HDC supports (in private/shared memory) zero-copy data access.
+- The goals are very close to ours, the way is slightly different.
