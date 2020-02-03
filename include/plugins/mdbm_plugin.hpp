@@ -42,13 +42,13 @@ public:
 
     void lock(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         mdbm_lock_smart (this->db, &key, 0);
     }
 
     void unlock(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         mdbm_unlock_smart (this->db, &key, 0);
     }
 
@@ -76,7 +76,7 @@ public:
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum value = {(char*)data, static_cast<int>(size)};
         mdbm_lock_smart (this->db, &key, 0);
         mdbm_store(this->db,key,value,MDBM_REPLACE);
@@ -87,7 +87,7 @@ public:
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum found = mdbm_fetch(this->db, key);
         if (found.dptr == NULL || found.dsize == 0) {
             throw std::runtime_error("MDBMStorage::get(\""+boost::lexical_cast<std::string>(_uuid)+"\"): not found\n");
@@ -99,7 +99,7 @@ public:
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum found = mdbm_fetch(this->db, key);
         return found.dsize;
     }
@@ -125,7 +125,7 @@ public:
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         return (mdbm_fetch(this->db, key).dsize != 0);
     }
 
@@ -133,7 +133,7 @@ public:
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
         }
-        datum key = { reinterpret_cast<char*>(&_uuid), _uuid.size() };
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         mdbm_delete(this->db,key);
     }
 

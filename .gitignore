@@ -21,6 +21,8 @@ src/__pycache__
 
 fort.*
 
+dump.rdb
+
 utils/binder/Makefile
 utils/binder/hdc_fortran_test_module.mod
 utils/binder/hdc_fortran_test_module.so
