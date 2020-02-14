@@ -38,11 +38,11 @@ public:
         DEBUG_STDOUT("~RedisStorage()\n");
     }
 
-    void lock(boost::uuids::uuid _uuid) {
+    void lock(boost::uuids::uuid _uuid UNUSED) {
 //         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
     }
 
-    void unlock(boost::uuids::uuid _uuid) {
+    void unlock(boost::uuids::uuid _uuid UNUSED) {
 //         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
     }
 
