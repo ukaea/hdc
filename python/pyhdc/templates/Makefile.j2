@@ -1,3 +1,4 @@
+FC?=gfortran
 HDC_INCLUDE=-I. $(shell pkg-config fhdc --cflags)
 HDC_LIBS=$(shell pkg-config fhdc --libs)
 HDC_CFLAGS=-fPIC -g -ffree-line-length-none -pedantic -fbacktrace -std=f2008
