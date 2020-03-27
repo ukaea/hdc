@@ -396,6 +396,10 @@ cdef class HDC:
         memcpy(<void*> ctypes_buffer, &obj, sizeof(hdc_t))
         return ret
 
+    #@property
+    #def _as_cpp_obj_(self):
+        #return self._this
+
     def get_type_str(self):
         """Returns string type description of HDC node, e.g. int32"""
         return self._this.get_type_str().decode()
