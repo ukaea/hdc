@@ -1,6 +1,6 @@
 #!/bin/bash
-HDC_PREFIX=../../../install
-
+#HDC_PREFIX=../../../install
+HDC_PREFIX=${CMAKE_INSTALL_PREFIX}
 for JSON_FILE in *.json
 do
     hdc-binder $JSON_FILE
