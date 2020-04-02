@@ -41,7 +41,7 @@ test-hdc-centos-7:
     - python3 -m pip install .
     - pytest
     - cd tests_binder
-    - ./run
+    - FC=gfortran ./run
 
 test-hdc-fedora-31:
   image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-fedora-31
@@ -56,4 +56,4 @@ test-hdc-fedora-31:
     - python3 -m pip install .
     - pytest
     - cd tests_binder
-    - ./run
+    - FC=gfortran ./run
