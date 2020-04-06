@@ -145,8 +145,6 @@ cdef class HDC:
             self._this = CppHDC()
         elif isinstance(data, hdc_t_):
             # Constructor from hdc_t struct (mainly for interfaces)
-            print(data.storage_id)
-            print(data.uuid)
             ctypes_buffer = ctypes.addressof(data)
             memcpy(&obj, <void*> ctypes_buffer, sizeof(hdc_t))
             self._this = CppHDC(obj)
