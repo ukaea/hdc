@@ -65,7 +65,7 @@ cdef extern from "hdc_types.h":
 
     ctypedef struct hdc_t:
         char uuid[16]
-        voidptr storage
+        size_t storage_id
 
 class hdc_t_(ctypes.Structure):
     """The ctypes equivalent of hdc_t"""
@@ -137,9 +137,19 @@ cdef class HDC:
         data : HDC instance, six.string_types, np.ndarray, numbers.Number, collections_abc.Mapping, or collections_abc.Sequence
             Data to set (default None)
         """
+        # The following two lines are needed for HDC(hdc_t), but cannot be placed inside the condition
+        cdef hdc_t obj
+        cdef size_t ctypes_buffer
         if data is None:
             # create a new C++ instance
             self._this = CppHDC()
+        elif isinstance(data, hdc_t_):
+            # Constructor from hdc_t struct (mainly for interfaces)
+            print(data.storage_id)
+            print(data.uuid)
+            ctypes_buffer = ctypes.addressof(data)
+            memcpy(&obj, <void*> ctypes_buffer, sizeof(hdc_t))
+            self._this = CppHDC(obj)
         elif isinstance(data, self.__class__):
             #  copy constructor
             self._this = CppHDC((<HDC> data)._this)
@@ -395,10 +405,6 @@ cdef class HDC:
         cdef size_t ctypes_buffer = ctypes.addressof(ret)
         memcpy(<void*> ctypes_buffer, &obj, sizeof(hdc_t))
         return ret
-
-    #@property
-    #def _as_cpp_obj_(self):
-        #return self._this
 
     def get_type_str(self):
         """Returns string type description of HDC node, e.g. int32"""
