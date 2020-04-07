@@ -11,4 +11,12 @@ hh = HDC(h)
 print("-- dump the result")
 print(hh.dumps())
 
+print("## now the second direction")
+n = HDC()
+n["aaa/bbb/ccc"] = 42
+d.dump(n)
+
+
+
+
 print("-- Done.")

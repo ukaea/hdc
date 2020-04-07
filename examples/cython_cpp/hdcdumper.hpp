@@ -6,6 +6,7 @@ public:
         h.dump();
     }
     void dump_struct(hdc_t h) {
+        std::cout << "** HDCDumper:" << std::endl;
         dump_obj(HDC(h));
     }
     HDC make_hdc() {
