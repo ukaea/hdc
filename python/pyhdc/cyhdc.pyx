@@ -175,7 +175,6 @@ cdef class HDC:
         elif isinstance(key, numbers.Integral):
             if key not in self:
                 self._this.insert(<size_t> key, new_hdc._this)
-                pass
             else:
                 self._this.set_child_i(<size_t> key, new_hdc._this)
         else:

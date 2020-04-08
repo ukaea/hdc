@@ -18,6 +18,7 @@ src/__pycache__
 *.gcda
 *.gcno
 *.html
+*.so
 
 fort.*
 

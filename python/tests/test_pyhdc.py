@@ -477,6 +477,12 @@ def test_tree_json_string(test_trees):
     hdctree_test = HDC.loads(json_str)
     assert tree_equal(pytree, hdctree_test, exception=False)
 
+def test_complex_paths():
+    c = 5.0
+    n = HDC()
+    n["magnetics/flux_loop[0]/flux/data"] = c
+    data = n["magnetics/flux_loop[0]/flux/data"]
+    assert 5.0 == data.to_python()
 
 if __name__ == "__main__":
     pytest.main()

@@ -889,10 +889,19 @@ void HDC::set_child(hdc_path_t& path, const HDC& n)
     }
     auto first = path.front();
     path.pop_front();
-    if (path.empty()) {
-        set_child_single(first, n);
+    if (!path.empty()) { // Create intermediate nodes here
+        HDC h;
+        if (first.type() == typeid(size_t)) {
+            get(boost::get<size_t>(first)).set_child(path, n);
+        } else {
+            get(boost::get<std::string>(first)).set_child(path, n);
+        }
     } else {
-        get(boost::get<std::string>(first)).set_child(path, n);
+        if (first.type() == typeid(size_t)) {
+            set_child_single(boost::get<size_t>(first), n);
+        } else {
+            set_child_single(boost::get<std::string>(first), n);
+        }
     }
 }
 
