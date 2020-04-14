@@ -1,5 +1,7 @@
 # -*- coding: utf-8
 # cython: language_level=3, binding=True, profile=True, linetrace=True
+# This is example of Cython-wrapper of C++ class producing/consuming HDC objects.
+# Because AFAIK Cython cannot work directly with C++ instance, you have to pass hdc_t structure instead.
 import ctypes
 from libc.string cimport memcpy
 from pyhdc.cyhdc import hdc_t_
@@ -11,42 +13,30 @@ cdef extern from "hdc_types.h":
         size_t storage_id
 
 cdef extern from "hdc.hpp":
-    cdef cppclass HDCStorage:
-        pass
     cdef cppclass CppHDC "HDC":
         CppHDC() except +
 
 cdef extern from "hdcdumper.hpp":
     cdef cppclass CppHDCDumper  "HDCDumper":
         CppHDCDumper() except +
-        #void dump_obj(CppHDC h) except +
-        void dump_struct(hdc_t h) except +
-        CppHDC make_hdc() except +
+        void dump(hdc_t h) except +
         hdc_t make_hdc_t() except +
 
 cdef class HDCDumper:
     """
-    PYthon wrapper class for the HDCDumper class
+    Python wrapper class for the HDCDumper class
     """
     cdef CppHDCDumper _this
 
     def __init__(self):
         self._this = CppHDCDumper()
 
-    #def dump_obj(self, HDC h):
-        #self._this.dump_obj(h)
-
     def dump(self, n):
-        #if not isinstance(obj, HDC):
-            #raise ValueError("obj has to be an instance of hdc_t.")
         n_par = n._as_parameter_
         cdef hdc_t obj
         cdef size_t ctypes_buffer = ctypes.addressof(n_par)
         memcpy(&obj, <void*> ctypes_buffer, sizeof(hdc_t))
-        self._this.dump_struct(obj)
-
-    #def make_hdc(self):
-        #return self._this.make_hdc()
+        self._this.dump(obj)
 
     def make_hdc_t(self):
         cdef hdc_t obj = self._this.make_hdc_t()

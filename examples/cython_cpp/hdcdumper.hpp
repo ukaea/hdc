@@ -1,16 +1,12 @@
 #include <hdc.hpp>
-
+/* This is simple example of Cython binding between C++ class producing/consuming HDC objects.
+ * Because AFAIK Cython cannot work directly with C++ instance, you have to pass hdc_t structure instead.
+ */
 class HDCDumper {
 public:
-    void dump_obj(HDC h) {
-        h.dump();
-    }
-    void dump_struct(hdc_t h) {
+    void dump(hdc_t h) {
         std::cout << "** HDCDumper:" << std::endl;
-        dump_obj(HDC(h));
-    }
-    HDC make_hdc() {
-        return HDC("test");
+        HDC(h).dump();
     }
     hdc_t make_hdc_t() {
         HDC h("Created by HDCDumper");
