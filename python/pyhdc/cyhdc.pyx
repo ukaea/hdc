@@ -71,6 +71,14 @@ class hdc_t_(ctypes.Structure):
     """The ctypes equivalent of hdc_t"""
     _fields_ = [("uuid", ctypes.c_char * 16),
                 ("storage_id", ctypes.c_size_t)]
+    _defaults_ = {"uuid": "",
+                  "storage_id": 0
+        }
+    def __init__(self, **kwargs):
+        values = type(self)._defaults_.copy()
+        for (key, val) in kwargs.items():
+            values[key] = val
+        super().__init__(**values)
 
 # cdef the C++ interface, any method we need must be here
 cdef extern from "hdc.hpp":
@@ -118,9 +126,10 @@ cdef extern from "hdc.hpp":
         CppHDC deserialize( string protocol, string string) except +
         @staticmethod
         CppHDC load(string uri, string datapath) except +
-        void save(string uri) except +
+        void save(string uri, string datapath) except +
         @staticmethod
         void init(string storage_str, string settings_str)
+
 cdef class HDC:
     """
     Python wrapper class for the HDC C++ class
@@ -367,15 +376,16 @@ cdef class HDC:
             False .. just pure JSON (default)
             True  .. append additional metadata
         """
+        data_path = "".encode()
         if verbose:
-            self._this.save(("json_verbose://"+filename).encode())
+            self._this.save(("json_verbose://"+filename).encode(),data_path)
         else:
-            self._this.save(("json://"+filename).encode())
+            self._this.save(("json://"+filename).encode(),data_path)
 
     @staticmethod
     def load(uri, datapath=''):
         """
-        Loads data from some external storage
+        Loads data from some external storage or file
 
         Parameters
         ----------
@@ -389,6 +399,20 @@ cdef class HDC:
         cdef CppHDC new_hdc = CppHDC.load(uri.encode(), datapath.encode())
         res._this = new_hdc
         return res
+
+    def save(self, uri, datapath=""):
+        """
+        Saves data to some external storage or file
+
+        Parameters
+        ----------
+        uri : string
+            string specifying data source in protocol://path_to_the_file format
+            e.g. json://a.txt, or hdf5://a.h5
+        datapath : string
+            additional path within the file, e.g. subgroup in HDF5
+        """
+        self._this.save(uri.encode(), datapath.encode())
 
     def print_info(self):
         """Prints info about HDC node"""
@@ -536,7 +560,7 @@ cdef class HDC:
         dataset_name : string
             HDF5 dataset name within the file (default "data")
         """
-        self._this.save(("hdf5://"+filename).encode())
+        self._this.save(("hdf5://"+filename).encode(), dataset_name.encode())
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
