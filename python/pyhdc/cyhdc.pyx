@@ -121,6 +121,8 @@ cdef extern from "hdc.hpp":
         void save(string uri, string datapath) except +
         @staticmethod
         void init(string storage_str, string settings_str)
+        @staticmethod
+        vector[string] available_serializers()
 
 cdef class HDC:
     """
@@ -536,10 +538,15 @@ cdef class HDC:
         pass
 
     def keys(self):
-        """Get access keys of containers' children
-        """
+        """Get access keys of containers' children"""
         keys = self._this.keys()
         return (k.decode() for k in keys)
+
+    @staticmethod
+    def available_serializers():
+        """Returns available serializers"""
+        _avail_ser = CppHDC.available_serializers()
+        return [k.decode() for k in _avail_ser]
 
     def to_hdf5(self, filename, dataset_name="data"):
         """

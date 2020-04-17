@@ -1273,6 +1273,12 @@ public:
     static std::vector<char> buffer_grow(char* old_buffer, size_t extra_size);
 
     /**
+     * @brief Returns list of available serializers
+     * @return std::list<std::string> List of keys of available serialization plugins
+     */
+    static std::vector<std::string> available_serializers();
+
+    /**
     * @brief Loads HDC from given URI and datapath. (deserialization)
     *
     * @param uri p_uri: URI of file/redis hostname

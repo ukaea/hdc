@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <vector>
 
 class HDC;
 
@@ -15,7 +16,7 @@ class SerialiserMap {
 public:
     SerialiserMap() noexcept;
     Serialiser& operator[](const std::string& key) const;
-
+    std::vector<std::string> available_serializers() const;
 private:
     std::unordered_map<std::string, std::unique_ptr<Serialiser>> serializers_;
 };
@@ -31,6 +32,7 @@ public:
     virtual HDC from_string(const std::string& string) = 0;
 
     static Serialiser& find_serializer(const std::string& protocol);
+    static std::vector<std::string> available_serializers();
 
 private:
     static const SerialiserMap serializers_;

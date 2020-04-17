@@ -47,6 +47,15 @@ SerialiserMap::SerialiserMap() noexcept
 #endif
 }
 
+std::vector<std::string> SerialiserMap::available_serializers() const
+{
+    std::vector<std::string> keys;
+    keys.reserve(serializers_.size());
+    for (auto& item: serializers_) {
+        keys.push_back(item.first);
+    }
+    return keys;
+}
 
 Serialiser& SerialiserMap::operator[](const std::string& key) const
 {
@@ -59,4 +68,9 @@ Serialiser& SerialiserMap::operator[](const std::string& key) const
 Serialiser& Serialiser::find_serializer(const std::string& protocol)
 {
     return serializers_[protocol];
+}
+
+std::vector<std::string> Serialiser::available_serializers()
+{
+    return serializers_.available_serializers();
 }

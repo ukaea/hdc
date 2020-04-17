@@ -1365,6 +1365,12 @@ std::vector<char> HDC::buffer_grow(char* old_buffer, size_t extra_size)
     return new_buffer;
 }
 
+/** Returns list of available serializers */
+std::vector<std::string> HDC::available_serializers()
+{
+    return hdc::serialization::Serialiser::available_serializers();
+}
+
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */
 HDC HDC::load(const std::string& uri, const std::string& datapath)
 {
