@@ -38,3 +38,5 @@ utils/binder/tests/*.so
 utils/binder/tests/*.pyc
 utils/binder/tests/test_*_bind.f90
 utils/binder/tests/test_*_interface.py
+
+examples/interfacing_pyhdc_with_c++/cyhdcdumper.cpp
