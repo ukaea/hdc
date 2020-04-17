@@ -71,14 +71,6 @@ class hdc_t_(ctypes.Structure):
     """The ctypes equivalent of hdc_t"""
     _fields_ = [("uuid", ctypes.c_char * 16),
                 ("storage_id", ctypes.c_size_t)]
-    _defaults_ = {"uuid": "",
-                  "storage_id": 0
-        }
-    def __init__(self, **kwargs):
-        values = type(self)._defaults_.copy()
-        for (key, val) in kwargs.items():
-            values[key] = val
-        super().__init__(**values)
 
 # cdef the C++ interface, any method we need must be here
 cdef extern from "hdc.hpp":
