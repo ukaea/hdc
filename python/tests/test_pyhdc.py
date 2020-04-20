@@ -93,6 +93,7 @@ def tree_equal(py_obj, hdc_obj, exception=False):
         (7, 2, 3, 4, 5),
     ],
 )
+
 def test_ndarray(dtype, shape, external):
     """Create np.array and put/get to/from flat HDC container
     """
@@ -343,6 +344,8 @@ def test_in_op_nested():
         (7, 2, 3, 4, 5),
     ],
 )
+
+@pytest.mark.skipif("hdf5" not in HDC.available_serializers(), reason="hdf5 serializer not available")
 def test_ndarray_to_hdf5(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
@@ -386,6 +389,8 @@ def test_ndarray_to_hdf5(dtype, shape):
         (7, 2, 3, 4, 5),
     ],
 )
+
+@pytest.mark.skipif("hdf5" not in HDC.available_serializers(), reason="hdf5 serializer not available")
 def test_ndarray_from_hdf5(dtype, shape):
     """Create np.array and put/get to/from flat HDC container
     """
@@ -450,7 +455,7 @@ def test_ndarray_json_string(dtype, shape):
     np.issubdtype(x_in.dtype, x_out.dtype)
     assert np.all(x_in == x_out)
 
-
+@pytest.mark.skipif("hdf5" not in HDC.available_serializers(), reason="hdf5 serializer not available")
 def test_tree_hdf5(test_trees):
     pytree, hdctree = test_trees
     with tempfile.NamedTemporaryFile(suffix=".h5") as tmppfile:
