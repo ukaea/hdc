@@ -278,6 +278,7 @@ cdef class HDC:
             self._this.set_data_Py(_shape, <voidptr> data_view.data, kind, <int8_t> itemsize, flags)
         else:
             self._this.set_external_Py(_shape, <voidptr> data_view.data, kind, <int8_t> itemsize, flags)
+
     def set_data(self, data, external=False):
         """
         Sets data to a HDC node.
@@ -550,31 +551,101 @@ cdef class HDC:
 
     def to_hdf5(self, filename, dataset_name="data"):
         """
-        Saves data into HFD5 file.
+        Saves data into HDF5 file.
 
         Parameters
         ----------
         filename : string
             filename of HDF5 file
         dataset_name : string
-            HDF5 dataset name within the file (default "data")
+            dataset name within the file (default "data")
         """
+        if "hdf5" not in self.available_serializers():
+            raise RuntimeError("HDF5 serializer is not available in this build.")
         self._this.save(("hdf5://"+filename).encode(), dataset_name.encode())
+
+    def to_s3(self, filename, dataset_name="data"):
+        """
+        Saves data into S3.
+
+        Parameters
+        ----------
+        filename : string
+            filename of S3 file
+        dataset_name : string
+            dataset name within the file (default "data")
+        """
+        if "s3" not in self.available_serializers():
+            raise RuntimeError("S3 serializer is not available in this build.")
+        self._this.save(("s3://"+filename).encode(), dataset_name.encode())
+
+    def to_flatbuffers(self, filename, dataset_name="data"):
+        """
+        Saves data into flatbffers.
+
+        Parameters
+        ----------
+        filename : string
+            filename of flatbuffers file
+        dataset_name : string
+            dataset name within the file (default "data")
+        """
+        if "flatbuffers" not in self.available_serializers():
+            raise RuntimeError("flatbuffers serializer is not available in this build.")
+        self._this.save(("flatbffers://"+filename).encode(), dataset_name.encode())
 
     @staticmethod
     def from_hdf5(filename, dataset_name="data"):
+        """
+        Loads data from HDF5 file into a new HDC container
+
+        Parameters
+        ----------
+        filename : string
+            filename of HDF5 file
+        dataset_name : string
+            dataset name within the file (default "data")
+        """
+        if "hdf5" not in HDC.available_serializers():
+            raise RuntimeError("HDF5 serializer is not available in this build.")
+        res = HDC()
+        res._this = CppHDC.load(("hdf5://"+filename).encode(), dataset_name.encode())
+        return res
+
+    @staticmethod
+    def from_s3(filename, dataset_name="data"):
         """
         Loads data from HFD5 file into a new HDC container
 
         Parameters
         ----------
         filename : string
-            filename of HDF5 file
+            filename of S3 file
         dataset_name : string
-            HDF5 dataset name within the file (default "data")
+            dataset name within the file (default "data")
         """
+        if "s3" not in HDC.available_serializers():
+            raise RuntimeError("S3 serializer is not available in this build.")
         res = HDC()
-        res._this = CppHDC.load(("hdf5://"+filename).encode(), dataset_name.encode())
+        res._this = CppHDC.load(("s3://"+filename).encode(), dataset_name.encode())
+        return res
+
+    @staticmethod
+    def from_flatbuffers(filename, dataset_name="data"):
+        """
+        Loads data from HFD5 file into a new HDC container
+
+        Parameters
+        ----------
+        filename : string
+            filename of S3 file
+        dataset_name : string
+            dataset name within the file (default "data")
+        """
+        if "flatbuffers" not in HDC.available_serializers():
+            raise RuntimeError("flatbuffers serializer is not available in this build.")
+        res = HDC()
+        res._this = CppHDC.load(("flatbuffers://"+filename).encode(), dataset_name.encode())
         return res
 
     def init(storage_str, settings_str):
