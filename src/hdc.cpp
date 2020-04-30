@@ -220,6 +220,8 @@ HDC::HDC(hdc_data_t obj)
     header->rank = rank;
     header->data_size = data_size;
     header->buffer_size = buffer_size;
+//for (int i=0;i<rank;i++) std::cerr << "obj: " << (reinterpret_cast<int64_t*>(obj.data)[i]) << std::endl;
+    for (size_t i = 0; i < rank; i++) header->shape[i] = obj.shape[i];
     if (obj.flags & HDCExternal) {
         memcpy(buffer.data() + sizeof(hdc_header_t), &(obj.data), data_size);
     } else {
@@ -227,7 +229,7 @@ HDC::HDC(hdc_data_t obj)
     }
     uuid = generate_uuid();
     storage = hdc_global.storage;
-    storage->set(uuid, buffer.data(), header->buffer_size);
+    storage->set(uuid, buffer.data(), buffer_size);
 }
 
 /** Creates a new HDC instance from a given string. If a supplied string contains uri, it tries to open a given resource */

@@ -154,65 +154,65 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 auto t = matlabClassID2HDCType(mxGetClassID(data_in));
                 auto n_elem = mxGetNumberOfElements(data_in);
                 if (mxIsScalar(data_in) || n_elem == 1) {
-                double data = mxGetScalar(data_in);
+                    double data = mxGetScalar(data_in);
 
-                bool data_b;
-                int8_t data_8;
-                int16_t data_16;
-                int32_t data_32;
-                int64_t data_64;
-                uint8_t data_u8;
-                uint16_t data_u16;
-                uint32_t data_u32;
-                uint64_t data_u64;
-                float data_f;
-                auto node = new HDC();
-                switch (t) {
-                    case HDC_BOOL:
-                        data_b = static_cast<bool>(data);
-                        node->set_data(data_b);
-                        break;
-                    case HDC_DOUBLE:
-                        node->set_data(data);
-                        break;
-                    case HDC_FLOAT:
-                        data_f = static_cast<float>(data);
-                        node->set_data(data_f);
-                        break;
-                    case HDC_INT8:
-                        data_8 = static_cast<int8_t>(data);
-                        node->set_data(data_8);
-                        break;
-                    case HDC_UINT8:
-                        data_u8 = static_cast<int16_t>(data);
-                        node->set_data(data_u8);
-                        break;
-                    case HDC_INT16:
-                        data_16 = static_cast<int32_t>(data);
-                        node->set_data(data_16);
-                        break;
-                    case HDC_UINT16:
-                        data_u16 = static_cast<int32_t>(data);
-                        node->set_data(data_u16);
-                        break;
-                    case HDC_INT32:
-                        data_32 = static_cast<int32_t>(data);
-                        node->set_data(data_32);
-                        break;
-                    case HDC_UINT32:
-                        data_u32 = static_cast<int32_t>(data);
-                        node->set_data(data_u32);
-                        break;
-                    case HDC_INT64:
-                        data_64 = static_cast<int64_t>(data);
-                        node->set_data(data_64);
-                        break;
-                    case HDC_UINT64:
-                        data_u64 = static_cast<int64_t>(data);
-                        node->set_data(data_u64);
-                        break;
-                    default:
-                        mexErrMsgTxt("matlabClassID2HDCType(): Unknown matlab_type.");
+                    bool data_b;
+                    int8_t data_8;
+                    int16_t data_16;
+                    int32_t data_32;
+                    int64_t data_64;
+                    uint8_t data_u8;
+                    uint16_t data_u16;
+                    uint32_t data_u32;
+                    uint64_t data_u64;
+                    float data_f;
+                    auto node = new HDC();
+                    switch (t) {
+                        case HDC_BOOL:
+                            data_b = static_cast<bool>(data);
+                            node->set_data(data_b);
+                            break;
+                        case HDC_DOUBLE:
+                            node->set_data(data);
+                            break;
+                        case HDC_FLOAT:
+                            data_f = static_cast<float>(data);
+                            node->set_data(data_f);
+                            break;
+                        case HDC_INT8:
+                            data_8 = static_cast<int8_t>(data);
+                            node->set_data(data_8);
+                            break;
+                        case HDC_UINT8:
+                            data_u8 = static_cast<int16_t>(data);
+                            node->set_data(data_u8);
+                            break;
+                        case HDC_INT16:
+                            data_16 = static_cast<int32_t>(data);
+                            node->set_data(data_16);
+                            break;
+                        case HDC_UINT16:
+                            data_u16 = static_cast<int32_t>(data);
+                            node->set_data(data_u16);
+                            break;
+                        case HDC_INT32:
+                            data_32 = static_cast<int32_t>(data);
+                            node->set_data(data_32);
+                            break;
+                        case HDC_UINT32:
+                            data_u32 = static_cast<int32_t>(data);
+                            node->set_data(data_u32);
+                            break;
+                        case HDC_INT64:
+                            data_64 = static_cast<int64_t>(data);
+                            node->set_data(data_64);
+                            break;
+                        case HDC_UINT64:
+                            data_u64 = static_cast<int64_t>(data);
+                            node->set_data(data_u64);
+                            break;
+                        default:
+                            mexErrMsgTxt("matlabClassID2HDCType(): Unknown matlab_type.");
                     }
                     plhs[0] = convertPtr2Mat<HDC>(node);
                     return;
@@ -259,35 +259,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
-    // Load JSON
-    if (!strcmp("load_json", cmd)) {
+    // Load URI
+    if (!strcmp("load", cmd)) {
         if (nlhs != 1)
-            mexErrMsgTxt("load_json: One output expected.");
+            mexErrMsgTxt("load: One output expected.");
         if (nrhs < 1)
-            mexErrMsgTxt("load_json: One or two inputs expected.");
-        auto path = mxArrayToUTF8String(prhs[1]);
+            mexErrMsgTxt("load: One or two inputs expected.");
+        auto uri = mxArrayToUTF8String(prhs[1]);
         std::string datapath = "";
         if (nrhs >=3) datapath = mxArrayToUTF8String(prhs[2]);
-        plhs[0] = convertPtr2Mat<HDC>(new HDC(HDC::from_json(path,datapath)));
-        return;
-    }
-
-    // Load HDF5
-    if (!strcmp("load_hdf5", cmd)) {
-        if (nlhs != 1)
-            mexErrMsgTxt("load_hdf5: One output expected.");
-                if (nrhs != 1)
-            mexErrMsgTxt("load_hdf5: One or two inputs expected.");
-        auto path = mxArrayToUTF8String(prhs[1]);
-        std::string datapath = "";
-        if (nrhs >=3) datapath = mxArrayToUTF8String(prhs[2]);
-        plhs[0] = convertPtr2Mat<HDC>(new HDC(HDC::from_hdf5(path,datapath)));
+        plhs[0] = convertPtr2Mat<HDC>(new HDC(HDC::load(uri,datapath)));
         return;
     }
 
     // Check there is a second input, which should be the class instance handle
     if (nrhs < 2)
-                mexErrMsgTxt("Second input should be a class instance handle.");
+        mexErrMsgTxt("Second input should be a class instance handle.");
 
     // Delete
     if (!strcmp("delete", cmd)) {
@@ -450,7 +437,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
     if (!strcmp("dumps", cmd)) {
-        std::string str = hdc_instance->to_json_string();
+        std::string str = hdc_instance->serialize("json");
         mxArray* mxstr = mxCreateString(str.c_str());
         plhs[0] = mxstr;
         return;
@@ -611,34 +598,77 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mxArray* storage_ = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
         size_t storage_id = hdc_instance->get_storage_id();
         memcpy(mxGetPr(storage_), &storage_id, sizeof(size_t));
+        auto uuid = hdc_instance->get_uuid();
         //mxArray* uuid_ = mxCreateString((char*) hdc_instance->get_uuid().c_str());
         mxArray* uuid_ = mxCreateNumericMatrix(1,HDC_UUID_LENGTH, mxINT8_CLASS, mxREAL);
-        strcpy((char*) mxGetPr(uuid_), (char*) hdc_instance->get_uuid().c_str());
+//         strcpy((char*) mxGetPr(uuid_), (char*) hdc_instance->get_uuid().c_str());
+        memcpy(mxGetPr(uuid_),reinterpret_cast<char*>(&uuid), uuid.size());
         mxSetFieldByNumber(plhs[0],0,0,storage_);
         mxSetFieldByNumber(plhs[0],0,1,uuid_);
         return;
     }
 
-    if (!strcmp("to_json", cmd)) {
-        char path[HDC_STR_LEN];
-        if (mxGetString(prhs[2], path, sizeof(path))) {
-            mexErrMsgTxt("to_json(): Second input should be a command string less than 1024 characters long.");
+    if (!strcmp("available_serializers", cmd)) {
+        auto avail_sers = hdc_instance->available_serializers();
+        mwSize mxdims[] = {avail_sers.size()};
+        mxArray* mx_avail_sers = mxCreateCellArray(1, mxdims);
+        for (size_t i=0; i<avail_sers.size(); i++) {
+            mxArray* str = mxCreateString((char*) avail_sers[i].c_str());
+            mxSetCell(mx_avail_sers, i, str);
         }
-        hdc_instance->to_json(path);
+        plhs[0] = mx_avail_sers;
         return;
     }
 
-
-    if (!strcmp("to_hdf5", cmd)) {
-        mexErrMsgTxt("to_hdf5(): Not imlemented yet...");
-        // This crashes - probably MATLAB HDF5 linking issue.
-        char path[HDC_STR_LEN];
-        if (mxGetString(prhs[2], path, sizeof(path))) {
-            mexErrMsgTxt("to_hdf5(): Second input should be a command string less than 1024 characters long.");
+    if (!strcmp("serialize", cmd)) {
+        // Get can eat string or index - get the class name:
+        HDC* child = convertMat2Ptr<HDC>(prhs[3]);
+        if (mxIsClass(prhs[2],"char")) {
+            char path[HDC_STR_LEN];
+            if (mxGetString(prhs[2], path, sizeof(path))) {
+                mexErrMsgTxt("set_child(): Second input should be a command string less than 1024 characters long.");
+            }
+            hdc_instance->set_child(path,*child);
+        } else {
+            double index_ = mxGetScalar(prhs[2]);
+            if (index_ < 0) {
+                mexErrMsgTxt("set(): Supplied index cannot be negative.");
+            }
+            size_t index = (size_t)index_;
+            hdc_instance->set_child(index,*child);
         }
-        hdc_instance->to_hdf5(path);
         return;
     }
+
+//     if (!strcmp("save", cmd)) {
+//         if (nrhs < 1)
+//             mexErrMsgTxt("save: One or two inputs expected.");
+//         auto uri = mxArrayToUTF8String(prhs[2]);
+//         std::string datapath = "";
+//         // This fails from unknown reason - lets work it around
+//         if (nrhs >=3) datapath = mxArrayToUTF8String(prhs[3]);
+//         hdc_instance->save(uri,datapath);
+//         return;
+//     }
+
+    if (!strcmp("save", cmd)) {
+        if (nrhs < 1)
+            mexErrMsgTxt("save: One or two inputs expected.");
+        std::string str = (mxArrayToUTF8String(prhs[2]));
+        std::string delim = "|";
+        auto pos = str.find(delim);
+        std::string uri = "";
+        std::string  data_path = "";
+        if (pos != std::string::npos) {
+            uri = str.substr(0,pos);
+            data_path = str.substr(pos+1,str.length());
+        } else {
+            uri = str;
+        }
+        hdc_instance->save(uri,data_path);
+        return;
+    }
+
 
     // Got here, so command not recognized
     mexErrMsgTxt("Command not recognized.");

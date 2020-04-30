@@ -129,32 +129,32 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
             result = HDC(1,hdc_mex('copy',this.objectHandle));
         end
 
-        function varargout = to_json(this, file)
-            if (class(file) == "string"); file = char(file); end
-            inp = {file};
-            [varargout{1:nargout}] = hdc_mex('to_json', this.objectHandle, inp{:});
+        function save(this,varargin)
+            uri = varargin{1};
+            if (class(uri) == "string"); uri = char(uri); end
+            inp = {uri};
+            if (length(varargin) >= 2)
+                data_path = varargin{2};
+                if (class(data_path) == "string"); data_path = char(data_path); end
+                % This does not work, we have to do some work around
+                % inp = {uri,data_path};
+                inp = join([inp{1},"|",data_path],"");
+            end
+            hdc_mex('save', this.objectHandle, inp{:});
         end
-
-        function varargout = to_hdf5(this, file)
-            if (class(file) == "string"); file = char(file); end
-            inp = {file};
-            [varargout{1:nargout}] = hdc_mex('to_hdf5', this.objectHandle, inp{:});
-        end
-
     end
     methods(Static)
 
-        function result = load_json(path,data_path)
-            if (class(path) == "string"); path = char(path); end
-            if (class(data_path) == "string"); data_path = char(data_path); end
-            result = HDC(1,hdc_mex('load_json', path, data_path));
-        end
-
-        function result = load_hdf5(path,data_path)
-            if (class(path) == "string"); path = char(path); end
-            if (class(data_path) == "string"); data_path = char(data_path); end
-            error("HDC.load_hdf5(): Not implemented yet.");
-            %result = HDC(1,hdc_mex('load_hdf5', path, data_path));
+        function result = load(varargin)
+            uri = varargin{1};
+            if (class(uri) == "string"); uri = char(uri); end
+            inp = {uri};
+            if (length(varargin) >= 2)
+                data_path = varargin{2};
+                if (class(data_path) == "string"); data_path = char(data_path); end
+                inp = {uri,data_path};
+            end
+            result = HDC(1,hdc_mex('load', inp{:}));
         end
 
         function destroy()

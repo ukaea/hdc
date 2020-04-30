@@ -110,79 +110,79 @@ Json::Value buffer_to_json(char* buffer)
     return root;
 }
 
-Json::Value to_json(const HDC& hdc, int mode)
+Json::Value to_json(const HDC& hdc, int mode, const std::string& data_path="")
 {
     auto buffer = hdc.get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
-    Json::Value root;
+    Json::Value subroot;
     if (mode == 0) {
         switch (header->type) {
             case HDC_INT8: {
-                root = buffer_to_json<int8_t>(buffer);
+                subroot = buffer_to_json<int8_t>(buffer);
                 break;
             }
             case HDC_INT16: {
-                root = buffer_to_json<int16_t>(buffer);
+                subroot = buffer_to_json<int16_t>(buffer);
                 break;
             }
             case HDC_INT32: {
-                root = buffer_to_json<int32_t>(buffer);
+                subroot = buffer_to_json<int32_t>(buffer);
                 break;
             }
             case HDC_INT64: {
-                root = buffer_to_json<int64_t>(buffer);
+                subroot = buffer_to_json<int64_t>(buffer);
                 break;
             }
             case HDC_UINT8: {
-                root = buffer_to_json<uint8_t>(buffer);
+                subroot = buffer_to_json<uint8_t>(buffer);
                 break;
             }
             case HDC_UINT16: {
-                root = buffer_to_json<uint16_t>(buffer);
+                subroot = buffer_to_json<uint16_t>(buffer);
                 break;
             }
             case HDC_UINT32: {
-                root = buffer_to_json<uint32_t>(buffer);
+                subroot = buffer_to_json<uint32_t>(buffer);
                 break;
             }
             case HDC_UINT64: {
-                root = buffer_to_json<uint64_t>(buffer);
+                subroot = buffer_to_json<uint64_t>(buffer);
                 break;
             }
             case HDC_FLOAT: {
-                root = buffer_to_json<float>(buffer);
+                subroot = buffer_to_json<float>(buffer);
                 break;
             }
             case HDC_DOUBLE: {
-                root = buffer_to_json<double>(buffer);
+                subroot = buffer_to_json<double>(buffer);
                 break;
             }
             case HDC_STRUCT: {
                 auto children = hdc.get_children_ptr();
                 for (auto it = children->begin(); it != children->end(); ++it) {
                     HDC node(hdc.get_storage(), it->address);
-                    root[it->key.c_str()] = to_json(node, mode);
+                    subroot[it->key.c_str()] = to_json(node, mode);
                 }
                 break;
             }
             case HDC_LIST: {
-                root = Json::arrayValue;
+                subroot = Json::arrayValue;
                 auto children = hdc.get_children_ptr();
                 for (size_t i = 0; i < children->size(); i++) {
-                    root[static_cast<int>(i)] = to_json(hdc.get_single(i), mode);
+                    subroot[static_cast<int>(i)] = to_json(hdc.get_single(i), mode);
                 }
                 break;
             }
             case HDC_EMPTY: {
-                root = Json::nullValue;
+                subroot = Json::nullValue;
                 break;
             }
             case HDC_STRING: {
-                root = hdc.as_string();
+                subroot = hdc.as_string();
                 break;
             }
             case HDC_BOOL: {
-                root = buffer_to_json<bool>(buffer);
+                subroot = buffer_to_json<bool>(buffer);
                 break;
             }
             default: {
@@ -192,15 +192,21 @@ Json::Value to_json(const HDC& hdc, int mode)
     } else {
         throw HDCException("to_json(): Mode " + std::to_string(mode) + " not supported yet.\n");
     }
-    return root;
+    if (data_path == "")
+        return subroot;
+    else {
+        Json::Value root;
+        root[data_path] = subroot;
+        return root;
+    }
 }
 
-void to_json(const HDC& hdc, string filename, int mode)
+void to_json(const HDC& hdc, string filename, int mode, const std::string& data_path="")
 {
     DEBUG_STDOUT("Saving output JSON to " + filename);
     ofstream json_file;
     json_file.open(filename.c_str());
-    json_file << to_json(hdc, mode);
+    json_file << to_json(hdc, mode, data_path);
     json_file.close();
 }
 
@@ -596,9 +602,9 @@ HDC from_json(const string& filename, const string& datapath)
 } // anon namespace
 
 void
-hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath UNUSED)
+hdc::serialization::JSONSerialiser::serialize(const HDC& hdc, const std::string& filename, const std::string& datapath)
 {
-    to_json(hdc, filename, mode_);
+    to_json(hdc, filename, mode_, datapath);
 }
 
 HDC hdc::serialization::JSONSerialiser::deserialize(const std::string& filename, const std::string& datapath)

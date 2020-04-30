@@ -189,6 +189,20 @@ TEMPLATE_TEST_CASE("DataManipulation", "[HDC]", ALL_NUMERIC_TYPES)
     CHECK(120 == data2[3]);
 }
 
+TEST_CASE("SetFromStruct", "[HDC]")
+{
+    int64_t array[5] = {1,2,3,4,5};
+    hdc_data_t data;
+    memset(&data,0,sizeof(hdc_data_t));
+    data.rank = 1;
+    data.shape[0] = 5;
+    data.type = HDC_INT64;
+    data.data = reinterpret_cast<char*>(array);
+    HDC h(data);
+    auto array2 = h.as<int64_t>();
+    for (int i=0;i<5;i++) CHECK(array[i] == array2[i]);
+}
+
 TEST_CASE("SetExternal", "[HDC]")
 {
     HDC node, external, e2, e3;
