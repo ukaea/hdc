@@ -1,0 +1,24 @@
+{
+    "function": "add_double",
+    "module": "test_module_add_double",
+    "source_file": "test_module_add_double.f90",
+    "do_compile": true,
+    "soname": "libtest_module_add_double.so",
+    "arguments": [
+        {
+            "name": "x1",
+            "type": "real(kind=c_double)",
+            "intent": "in"
+        },
+        {
+            "name": "x2",
+            "type": "real(kind=c_double)",
+            "intent": "in"
+        },
+        {
+            "name": "y",
+            "type": "real(kind=c_double)",
+            "intent": "out"
+        }
+    ]
+}

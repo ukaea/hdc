@@ -2,6 +2,7 @@
 #include "hdc.hpp"
 #include <vector>
 #include <string>
+#include <boost/functional/hash.hpp>
 
 using namespace std;
 
@@ -59,15 +60,16 @@ int main()
     cout << endl;
 
     //Serialize data to JSON
-    tree.to_json("tree.txt",0);
+    tree.save("json://tree.txt");
+
     // On screen
     tree.dump();
-    tree.serialize("pokus.json");
+    cout << tree.serialize("json") << endl;
 
 //Serialize data to HDF5
 #ifdef _USE_HDF5
-    tree.to_hdf5("tree.h5");
-    HDC hhh = HDC::from_hdf5("tree.h5","/data");
+    tree.save("hdf5://tree.h5");
+    HDC hhh = HDC::load("hdf5://tree.h5", "/data");
     hhh.dump();
 #endif
     HDC::destroy();

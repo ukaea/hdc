@@ -137,9 +137,18 @@ assert(~all(tree.get_child("aaa/bbb").as_hdc_t.uuid == tree2.get_child("aaa/bbb"
 assert(tree.at("aaa/bbb") == tree2.at("aaa/bbb"))
 
 % test json
-tree.to_json("tree.json");
-tree2 = HDC.load_json("tree.json","");
+uri = join(["json://",pwd,"/test.json"],"");
+tree.save(uri);
+tree2 = HDC.load(uri);
 assert(tree.at("aaa/bbb") == tree2.at("aaa/bbb"))
+
+% test json - data_path specified
+uri = join(["json://",pwd,"/test2.json"],"");
+data_path = "data";
+tree.save(uri,data_path);
+tree2 = HDC.load(uri,data_path);
+assert(tree.at("aaa/bbb") == tree2.at("aaa/bbb"))
+
 
 disp("All tests are OK...")
 

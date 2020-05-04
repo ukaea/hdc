@@ -7,20 +7,21 @@
 #include <iostream>
 #include <cstdio>
 #include <hdc_helpers.h>
-
-using namespace std;
+#include <boost/uuid/uuid.hpp>
+#include <boost/lexical_cast.hpp>
 
 class HDCStorage {
 private:
     pluma::Pluma _pluma;
     Storage* _store;
-    string pluginPath;
+    std::string pluginPath;
     size_t _id;
     bool _do_init;
+
 public:
-    HDCStorage(size_t _id, std::string plugin_path, std::string settings_str, bool do_init=true) {
+    HDCStorage(size_t _id, const std::string& plugin_path, const std::string& settings_str, bool do_init=true) {
         _pluma.acceptProviderType<StorageProvider>();
-        if (plugin_path.size() != 0) {
+        if (!plugin_path.empty()) {
             if (!_pluma.load(plugin_path)) {
                 DEBUG_STDERR("Could not load plugin \"" + plugin_path +"\"\n");
                 DEBUG_STDERR("Using std::unordered_map as fallback\n");
@@ -33,57 +34,77 @@ public:
         _pluma.getProviders(providers);
         _store = providers.front()->create();
         _do_init = do_init;
-        if (_do_init) _store->init(settings_str);
+        if (_do_init) {
+            _store->init(settings_str);
+        }
         this->pluginPath = plugin_path;
         this->_id = _id;
         DEBUG_STDOUT(_store->getDescription());
     }
+
     ~HDCStorage() {
         if (_do_init) _store->cleanup();
         delete _store;
         _pluma.unloadAll();
     }
-    string getDescription() {
+
+    std::string getDescription() {
         return _store->getDescription();
     }
+
     std::string get_settings() {
         return _store->get_settings();
     }
-    void set(string path, char* data, size_t size) {
-        _store->set(path, data, size);
+
+    void set(boost::uuids::uuid uuid, char* data, size_t size) {
+        _store->set(uuid, data, size);
     }
-    char* get(string path) {
-        return _store->get(path);
+
+    char* get(boost::uuids::uuid uuid) {
+        return _store->get(uuid);
     }
+
     void cleanup() {
         _store->cleanup();
     }
-    size_t get_size(string path) {
-        return _store->get_size(path);
+
+    size_t get_size(boost::uuids::uuid uuid) {
+        return _store->get_size(uuid);
     }
-    bool has(string path) {
-        return _store->has(path);
+
+    bool has(boost::uuids::uuid uuid) {
+        return _store->has(uuid);
     }
-    void remove(string path) {
-        _store->remove(path);
+
+    void remove(boost::uuids::uuid uuid) {
+        _store->remove(uuid);
     }
-    void lock(string path) {
-        _store->lock(path);
-    };
-    void unlock(string path) {
-        _store->unlock(path);
-    };
+
+    void lock(boost::uuids::uuid uuid) {
+        _store->lock(uuid);
+    }
+
+    void unlock(boost::uuids::uuid uuid) {
+        _store->unlock(uuid);
+    }
+
     bool locked() {
         return _store->locked();
-    };
+    }
+
     void sync() {
         _store-> sync();
-    };
-    string name() {
+    }
+
+    std::string name() {
         return _store->name();
     }
+
     size_t id() {
         return _id;
+    }
+    bool memory_mapped() {
+        return _store->memory_mapped();
     }
 };
 

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <boost/random.hpp>
 
 // HDC
 #include "hdc_storage.h"
@@ -17,6 +18,8 @@ public:
     //list of found plugins
     std::unordered_map<std::string,std::string> avail_stores;
     boost::mt19937 ran;
+
+    HDCGlobal() noexcept : stores{}, storage{ nullptr }, avail_stores{}, ran{} {};
 };
 
 #endif //HDC_GLOBAL_HPP

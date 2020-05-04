@@ -1,0 +1,6 @@
+six
+numpy>=1.10.0
+Cython>=0.28.0
+Click
+jinja2
+future

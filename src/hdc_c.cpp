@@ -221,10 +221,10 @@ void hdc_set_float_scalar(hdc_t tree, const char* path, float data)
     return;
 }
 
-hdc_t hdc_copy(hdc_t src)
+hdc_t hdc_copy(hdc_t src, bool deep_copy)
 {
     HDC h(src);
-    return HDC(h).copy().as_obj();
+    return HDC(h).copy(deep_copy).as_obj();
 }
 
 void hdc_clean(hdc_t node)
@@ -280,10 +280,10 @@ const char* hdc_get_type_str(hdc_t tree, const char* path)
     return (HDC(tree).get(path).get_type_str());
 }
 
-void hdc_to_json(hdc_t tree, const char* filename, int mode)
-{
-    HDC(tree).to_json(filename, mode);
-}
+//void hdc_to_json(hdc_t tree, const char* filename, int mode)
+//{
+//    HDC(tree).to_json(filename, mode);
+//}
 
 void hdc_dump(hdc_t tree)
 {
@@ -304,13 +304,13 @@ void hdc_keys(hdc_t tree, char** keys, size_t* nkeys)
     }
 }
 
-const char* hdc_dumps(hdc_t tree)
-{
-    stringstream tmp;
-    tmp << HDC(tree).to_json(0);
-    string dump_str = tmp.str();
-    return strdup(dump_str.c_str());
-}
+//const char* hdc_dumps(hdc_t tree)
+//{
+//    stringstream tmp;
+//    tmp << HDC(tree).to_json(0);
+//    string dump_str = tmp.str();
+//    return strdup(dump_str.c_str());
+//}
 
 void hdc_init(const char* pluginFileName, const char* pluginSettingsFileName)
 {
@@ -340,16 +340,26 @@ void hdc_search_plugins(char** keys, int* num)
     *num = plugins.size();
 }
 
+hdc_t hdc_load(const char* uri, const char* datapath)
+{
+    return HDC::load(uri, datapath).as_obj();
+}
+
+void hdc_save(hdc_t tree, const char* uri)
+{
+    HDC(tree).save(uri);
+}
+
 void hdc_serialize(hdc_t tree, char* buffer)
 {
     stringstream tmp;
-    tmp << HDC(tree).serialize();
+    tmp << HDC(tree).serialize("hdc");
     strcpy(buffer,tmp.str().c_str());
 }
 
 hdc_t hdc_deserialize(const char* str)
 {
-    return HDC::deserialize_str(str).as_obj();
+    return HDC::deserialize("hdc", str).as_obj();
 }
 
 hdc_data_t hdc_get_data(hdc_t tree, const char* path)

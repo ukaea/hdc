@@ -71,7 +71,7 @@ subroutine test_cpos_f2c(equilibriumin, tree_out) bind(c, name="test_cpos_f2c")
 
     write(*,*)'output tree:'
     call hdc_dump(tree_out)
-    call hdc_to_json(tree_out, "./tree_out.json", 0)
+!    call hdc_to_json(tree_out, "./tree_out.json", 0)
 
     write(*,*)'=== END test_cpos_f2c ==='
 end subroutine

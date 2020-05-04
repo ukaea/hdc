@@ -1,7 +1,5 @@
-test-bionic:
-  #variables:
-    #CI_DEBUG_TRACE: "true"
-  image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-bionic-hdc-prereq
+test-hdc-bionic:
+  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-bionic
   script:
     - mkdir build
     - cd build
@@ -10,11 +8,13 @@ test-bionic:
     - make test
     - make install
     - cd python
-    - python3 setup.py build
-    - python3 setup.py test
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - ./run
 
-test-xenial:
-  image: dockerhub.tok.ipp.cas.cz:5000/ubuntu-xenial-hdc-prereq
+test-hdc-xenial:
+  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-xenial
   script:
     - mkdir build
     - cd build
@@ -23,32 +23,37 @@ test-xenial:
     - make test
     - make install
     - cd python
-    - python3 setup.py build
-    - python3 setup.py test
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - ./run
 
-test-centos7:
-  image: dockerhub.tok.ipp.cas.cz:5000/centos-7-hdc-prereq
+test-hdc-centos-7:
+  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-centos-7
   script:
-    - export PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
     - mkdir build
     - cd build
-    - cmake3 -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    - cmake3 .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
     - make -j
     - make test
     - make install
     - cd python
-    - python3.6 setup.py build
-    - python3.6 setup.py test
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - FC=gfortran ./run
 
-test-fedora-28:
-  image: dockerhub.tok.ipp.cas.cz:5000/fedora-28-hdc-prereq
+test-hdc-fedora-31:
+  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-fedora-31
   script:
     - mkdir build
     - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install ..
+    - cmake3 .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
     - make -j
     - make test
     - make install
     - cd python
-    - python3 setup.py build
-    - python3 setup.py test
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - FC=gfortran ./run

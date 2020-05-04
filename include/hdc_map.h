@@ -15,8 +15,6 @@
 #include <sstream>
 #include <string>
 
-namespace bip=boost::interprocess;
-
 /* Map stuff */
 
 #include <boost/multi_index_container.hpp>
@@ -29,26 +27,32 @@ namespace bip=boost::interprocess;
 
 #include <boost/aligned_storage.hpp>
 
-using namespace boost::multi_index;
-using namespace std;
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Allocator definition
-typedef bip::managed_external_buffer::allocator<char>::type char_allocator;
+typedef boost::interprocess::managed_external_buffer::allocator<char>::type char_allocator;
 
 // Strings have to live inside buffer
-typedef bip::basic_string<
-  char,std::char_traits<char>,
-  char_allocator
+typedef boost::interprocess::basic_string<
+        char, std::char_traits<char>,
+        char_allocator
 > shared_string;
 
 // Hashing class - we want to lookup using const char* and std::string
 struct shared_string_hash {
-    std::size_t operator ()(const shared_string& str) const {
+    std::size_t operator()(const shared_string& str) const
+    {
         boost::hash<std::string> hasher;
         size_t hashed = hasher(str.c_str());
         return hashed;
     }
-    std::size_t operator ()(const char* str) const {
+
+    std::size_t operator()(const char* str) const
+    {
         boost::hash<std::string> hasher;
         size_t hashed = hasher(str);
         return hashed;
@@ -58,71 +62,92 @@ struct shared_string_hash {
 // Equal predicate -- replacement for std::equal_to, same reason as hash
 struct shared_string_equal {
     template <class T, class U>
-    static bool compare(const T& lhs, const U& rhs) {
+    static bool compare(const T& lhs, const U& rhs)
+    {
         return lhs == rhs;
     }
+
     template <class T, class U>
-    bool operator()(const T& lhs, const U& rhs) const {
-        return compare(lhs,rhs);
+    bool operator()(const T& lhs, const U& rhs) const
+    {
+        return compare(lhs, rhs);
     }
 };
 
 // key specifiers
-struct by_index{};
-struct by_key{};
-struct by_sequence{};
+struct by_index {
+};
+struct by_key {
+};
+struct by_sequence {
+};
 
 // We want to store (key,address) pairs
-struct record
-{
-    record(const char* _key, const char* _address, const char_allocator &a): key(_key,a), address(_address,a) {};
-    record(std::string& _key, std::string& _address, const char_allocator &a): key(_key.c_str(),a), address(_address.c_str(),a) {};
-    record(std::string& _key, const char* _address, const char_allocator &a): key(_key.c_str(),a), address(_address,a) {};
-    record(const char * _key, std::string& _address, const char_allocator &a): key(_key,a), address(_address.c_str(),a) {};
+struct record {
+    record(const char* _key, const char* _address, const char_allocator& a) : key(_key, a), address(boost::lexical_cast<boost::uuids::uuid>(_address))
+    {};
 
+    record(std::string& _key, std::string& _address, const char_allocator& a) : key(_key.c_str(), a),
+                                                                                address(boost::lexical_cast<boost::uuids::uuid>(_address))
+    {};
+
+    record(std::string& _key, const char* _address, const char_allocator& a) : key(_key.c_str(), a),
+                                                                               address(boost::lexical_cast<boost::uuids::uuid>(_address))
+    {};
+
+    record(const char* _key, std::string& _address, const char_allocator& a) : key(_key, a),
+                                                                               address(boost::lexical_cast<boost::uuids::uuid>(_address))
+    {};
+    record(std::string& _key, boost::uuids::uuid _address, const char_allocator& a) : key(_key.c_str(), a),
+                                                                               address(_address)
+    {};
+
+    record(const char* _key, boost::uuids::uuid _address, const char_allocator& a) : key(_key, a),
+                                                                               address(_address)
+    {};
     shared_string key;
-    shared_string address;
+    boost::uuids::uuid address;
 
-    friend std::ostream& operator<<(std::ostream& os,const record& r)
+    friend std::ostream& operator<<(std::ostream& os, const record& r)
     {
         os << r.key << " " << r.address << std::endl;
         return os;
     }
 };
+
 // Modifying functor
-struct change_node
-{
-    change_node(shared_string& new_address):new_address(new_address){}
+struct change_node {
+    explicit change_node(shared_string& new_address) : new_address(new_address)
+    {}
+
     void operator()(record& r)
     {
-        r.address=new_address;
+        r.address = boost::lexical_cast<boost::uuids::uuid>(new_address);
     }
+
 private:
     shared_string new_address;
 };
 
 // Finally, our children nodes storage
-using hdc_map_t = multi_index_container<
-    record,
-    indexed_by<
-        hashed_non_unique< // TODO unique here??
-            tag<by_key>,
-            member<
-                record, shared_string, &record::key
-            >,
-            //boost::hash<shared_string>, // This would be default hasher
-            shared_string_hash,
-            //std::equal_to<shared_string> // This would be default Pred
-            shared_string_equal
+using hdc_map_t = boost::multi_index::multi_index_container<
+        record,
+        boost::multi_index::indexed_by<
+                boost::multi_index::hashed_non_unique<
+                        boost::multi_index::tag<by_key>,
+                        boost::multi_index::member<
+                                record, shared_string, &record::key
+                        >,
+                        //boost::hash<shared_string>, // This would be default hasher
+                        shared_string_hash,
+                        //std::equal_to<shared_string> // This would be default Pred
+                        shared_string_equal
+                >,
+                boost::multi_index::random_access<
+                        boost::multi_index::tag<by_index>
+                >
         >,
-        random_access<
-            tag<by_index>
-        >,
-        sequenced< // TODO remove this??
-            tag<by_sequence>
-        >
-    >,
-    bip::managed_external_buffer::allocator<record>::type // our allocator
+        boost::interprocess::managed_external_buffer::allocator<record>::type // our allocator
 >;
 
 #endif

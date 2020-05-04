@@ -5,8 +5,7 @@ includedir=${prefix}/include/hdc
 
 Name: HDC
 Description: Hierarchical Dynamic Containers library (C wrapper)
-Version: 0.5
+Version: 0.14.0
 
-Requires: hdc
-Libs: -L${libdir} -lchdc
-Cflags: -I${includedir}
+Libs: -L${libdir}  -lboost_system -lhdc -lchdc
+Cflags: -I${includedir} -std=c99

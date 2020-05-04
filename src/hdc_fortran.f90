@@ -1,5 +1,5 @@
 
-! This file was generated on 2018-12-03 15:10:18.487181 by generate_fortran_api.py
+! This file was generated on 2020-02-03 16:19:55.147040 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -7,7 +7,7 @@ module hdc_fortran
     use iso_c_binding
     implicit none
     type, bind(c) :: hdc_t
-        character(kind=c_char) :: uuid(37)
+        character(kind=c_char) :: uuid(16)
         integer(kind=c_size_t) :: storage_id
     end type hdc_t
 
@@ -100,9 +100,10 @@ module hdc_fortran
         end subroutine hdc_clean
 
         !> Performs deep copy of current node. This is interface to C.
-        function c_hdc_copy(src) result(obj) bind(c,name="hdc_copy")
+        function c_hdc_copy(src, deep_copy) result(obj) bind(c,name="hdc_copy")
             import
             type(hdc_t), value :: src
+            logical(kind=c_bool), value :: deep_copy
             type(hdc_t) :: obj
         end function c_hdc_copy
 
@@ -144,12 +145,12 @@ module hdc_fortran
             type(hdc_t), value :: node
         end subroutine hdc_append_slice
 
-        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
-            import
-            type(hdc_t), value :: obj
-            character(kind=c_char), intent(in) :: path(*)
-            integer(kind=c_int32_t), value :: mode
-        end subroutine c_hdc_to_json
+!        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
+!            import
+!            type(hdc_t), value :: obj
+!            character(kind=c_char), intent(in) :: path(*)
+!            integer(kind=c_int32_t), value :: mode
+!       end subroutine c_hdc_to_json
 
         !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
@@ -200,17 +201,10 @@ module hdc_fortran
         end function c_hdc_exists
 
         !> Sets string to given path. This is interface to C.
-        subroutine c_hdc_set_string_path(obj, path, str) bind(c,name="hdc_set_string")
+        subroutine c_hdc_set_string(obj, path, str) bind(c,name="hdc_set_string")
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
-            character(kind=c_char), intent(in) :: str(*)
-        end subroutine c_hdc_set_string_path
-
-        !> Sets string. This is interface to C.
-        subroutine c_hdc_set_string(obj, str) bind(c,name="hdc_set_string")
-            import
-            type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: str(*)
         end subroutine c_hdc_set_string
 
@@ -643,7 +637,6 @@ module hdc_fortran
                 hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
-                hdc_to_json, &
                 hdc_insert_slice, &
                 hdc_append_slice, &
                 hdc_set_slice, &
@@ -786,10 +779,13 @@ contains
         call c_hdc_set_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_set_child
 
-    subroutine hdc_copy(src, dest)
+    subroutine hdc_copy(src, dest, deep_copy)
         use iso_c_binding
         type(hdc_t) :: src, dest
-        dest = c_hdc_copy(src)
+        logical, optional :: deep_copy
+        logical(kind=c_bool) :: deep_copy_ = .false.
+        if (present(deep_copy)) deep_copy_ = deep_copy
+        dest = c_hdc_copy(src, deep_copy_)
     end subroutine hdc_copy
 
     subroutine hdc_set_string_path(this, path, str)
@@ -797,14 +793,14 @@ contains
         type(hdc_t) :: this
         character(len=*) :: path
         character(len=*), intent(in) :: str
-        call c_hdc_set_string_path(this, trim(path)//c_null_char, trim(str)//c_null_char)
+        call c_hdc_set_string(this, trim(path)//c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string_path
 
     subroutine hdc_set_string(this, str)
         use iso_c_binding
         type(hdc_t) :: this
         character(len=*) :: str
-        call c_hdc_set_string(this, trim(str)//c_null_char)
+        call c_hdc_set_string(this, c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string
 
     function hdc_get_child(this, path) result(res)
@@ -938,13 +934,13 @@ contains
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
 
-    subroutine hdc_to_json(this,path,mode)
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        integer(kind=c_int32_t) :: mode
-        if (.not.present(path)) path = ""
-        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
-    end subroutine hdc_to_json
+!    subroutine hdc_to_json(this,path,mode)
+!        type(hdc_t) :: this
+!        character(len=*), optional :: path
+!        integer(kind=c_int32_t) :: mode
+!        if (.not.present(path)) path = ""
+!        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
+!    end subroutine hdc_to_json
 
     function hdc_get_ptr_f(tree) result(res)
         use iso_c_binding

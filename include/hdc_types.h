@@ -11,7 +11,7 @@
 #define HDC_MAX_DIMS           10
 #define HDC_LIST_INIT_CAPACITY 10
 #define HDC_LIST_RESIZE_STEP   10
-#define HDC_UUID_LENGTH        37
+#define HDC_UUID_LENGTH        16
 
 typedef enum {
     HDC_EMPTY  =  0,
@@ -42,6 +42,13 @@ typedef enum {
 
 typedef size_t hdc_flags_t;
 
+struct hdc_t {
+    char        uuid[HDC_UUID_LENGTH];
+    size_t      storage_id;
+};
+
+typedef struct hdc_t hdc_t;
+
 struct hdc_header_t {
     size_t      buffer_size;
     size_t      data_size;
@@ -49,6 +56,7 @@ struct hdc_header_t {
     hdc_flags_t flags;
     size_t      shape[HDC_MAX_DIMS];
     size_t      rank;
+//     hdc_t       parent;
     size_t      pad; // Padding
 };
 //} __attribute__((packed));
@@ -57,7 +65,6 @@ struct hdc_header_t {
 #define HDC_MAX_RESIZE_ATTEMPTS    5 // how many times to try increasing buffer
 
 //TODO Specify offsets in header, possibly make header of dynamic length.
-//TODO support external data
 
 struct hdc_data_t {
     hdc_type_t  type;
@@ -66,12 +73,5 @@ struct hdc_data_t {
     size_t      shape[HDC_MAX_DIMS];
     char*       data;
 };
-
-struct hdc_t {
-    char        uuid[HDC_UUID_LENGTH];
-    size_t      storage_id;
-};
-
-typedef struct hdc_t hdc_t;
 
 #endif

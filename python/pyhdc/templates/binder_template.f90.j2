@@ -1,0 +1,38 @@
+subroutine {{ func.function }}_hdc(data_in, data_out) bind(c, name="{{ func.function }}_hdc")
+    use hdc_fortran
+    use iso_c_binding
+    {% if func.module %}
+    use {{ func.module }}
+    {%- endif %}
+    implicit none
+    ! declare input and output containers
+    type(hdc_t), value :: data_in, data_out
+    ! declare all input and output arguments
+    {% for var in func.arguments %}
+    {{ var.type  }} :: {{ var.name }}
+    {%- endfor %}
+    ! declare all suplementary containers
+    {% for var in func.arguments if var.type != 'type(hdc_t)' %}
+    type(hdc_t) :: hdc_node_{{ var.name }}
+    {%- endfor %}
+    ! init all output HDCs
+    {% for var in func.arguments if var.type == 'type(hdc_t)' and var.intent == 'out' %}
+    {{ var.name }} = hdc_new()
+    {% endfor %}
+    {% for var in func.arguments if 'in' in var.intent %}
+    call hdc_get(data_in, '{{ var.name }}', {{ var.name }})
+    {%- endfor %}
+    call {{ func.function }}({% for var in func.arguments -%}
+        {%- if not loop.first %}, {% endif -%}
+        {{ var.name }}
+    {%- endfor %})
+    {% for var in func.arguments if 'out' in var.intent %}
+    {% if var.type == 'type(hdc_t)' %}
+    call hdc_add_child(data_out, '{{ var.name }}', {{ var.name }})
+    {% else %}
+    hdc_node_{{ var.name }} = hdc_new()
+    call hdc_set(hdc_node_{{ var.name }},{{ var.name }})
+    call hdc_add_child(data_out, '{{ var.name }}', hdc_node_{{ var.name }})
+    {% endif %}
+    {%- endfor %}
+end subroutine

@@ -1,0 +1,5 @@
+pytest>=3.0.0
+h5py>=2.8.0
+hypothesis
+Sphinx
+breathe

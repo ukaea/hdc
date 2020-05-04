@@ -1,5 +1,6 @@
 #ifndef MDBM_PLUGIN_HPP
 #define MDBM_PLUGIN_HPP
+
 #include <string>
 #include "storage_interface.hpp"
 #include <mdbm.h>
@@ -11,51 +12,57 @@
 #include <sys/stat.h>
 #include <json/json.h>
 
-using namespace std;
-
 /**
  * Check if a file exists
  * @return true if and only if the file exists, false else
  */
 bool MDBMFileExists(const std::string& file) {
-    struct stat buf;
+    struct stat buf = {};
     return (stat(file.c_str(), &buf) == 0);
 }
 
 class MDBMStorage : public Storage {
 private:
-    MDBM* db = NULL;
+    MDBM* db = nullptr;
     bool initialized = false;
     bool persistent = false;
     std::string filename = "/tmp/db.mdbm";
+
 public:
     MDBMStorage() {
         DEBUG_STDOUT("MDBMStorage()\n");
-    };
-    ~MDBMStorage() {
+    }
+
+    ~MDBMStorage() override {
         DEBUG_STDOUT("~MDBMStorage()\n");
         if(!persistent) {
             cleanup();
         } else std::cout << "Storage has been set persistent. The data are stored in file \"" << filename << "\""<< std::endl;
-    };
-    void lock(string path) {
+    }
+
+    void lock(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         mdbm_lock_smart (this->db, &key, 0);
-    };
-    void unlock(string path) {
+    }
+
+    void unlock(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         mdbm_unlock_smart (this->db, &key, 0);
-    };
-    bool locked() {
+    }
+
+    bool locked() override {
         return mdbm_islocked(this->db);
-    };
-    void sync() {};
-    string getDescription() {
+    }
+
+    void sync() override {}
+
+    std::string getDescription() override {
         return "This is MDBM based storage.";
-    };
-    std::string get_settings() {
+    }
+
+    std::string get_settings() override {
         Json::Value root;
         root["persistent"] = persistent;
         root["filename"] = filename;
@@ -63,35 +70,47 @@ public:
         std::stringstream ss;
         ss << root;
         return ss.str();
-    };
-    void set(string path, char* data, size_t size) {
-        if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+    }
+
+    void set(boost::uuids::uuid _uuid, char* data, size_t size) override {
+        if (!initialized) {
+            throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
+        }
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum value = {(char*)data, static_cast<int>(size)};
         mdbm_lock_smart (this->db, &key, 0);
         mdbm_store(this->db,key,value,MDBM_REPLACE);
         mdbm_unlock_smart (this->db, &key, 0);
-        return;
-    };
-    char* get(string path) {
-        if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+    }
+
+    char* get(boost::uuids::uuid _uuid) override {
+        if (!initialized) {
+            throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
+        }
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum found = mdbm_fetch(this->db, key);
+        if (found.dptr == NULL || found.dsize == 0) {
+            throw std::runtime_error("MDBMStorage::get(\""+boost::lexical_cast<std::string>(_uuid)+"\"): not found\n");
+        }
         return (char*) found.dptr;
-    };
-    size_t get_size(string path) {
-        if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+    }
+
+    size_t get_size(boost::uuids::uuid _uuid) override {
+        if (!initialized) {
+            throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
+        }
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum found = mdbm_fetch(this->db, key);
         return found.dsize;
-    };
-    void cleanup () {
+    }
+
+    void cleanup () override {
         if (!initialized) return;
         DEBUG_STDOUT("MDBMStorage::cleanup()\n");
-        if (this->db != NULL) {
+        if (this->db != nullptr) {
             mdbm_close(this->db);
             mdbm_delete_lockfiles(this->filename.c_str());
-            this->db = NULL;
+            this->db = nullptr;
         }
         // Remove db file if the data persistence is not required
         if (!this->persistent && MDBMFileExists(filename)) {
@@ -100,22 +119,27 @@ public:
             };
         }
         initialized = false;
-        return;
-    };
-    bool has(string path) {
-        if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+    }
+
+    bool has(boost::uuids::uuid _uuid) override {
+        if (!initialized) {
+            throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
+        }
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         return (mdbm_fetch(this->db, key).dsize != 0);
-    };
-    void remove(string path) {
-        if (!initialized) throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
-        datum key = {&path[0u], static_cast<int>(path.length())};
+    }
+
+    void remove(boost::uuids::uuid _uuid) override {
+        if (!initialized) {
+            throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
+        }
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         mdbm_delete(this->db,key);
-        return;
-    };
-    void init(std::string settings) {
+    }
+
+    void init(std::string settings) override {
         Json::Value root;
-        if (settings != "") {
+        if (!settings.empty()) {
             std::stringstream ss(settings);
             ss >> root;
         }
@@ -125,11 +149,15 @@ public:
         this->db = mdbm_open(filename.c_str(), MDBM_O_RDWR | MDBM_O_CREAT | MDBM_LARGE_OBJECTS, 0666, 0, 0);
         mdbm_set_alignment(this->db,MDBM_ALIGN_16_BITS);
         initialized = true;
-        return;
-    };
-    string name() {
+    }
+
+    std::string name() override {
         return "mdbm";
-    };
+    }
+
+    bool memory_mapped() override {
+        return true;
+    }
 };
 
 PLUMA_INHERIT_PROVIDER(MDBMStorage, Storage)
