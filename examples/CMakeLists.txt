@@ -25,7 +25,7 @@ set_target_properties(hdc_example_lukas PROPERTIES LINKER_LANGUAGE Fortran)
 add_executable(show_type_traits show_type_traits.cpp)
 target_link_libraries(show_type_traits hdc)
 
-set(HDC_EXAMPLES hdc_example_cpp hdc_example_c hdc_example_fortran hdc_example_cpo show_type_traits)
+set(HDC_EXAMPLES hdc_example_cpp hdc_example_c hdc_example_fortran hdc_example_cpo show_type_traits hdc_fortran_module)
 
 if (_BUILD_MDBM)
     add_executable(hdc_example_interprocess example_interprocess.cpp)
