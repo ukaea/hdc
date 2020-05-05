@@ -20,8 +20,7 @@ bool in_map(const std::string& str, const std::unordered_map<std::string, std::s
 std::string make_tmp_name(const std::string& suffix = "h5")
 {
     boost::filesystem::path temp = boost::filesystem::unique_path();
-    temp += std::string(".") + suffix;
-    const std::string tempstr = temp.native();
+    const std::string tempstr = temp.native()+"."+suffix;
     return tempstr;
 }
 

@@ -3,9 +3,15 @@ set( SOURCES
   hdc_serializer.cpp
 )
 
+if( _BUILD_MDBM )
+  list( APPEND SOURCES hdc_hdc_serializer.cpp )
+endif( _BUILD_MDBM )
+
+
 if( HDF5_FOUND )
-  list( APPEND SOURCES hdc_hdf5_serializer.cpp hdc_hdc_serializer.cpp )
+  list( APPEND SOURCES hdc_hdf5_serializer.cpp)
 endif( HDF5_FOUND )
+
 if( ENABLE_UDA )
   list( APPEND SOURCES hdc_uda_serializer.cpp )
 endif( ENABLE_UDA )

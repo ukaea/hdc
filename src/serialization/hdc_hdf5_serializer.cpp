@@ -562,32 +562,48 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
     }  // end of try block
         // catch failure caused by the H5File operations
     catch (FileIException& error) {
-#if H5_VERSION_GE(1, 8, 13)
+#ifdef H5_VERSION_GE
+    #if H5_VERSION_GE(1, 8, 13)
         Exception::printErrorStack();
+    #else
+        std::cerr << "write_node(): " << "FileIException" << std::endl;
+    #endif
 #else
         std::cerr << "write_node(): " << "FileIException" << std::endl;
 #endif
     }
         // catch failure caused by the DataSet operations
     catch (DataSetIException& error) {
-#if H5_VERSION_GE(1, 8, 13)
+#ifdef H5_VERSION_GE
+    #if H5_VERSION_GE(1, 8, 13)
         Exception::printErrorStack();
+    #else
+        std::cerr << "write_node(): " << "DataSetIException" << std::endl;
+    #endif
 #else
         std::cerr << "write_node(): " << "DataSetIException" << std::endl;
 #endif
     }
         // catch failure caused by the DataSpace operations
     catch (DataSpaceIException& error) {
-#if H5_VERSION_GE(1, 8, 13)
+#ifdef H5_VERSION_GE
+    #if H5_VERSION_GE(1, 8, 13)
         Exception::printErrorStack();
+    #else
+        std::cerr << "write_node(): " << "DataSpaceIException" << std::endl;
+    #endif
 #else
         std::cerr << "write_node(): " << "DataSpaceIException" << std::endl;
 #endif
     }
         // catch failure caused by the DataSpace operations
     catch (DataTypeIException& error) {
-#if H5_VERSION_GE(1, 8, 13)
+#ifdef H5_VERSION_GE
+    #if H5_VERSION_GE(1, 8, 13)
         Exception::printErrorStack();
+    #else
+        std::cerr << "write_node(): " << "DataTypeIException" << std::endl;
+    #endif
 #else
         std::cerr << "write_node(): " << "DataTypeIException" << std::endl;
 #endif
@@ -615,8 +631,12 @@ void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::st
         H5File file(h5_filename, H5F_ACC_TRUNC);
         write_node(hdc, &file, "data");
     } catch (FileIException& error) {
-#if H5_VERSION_GE(1, 8, 13)
+#ifdef H5_VERSION_GE
+    #if H5_VERSION_GE(1, 8, 13)
         Exception::printErrorStack();
+    #else
+        std::cerr << "to_hdf5(): " << "FileIException" << std::endl;
+    #endif
 #else
         std::cerr << "to_hdf5(): " << "FileIException" << std::endl;
 #endif
