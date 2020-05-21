@@ -14,7 +14,8 @@ public class HDC {
         public HDCException(String msg) { super(msg); }
     }
 
-    private String nativeUUID;
+    //private String nativeUUID;
+    private byte[] nativeUUID;
     private long nativeStorageID;
 
     private static final int HDC_EMPTY  =  0;
@@ -34,8 +35,9 @@ public class HDC {
     private static final int HDC_BOOL   = 14;
     private static final int HDC_ERROR  = 15;
 
-    protected HDC(String uuid, long storageID) {
-        nativeUUID = uuid;
+    protected HDC(byte[] uuid, long storageID) {
+        nativeUUID = new byte[16];
+        for (int i=0; i<16; i++) nativeUUID[i] = uuid[i];
         nativeStorageID = storageID;
     }
 
@@ -83,17 +85,22 @@ public class HDC {
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");
         }
 
-        // int[] shape = new int[] { 4 };
-
         return Nd4j.create(data);
+    }
+
+    public String get_uuid() {
+        return String.valueOf(nativeUUID);
+    }
+
+    public void print_uuid() {
+        System.out.println(nativeUUID);
     }
 
     public native long get_rank();
     public native ArrayList<Integer> get_shape();
-    public native String serialize();
-    public native void serialize(String file);
-    public native void to_json(String file, int mode);
-    public native String to_json_string(int mode);
+    public native String serialize(String protocol);
+    public native void save(String uri, String datapath);
+    public final static native HDC load(String uri, String datapath);
     public native void print_info();
     public native long get_type();
     public native String get_type_str();

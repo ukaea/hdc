@@ -7,6 +7,38 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef dev_libhdc_HDC_HDC_EMPTY
+#define dev_libhdc_HDC_HDC_EMPTY 0L
+#undef dev_libhdc_HDC_HDC_STRUCT
+#define dev_libhdc_HDC_HDC_STRUCT 1L
+#undef dev_libhdc_HDC_HDC_LIST
+#define dev_libhdc_HDC_HDC_LIST 2L
+#undef dev_libhdc_HDC_HDC_INT8
+#define dev_libhdc_HDC_HDC_INT8 3L
+#undef dev_libhdc_HDC_HDC_INT16
+#define dev_libhdc_HDC_HDC_INT16 4L
+#undef dev_libhdc_HDC_HDC_INT32
+#define dev_libhdc_HDC_HDC_INT32 5L
+#undef dev_libhdc_HDC_HDC_INT64
+#define dev_libhdc_HDC_HDC_INT64 6L
+#undef dev_libhdc_HDC_HDC_UINT8
+#define dev_libhdc_HDC_HDC_UINT8 7L
+#undef dev_libhdc_HDC_HDC_UINT16
+#define dev_libhdc_HDC_HDC_UINT16 8L
+#undef dev_libhdc_HDC_HDC_UINT32
+#define dev_libhdc_HDC_HDC_UINT32 9L
+#undef dev_libhdc_HDC_HDC_UINT64
+#define dev_libhdc_HDC_HDC_UINT64 10L
+#undef dev_libhdc_HDC_HDC_FLOAT
+#define dev_libhdc_HDC_HDC_FLOAT 11L
+#undef dev_libhdc_HDC_HDC_DOUBLE
+#define dev_libhdc_HDC_HDC_DOUBLE 12L
+#undef dev_libhdc_HDC_HDC_STRING
+#define dev_libhdc_HDC_HDC_STRING 13L
+#undef dev_libhdc_HDC_HDC_BOOL
+#define dev_libhdc_HDC_HDC_BOOL 14L
+#undef dev_libhdc_HDC_HDC_ERROR
+#define dev_libhdc_HDC_HDC_ERROR 15L
 /*
  * Class:     dev_libhdc_HDC
  * Method:    create
@@ -138,34 +170,26 @@ JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_get_1shape
 /*
  * Class:     dev_libhdc_HDC
  * Method:    serialize
- * Signature: ()Ljava/lang/String;
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_dev_libhdc_HDC_serialize__
-  (JNIEnv *, jobject);
-
-/*
- * Class:     dev_libhdc_HDC
- * Method:    serialize
- * Signature: (Ljava/lang/String;)V
- */
-JNIEXPORT void JNICALL Java_dev_libhdc_HDC_serialize__Ljava_lang_String_2
+JNIEXPORT jstring JNICALL Java_dev_libhdc_HDC_serialize
   (JNIEnv *, jobject, jstring);
 
 /*
  * Class:     dev_libhdc_HDC
- * Method:    to_json
- * Signature: (Ljava/lang/String;I)V
+ * Method:    save
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_dev_libhdc_HDC_to_1json
-  (JNIEnv *, jobject, jstring, jint);
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_save
+  (JNIEnv *, jobject, jstring, jstring);
 
 /*
  * Class:     dev_libhdc_HDC
- * Method:    to_json_string
- * Signature: (I)Ljava/lang/String;
+ * Method:    load
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)Ldev/libhdc/HDC;
  */
-JNIEXPORT jstring JNICALL Java_dev_libhdc_HDC_to_1json_1string
-  (JNIEnv *, jobject, jint);
+JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2
+  (JNIEnv *, jobject, jstring, jstring);
 
 /*
  * Class:     dev_libhdc_HDC
@@ -212,7 +236,7 @@ JNIEXPORT void JNICALL Java_dev_libhdc_HDC_init
  * Method:    load
  * Signature: (Ljava/lang/String;)Ldev/libhdc/HDC;
  */
-JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_load
+JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_load__Ljava_lang_String_2
   (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus

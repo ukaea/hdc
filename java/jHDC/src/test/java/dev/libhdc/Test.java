@@ -71,12 +71,18 @@ public class Test {
         INDArray out_data = node.data();
         System.out.println("Data: " + out_data);
 
-        // Serialize data to JSON
-        tree.to_json("tree.json", 0);
-
         // On screen
         tree.dump();
-        tree.serialize("pokus.json");
+
+        // Serialize data to JSON
+        tree.save("json://tree.json", "");
+
+        //load from JSON
+        HDC tree2 = HDC.load("json://tree.json", "");
+        HDC node2 = tree2.get("aaa/bbb/ccc");
+        INDArray out_data2 = node2.data();
+        System.out.println("Loaded data: " + out_data2);
+
     }
 
 }

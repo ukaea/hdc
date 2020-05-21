@@ -8,7 +8,7 @@ namespace
 jfieldID getUUIDField(JNIEnv* jEnv, jobject jObj)
 {
     jclass hdc_class = jEnv->GetObjectClass(jObj);
-    return jEnv->GetFieldID(hdc_class, "nativeUUID", "Ljava/lang/String;");
+    return jEnv->GetFieldID(hdc_class, "nativeUUID", "[B");
 }
 
 jfieldID getStorageField(JNIEnv* jEnv, jobject jObj)
@@ -21,33 +21,38 @@ void initHDC(JNIEnv* jEnv, jobject jObj, const hdc_t& hdc)
 {
     jEnv->SetLongField(jObj, getStorageField(jEnv, jObj), hdc.storage_id);
 
-    jstring jUUID = jEnv->NewStringUTF(hdc.uuid);
+    jbyteArray jUUID = jEnv->NewByteArray(HDC_UUID_LENGTH);
+
+    jbyte *carr = jEnv->GetByteArrayElements(jUUID, NULL);
+    memcpy(carr,hdc.uuid,HDC_UUID_LENGTH);
+    jEnv->ReleaseByteArrayElements(jUUID, carr, 0);
+
     jEnv->SetObjectField(jObj, getUUIDField(jEnv, jObj), jUUID);
 }
 
 HDC getHDC(JNIEnv* jEnv, jobject jObj)
 {
-    auto jUUID = reinterpret_cast<jstring>(jEnv->GetObjectField(jObj, getUUIDField(jEnv, jObj)));
+    auto jUUID = reinterpret_cast<jbyteArray>(jEnv->GetObjectField(jObj, getUUIDField(jEnv, jObj)));
     jlong jStorage = jEnv->GetLongField(jObj, getStorageField(jEnv, jObj));
-
-    const char* uuid = jEnv->GetStringUTFChars(jUUID, nullptr);
-
     hdc_t hdc = {};
-    strncpy(hdc.uuid, uuid, HDC_UUID_LENGTH);
+    jbyte *carr = jEnv->GetByteArrayElements(jUUID, NULL);
+    memcpy(hdc.uuid, carr, HDC_UUID_LENGTH);
+    jEnv->ReleaseByteArrayElements(jUUID, carr, 0);
     hdc.storage_id = jStorage;
-
     return HDC(hdc);
 }
 
 jobject newHDC(JNIEnv* jEnv, hdc_t hdc)
 {
-    jstring jUUID = jEnv->NewStringUTF(hdc.uuid);
+    jbyteArray jUUID = jEnv->NewByteArray(HDC_UUID_LENGTH);
+    jbyte *carr = jEnv->GetByteArrayElements(jUUID, NULL);
+    memcpy(carr,hdc.uuid,HDC_UUID_LENGTH);
     long jStorageID = hdc.storage_id;
-
     jclass hdc_class = jEnv->FindClass("dev/libhdc/HDC");
-    jmethodID ctor = jEnv->GetMethodID(hdc_class, "<init>", "(Ljava/lang/String;J)V");
+    jmethodID ctor = jEnv->GetMethodID(hdc_class, "<init>", "([BJ)V");
+    assert(ctor);
+    jEnv->ReleaseByteArrayElements(jUUID, carr, 0);
     jobject jHDC = jEnv->NewObject(hdc_class, ctor, jUUID, jStorageID);
-
     return jHDC;
 }
 
@@ -88,10 +93,8 @@ jobject Java_dev_libhdc_HDC_get(JNIEnv* jEnv, jobject obj, jstring jPath)
 {
     auto hdc = getHDC(jEnv, obj);
     std::string path = jEnv->GetStringUTFChars(jPath, nullptr);
-
     auto child = hdc.get(path);
     hdc_t child_hdc = child.as_obj();
-
     return newHDC(jEnv, child_hdc);
 }
 
@@ -171,7 +174,7 @@ jobject Java_dev_libhdc_HDC_get_1shape(JNIEnv* jEnv, jobject jObj)
     jobject jShape = jEnv->NewObject(list_class, jEnv->GetMethodID(list_class, "<init>", "()V"));
 
     jclass integer_class = jEnv->FindClass("java/lang/Integer");
-    
+
     for (const auto& i : shape) {
         jobject jI = jEnv->NewObject(integer_class, jEnv->GetMethodID(integer_class, "<init>", "(I)V"), i);
         jEnv->CallVoidMethod(jShape, jEnv->GetMethodID(list_class, "add", "(Ljava/lang/Object;)Z"), jI);
@@ -227,17 +230,11 @@ jobject Java_dev_libhdc_HDC_get_1data(JNIEnv* jEnv, jobject jObj)
     return jEnv->NewDirectByteBuffer(hdc.as_void_ptr(), hdc.get_datasize());
 }
 
-jstring Java_dev_libhdc_HDC_serialize__(JNIEnv* jEnv, jobject jObj)
+jstring Java_dev_libhdc_HDC_serialize__(JNIEnv* jEnv, jobject jObj, jstring jProtocol)
 {
     auto hdc = getHDC(jEnv, jObj);
-    auto str = hdc.serialize();
-    return jEnv->NewStringUTF(str.c_str());
-}
-
-jstring Java_dev_libhdc_HDC_to_1json_1string(JNIEnv* jEnv, jobject jObj, jint jMode)
-{
-    auto hdc = getHDC(jEnv, jObj);
-    auto str = hdc.to_json_string(jMode);
+    std::string protocol = jEnv->GetStringUTFChars(jProtocol, nullptr);
+    auto str = hdc.serialize(protocol);
     return jEnv->NewStringUTF(str.c_str());
 }
 
@@ -279,11 +276,21 @@ void Java_dev_libhdc_HDC_create(JNIEnv* jEnv, jobject jObj, jstring jPath)
     initHDC(jEnv, jObj, hdc.as_obj());
 }
 
-void Java_dev_libhdc_HDC_to_1json(JNIEnv* jEnv, jobject jObj, jstring jFile, jint jMode)
+jobject Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jEnv, jobject jObj, jstring jUri, jstring jDataPath)
+{
+    std::string uri = jEnv->GetStringUTFChars(jUri, nullptr);
+    std::string datapath = jEnv->GetStringUTFChars(jDataPath, nullptr);
+    HDC h = HDC::load(uri,datapath);
+    return newHDC(jEnv, h.as_obj());
+}
+
+
+void Java_dev_libhdc_HDC_save(JNIEnv* jEnv, jobject jObj, jstring jUri, jstring jDataPath)
 {
     auto hdc = getHDC(jEnv, jObj);
-    std::string file = jEnv->GetStringUTFChars(jFile, nullptr);
-    hdc.to_json(file, jMode);
+    std::string uri = jEnv->GetStringUTFChars(jUri, nullptr);
+    std::string datapath = jEnv->GetStringUTFChars(jDataPath, nullptr);
+    hdc.save(uri,datapath);
 }
 
 void Java_dev_libhdc_HDC_serialize__Ljava_lang_String_2(JNIEnv* jEnv, jobject jObj, jstring jFile)
