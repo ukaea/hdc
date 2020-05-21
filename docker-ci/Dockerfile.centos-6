@@ -1,0 +1,48 @@
+FROM centos:6.9
+
+MAINTAINER David Fridrich <fridrich@ipp.cas.cz>
+
+# Update & upgrade, install EPEL
+RUN yum -y --setopt=tsflags=nodocs update
+RUN yum -y --setopt=tsflags=nodocs install epel-release.noarch
+RUN yum -y --setopt=tsflags=nodocs install centos-release-scl
+RUN yum -y --setopt=tsflags=nodocs update
+
+# Install some dependencies
+RUN yum -y --setopt=tsflags=nodocs groupinstall "Development Tools"
+RUN yum -y --setopt=tsflags=nodocs install boost boost-devel cppunit-devel openssl-devel git hdf5-devel readline-devel centos-release-scl devtoolset-7-gcc* libs3 libs3-devel cmake3 python3-devel
+
+# Set environment
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV PATH=/opt/rh/devtoolset-7/root/usr/bin:$PATH
+
+# Download, build and install MDBM
+WORKDIR /tmp
+RUN git clone https://github.com/yahoo/mdbm
+WORKDIR mdbm
+RUN sed -i.bak 's|/tmp/install|/usr/local|g' Makefile.base
+RUN make
+RUN make install
+
+# Download, build and install flatbuffers
+WORKDIR /tmp
+RUN git clone https://github.com/google/flatbuffers.git
+WORKDIR flatbuffers
+RUN cmake3 -G "Unix Makefiles"
+RUN make
+RUN make install
+
+# Install pyHDC stuff
+WORKDIR /tmp
+#RUN yum search python3
+#RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+#RUN python3.6 get-pip.py
+#COPY requirements.txt /tmp
+#COPY dev-requirements.txt /tmp
+#RUN pip install -r /tmp/requirements.txt
+#RUN pip install -r /tmp/dev-requirements.txt
+
+# Final cleanup
+#RUN yum clean all
+#RUN rm -rf /tmp/*
