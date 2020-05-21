@@ -69,17 +69,20 @@ public class HDC {
 
     public INDArray data() {
         ByteBuffer buffer = get_data();
-
+        long rank = get_rank();
+        int length = 1;
+        ArrayList<Integer> shape = get_shape();
+        for(int i=0;i<rank;i++) length *= shape.get(i);
         DataBuffer data = null;
         switch ((int)get_type()) {
             case HDC_INT32:
-                data = Nd4j.createBuffer(buffer, DataBuffer.Type.INT, 4);
+                data = Nd4j.createBuffer(buffer, DataBuffer.Type.INT, length);
                 break;
             case HDC_FLOAT:
-                data = Nd4j.createBuffer(buffer, DataBuffer.Type.FLOAT, 4);
+                data = Nd4j.createBuffer(buffer, DataBuffer.Type.FLOAT, length);
                 break;
             case HDC_DOUBLE:
-                data = Nd4j.createBuffer(buffer, DataBuffer.Type.DOUBLE, 4);
+                data = Nd4j.createBuffer(buffer, DataBuffer.Type.DOUBLE, length);
                 break;
             default:
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");

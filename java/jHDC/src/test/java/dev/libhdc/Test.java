@@ -48,7 +48,7 @@ public class Test {
         // Prepare some data
         int[] array = new int[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shape = new ArrayList<>();
-        shape.add(4);
+        shape.add(array.length);
 
         // Add data to a single node
         HDC data = new HDC();
