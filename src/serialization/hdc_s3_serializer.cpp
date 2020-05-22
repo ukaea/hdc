@@ -237,11 +237,11 @@ void S3Serializer::write_node(const HDC& hdc, const char* host, const char* buck
 //        std::string rank_string = std::to_string(header->rank);
 //        meta_data.emplace_back(S3NameValue{ "rank", rank_string.c_str() });
 
-        hsize_t rank = header->rank;
+        size_t rank = header->rank;
         std::string shape_string;
         if (rank > 0) {
             std::string delim;
-            for (hsize_t i = 0; i < rank; i++) {
+            for (size_t i = 0; i < rank; i++) {
                 shape_string += (delim + std::to_string(header->shape[i]));
                 delim = ",";
             };
