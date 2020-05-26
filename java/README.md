@@ -44,7 +44,7 @@ export HDC_PREFIX=~/projects/hdc
 
 java -cp "$HDC_PREFIX/java/jHDC/target/jHDC-0.14.0.jar:$HDC_PREFIX/java/jHDC/target/test-classes:$ND4J_JARS:$MISC_JARS:$BLAS_JARS" -Djava.library.path=$HDC_PREFIX/build/java Test
 ```
-Lazy people can (like me) try the following. Bear in the mind that here we assume empty *~/.m2* before build.
+Lazy people (like me) can try the following. Bear in the mind that here we assume empty *~/.m2/* before the build.
 ```bash
 export ALL_JARS=$(find ~/.m2/repository -iname "*.jar" -printf "%p:")
 java -cp "$HDC_PREFIX/java/jHDC/target/jHDC-0.14.0.jar:$HDC_PREFIX/java/jHDC/target/test-classes:$ALL_JARS" -Djava.library.path=$HDC_PREFIX/build/java Test
