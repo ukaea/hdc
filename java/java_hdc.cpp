@@ -158,6 +158,33 @@ void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3D(JNIEnv* jEnv,
     set_data(jEnv, obj, jShape, data);
 }
 
+void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3B(JNIEnv* jEnv,
+                                                              jobject obj,
+                                                              jobject jShape,
+                                                              jbyteArray jData)
+{
+    jbyte* data = jEnv->GetByteArrayElements(jData, nullptr);
+    set_data(jEnv, obj, jShape, data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3S(JNIEnv* jEnv,
+                                                              jobject obj,
+                                                              jobject jShape,
+                                                              jshortArray jData)
+{
+    jshort* data = jEnv->GetShortArrayElements(jData, nullptr);
+    set_data(jEnv, obj, jShape, data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3Z(JNIEnv* jEnv,
+                                                              jobject obj,
+                                                              jobject jShape,
+                                                              jbooleanArray jData)
+{
+    jboolean* data = jEnv->GetBooleanArrayElements(jData, nullptr);
+    set_data(jEnv, obj, jShape, data);
+}
+
 jlong Java_dev_libhdc_HDC_get_1rank(JNIEnv* jEnv, jobject jObj)
 {
     auto hdc = getHDC(jEnv, jObj);
@@ -276,7 +303,7 @@ void Java_dev_libhdc_HDC_create(JNIEnv* jEnv, jobject jObj, jstring jPath)
     initHDC(jEnv, jObj, hdc.as_obj());
 }
 
-jobject Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jEnv, jobject jObj, jstring jUri, jstring jDataPath)
+jobject Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jEnv, jclass, jstring jUri, jstring jDataPath)
 {
     std::string uri = jEnv->GetStringUTFChars(jUri, nullptr);
     std::string datapath = jEnv->GetStringUTFChars(jDataPath, nullptr);
@@ -293,7 +320,7 @@ void Java_dev_libhdc_HDC_save(JNIEnv* jEnv, jobject jObj, jstring jUri, jstring 
     hdc.save(uri,datapath);
 }
 
-void Java_dev_libhdc_HDC_serialize__Ljava_lang_String_2(JNIEnv* jEnv, jobject jObj, jstring jFile)
+void Java_dev_libhdc_HDC_serialize__Ljava_lang_String_2(JNIEnv* jEnv, jclass jObj, jstring jFile)
 {
     auto hdc = getHDC(jEnv, jObj);
     std::string file = jEnv->GetStringUTFChars(jFile, nullptr);

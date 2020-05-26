@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 //import org.nd4j.linalg.api.buffer.factory.DefaultDataBufferFactory;
 import org.nd4j.linalg.api.buffer.DataBuffer;
+import org.nd4j.linalg.api.buffer.DataType;
+
 // import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -60,6 +62,9 @@ public class HDC {
     public native ArrayList<String> keys();
     public native boolean exists(String path);
 
+    public native void set_data(ArrayList<Integer> shape, boolean[] data);
+    public native void set_data(ArrayList<Integer> shape, byte[] data);
+    public native void set_data(ArrayList<Integer> shape, short[] data);
     public native void set_data(ArrayList<Integer> shape, int[] data);
     public native void set_data(ArrayList<Integer> shape, long[] data);
     public native void set_data(ArrayList<Integer> shape, float[] data);
@@ -70,25 +75,52 @@ public class HDC {
     public INDArray data() {
         ByteBuffer buffer = get_data();
         long rank = get_rank();
-        int length = 1;
+        long length = 1;
         ArrayList<Integer> shape = get_shape();
-        for(int i=0;i<rank;i++) length *= shape.get(i);
+        long[] shape_ = new long[(int)rank];
+        for(int i=0;i<rank;i++) {
+            shape_[i] = shape.get(i);
+            length *= shape_[i];
+        }
         DataBuffer data = null;
         switch ((int)get_type()) {
+            case HDC_INT8:
+                data = Nd4j.createBuffer(buffer, DataType.INT8, (int)length);
+                break;
+            case HDC_INT16:
+                data = Nd4j.createBuffer(buffer, DataType.INT16, (int)length);
+                break;
             case HDC_INT32:
-                data = Nd4j.createBuffer(buffer, DataBuffer.Type.INT, length);
+                data = Nd4j.createBuffer(buffer, DataType.INT32, (int)length);
+                break;
+            case HDC_INT64:
+                data = Nd4j.createBuffer(buffer, DataType.INT64, (int)length);
+                break;
+            case HDC_UINT8:
+                data = Nd4j.createBuffer(buffer, DataType.UINT8, (int)length);
+                break;
+            case HDC_UINT16:
+                data = Nd4j.createBuffer(buffer, DataType.UINT16, (int)length);
+                break;
+            case HDC_UINT32:
+                data = Nd4j.createBuffer(buffer, DataType.UINT32, (int)length);
+                break;
+            case HDC_UINT64:
+                data = Nd4j.createBuffer(buffer, DataType.UINT64, (int)length);
                 break;
             case HDC_FLOAT:
-                data = Nd4j.createBuffer(buffer, DataBuffer.Type.FLOAT, length);
+                data = Nd4j.createBuffer(buffer, DataType.FLOAT, (int)length);
                 break;
             case HDC_DOUBLE:
-                data = Nd4j.createBuffer(buffer, DataBuffer.Type.DOUBLE, length);
+                data = Nd4j.createBuffer(buffer, DataType.DOUBLE, (int)length);
+                break;
+            case HDC_BOOL:
+                data = Nd4j.createBuffer(buffer, DataType.BOOL, (int)length);
                 break;
             default:
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");
         }
-
-        return Nd4j.create(data);
+        return Nd4j.create(data,shape_);
     }
 
     public String get_uuid() {

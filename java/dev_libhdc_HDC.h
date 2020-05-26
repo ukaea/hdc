@@ -114,6 +114,30 @@ JNIEXPORT jboolean JNICALL Java_dev_libhdc_HDC_exists
 /*
  * Class:     dev_libhdc_HDC
  * Method:    set_data
+ * Signature: (Ljava/util/ArrayList;[Z)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3Z
+  (JNIEnv *, jobject, jobject, jbooleanArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (Ljava/util/ArrayList;[B)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3B
+  (JNIEnv *, jobject, jobject, jbyteArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (Ljava/util/ArrayList;[S)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3S
+  (JNIEnv *, jobject, jobject, jshortArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
  * Signature: (Ljava/util/ArrayList;[I)V
  */
 JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3I
@@ -189,7 +213,7 @@ JNIEXPORT void JNICALL Java_dev_libhdc_HDC_save
  * Signature: (Ljava/lang/String;Ljava/lang/String;)Ldev/libhdc/HDC;
  */
 JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2
-  (JNIEnv *, jobject, jstring, jstring);
+  (JNIEnv *, jclass, jstring, jstring);
 
 /*
  * Class:     dev_libhdc_HDC
