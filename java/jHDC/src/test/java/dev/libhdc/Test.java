@@ -44,6 +44,14 @@ public class Test {
         // Ask whether child exists
         System.out.println("exists: " + tree.exists("aaa/bbb/eee"));
 
+        // Test set_child
+        HDC old_ = new HDC();
+        old_.set_string("old");
+        HDC new_ = new HDC();
+        new_.set_string("new");
+        tree.add_child("aaa/node",old_);
+        tree.set_child("aaa/node",new_);
+
         // Prepare some data
         int[] array = new int[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shape = new ArrayList<>();
