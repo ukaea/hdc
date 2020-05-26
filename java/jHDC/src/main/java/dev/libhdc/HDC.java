@@ -43,15 +43,74 @@ public class HDC {
         nativeStorageID = storageID;
     }
 
+    public HDC(ArrayList<Integer> shape, double[] data) {
+        create_double_array(shape,data);
+    }
+    public HDC(ArrayList<Integer> shape, boolean[] data) {
+        create_boolean_array(shape,data);
+    }
+    public HDC(ArrayList<Integer> shape, byte[] data) {
+        create_byte_array(shape,data);
+    }
+    public HDC(ArrayList<Integer> shape, short[] data) {
+        create_short_array(shape,data);
+    }
+    public HDC(ArrayList<Integer> shape, int[] data) {
+        create_int_array(shape,data);
+    }
+    public HDC(ArrayList<Integer> shape, long[] data) {
+        create_long_array(shape,data);
+    }
+    public HDC(ArrayList<Integer> shape, float[] data) {
+        create_float_array(shape,data);
+    }
+
+    public HDC(double data) {
+        create_double(data);
+    }
+    public HDC(boolean data) {
+        create_boolean(data);
+    }
+    public HDC(byte data) {
+        create_byte(data);
+    }
+    public HDC(short data) {
+        create_short(data);
+    }
+    public HDC(int data) {
+        create_int(data);
+    }
+    public HDC(long data) {
+        create_long(data);
+    }
+    public HDC(float data) {
+        create_float(data);
+    }
+
     public HDC() {
         create(null);
     }
 
-    public HDC(String path) {
-        create(path);
+    public HDC(String str) {
+        create(str);
     }
 
-    protected native void create(String path);
+    protected native void create(String str);
+    protected native void create_double_array(ArrayList<Integer> shape, double[] data);
+    protected native void create_float_array(ArrayList<Integer> shape, float[] data);
+    protected native void create_long_array(ArrayList<Integer> shape, long[] data);
+    protected native void create_int_array(ArrayList<Integer> shape, int[] data);
+    protected native void create_short_array(ArrayList<Integer> shape, short[] data);
+    protected native void create_byte_array(ArrayList<Integer> shape, byte[] data);
+    protected native void create_boolean_array(ArrayList<Integer> shape, boolean[] data);
+
+    protected native void create_double(double data);
+    protected native void create_float(float data);
+    protected native void create_long(long data);
+    protected native void create_int(int data);
+    protected native void create_short(short data);
+    protected native void create_byte(byte data);
+    protected native void create_boolean(boolean data);
 
     public native void add_child(String path, HDC child);
     public native void set_child(String path, HDC child);

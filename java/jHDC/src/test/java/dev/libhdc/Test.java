@@ -87,6 +87,14 @@ public class Test {
         nodeLongs.set_data(shapeOfLongs, arrayOfLongs);
         tree.add_child("aaa/bbb/long", nodeLongs);
 
+        //add ints
+        int[] arrayOfInts = new int[]{ 7, 2, 3, 4 };
+        ArrayList<Integer> shapeOfInts = new ArrayList<>();
+        shapeOfInts.add(arrayOfInts.length);
+        HDC nodeInts = new HDC();
+        nodeInts.set_data(shapeOfInts, arrayOfInts);
+        tree.add_child("aaa/bbb/int", nodeInts);
+
         // Add shorts
         short[] arrayOfShorts = new short[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shapeOfShorts = new ArrayList<>();
@@ -168,6 +176,50 @@ public class Test {
         tree.add_child("aaa/bbb/string",nodeStr);
         String str = tree.get("aaa/bbb/string").get_string();
         System.out.println("String: " + str);
+
+        //test constructors
+        HDC nodeDoubleC = new HDC(shapeOfDouble, arrayOfDouble);
+        tree.add_child("aaa/constructors/double", nodeDoubleC);
+
+        HDC nodeLongsC = new HDC(shapeOfLongs, arrayOfLongs);
+        tree.add_child("aaa/constructors/long", nodeLongsC);
+
+        HDC nodeShortsC = new HDC(shapeOfShorts, arrayOfShorts);
+        tree.add_child("aaa/constructors/short", nodeShortsC);
+
+        HDC nodeBytesC = new HDC(shapeOfBytes, arrayOfBytes);
+        tree.add_child("aaa/constructors/byte", nodeBytesC);
+
+        HDC nodeBooleanC = new HDC(shapeOfBoolean, arrayOfBoolean);
+        tree.add_child("aaa/constructors/boolean", nodeBooleanC);
+
+        HDC nodeFloatC = new HDC(shapeOfFloat, arrayOfFloat);
+        tree.add_child("aaa/constructors/float", nodeFloatC);
+
+        HDC nodeIntsC = new HDC(shapeOfInts, arrayOfInts);
+        tree.add_child("aaa/constructors/int", nodeIntsC);
+
+        //test constructors_scalar
+        HDC nodeDoubleScalarC = new HDC(3.14);
+        tree.add_child("aaa/constructors_scalar/double", nodeDoubleScalarC);
+
+        HDC nodeLongsScalarC = new HDC(7777777);
+        tree.add_child("aaa/constructors_scalar/long", nodeLongsScalarC);
+
+        HDC nodeShortsScalarC = new HDC(4242);
+        tree.add_child("aaa/constructors_scalar/short", nodeShortsScalarC);
+
+        HDC nodeBytesScalarC = new HDC(42);
+        tree.add_child("aaa/constructors_scalar/byte", nodeBytesScalarC);
+
+        HDC nodeBooleanScalarC = new HDC(false);
+        tree.add_child("aaa/constructors_scalar/boolean", nodeBooleanScalarC);
+
+        HDC nodeFloatScalarC = new HDC(3.14F);
+        tree.add_child("aaa/constructors_scalar/float", nodeFloatScalarC);
+
+        HDC nodeIntsScalarC = new HDC(1111111);
+        tree.add_child("aaa/constructors_scalar/int", nodeIntsScalarC);
 
         // Ask for some data details, use subtree to shorten the path
         long rank = node.get_rank();

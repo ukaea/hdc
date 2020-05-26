@@ -49,6 +49,118 @@ JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create
 
 /*
  * Class:     dev_libhdc_HDC
+ * Method:    create_double_array
+ * Signature: (Ljava/util/ArrayList;[D)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1double_1array
+  (JNIEnv *, jobject, jobject, jdoubleArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_float_array
+ * Signature: (Ljava/util/ArrayList;[F)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1float_1array
+  (JNIEnv *, jobject, jobject, jfloatArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_long_array
+ * Signature: (Ljava/util/ArrayList;[J)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1long_1array
+  (JNIEnv *, jobject, jobject, jlongArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_int_array
+ * Signature: (Ljava/util/ArrayList;[I)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1int_1array
+  (JNIEnv *, jobject, jobject, jintArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_short_array
+ * Signature: (Ljava/util/ArrayList;[S)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1short_1array
+  (JNIEnv *, jobject, jobject, jshortArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_byte_array
+ * Signature: (Ljava/util/ArrayList;[B)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1byte_1array
+  (JNIEnv *, jobject, jobject, jbyteArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_boolean_array
+ * Signature: (Ljava/util/ArrayList;[Z)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1boolean_1array
+  (JNIEnv *, jobject, jobject, jbooleanArray);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_double
+ * Signature: (D)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1double
+  (JNIEnv *, jobject, jdouble);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_float
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1float
+  (JNIEnv *, jobject, jfloat);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_long
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1long
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_int
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1int
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_short
+ * Signature: (S)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1short
+  (JNIEnv *, jobject, jshort);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_byte
+ * Signature: (B)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1byte
+  (JNIEnv *, jobject, jbyte);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    create_boolean
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_create_1boolean
+  (JNIEnv *, jobject, jboolean);
+
+/*
+ * Class:     dev_libhdc_HDC
  * Method:    add_child
  * Signature: (Ljava/lang/String;Ldev/libhdc/HDC;)V
  */

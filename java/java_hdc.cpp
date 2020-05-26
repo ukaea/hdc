@@ -374,6 +374,103 @@ void Java_dev_libhdc_HDC_create(JNIEnv* jEnv, jobject jObj, jstring jPath)
     initHDC(jEnv, jObj, hdc.as_obj());
 }
 
+template<typename T>
+void create(JNIEnv* jEnv, jobject jObj, jobject jShape, T* data)
+{
+    HDC hdc;
+
+    jclass list_class = jEnv->FindClass("java/util/ArrayList");
+    jint jSize = jEnv->CallIntMethod(jShape, jEnv->GetMethodID(list_class, "size", "()I"));
+
+    std::vector<size_t> shape = {};
+    shape.reserve(jSize);
+
+    jclass integer_class = jEnv->FindClass("java/lang/Integer");
+
+    for (jint i = 0; i < jSize; ++i) {
+        jobject
+            element = jEnv->CallObjectMethod(jShape, jEnv->GetMethodID(list_class, "get", "(I)Ljava/lang/Object;"), i);
+        jint value = jEnv->CallIntMethod(element, jEnv->GetMethodID(integer_class, "intValue", "()I"));
+        shape.push_back(value);
+    }
+
+    hdc.set_data(shape, data);
+    initHDC(jEnv, jObj, hdc.as_obj());
+}
+
+
+void Java_dev_libhdc_HDC_create_1double_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jdoubleArray jData)
+{
+    jdouble* data = jEnv->GetDoubleArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+void Java_dev_libhdc_HDC_create_1float_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jfloatArray jData)
+{
+    jfloat* data = jEnv->GetFloatArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+void Java_dev_libhdc_HDC_create_1long_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jlongArray jData)
+{
+    jlong* data = jEnv->GetLongArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+void Java_dev_libhdc_HDC_create_1int_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jintArray jData)
+{
+    jint* data = jEnv->GetIntArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+void Java_dev_libhdc_HDC_create_1short_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jshortArray jData)
+{
+    jshort* data = jEnv->GetShortArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+void Java_dev_libhdc_HDC_create_1byte_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jbyteArray jData)
+{
+    jbyte* data = jEnv->GetByteArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+void Java_dev_libhdc_HDC_create_1boolean_1array(JNIEnv* jEnv, jobject jObj, jobject jShape, jbooleanArray jData)
+{
+    jboolean* data = jEnv->GetBooleanArrayElements(jData, nullptr);
+    create(jEnv, jObj, jShape, data);
+}
+
+template<typename T>
+void create(JNIEnv* jEnv, jobject jObj, T data)
+{
+    HDC hdc;
+    hdc.set_data(data);
+    initHDC(jEnv, jObj, hdc.as_obj());
+}
+void Java_dev_libhdc_HDC_create_1double(JNIEnv* jEnv, jobject jObj, jdouble jData)
+{
+    create( jEnv, jObj, jData);
+}
+void Java_dev_libhdc_HDC_create_1float(JNIEnv* jEnv, jobject jObj, jfloat jData)
+{
+    create( jEnv, jObj, jData);
+}
+void Java_dev_libhdc_HDC_create_1long(JNIEnv* jEnv, jobject jObj, jlong jData)
+{
+    create( jEnv, jObj, jData);
+}
+void Java_dev_libhdc_HDC_create_1int(JNIEnv* jEnv, jobject jObj, jint jData)
+{
+    create( jEnv, jObj, jData);
+}
+void Java_dev_libhdc_HDC_create_1short(JNIEnv* jEnv, jobject jObj, jshort jData)
+{
+    create( jEnv, jObj, jData);
+}
+void Java_dev_libhdc_HDC_create_1byte(JNIEnv* jEnv, jobject jObj, jbyte jData)
+{
+    create( jEnv, jObj, jData);
+}
+void Java_dev_libhdc_HDC_create_1boolean(JNIEnv* jEnv, jobject jObj, jboolean jData)
+{
+    create( jEnv, jObj, jData);
+}
+
 jobject Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jEnv, jclass, jstring jUri, jstring jDataPath)
 {
     std::string uri = jEnv->GetStringUTFChars(jUri, nullptr);
