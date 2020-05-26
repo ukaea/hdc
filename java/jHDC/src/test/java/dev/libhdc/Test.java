@@ -66,6 +66,19 @@ public class Test {
 
         tree.add_child("aaa/bbb/bbb", dummy3);
 
+        //Test tree indexes manipulations
+        HDC list = new HDC();
+        for (int i=0; i<5; i++) {
+            HDC n = new HDC();
+            n.set_string(String.valueOf(i));
+            list.append(n);
+        }
+        HDC n = new HDC();
+        n.set_string("7");
+        list.insert(0,n);
+        list.delete_slice(3L);
+        tree.add_child("aaa/list",list);
+
         // Add longs
         long[] arrayOfLongs = new long[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shapeOfLongs = new ArrayList<>();
@@ -146,6 +159,7 @@ public class Test {
         HDC node2 = tree2.get("aaa/bbb/int");
         INDArray out_data2 = node2.data();
         System.out.println("Loaded data: " + out_data2);
+
 
     }
 

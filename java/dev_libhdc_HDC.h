@@ -73,11 +73,27 @@ JNIEXPORT void JNICALL Java_dev_libhdc_HDC_delete_1child
 
 /*
  * Class:     dev_libhdc_HDC
+ * Method:    delete_slice
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_delete_1slice
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     dev_libhdc_HDC
  * Method:    append
  * Signature: (Ldev/libhdc/HDC;)V
  */
 JNIEXPORT void JNICALL Java_dev_libhdc_HDC_append
   (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    insert
+ * Signature: (JLdev/libhdc/HDC;)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_insert
+  (JNIEnv *, jobject, jlong, jobject);
 
 /*
  * Class:     dev_libhdc_HDC

@@ -56,7 +56,9 @@ public class HDC {
     public native void add_child(String path, HDC child);
     public native void set_child(String path, HDC child);
     public native void delete_child(String path);
+    public native void delete_slice(long index);
     public native void append(HDC hdc);
+    public native void insert(long index, HDC hdc);
     public native HDC get(String name);
     public native HDC get(long index);
     public native ArrayList<String> keys();

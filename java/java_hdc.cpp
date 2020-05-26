@@ -122,6 +122,12 @@ void Java_dev_libhdc_HDC_delete_1child(JNIEnv* jEnv, jobject obj, jstring jPath)
     hdc.delete_child(path);
 }
 
+void Java_dev_libhdc_HDC_delete_1slice(JNIEnv* jEnv, jobject obj, jlong jIndex)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.delete_slice((size_t)jIndex);
+}
+
 void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3I(JNIEnv* jEnv,
                                                               jobject obj,
                                                               jobject jShape,
@@ -240,6 +246,14 @@ void Java_dev_libhdc_HDC_append(JNIEnv* jEnv, jobject jObj, jobject jChild)
     auto child = getHDC(jEnv, jChild);
 
     hdc.append(child);
+}
+
+void Java_dev_libhdc_HDC_insert(JNIEnv* jEnv, jobject jObj, jlong jIndex, jobject jChild)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    auto child = getHDC(jEnv, jChild);
+
+    hdc.insert(jIndex,child);
 }
 
 jobject Java_dev_libhdc_HDC_get__Ljava_lang_String_2(JNIEnv* jEnv, jobject jObj, jstring jPath)
