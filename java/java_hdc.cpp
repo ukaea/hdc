@@ -191,6 +191,48 @@ void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3Z(JNIEnv* jEnv,
     set_data(jEnv, obj, jShape, data);
 }
 
+void Java_dev_libhdc_HDC_set_1data__D(JNIEnv* jEnv, jobject obj, jdouble data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__Z(JNIEnv* jEnv, jobject obj, jboolean data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__B(JNIEnv* jEnv, jobject obj, jbyte data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__S(JNIEnv* jEnv, jobject obj, jshort data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__I(JNIEnv* jEnv, jobject obj, jint data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__J(JNIEnv* jEnv, jobject obj, jlong data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
+void Java_dev_libhdc_HDC_set_1data__F(JNIEnv* jEnv, jobject obj, jfloat data)
+{
+    auto hdc = getHDC(jEnv, obj);
+    hdc.set_data(data);
+}
+
 void Java_dev_libhdc_HDC_set_1string(JNIEnv* jEnv, jobject jObj, jstring jStr)
 {
     auto hdc = getHDC(jEnv, jObj);

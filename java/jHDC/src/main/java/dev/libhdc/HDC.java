@@ -72,6 +72,14 @@ public class HDC {
     public native void set_data(ArrayList<Integer> shape, float[] data);
     public native void set_data(ArrayList<Integer> shape, double[] data);
 
+    public native void set_data(boolean data);
+    public native void set_data(byte data);
+    public native void set_data(short data);
+    public native void set_data(int data);
+    public native void set_data(long data);
+    public native void set_data(float data);
+    public native void set_data(double data);
+
     public native void set_string(String str);
 
     public native ByteBuffer get_data();

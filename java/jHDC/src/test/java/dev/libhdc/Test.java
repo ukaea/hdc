@@ -127,6 +127,41 @@ public class Test {
         nodeFloat.set_data(shapeOfFloat, arrayOfFloat);
         tree.add_child("aaa/bbb/float", nodeFloat);
 
+        //Add single double
+        HDC nodeDoubleScalar = new HDC();
+        nodeDoubleScalar.set_data(3.14);
+        tree.add_child("aaa/scalars/double",nodeDoubleScalar);
+
+        //Add single float
+        HDC nodeFloatScalar = new HDC();
+        nodeFloatScalar.set_data(3.14F);
+        tree.add_child("aaa/scalars/float",nodeFloatScalar);
+
+        //Add single long
+        HDC nodeLongScalar = new HDC();
+        nodeLongScalar.set_data(7777777);
+        tree.add_child("aaa/scalars/long",nodeLongScalar);
+
+        //Add single int
+        HDC nodeIntScalar = new HDC();
+        nodeIntScalar.set_data(1111111);
+        tree.add_child("aaa/scalars/int",nodeIntScalar);
+
+        //Add single short
+        HDC nodeShortScalar = new HDC();
+        nodeShortScalar.set_data(4242);
+        tree.add_child("aaa/scalars/short",nodeShortScalar);
+
+        //Add single byte
+        HDC nodeByteScalar = new HDC();
+        nodeByteScalar.set_data(42);
+        tree.add_child("aaa/scalars/byte",nodeByteScalar);
+
+        //Add single boolean
+        HDC nodeBooleanScalar = new HDC();
+        nodeBooleanScalar.set_data(true);
+        tree.add_child("aaa/scalars/boolean",nodeBooleanScalar);
+
         // Add string
         HDC nodeStr = new HDC();
         nodeStr.set_string("test string");

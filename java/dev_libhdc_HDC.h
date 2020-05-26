@@ -185,6 +185,62 @@ JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3D
 
 /*
  * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Z
+  (JNIEnv *, jobject, jboolean);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (B)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__B
+  (JNIEnv *, jobject, jbyte);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (S)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__S
+  (JNIEnv *, jobject, jshort);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__I
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__J
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__F
+  (JNIEnv *, jobject, jfloat);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    set_data
+ * Signature: (D)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__D
+  (JNIEnv *, jobject, jdouble);
+
+/*
+ * Class:     dev_libhdc_HDC
  * Method:    set_string
  * Signature: (Ljava/lang/String;)V
  */
