@@ -169,10 +169,26 @@ JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3D
 
 /*
  * Class:     dev_libhdc_HDC
+ * Method:    set_string
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_dev_libhdc_HDC_set_1string
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     dev_libhdc_HDC
  * Method:    get_data
  * Signature: ()Ljava/nio/ByteBuffer;
  */
 JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_get_1data
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    get_string
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_dev_libhdc_HDC_get_1string
   (JNIEnv *, jobject);
 
 /*

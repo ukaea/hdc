@@ -70,6 +70,8 @@ public class HDC {
     public native void set_data(ArrayList<Integer> shape, float[] data);
     public native void set_data(ArrayList<Integer> shape, double[] data);
 
+    public native void set_string(String str);
+
     public native ByteBuffer get_data();
 
     public INDArray data() {
@@ -130,6 +132,8 @@ public class HDC {
     public void print_uuid() {
         System.out.println(nativeUUID);
     }
+
+    public native String get_string();
 
     public native long get_rank();
     public native ArrayList<Integer> get_shape();

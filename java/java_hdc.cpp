@@ -185,6 +185,21 @@ void Java_dev_libhdc_HDC_set_1data__Ljava_util_ArrayList_2_3Z(JNIEnv* jEnv,
     set_data(jEnv, obj, jShape, data);
 }
 
+void Java_dev_libhdc_HDC_set_1string(JNIEnv* jEnv, jobject jObj, jstring jStr)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    std::string str = jEnv->GetStringUTFChars(jStr, nullptr);
+    hdc.set_string(str);
+}
+
+jstring Java_dev_libhdc_HDC_get_1string(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    std::string str = hdc.as_string();
+    return jEnv->NewStringUTF(str.c_str());
+}
+
+
 jlong Java_dev_libhdc_HDC_get_1rank(JNIEnv* jEnv, jobject jObj)
 {
     auto hdc = getHDC(jEnv, jObj);

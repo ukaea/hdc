@@ -57,54 +57,61 @@ public class Test {
         tree.get("aaa/bbb/int").set_data(shape, array);
 
         tree.add_child("aaa/bbb/bbb", dummy3);
-        // Prepare some data
+
+        // Add longs
         long[] arrayOfLongs = new long[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shapeOfLongs = new ArrayList<>();
         shapeOfLongs.add(arrayOfLongs.length);
-        HDC dataLongs = new HDC();
-        dataLongs.set_data(shapeOfLongs, arrayOfLongs);
-        tree.add_child("aaa/bbb/long", dataLongs);
+        HDC nodeLongs = new HDC();
+        nodeLongs.set_data(shapeOfLongs, arrayOfLongs);
+        tree.add_child("aaa/bbb/long", nodeLongs);
 
-
-        // Prepare some data
+        // Add shorts
         short[] arrayOfShorts = new short[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shapeOfShorts = new ArrayList<>();
         shapeOfShorts.add(arrayOfShorts.length);
-        HDC dataShorts = new HDC();
-        dataShorts.set_data(shapeOfShorts, arrayOfShorts);
-        tree.add_child("aaa/bbb/short", dataShorts);
+        HDC nodeShorts = new HDC();
+        nodeShorts.set_data(shapeOfShorts, arrayOfShorts);
+        tree.add_child("aaa/bbb/short", nodeShorts);
 
-        // Prepare some data
+        // Add bytes
         byte[] arrayOfBytes = new byte[]{ 7, 2, 3, 4 };
         ArrayList<Integer> shapeOfBytes = new ArrayList<>();
         shapeOfBytes.add(arrayOfBytes.length);
-        HDC dataBytes = new HDC();
-        dataBytes.set_data(shapeOfBytes, arrayOfBytes);
-        tree.add_child("aaa/bbb/byte", dataBytes);
+        HDC nodeBytes = new HDC();
+        nodeBytes.set_data(shapeOfBytes, arrayOfBytes);
+        tree.add_child("aaa/bbb/byte", nodeBytes);
 
-        // Prepare some data
+        // Add booleans
         boolean[] arrayOfBoolean = new boolean[]{ true, false, true, false };
         ArrayList<Integer> shapeOfBoolean = new ArrayList<>();
         shapeOfBoolean.add(arrayOfBoolean.length);
-        HDC dataBoolean = new HDC();
-        dataBoolean.set_data(shapeOfBoolean, arrayOfBoolean);
-        tree.add_child("aaa/bbb/boolean", dataBoolean);
+        HDC nodeBoolean = new HDC();
+        nodeBoolean.set_data(shapeOfBoolean, arrayOfBoolean);
+        tree.add_child("aaa/bbb/boolean", nodeBoolean);
 
-        // Prepare some data
+        // Add doubles
         double[] arrayOfDouble = new double[]{ 7e-11, 2.2, 3e2, 4e10 };
         ArrayList<Integer> shapeOfDouble = new ArrayList<>();
         shapeOfDouble.add(arrayOfDouble.length);
-        HDC dataDouble = new HDC();
-        dataDouble.set_data(shapeOfDouble, arrayOfDouble);
-        tree.add_child("aaa/bbb/double", dataDouble);
+        HDC nodeDouble = new HDC();
+        nodeDouble.set_data(shapeOfDouble, arrayOfDouble);
+        tree.add_child("aaa/bbb/double", nodeDouble);
 
-        // Prepare some data
+        // Add floats
         float[] arrayOfFloat = new float[]{ 7e-11F, 2.2F, 3e2F, 4e10F };
         ArrayList<Integer> shapeOfFloat = new ArrayList<>();
         shapeOfFloat.add(arrayOfFloat.length);
-        HDC dataFloat = new HDC();
-        dataFloat.set_data(shapeOfFloat, arrayOfFloat);
-        tree.add_child("aaa/bbb/float", dataFloat);
+        HDC nodeFloat = new HDC();
+        nodeFloat.set_data(shapeOfFloat, arrayOfFloat);
+        tree.add_child("aaa/bbb/float", nodeFloat);
+
+        // Add string
+        HDC nodeStr = new HDC();
+        nodeStr.set_string("test string");
+        tree.add_child("aaa/bbb/string",nodeStr);
+        String str = tree.get("aaa/bbb/string").get_string();
+        System.out.println("String: " + str);
 
         // Ask for some data details, use subtree to shorten the path
         long rank = node.get_rank();
