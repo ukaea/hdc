@@ -5,7 +5,6 @@ import java.util.Arrays;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class Test {
-
     public static void main(String[] args) {
         HDC.init();
 
@@ -140,32 +139,27 @@ public class Test {
         nodeDoubleScalar.set_data(3.14);
         tree.add_child("aaa/scalars/double",nodeDoubleScalar);
 
-        //Add single float
+        //Add scalars
         HDC nodeFloatScalar = new HDC();
         nodeFloatScalar.set_data(3.14F);
         tree.add_child("aaa/scalars/float",nodeFloatScalar);
 
-        //Add single long
         HDC nodeLongScalar = new HDC();
         nodeLongScalar.set_data(7777777);
         tree.add_child("aaa/scalars/long",nodeLongScalar);
 
-        //Add single int
         HDC nodeIntScalar = new HDC();
         nodeIntScalar.set_data(1111111);
         tree.add_child("aaa/scalars/int",nodeIntScalar);
 
-        //Add single short
         HDC nodeShortScalar = new HDC();
         nodeShortScalar.set_data(4242);
         tree.add_child("aaa/scalars/short",nodeShortScalar);
 
-        //Add single byte
         HDC nodeByteScalar = new HDC();
         nodeByteScalar.set_data(42);
         tree.add_child("aaa/scalars/byte",nodeByteScalar);
 
-        //Add single boolean
         HDC nodeBooleanScalar = new HDC();
         nodeBooleanScalar.set_data(true);
         tree.add_child("aaa/scalars/boolean",nodeBooleanScalar);
@@ -220,6 +214,14 @@ public class Test {
 
         HDC nodeIntsScalarC = new HDC(1111111);
         tree.add_child("aaa/constructors_scalar/int", nodeIntsScalarC);
+
+        System.out.println("Scalar byte  : " + nodeBytesScalarC.scalar());
+        System.out.println("Scalar short : " + nodeShortsScalarC.scalar());
+        System.out.println("Scalar int   : " + nodeIntsScalarC.scalar());
+        System.out.println("Scalar long  : " + nodeLongsScalarC.scalar());
+        System.out.println("Scalar float : " + nodeFloatScalarC.scalar());
+        System.out.println("Scalar double: " + nodeDoubleScalarC.scalar());
+        System.out.println("Scalar bool  : " + nodeBooleanScalarC.as_bool());
 
         // Ask for some data details, use subtree to shorten the path
         long rank = node.get_rank();

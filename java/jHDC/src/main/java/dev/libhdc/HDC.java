@@ -112,6 +112,14 @@ public class HDC {
     protected native void create_byte(byte data);
     protected native void create_boolean(boolean data);
 
+    protected native byte as_byte();
+    protected native short as_short();
+    protected native int as_int();
+    protected native long as_long();
+    protected native float as_float();
+    protected native double as_double();
+    public native boolean as_bool();
+
     public native void add_child(String path, HDC child);
     public native void set_child(String path, HDC child);
     public native void delete_child(String path);
@@ -192,6 +200,45 @@ public class HDC {
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");
         }
         return Nd4j.create(data,shape_);
+    }
+
+    public Number scalar() {
+        Number n;
+        switch ((int)get_type()) {
+            case HDC_INT8:
+                n = as_byte();
+                break;
+            case HDC_INT16:
+                n = as_short();
+                break;
+            case HDC_INT32:
+                n = as_int();
+                break;
+            case HDC_INT64:
+                n = as_long();
+                break;
+            case HDC_UINT8:
+                n = as_byte();
+                break;
+            case HDC_UINT16:
+                n = as_short();
+                break;
+            case HDC_UINT32:
+                n = as_int();
+                break;
+            case HDC_UINT64:
+                n = as_long();
+                break;
+            case HDC_FLOAT:
+                n = as_float();
+                break;
+            case HDC_DOUBLE:
+                n = as_double();
+                break;
+            default:
+                throw new HDCException("Cannot return data of type " + get_type_str() + " as Number");
+        }
+        return n;
     }
 
     public String get_uuid() {

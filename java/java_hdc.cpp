@@ -471,6 +471,42 @@ void Java_dev_libhdc_HDC_create_1boolean(JNIEnv* jEnv, jobject jObj, jboolean jD
     create( jEnv, jObj, jData);
 }
 
+jboolean Java_dev_libhdc_HDC_as_1bool(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<bool>();
+}
+jbyte Java_dev_libhdc_HDC_as_1byte(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<byte>();
+}
+jshort Java_dev_libhdc_HDC_as_1short(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<short>();
+}
+jlong Java_dev_libhdc_HDC_as_1long(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<long>();
+}
+jfloat Java_dev_libhdc_HDC_as_1float(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<float>();
+}
+jdouble Java_dev_libhdc_HDC_as_1double(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<double>();
+}
+jint Java_dev_libhdc_HDC_as_1int(JNIEnv* jEnv, jobject jObj)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.as_scalar<int32_t>();
+}
+
 jobject Java_dev_libhdc_HDC_load__Ljava_lang_String_2Ljava_lang_String_2(JNIEnv* jEnv, jclass, jstring jUri, jstring jDataPath)
 {
     std::string uri = jEnv->GetStringUTFChars(jUri, nullptr);
