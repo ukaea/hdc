@@ -292,8 +292,16 @@ JNIEXPORT jobject JNICALL Java_dev_libhdc_HDC_keys
  * Method:    exists
  * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT jboolean JNICALL Java_dev_libhdc_HDC_exists
+JNIEXPORT jboolean JNICALL Java_dev_libhdc_HDC_exists__Ljava_lang_String_2
   (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     dev_libhdc_HDC
+ * Method:    exists
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_dev_libhdc_HDC_exists__J
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     dev_libhdc_HDC

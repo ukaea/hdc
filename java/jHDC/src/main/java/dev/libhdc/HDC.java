@@ -130,6 +130,7 @@ public class HDC {
     public native HDC get(long index);
     public native ArrayList<String> keys();
     public native boolean exists(String path);
+    public native boolean exists(long index);
 
     public native void set_data(ArrayList<Integer> shape, boolean[] data);
     public native void set_data(ArrayList<Integer> shape, byte[] data);
@@ -263,6 +264,10 @@ public class HDC {
 
     public final static native void init();
     public final static native HDC load(String uri);
+
+    public String dumps() {
+        return serialize("json");
+    }
 
     static {
         System.loadLibrary("hdc-jni");

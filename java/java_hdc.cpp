@@ -315,11 +315,17 @@ jobject Java_dev_libhdc_HDC_get__J(JNIEnv* jEnv, jobject jObj, jlong jIndex)
     return newHDC(jEnv, child.as_obj());
 }
 
-jboolean Java_dev_libhdc_HDC_exists(JNIEnv* jEnv, jobject jObj, jstring jPath)
+jboolean Java_dev_libhdc_HDC_exists__Ljava_lang_String_2(JNIEnv* jEnv, jobject jObj, jstring jPath)
 {
     auto hdc = getHDC(jEnv, jObj);
     std::string path = jEnv->GetStringUTFChars(jPath, nullptr);
     return hdc.exists(path);
+}
+
+jboolean Java_dev_libhdc_HDC_exists__J(JNIEnv* jEnv, jobject jObj, jlong index)
+{
+    auto hdc = getHDC(jEnv, jObj);
+    return hdc.exists((size_t)index);
 }
 
 jobject Java_dev_libhdc_HDC_get_1data(JNIEnv* jEnv, jobject jObj)
@@ -328,7 +334,7 @@ jobject Java_dev_libhdc_HDC_get_1data(JNIEnv* jEnv, jobject jObj)
     return jEnv->NewDirectByteBuffer(hdc.as_void_ptr(), hdc.get_datasize());
 }
 
-jstring Java_dev_libhdc_HDC_serialize__(JNIEnv* jEnv, jobject jObj, jstring jProtocol)
+jstring Java_dev_libhdc_HDC_serialize(JNIEnv* jEnv, jobject jObj, jstring jProtocol)
 {
     auto hdc = getHDC(jEnv, jObj);
     std::string protocol = jEnv->GetStringUTFChars(jProtocol, nullptr);

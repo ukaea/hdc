@@ -19,10 +19,10 @@
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.6.2</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
@@ -57,6 +57,9 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.22.1</version>
+          <configuration>
+            <argLine>-Djava.library.path=../../build/java</argLine>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
@@ -82,4 +85,5 @@
       </plugins>
     </pluginManagement>
   </build>
+
 </project>

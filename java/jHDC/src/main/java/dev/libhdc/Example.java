@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-public class Test {
+public class Example {
     public static void main(String[] args) {
         HDC.init();
 
@@ -93,31 +93,6 @@ public class Test {
         HDC nodeInts = new HDC();
         nodeInts.set_data(shapeOfInts, arrayOfInts);
         tree.add_child("aaa/bbb/int", nodeInts);
-
-        // Add shorts
-        short[] arrayOfShorts = new short[]{ 7, 2, 3, 4 };
-        ArrayList<Integer> shapeOfShorts = new ArrayList<>();
-        shapeOfShorts.add(arrayOfShorts.length);
-        HDC nodeShorts = new HDC();
-        nodeShorts.set_data(shapeOfShorts, arrayOfShorts);
-        tree.add_child("aaa/bbb/short", nodeShorts);
-
-        // Add bytes
-        byte[] arrayOfBytes = new byte[]{ 7, 2, 3, 4 };
-        ArrayList<Integer> shapeOfBytes = new ArrayList<>();
-        shapeOfBytes.add(arrayOfBytes.length);
-        HDC nodeBytes = new HDC();
-        nodeBytes.set_data(shapeOfBytes, arrayOfBytes);
-        tree.add_child("aaa/bbb/byte", nodeBytes);
-
-        // Add booleans
-        boolean[] arrayOfBoolean = new boolean[]{ true, false, true, false };
-        ArrayList<Integer> shapeOfBoolean = new ArrayList<>();
-        shapeOfBoolean.add(arrayOfBoolean.length);
-        HDC nodeBoolean = new HDC();
-        nodeBoolean.set_data(shapeOfBoolean, arrayOfBoolean);
-        tree.add_child("aaa/bbb/boolean", nodeBoolean);
-
         // Add doubles
         double[] arrayOfDouble = new double[]{ 7e-11, 2.2, 3e2, 4e10 };
         ArrayList<Integer> shapeOfDouble = new ArrayList<>();
@@ -125,44 +100,6 @@ public class Test {
         HDC nodeDouble = new HDC();
         nodeDouble.set_data(shapeOfDouble, arrayOfDouble);
         tree.add_child("aaa/bbb/double", nodeDouble);
-
-        // Add floats
-        float[] arrayOfFloat = new float[]{ 7e-11F, 2.2F, 3e2F, 4e10F };
-        ArrayList<Integer> shapeOfFloat = new ArrayList<>();
-        shapeOfFloat.add(arrayOfFloat.length);
-        HDC nodeFloat = new HDC();
-        nodeFloat.set_data(shapeOfFloat, arrayOfFloat);
-        tree.add_child("aaa/bbb/float", nodeFloat);
-
-        //Add single double
-        HDC nodeDoubleScalar = new HDC();
-        nodeDoubleScalar.set_data(3.14);
-        tree.add_child("aaa/scalars/double",nodeDoubleScalar);
-
-        //Add scalars
-        HDC nodeFloatScalar = new HDC();
-        nodeFloatScalar.set_data(3.14F);
-        tree.add_child("aaa/scalars/float",nodeFloatScalar);
-
-        HDC nodeLongScalar = new HDC();
-        nodeLongScalar.set_data(7777777);
-        tree.add_child("aaa/scalars/long",nodeLongScalar);
-
-        HDC nodeIntScalar = new HDC();
-        nodeIntScalar.set_data(1111111);
-        tree.add_child("aaa/scalars/int",nodeIntScalar);
-
-        HDC nodeShortScalar = new HDC();
-        nodeShortScalar.set_data(4242);
-        tree.add_child("aaa/scalars/short",nodeShortScalar);
-
-        HDC nodeByteScalar = new HDC();
-        nodeByteScalar.set_data(42);
-        tree.add_child("aaa/scalars/byte",nodeByteScalar);
-
-        HDC nodeBooleanScalar = new HDC();
-        nodeBooleanScalar.set_data(true);
-        tree.add_child("aaa/scalars/boolean",nodeBooleanScalar);
 
         // Add string
         HDC nodeStr = new HDC();
@@ -174,54 +111,17 @@ public class Test {
         //test constructors
         HDC nodeDoubleC = new HDC(shapeOfDouble, arrayOfDouble);
         tree.add_child("aaa/constructors/double", nodeDoubleC);
-
-        HDC nodeLongsC = new HDC(shapeOfLongs, arrayOfLongs);
-        tree.add_child("aaa/constructors/long", nodeLongsC);
-
-        HDC nodeShortsC = new HDC(shapeOfShorts, arrayOfShorts);
-        tree.add_child("aaa/constructors/short", nodeShortsC);
-
-        HDC nodeBytesC = new HDC(shapeOfBytes, arrayOfBytes);
-        tree.add_child("aaa/constructors/byte", nodeBytesC);
-
-        HDC nodeBooleanC = new HDC(shapeOfBoolean, arrayOfBoolean);
-        tree.add_child("aaa/constructors/boolean", nodeBooleanC);
-
-        HDC nodeFloatC = new HDC(shapeOfFloat, arrayOfFloat);
-        tree.add_child("aaa/constructors/float", nodeFloatC);
-
         HDC nodeIntsC = new HDC(shapeOfInts, arrayOfInts);
         tree.add_child("aaa/constructors/int", nodeIntsC);
 
         //test constructors_scalar
         HDC nodeDoubleScalarC = new HDC(3.14);
         tree.add_child("aaa/constructors_scalar/double", nodeDoubleScalarC);
-
-        HDC nodeLongsScalarC = new HDC(7777777);
-        tree.add_child("aaa/constructors_scalar/long", nodeLongsScalarC);
-
-        HDC nodeShortsScalarC = new HDC(4242);
-        tree.add_child("aaa/constructors_scalar/short", nodeShortsScalarC);
-
-        HDC nodeBytesScalarC = new HDC(42);
-        tree.add_child("aaa/constructors_scalar/byte", nodeBytesScalarC);
-
-        HDC nodeBooleanScalarC = new HDC(false);
-        tree.add_child("aaa/constructors_scalar/boolean", nodeBooleanScalarC);
-
-        HDC nodeFloatScalarC = new HDC(3.14F);
-        tree.add_child("aaa/constructors_scalar/float", nodeFloatScalarC);
-
         HDC nodeIntsScalarC = new HDC(1111111);
         tree.add_child("aaa/constructors_scalar/int", nodeIntsScalarC);
 
-        System.out.println("Scalar byte  : " + nodeBytesScalarC.scalar());
-        System.out.println("Scalar short : " + nodeShortsScalarC.scalar());
         System.out.println("Scalar int   : " + nodeIntsScalarC.scalar());
-        System.out.println("Scalar long  : " + nodeLongsScalarC.scalar());
-        System.out.println("Scalar float : " + nodeFloatScalarC.scalar());
         System.out.println("Scalar double: " + nodeDoubleScalarC.scalar());
-        System.out.println("Scalar bool  : " + nodeBooleanScalarC.as_bool());
 
         // Ask for some data details, use subtree to shorten the path
         long rank = node.get_rank();
@@ -248,8 +148,6 @@ public class Test {
         HDC node2 = tree2.get("aaa/bbb/int");
         INDArray out_data2 = node2.data();
         System.out.println("Loaded data: " + out_data2);
-
-
     }
 
 }
