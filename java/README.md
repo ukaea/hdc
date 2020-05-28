@@ -31,7 +31,7 @@ mvn package
 
 ## Running
 
-You can run the tests with:
+You can run the tests with (shorter way available below):
 
 ```bash
 export ND4J_JARS=~/.m2/repository/org/nd4j/nd4j-native-api/1.0.0-beta7/nd4j-native-api-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/nd4j-api/1.0.0-beta7/nd4j-api-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/nd4j-common/1.0.0-beta7/nd4j-common-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/jackson/1.0.0-beta7/jackson-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/nd4j-native-platform/1.0.0-beta7/nd4j-native-platform-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/protobuf/1.0.0-beta7/protobuf-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-android-arm64.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-linux-ppc64le.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-android-x86_64.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-android-x86.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-windows-x86_64.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-linux-armhf.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-macosx-x86_64.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-linux-x86_64.jar:~/.m2/repository/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-android-arm.jar:~/.m2/repository/org/nd4j/guava/1.0.0-beta7/guava-1.0.0-beta7.jar
