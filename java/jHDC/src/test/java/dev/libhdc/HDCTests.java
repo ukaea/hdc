@@ -9,6 +9,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.api.buffer.DataType;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class HDCTests {
 
@@ -49,6 +50,12 @@ public class HDCTests {
         tree.add_child("set/aaa", new HDC());
         tree.set_child("set", new HDC());
         assert(!tree.exists("set/aaa"));
+
+        // test children() method
+        for (Map.Entry<String, HDC> entry : tree.children().entrySet())  {
+            assert(tree.exists(entry.getKey()));
+        }
+
     }
 
     @Test
@@ -68,6 +75,13 @@ public class HDCTests {
         assertEquals(list.get(1L).get_string(),"0");
         list.delete_slice(3L);
         assertEquals(list.get(3L).get_string(),"3");
+
+        // Test slices() method
+        long i=0;
+        for (HDC slice : list.slices()) {
+            assertEquals(slice.get_string(),list.get(i).get_string());
+            i++;
+        }
     }
 
     @Test

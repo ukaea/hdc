@@ -7,7 +7,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 //import org.nd4j.linalg.api.buffer.factory.DefaultDataBufferFactory;
 import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.buffer.DataType;
-
+import java.util.LinkedHashMap;
 // import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -267,6 +267,20 @@ public class HDC {
 
     public String dumps() {
         return serialize("json");
+    }
+
+    public LinkedHashMap<String,HDC> children() {
+        LinkedHashMap<String,HDC> children_ = new LinkedHashMap<String,HDC>();
+        for (String key : keys()) {
+            children_.put(key,get(key));
+        }
+        return children_;
+    }
+
+    public ArrayList<HDC> slices() {
+        ArrayList<HDC> slices_ = new ArrayList<HDC>();
+        for (long i=0; i<get_shape().get(0); i++) slices_.add(get(i));
+        return slices_;
     }
 
     static {

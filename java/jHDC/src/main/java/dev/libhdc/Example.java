@@ -3,6 +3,11 @@ import java.util.ArrayList;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Iterator;
+
 
 public class Example {
     public static void main(String[] args) {
@@ -18,6 +23,12 @@ public class Example {
         tree.add_child("aaa/bbb/eee", dummy2);
         HDC dummy3 = new HDC();
         tree.add_child("aaa/bbb/bbb", dummy3);
+
+        // Test children() method
+        for (Map.Entry<String, HDC> entry : tree.children().entrySet())  {
+            System.out.println("-- dumping " + entry.getKey());
+            entry.getValue().dump();
+        }
 
         System.out.println("root keys");
         for (String key : tree.keys()) {
@@ -76,6 +87,11 @@ public class Example {
         n.set_string("7");
         list.insert(0,n);
         list.delete_slice(3L);
+        long i = 0;
+        for (HDC slice : list.slices()) {
+            System.out.println("slice["+ (i++) +"] = " + slice.get_string());
+        }
+
         tree.add_child("aaa/list",list);
 
         // Add longs
