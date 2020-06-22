@@ -71,7 +71,7 @@ options = dict(
     ''',
     package_data={'pyhdc': ['templates/*.j2']},
     cmdclass={'test': PyTest},
-    version='0.14.0',
+    version='0.15.0',
 )
 
 setup(**options)
