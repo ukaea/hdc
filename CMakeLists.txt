@@ -33,7 +33,7 @@ if( CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.9 )
     FATAL_ERROR
 
     "
-    I require at least gcc-4.9. Please, obtain higher version of gcc toolset and run me again after exporting path to a newer compiler.
+    HDC requires at least gcc-4.9. Please, obtain higher version of gcc toolset and run me again after exporting path to a newer compiler.
 
     For example:
 
