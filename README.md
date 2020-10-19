@@ -12,6 +12,10 @@ The bitbucket repo is just a read-only mirror.
 
 The access to the master repo can be requested via email *fridrich at ipp.cas.cz*
 
+API documentation
+=================
+The API documentation is available [here.](http://compass-tokamak.pages.tok.ipp.cas.cz/HDC/)
+
 Building instructions
 =====================
 
@@ -42,6 +46,7 @@ Currently all commits are automatically tested against:
 
  - Ubuntu 16.04 (xenial)
  - Ubuntu 18.04 (bionic)
+ - Ubuntu 20.04 (focal)
  - Fedora 31
  - Centos 7
 
