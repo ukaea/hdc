@@ -8,12 +8,15 @@ ENV LANG=C.UTF-8
 ENV TZ=Europe/Prague
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Switch to Czech mirror as a workaround for some missing package.
+RUN sed -i 's/archive/cz.archive/g' /etc/apt/sources.list
+
 # Update & upgrade
 RUN apt-get update
 RUN apt-get -y upgrade
 
 # Install some dependencies
-RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales doxygen python3-sphinx python3-breathe
+RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales doxygen python3-sphinx python3-breathe cython3
 
 # Download, build and install MDBM
 WORKDIR /tmp
@@ -39,6 +42,9 @@ COPY requirements.txt /tmp
 COPY dev-requirements.txt /tmp
 RUN pip3 install -r /tmp/requirements.txt
 RUN pip3 install -r /tmp/dev-requirements.txt
+RUN pip3 install exhale
+RUN pip3 install sphinx-fortran
+RUN pip3 install m2r
 
 # Final cleanup
 RUN apt-get clean

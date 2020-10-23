@@ -1,8 +1,33 @@
-# Building on ITM Gateway How-to
+Building on specific machines
+=============================
+
+Build on ITER
+-------------
+
+Setup UDA & run test
+```
+source setup.env
+bash test_uda.cpp
+./test.x
+```
+Build HDC and run it
+```
+cd ~/projects/hdc
+mkdir build
+module load Boost/1.66.0-foss-2018a MDSplus/7.7.12-intel-2018a hdf5/1.8.15 openssl/1.0.2g postgresql/9.4.4 libmemcached/1.0.18
+module load CMake/3.10.2-GCCcore-6.4.0
+module load netCDF-Fortran/4.4.4-intel-2018a
+cmake .. -DCMAKE_INSTALL_PREFIX=../install -DENABLE_UDA=ON
+make -j install
+../install/bin/hdc_test
+```
+
+Building on ITM Gateway How-to
+------------------------------
 
 This shows how to build HDC with MDBM support on ITM gateway.
 
-## Load modules (GCC)
+Load modules (GCC)
 
 ```bash
 module load cmake/3.5.2
@@ -13,7 +38,7 @@ module load openmpi/1.10.7--gnu--6.1.0
 module load boost/1.61.0--gnu--6.1.0
 ```
 
-## Load modules (Intel compiler suite)
+Load modules (Intel compiler suite)
 
 ```bash
 module load cmake/3.5.2
@@ -25,8 +50,7 @@ module load hdf5/1.8.17--intelmpi--2017--binary
 export CC=mpiicc CXX=mpiicpc FC=mpiifort
 ```
 
-## Build MDBM backend (optional)
-Clone **MDBM**:
+Build MDBM backend (optional)
 
 ```
 git clone https://github.com/yahoo/mdbm
@@ -50,8 +74,7 @@ In order to use MDBM, please, append this to `cmake` command line:
 -DMDBM_LIBRARY=$MDBM_PREFIX/lib64 -DMDBM_INCLUDE_DIR=$MDBM_PREFIX/include
 ```
 
-## Clone project
-
+Build HDC
 ```
 git clone https://bitbucket.org/compass-tokamak/hdc.git
 cd hdc
@@ -60,8 +83,7 @@ Optionally checkout develop branch:
 ```
 git checkout develop
 ```
-
-## Build & install
+Build & install
 ```
 mkdir build
 cd build
@@ -76,19 +98,15 @@ And finally build&install:
 make -j install
 ```
 
-## Test
-
+Test
 ```
 make test
 ```
 
-# Build Python bindings (optional)
-
-Load some Python
+Build Python bindings (optional)
 ```
 module load itm-python/3.6
 ```
-
 We will use virtual env here, butr it can be skipped. Assuming we are still in `hdc/build` directory and have `python3` interpreter:
 ```
 cd python
@@ -100,8 +118,7 @@ python3 -m pip install -r dev-requirements.txt
 pytest
 ```
 
-## Test hdc-binder
-
+Test hdc-binder
 ```
 cd tests_binder
 # we we do not have C.UTF-8 locale:

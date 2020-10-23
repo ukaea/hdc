@@ -36,22 +36,16 @@ void hdc_print_info(hdc_t tree UNUSED)
     return;
 }
 
-void hdc_delete_ptr(void* tree UNUSED)
+void hdc_add_child(hdc_t tree, const char* path, hdc_t child)
 {
-    std::cerr << "hdc_delete_ptr(): I do nothing TODO: remove me...\n";
-    return;
-}
-
-void hdc_add_child(hdc_t tree, const char* path, hdc_t n)
-{
-    HDC node(n);
+    HDC node(child);
     HDC(tree).add_child(path, node);
     return;
 }
 
-void hdc_set_child(hdc_t tree, const char* path, hdc_t n)
+void hdc_set_child(hdc_t tree, const char* path, hdc_t child)
 {
-    HDC node(n);
+    HDC node(child);
     HDC(tree).set_child(path, node);
     return;
 }
@@ -72,21 +66,21 @@ hdc_t hdc_get_slice(hdc_t tree, const char* path, size_t i)
     return HDC(tree).get(path).get(i).as_obj();
 }
 
-void hdc_set_slice(hdc_t tree, size_t i, hdc_t n)
+void hdc_set_slice(hdc_t tree, size_t i, hdc_t child)
 {
-    HDC node(n);
+    HDC node(child);
     HDC(tree).set_child(i,node);
 }
 
-void hdc_insert_slice(hdc_t tree, size_t i, hdc_t n)
+void hdc_insert_slice(hdc_t tree, size_t i, hdc_t child)
 {
-    HDC node(n);
+    HDC node(child);
     HDC(tree).insert(i,node);
 }
 
-void hdc_append_slice(hdc_t tree, hdc_t n)
+void hdc_append_slice(hdc_t tree, hdc_t child)
 {
-    HDC node(n);
+    HDC node(child);
     HDC(tree).append(node);
 }
 

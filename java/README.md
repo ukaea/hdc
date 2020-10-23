@@ -1,14 +1,16 @@
-# Java Wrapper
+jHDC
+====
 
-## Prerequisities
+Prerequisities
+--------------
 ```
 apt -y install maven
 ```
+The following howto assumes you have installed hdc with ```-DENABLE_JAVA=ON``` option.
 
-
-## Building
-
-Current the c++ header is checked into the repo but this should be generated in the build by
+Building
+--------
+Currently the c++ header is checked into the repo but this should be generated in the build by
 
 ```bash
 cd java
@@ -23,13 +25,14 @@ The environment on ubuntu bionic can be set up by:
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
 ```
-The actual buid is done by:
+The actual build is done by:
 ```bash
 cd jHDC
 mvn package
 ```
 
-## Running
+Running
+-------
 
 You can run the example with (shorter way available below):
 
@@ -49,4 +52,9 @@ Lazy people (like me) can try the following. Bear in the mind that here we assum
 ```bash
 export ALL_JARS=$(find ~/.m2/repository -iname "*.jar" -printf "%p:")
 java -cp "$HDC_PREFIX/java/jHDC/target/jHDC-0.15.0.jar:$HDC_PREFIX/java/jHDC/target/test-classes:$ALL_JARS" -Djava.library.path=$HDC_PREFIX/build/java Example
+```
+
+Building doc
+```
+mvn site
 ```
