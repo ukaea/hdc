@@ -1,5 +1,5 @@
-Some HDC benchmarking results
-=============================
+Benchmark results
+=================
 
 We use [Google Benchmark](https://github.com/google/benchmark) library for benchmarking. Simirarly to the unit tests, the neccessary library is automatically downloaded and installed using cmake. The benchmark executable can be found and run in cmake `cmake_build_dir/bin/benchmark_hdc`, sources can be found in `benchmark` directory.
 

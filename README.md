@@ -1,4 +1,4 @@
-HDC - Hierarchical Dynamic Containers                         {#mainpage}
+HDC - Hierarchical Dynamic Containers {#mainpage}
 =====================================
 
 HDC is tiny library for exchanging hierarchical data (arrays of structures) in shared memory between multiple programming languages, currently supporting C, C++, Python, Fortran and MATLAB.
@@ -55,7 +55,7 @@ But HDC should work on any not-too-obsolette distro. If you face any problems, p
 
 Building HDC
 ------------
-For building on ITM gateway, please, follow [these instructions](docs/BUILDING_ON_ITM_GATEWAY.md).
+Machine specific build instructions are available [here](docs/MACHINE_SPECIFIC_BUILD_INSTRUCTIONS.md).
 
 There are several cmake options. The most important are:
 

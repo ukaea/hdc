@@ -79,6 +79,11 @@ test-pages:
   script:
     - mkdir build
     - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=OFF
+    - make -j5 install
+    - cd python
+    - python3 setup.py build_ext --inplace
+    - cd ..
     - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=ON
     - make Sphinx
     - mv docs/sphinx ../public
@@ -92,6 +97,11 @@ pages:
   script:
     - mkdir build
     - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=OFF
+    - make -j5 install
+    - cd python
+    - python3 setup.py build_ext --inplace
+    - cd ..
     - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=ON
     - make Sphinx
     - mv docs/sphinx ../public
