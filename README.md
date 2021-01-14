@@ -156,6 +156,55 @@ Basic ideas
   + Array node - the node has at least one children indexed by integer. It can only store subtrees indexed by integer.
   + Data node - it only can be terminal node, it stores some data, currently char* buffer.
 
+Path syntax
+-----------
+If working directly with HDC tree (i.e.: methods like `get()`, `put()`, `set()`)
+The path string is internally converted to
+```
+hdc_path_t = std::list<hdc_index_t>
+```
+type where
+```
+hdc_index_t = boost::variant<size_t, std::string>
+```
+type represents single level of path. Therefore every tree node can be refferenced by:
+
+- **empty string** representing identity, e.g.: `"//"` is ommited unless part of protocol specification like `"json://"`
+- **key** (string) referencing children of hash map/dict
+- **index** (non-negative integer) for referencing value in list/array
+Individual keys are separated by slash, indexes are surrounded by brakets.
+
+For example the following string
+```
+"aaa/bbb//ccc[5]/ddd"
+```
+represents the following node within the HDC tree:
+```
+"aaa" -> "bbb" -> "ccc" -> 5 -> "ddd"
+```
+
+For loading from or saving to outside HDC tree (methods `load()` and `save()` ), one has to also specify protocol and file path. Is such case there are two ekvivalent options:
+
+- protocol+file path and the path within the file data are concatenated using pipe character `|`: `HDC n = HDC::load("protocol://path/to/file|path/within/the/file")`
+
+-  two arguments are provided: `HDC n = HDC::load("protocol://path/to/file", "path/within/the/file")`
+
+Internally the first option calls the second one, so usage of the second form spares some method calls.
+
+The supported protocols are:
+
+- **json**
+- **json_string**
+- **json_verbose**
+- **uda**
+- **uda_new**
+- **hdf5**
+- **hdc_file**
+- **hdc_string**
+- **flatbuffers**
+- **s3**
+
+
 
 Examples
 ========
