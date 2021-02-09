@@ -29,10 +29,6 @@
 #include "hdc_utils.h"
 #include "serialization/hdc_serializer.h"
 
-#ifdef _USE_HDF5
-#  include <H5Cpp.h>
-#endif
-
 // #define DEBUG
 
 using namespace std;
