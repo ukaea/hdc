@@ -1,6 +1,15 @@
 #pragma once
 
 #include "hdc_serializer.h"
+#include <H5Cpp.h>
+#include <hdf5.h>
+#if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 12))
+#define HDC_HDF5_ADDR_T haddr_t
+#define HDC_HDF5_ADDR_NAME addr
+#else
+#define HDC_HDF5_ADDR_T H5O_token_t
+#define HDC_HDF5_ADDR_NAME token
+#endif
 
 namespace hdc {
 namespace serialization {
