@@ -61,7 +61,7 @@ struct h5_read_opdata {
     {}
 };
 
-void write_node(const HDC& h, H5File* file, const std::string& path);
+void write_node(const HDC& h, H5File& file, const std::string& path);
 hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path);
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& dest);
 int h5_group_check(h5_read_opdata* od, HDC_HDF5_ADDR_T target_addr);
@@ -110,13 +110,10 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
                                                   << hdf5_dset_id);
             dest.set_type(HDC_LIST);
             for (size_t i = 0; i < nelems; i++) {
-                // C function H5Rdereference renamed to H5Rdereference1 and deprecated in this release.
-                // https://support.hdfgroup.org/HDF5/doc/RM/RM_H5R.html#Reference-Dereference1
 #if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 10))
                 auto dsetv_id = H5Rdereference(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
 #else
-                // TODO Use the new H5Rdereference API
-                auto dsetv_id = H5Rdereference1(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
+                auto dsetv_id = H5Rdereference2(hdf5_dset_id, H5P_DEFAULT, H5R_OBJECT, &ref_out[i]);
 #endif
                 HDC h;
                 hdf5_tree_to_hdc(dsetv_id, "", h);
@@ -495,7 +492,12 @@ PredType HDCtype2HDF5(hdc_type_t t)
     return PredType::NATIVE_UINT_LEAST32;
 }
 
-void write_node(const HDC& h, H5File* file, const std::string& path)
+bool pathExists(hid_t id, const std::string& path)
+{
+  return H5Lexists( id, path.c_str(), H5P_DEFAULT ) > 0;
+}
+
+void write_node(const HDC& h, H5File& file, const std::string& path)
 {
     auto buffer = h.get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -512,25 +514,22 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
         if (header->type == HDC_STRUCT) {
             hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
-                auto group = new Group(file->createGroup(path));
+                Group group(file.createGroup(path));
                 for (const auto& child : children->get<1>()) {
                     auto key = child.key.c_str();
                     auto uuid = child.address;
                     write_node(HDC(hdc_global.storage, uuid), file, path + "/" + key);
                 }
-                delete group;
             }
             return;
         } else if (header->type == HDC_LIST) {
             hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
                 Group ref_group;
-                try {
-                    Exception::dontPrint(); //TODO: Do this just temporarily???
-                    ref_group = file->openGroup(ref_group_name);
-                } catch (FileIException& e) {
-                    ref_group = file->createGroup(ref_group_name);
-                }
+                if (pathExists(file.getId(), ref_group_name))
+                    ref_group=file.openGroup(ref_group_name);
+                else
+                    ref_group=file.createGroup(ref_group_name);
                 size_t n_child = children->size();
                 auto wbuf = new hobj_ref_t[n_child];
                 size_t i = 0;
@@ -541,7 +540,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
                     auto _uuid = hh.get_uuid_str();
                     std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                     write_node(hh, file, full_path.c_str());
-                    auto ret = H5Rcreate(&wbuf[i], file->getId(), full_path.c_str(), H5R_OBJECT, -1);
+                    auto ret = H5Rcreate(&wbuf[i], file.getId(), full_path.c_str(), H5R_OBJECT, -1);
                     if (ret < 0) {
                         throw HDCException("Could not create refference to " + full_path);
                     }
@@ -551,7 +550,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
                 hsize_t ref_dims[1];
                 ref_dims[0] = n_child;
                 DataSpace ref_dataspace(1, ref_dims);
-                DataSet ref_dataset = file->createDataSet(DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace);
+                DataSet ref_dataset = file.createDataSet(DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace);
                 ref_dataset.write(wbuf, PredType::STD_REF_OBJ);
                 delete[] wbuf;
             }
@@ -560,7 +559,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
             hsize_t dims1[] = { 1 };
             DataSpace edataspace(1, dims1);
             double edata[] = { NAN };
-            DataSet dataset = file->createDataSet(DATASET_NAME, PredType::NATIVE_DOUBLE, edataspace);
+            DataSet dataset = file.createDataSet(DATASET_NAME, PredType::NATIVE_DOUBLE, edataspace);
             dataset.write(edata, PredType::NATIVE_DOUBLE);
         } else {
             hsize_t rank = header->rank;
@@ -570,7 +569,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
             };
             DataSpace dataspace(rank, dimsf);
             auto t = HDCtype2HDF5(header->type);
-            DataSet dataset = file->createDataSet(DATASET_NAME, t, dataspace);
+            DataSet dataset = file.createDataSet(DATASET_NAME, t, dataspace);
             dataset.write(data, t);
             return;
         }
@@ -644,7 +643,7 @@ void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::st
     try {
         H5std_string h5_filename(filename);
         H5File file(h5_filename, H5F_ACC_TRUNC);
-        write_node(hdc, &file, "data");
+        write_node(hdc, file, "data");
     } catch (FileIException& error) {
 #ifdef H5_VERSION_GE
     #if H5_VERSION_GE(1, 8, 13)
