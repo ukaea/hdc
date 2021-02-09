@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:focal-20210119
 
 MAINTAINER David Fridrich <fridrich@ipp.cas.cz>
 
@@ -16,7 +16,7 @@ RUN apt-get update
 RUN apt-get -y upgrade
 
 # Install some dependencies
-RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales doxygen python3-sphinx python3-breathe cython3
+RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales doxygen python3-sphinx python3-breathe cython3 curl
 
 # Download, build and install MDBM
 WORKDIR /tmp
@@ -46,7 +46,20 @@ RUN pip3 install exhale
 RUN pip3 install sphinx-fortran
 RUN pip3 install m2r
 
+# Download, build and install HDF5-1.12
+WORKDIR /opt
+RUN curl 'https://hdf-wordpress-1.s3.amazonaws.com/wp-content/uploads/manual/HDF5/HDF5_1_12_0/source/hdf5-1.12.0.tar.gz' -o /opt/hdf5-1.12.0.tar.gz
+RUN tar xzf /opt/hdf5-1.12.0.tar.gz
+RUN mkdir hdf5-1.12.0/build
+WORKDIR hdf5-1.12.0/build
+RUN cmake .. -DCMAKE_INSTALL_PREFIX=/opt/hdf
+RUN make install
+
 # Final cleanup
+WORKDIR /
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 RUN rm -rf /tmp/*
+RUN rm -rf /opt/hdf5-1.12.0
+RUN rm -rf /opt/hdf5-1.12.0.tar.gz
+
