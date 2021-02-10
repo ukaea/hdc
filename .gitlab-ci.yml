@@ -13,6 +13,21 @@ test-hdc-focal:
     - cd tests_binder
     - ./run
 
+test-hdc-focal-hdf5-1.12:
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
+  script:
+    - mkdir build
+    - cd build
+    - HDF5_ROOT=/opt/hdf cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - ./run
+
 test-hdc-bionic:
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-bionic
   script:
