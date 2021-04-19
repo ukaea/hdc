@@ -3,7 +3,7 @@ test-hdc-focal:
   script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_JAVA=ON
     - make -j
     - make test
     - make install
@@ -18,7 +18,7 @@ test-hdc-focal-hdf5-1.12:
   script:
     - mkdir build
     - cd build
-    - HDF5_ROOT=/opt/hdf cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+    - HDF5_ROOT=/opt/hdf cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_JAVA=ON
     - make -j
     - make test
     - make install
