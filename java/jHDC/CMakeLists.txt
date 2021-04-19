@@ -15,6 +15,7 @@ if (NOT JAR_WITH_DEPENDENCIES)
         COMMAND ${MVN_EXECUTABLE} ${MVN_ARGS} package
     )
     add_custom_target(jar ALL DEPENDS ${JHDC_JAR_NAME})
+    add_dependencies(jar hdc-jni)
     # install the resulting jar
     install(FILES ${JHDC_JAR_NAME} DESTINATION ${JAR_INSTALL_PREFIX})
 
@@ -33,6 +34,7 @@ else()
         COMMAND ${MVN_EXECUTABLE} compile assembly:single -Djavacpp.platform=linux-x86_64
     )
     add_custom_target(jar-with-dependencies ALL DEPENDS ${JHDC_JAR_NAME})
+    add_dependencies(jar-with-dependencies hdc-jni)
     # install the resulting jar
     install(FILES ${JHDC_JAR_NAME} DESTINATION ${JAR_INSTALL_PREFIX})
 endif() # JAR_WITH_DEPENDENCIES
