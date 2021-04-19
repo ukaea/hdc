@@ -111,6 +111,32 @@ The example of build follows:
  ```
 You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 
+Building java HDC bindings (jHDC)
+---------------------------------
+
+jHDC build requires  `maven` and `openjdk-8-jdk-headless` or another JDK (not tested). Please ensure you have these installed.
+There are several cmake options for jHDC:
+
+  - `-DENABLE_JAVA` Enable JAVA support (`OFF` by default).
+  - `-DJAR_INSTALL_PREFIX` Where to install resulting jar(s) (Defaults to `${CMAKE_INSTALL_PREFIX}/share/java`).
+  - `-DINSTALL_JAVA_DEPENDENCIES` Whether to install also dependencies (`OFF` by default). If enabled, all jars are put into `$JAR_INSTALL_PREFIX`.
+  - `-DJAR_WITH_DEPENDENCIES` Build jar with all dependencies bundled inside. The result can be quite large, but no dependencies are needed. (`OFF` by default).
+  - `-DJAVACPP_PLATFORM` Build bundled jar with only specified arch (`linux-x86_64` by default). This reduces the jar size from ~460MB to ~80MB. Anybody loving huge jars can set empty string here. [Detailed description here.](https://github.com/bytedeco/javacpp-presets/wiki/Reducing-the-Number-of-Dependencies)
+
+Clearly, not all combinations of these options make sense, but making some of them dependent does not make sense either.
+
+Usually you would want either:
+```
+-DENABLE_JAVA=ON -DINSTALL_JAVA_DEPENDENCIES=ON --DJAR_WITH_DEPENDENCIES=OFF
+```
+or:
+```
+-DENABLE_JAVA=ON -DJAR_WITH_DEPENDENCIES=ON -DJAVACPP_PLATFORM=linux-x86_64
+```
+depending on your preferences.
+
+How to run jHDC example is described [here.](java/README.md)
+
 Building using IntelStudio
 --------------------------
 ```

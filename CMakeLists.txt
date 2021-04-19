@@ -149,6 +149,7 @@ option( BUILD_MDBM_PLUGIN "Enables MDBM storage plugin." ON )
 option( BUILD_OWN_MDBM "Build own MDBM" OFF )
 option( INSTALL_JAVA_DEPENDENCIES "Install jHDC JAR dependencies" OFF )
 option( JAR_WITH_DEPENDENCIES "Bundle all dependencies into a single jar - the result can be large (~80 MB)" OFF )
+set( JAVACPP_PLATFORM "linux-x86_64" CACHE STRING "Strip unnecessary native libraries from bundled jar. Only relevant when JAR_WITH_DEPENDENCIES=ON" )
 set( JAR_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/share/java" CACHE STRING "JAR install prefix" )
 
 if( GOPTION )

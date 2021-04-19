@@ -1,7 +1,7 @@
 find_program(MVN_EXECUTABLE mvn)
 # we could use REQUIRED instead, but cmake 3.18 is imho quite new:
 if (NOT MVN_EXECUTABLE)
-    message(ERROR "\"mvn\" command not found")
+    message(ERROR "\"mvn\" command not found. Please install maven prior building jHDC.")
 endif()
 
 if (INSTALL_JAVA_DEPENDENCIES)
@@ -26,12 +26,16 @@ if (NOT JAR_WITH_DEPENDENCIES)
 
 else()
     if (INSTALL_JAVA_DEPENDENCIES)
-        message("Ignoring INSTALL_JAVA_DEPENDENCIES since they are not needed with bundled jar.")
+        message("Ignoring INSTALL_JAVA_DEPENDENCIES since they are not needed with bundled jar (-DJAR_WITH_DEPENDENCIES=ON).")
+    endif()
+    # strip native libs if requested
+    if (NOT JAVACPP_PLATFORM STREQUAL "")
+        set(MVN_ARGS "-Djavacpp.platform=${JAVACPP_PLATFORM}")
     endif()
     # create überjar with everything included
     set(JHDC_JAR_NAME "${CMAKE_CURRENT_BINARY_DIR}/target/jHDC-${CMAKE_PROJECT_VERSION}-jar-with-dependencies.jar")
     add_custom_command(OUTPUT ${JHDC_JAR_NAME}
-        COMMAND ${MVN_EXECUTABLE} compile assembly:single -Djavacpp.platform=linux-x86_64
+        COMMAND ${MVN_EXECUTABLE} compile assembly:single ${MVN_ARGS}
     )
     add_custom_target(jar-with-dependencies ALL DEPENDS ${JHDC_JAR_NAME})
     add_dependencies(jar-with-dependencies hdc-jni)
