@@ -4,7 +4,7 @@ cmake_minimum_required( VERSION 3.3 )
 # CMake configuration
 cmake_policy( SET CMP0057 NEW )
 
-project( hdc )
+project( hdc VERSION 0.16.0 )
 enable_language( CXX C Fortran )
 
 set( hdc_TEST_DIR "${hdc_SOURCE_DIR}/test" )
@@ -147,6 +147,9 @@ option( GOPTION "adds -g to compiler flags" ON )
 option( BUILD_DOC "Create and install the HTML based API documentation (requires Doxygen)" OFF )
 option( BUILD_MDBM_PLUGIN "Enables MDBM storage plugin." ON )
 option( BUILD_OWN_MDBM "Build own MDBM" OFF )
+option( INSTALL_JAVA_DEPENDENCIES "Install jHDC JAR dependencies" OFF )
+option( JAR_WITH_DEPENDENCIES "Bundle all dependencies into a single jar - the result can be large (~80 MB)" OFF )
+set( JAR_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/share/java" CACHE STRING "JAR install prefix" )
 
 if( GOPTION )
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
