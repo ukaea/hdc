@@ -16,7 +16,7 @@ RUN apt-get update
 RUN apt-get -y upgrade
 
 # Install some dependencies
-RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales doxygen python3-sphinx python3-breathe cython3 curl maven openjdk-8-jdk-headless
+RUN apt-get install -y build-essential git cmake gfortran libboost-all-dev gfortran libhdf5-dev python3-numpy python3-pip python3-h5py libssl-dev libreadline-dev libcppunit-dev pkg-config libhiredis-dev redis python3-venv libs3-dev locales doxygen python3-sphinx python3-breathe cython3 curl maven openjdk-8-jdk
 
 # Download, build and install MDBM
 WORKDIR /tmp
