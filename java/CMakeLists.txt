@@ -20,5 +20,6 @@ add_library(hdc-jni SHARED java_hdc.cpp)
 
 target_include_directories(hdc-jni PRIVATE ${JNI_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}) 
 target_link_libraries(hdc-jni PUBLIC hdc)
+install( TARGETS hdc-jni LIBRARY DESTINATION lib )
 
 add_subdirectory(jHDC)
