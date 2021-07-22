@@ -631,6 +631,23 @@ TEMPLATE_TEST_CASE("scalar", "[HDC]", ALL_NUMERIC_TYPES, bool)
     CHECK_THROWS(tree.as_scalar<TestType>());
 }
 
+TEMPLATE_TEST_CASE("scalar_external", "[HDC]", ALL_NUMERIC_TYPES, bool)
+{
+    TestType    d = 111;
+    HDC h;
+    h.set_external(&d);
+    CHECK(h.as_scalar<TestType>() == d);
+    CHECK(h.get_type() == to_typeid(d));
+
+    HDC hd = HDC::make_external(&d);
+    CHECK(hd.as_scalar<TestType>() == d);
+    CHECK(hd.get_type() == to_typeid(d));
+
+    HDC tree, ch;
+    tree.add_child("aaa",ch);
+    CHECK_THROWS(tree.as_scalar<TestType>());
+}
+
 TEST_CASE("get_data", "[HDC]")
 {
     double array_in[] = { 0.0, 1000.0, 1.0e-200, 1.0e200 };

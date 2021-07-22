@@ -1493,6 +1493,85 @@ HDC HDC::make_scalar(uint64_t data)
     return HDC((void*)&data, HDC_UINT64);
 }
 
+
+HDC HDC::make_external(float* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(double* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(bool* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(int8_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(int16_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(int32_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(int64_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(uint8_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(uint16_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(uint32_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+HDC HDC::make_external(uint64_t* data)
+{
+    HDC h;
+    h.set_external(data);
+    return h;
+}
+
+
 HDC HDC::make_external(hdc_data_t obj)
 {
     obj.flags &= HDCExternal;

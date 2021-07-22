@@ -672,6 +672,27 @@ public:
     * @brief Sets provided data to a HDC node.
     *
     * @param T p_T: Desired data type.
+    * @param data p_data: Pointer to data
+    */
+    template <typename T>
+    void set_external(T* data)
+    {
+        auto data_size = sizeof(void*);
+        auto buffer_size = data_size + sizeof(hdc_header_t);
+        std::vector<char> buffer(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        header->type = to_typeid(*data);
+        header->data_size = data_size;
+        header->buffer_size = buffer_size;
+        header->flags = HDCExternal;
+        memcpy(buffer.data() + sizeof(hdc_header_t), &data, data_size);
+        storage->set(uuid, buffer.data(), buffer_size);
+    }
+
+    /**
+    * @brief Sets provided data to a HDC node.
+    *
+    * @param T p_T: Desired data type.
     * @param shape p_shape: Shape of the data
     * @param data p_data: Pointer to data
     * @param flags p_flags: Flags the node should have (e.g. HDCFortranOrder)
@@ -1163,6 +1184,7 @@ public:
     {
         auto buffer = get_buffer();
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
+        auto data = buffer + sizeof(hdc_header_t);
         if (header->type == HDC_STRUCT || header->type == HDC_LIST) {
             throw std::runtime_error("This is not a terminal node...");
         }
@@ -1170,10 +1192,15 @@ public:
         if (!storage->has(uuid)) {
             throw HDCException("as_scalar(): Not found: " + boost::lexical_cast<uuid_str_t>(uuid) + "\n");
         }
-        T result;
-        memcpy(&result, buffer + sizeof(hdc_header_t), sizeof(T));
-        return result;
-        //return *reinterpret_cast<T>(get_buffer()+sizeof(hdc_header_t));
+        if (!is_external()) {
+            T result;
+            memcpy(&result, data, sizeof(T));
+            return result;
+        } else {
+            T* result;
+            memcpy(&result, data, sizeof(result));
+            return *result;
+        }
     }
 
     /**
@@ -1311,6 +1338,94 @@ public:
     * @return HDC
     */
     static HDC make_scalar(void* data, hdc_type_t t);
+
+    
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: scalar of a intended type
+    * @return HDC
+    */
+    static HDC make_external(float* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: float scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(double* data);
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: double scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(bool* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: int8_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(int8_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: int16_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(int16_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: int32_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(int32_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: int64_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(int64_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: uint8_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(uint8_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: uint16_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(uint16_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: uint32_t scalar to be saved
+    * @return HDC
+    */
+    static HDC make_external(uint32_t* data);
+
+    /**
+    * @brief Creates scalar HDC object from external scalar* data
+    *
+    * @param* data p_data: uint64_t scalar to be saved
+    * @return hdc_data_t
+    */
+    static HDC make_external(uint64_t* data);
 
     /**
     * @brief Creates scalar HDC object
