@@ -5,7 +5,7 @@ includedir=${prefix}/include/hdc
 
 Name: HDC
 Description: Hierarchical Dynamic Containers library
-Version: 0.17.1
+Version: 0.17.2
 
 Libs: -L${libdir} -lhdc -lboost_system
 Cflags: -I${includedir} -std=c++11
