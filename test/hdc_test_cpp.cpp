@@ -625,6 +625,7 @@ TEMPLATE_TEST_CASE("scalar", "[HDC]", ALL_NUMERIC_TYPES, bool)
     HDC hd = HDC::make_scalar(d);
     CHECK(hd.as_scalar<TestType>() == d);
     CHECK(hd.get_type() == to_typeid(d));
+    CHECK(hd.is_scalar());
 
     HDC tree, ch;
     tree.add_child("aaa",ch);
@@ -638,10 +639,12 @@ TEMPLATE_TEST_CASE("scalar_external", "[HDC]", ALL_NUMERIC_TYPES, bool)
     h.set_external(&d);
     CHECK(h.as_scalar<TestType>() == d);
     CHECK(h.get_type() == to_typeid(d));
+    CHECK(h.is_scalar());
 
     HDC hd = HDC::make_external(&d);
     CHECK(hd.as_scalar<TestType>() == d);
     CHECK(hd.get_type() == to_typeid(d));
+    CHECK(hd.is_scalar());
 
     HDC tree, ch;
     tree.add_child("aaa",ch);

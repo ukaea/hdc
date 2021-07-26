@@ -89,6 +89,16 @@ bool hdc_exists(hdc_t tree, const char* path)
     return HDC(tree).exists(path);
 }
 
+bool hdc_is_external(hdc_t tree, const char* path)
+{
+    return HDC(tree).get(path).is_external();
+}
+
+bool hdc_is_scalar(hdc_t tree, const char* path)
+{
+    return HDC(tree).get(path).is_scalar();
+}
+
 void hdc_set_int8(hdc_t tree, const char* path, int rank, size_t* shape_in, void* data, hdc_flags_t _flags)
 {
     std::vector<size_t> shape(shape_in, shape_in+rank);

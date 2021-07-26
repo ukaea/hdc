@@ -135,6 +135,15 @@ void hdc_insert_slice(hdc_t tree, size_t i, hdc_t child);
 bool hdc_exists(hdc_t tree, const char* path);
 
 /**
+ * @brief Checks whether the node under given path is external or not.
+ *
+ * @param tree p_tree: HDC node
+ * @param path p_path: Path string
+ * @return bool
+ */
+bool hdc_is_external(hdc_t tree, const char* path);
+
+/**
  * @brief Prints out info about the node (type, rank, shape, flags)
  *
  * @param tree p_tree: HDC node

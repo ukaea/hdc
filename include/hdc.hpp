@@ -937,6 +937,14 @@ public:
     bool is_external() const;
 
     /**
+     * @brief Returns true if contained data is scalar
+     *
+     * @param t p_t: type
+     * @return bool
+     */
+    bool is_scalar() const;
+
+    /**
     * @brief Returns true if a node is read-only.
     *
     * @return bool

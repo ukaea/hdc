@@ -338,6 +338,11 @@ bool HDC::is_external() const
     return (get_flags() & HDCExternal) != 0;
 }
 
+bool HDC::is_scalar() const
+{
+    return get_rank() == 0;
+}
+
 bool HDC::is_readonly() const
 {
     return (get_flags() & HDCReadOnly) != 0;
@@ -1582,6 +1587,7 @@ hdc_data_t HDC::get_data() const
 {
     auto buffer = get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
+    auto data = buffer + sizeof(hdc_header_t);
     hdc_data_t obj = {};
     obj.type = header->type;
     obj.flags = header->flags;
@@ -1589,7 +1595,11 @@ hdc_data_t HDC::get_data() const
     for (size_t i = 0; i < HDC_MAX_DIMS; i++) {
         obj.shape[i] = header->shape[i];
     }
-    obj.data = buffer + sizeof(hdc_header_t);
+    if (!is_external() && !is_scalar()) {
+        obj.data = data;
+    } else {
+        memcpy(&(obj.data),data,header->data_size);
+    }
     return obj;
 }
 

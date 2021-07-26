@@ -19,6 +19,7 @@ src/__pycache__
 *.gcno
 *.html
 *.so
+*.mod
 
 fort.*
 

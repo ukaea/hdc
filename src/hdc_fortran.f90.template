@@ -186,6 +186,22 @@ module hdc_fortran
             logical(kind=c_bool) :: res ! change this to c_bool later
         end function c_hdc_exists
 
+        function c_hdc_is_scalar(obj, path) result(res) bind(c,name="hdc_is_scalar")
+            ! Returns true if subtree with given path contains scala data. This is interface to C.
+                import
+                type(hdc_t), value :: obj ! HDC object
+                character(kind=c_char), intent(in) :: path(*)
+                logical(kind=c_bool) :: res ! change this to c_bool later
+        end function c_hdc_is_scalar
+
+        function c_hdc_is_external(obj, path) result(res) bind(c,name="hdc_is_external")
+            ! Returns true if subtree with given path contains external data. This is interface to C.
+                import
+                type(hdc_t), value :: obj ! HDC object
+                character(kind=c_char), intent(in) :: path(*)
+                logical(kind=c_bool) :: res ! change this to c_bool later
+        end function c_hdc_is_external
+
         subroutine c_hdc_set_string(obj, path, str) bind(c,name="hdc_set_string")
         ! Sets string to given path. This is interface to C.
             import
@@ -262,6 +278,15 @@ module hdc_fortran
             integer(kind=c_size_t),value :: type_
         end subroutine c_hdc_set_scalar
 
+        {% for type_ in types %}
+        function c_hdc_as_{{ type_[0] }}_scalar(obj, path) result(res) bind(c,name="hdc_as_{{ type_[0] }}_scalar")
+            ! Returns scalar {{ type_[0] }}
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            {{ type_[2] }} :: res
+        end function c_hdc_as_{{ type_[0] }}_scalar
+        {% endfor %}
     end interface
 
     interface hdc_get_shape
@@ -364,6 +389,8 @@ module hdc_fortran
                 hdc_get_type, &
                 hdc_destroy, &
                 hdc_init, &
+                hdc_is_scalar, &
+                hdc_is_external, &
                 hdc_as_string_sub, &
                 hdc_as_string, &
                 hdc_new_string, &
@@ -406,6 +433,26 @@ contains
         if (.not.present(path)) path = ""
         res = c_hdc_exists(this, trim(path)//c_null_char)
     end function hdc_exists
+
+    function hdc_is_scalar(this, path) result(res)
+        ! returns true if a node under given path contains scalar data
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
+        logical(kind=c_bool) :: res
+        if (.not.present(path)) path = ""
+        res = c_hdc_is_scalar(this, trim(path)//c_null_char)
+     end function hdc_is_scalar
+
+    function hdc_is_external(this, path) result(res)
+    ! returns true if a node under given path contains external data
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
+        logical(kind=c_bool) :: res
+        if (.not.present(path)) path = ""
+        res = c_hdc_is_external(this, trim(path)//c_null_char)
+    end function hdc_is_external
 
     function hdc_get_rank(this,path) result(res)
     ! Returns rank of stored array data
@@ -815,11 +862,7 @@ contains
     ! Sets {{ type_[0] }} data into provided variable.
         type(hdc_t) :: this ! HDC node
         {{ type_[2] }} :: res
-        {{ type_[2] }}, pointer :: pres
-        type(hdc_data_t) :: data ! Encapsulated data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_{{ type_[0] }}_scalar(this, c_null_char)
     end subroutine hdc_as_{{ type_[0] }}_sub
 
 
@@ -829,12 +872,8 @@ contains
         type(hdc_t) :: this ! HDC node
         character(len=*), optional :: path ! Path string
         {{ type_[2] }} :: res
-        {{ type_[2] }}, pointer :: pres
-        type(hdc_data_t) :: data ! Encapsulated data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_{{ type_[0] }}_scalar(this, trim(path)//c_null_char)
     end function hdc_as_{{ type_[0] }}
 
     subroutine hdc_as_{{ type_[0] }}_path_sub(this, path, res)
@@ -842,11 +881,7 @@ contains
         type(hdc_t) :: this ! HDC node
         character(len=*) :: path ! relative path within HDC tree
         {{ type_[2] }} :: res
-        {{ type_[2] }}, pointer :: pres
-        type(hdc_data_t) :: data ! Encapsulated data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_{{ type_[0] }}_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_{{ type_[0] }}_path_sub
 
 
