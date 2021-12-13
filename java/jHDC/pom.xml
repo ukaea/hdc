@@ -77,7 +77,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.22.1</version>
           <configuration>
-            <argLine>-Djava.library.path=..</argLine>
+            <argLine>-Djava.library.path=..:${project.basedir}/../../build/java</argLine>
           </configuration>
         </plugin>
         <plugin>
