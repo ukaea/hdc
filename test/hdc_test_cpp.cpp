@@ -116,7 +116,6 @@ TEST_CASE("NodeManipulation", "[HDC]")
     tree.add_child("aaa/list[0]/eee", dummy2);
     HDC list = tree.get("aaa/list");
     CHECK(HDC_LIST == list.get_type());
-    HDC h = tree.get("aaa/list[0]/ddd");
     CHECK(true == tree.exists("aaa/list[0]/ddd"));
     CHECK(true == tree.exists("aaa/list[0]/eee"));
     tree.get("aaa/list").get(0).add_child("kkk", dummy3); // Remove this - unnecessary
@@ -240,7 +239,7 @@ TEST_CASE("SetExternal", "[HDC]")
     CHECK(*array_in == *array_out);
 
     HDC e4 = HDC::make_external(data);
-    array_out = e3.as<int64_t>();
+    array_out = e4.as<int64_t>();
     CHECK(*array_in == *array_out);
 
     //update
