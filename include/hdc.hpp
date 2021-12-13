@@ -575,7 +575,7 @@ public:
         auto buffer = get_buffer();
         auto header = reinterpret_cast<hdc_header_t*>(buffer);
         if (header->flags & HDCExternal) {
-                throw HDCException("set_data(): I can't enlarge your external buffer for you...");
+                throw HDCException("set_data(): Trying to set externally owned data. Please, ommit this, use set_external(), or re-create the node.");
         }
         if (header->buffer_size == buffer_size) {
             storage->lock(uuid);
