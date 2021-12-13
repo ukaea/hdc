@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import org.nd4j.linalg.api.ndarray.INDArray;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -95,6 +97,8 @@ public class HDCTests {
         HDC node = new HDC();
         node.set_data(shape, array);
         assertEquals(shape,node.get_shape());
+        long[] out_data = node.as_long_1d();
+        assertArrayEquals(array,out_data);
         INDArray in_data = Nd4j.create(array,shape_,DataType.INT64);
         assertEquals(in_data,node.data());
         // test constructor
@@ -104,6 +108,10 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
+        // test set_dataa(long[],...)
+        HDC node4 = new HDC();
+        node4.set_data(shape_, array);
+        assertEquals(in_data,node4.data());
     }
 
     @Test
@@ -116,6 +124,8 @@ public class HDCTests {
         // test set/get data
         HDC node = new HDC();
         node.set_data(shape, array);
+        int[] out_data = node.as_int_1d();
+        assertArrayEquals(array,out_data);
         INDArray in_data = Nd4j.create(array,shape_,DataType.INT32);
         assertEquals(in_data,node.data());
         // test constructor
@@ -125,6 +135,10 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
+        // test set_dataa(long[],...)
+        HDC node4 = new HDC();
+        node4.set_data(shape_, array);
+        assertEquals(in_data,node4.data());
     }
 
     @Test
@@ -142,6 +156,10 @@ public class HDCTests {
         // test constructor
         HDC node2 = new HDC(shape, array);
         assertEquals(in_data,node2.data());
+        // test set_dataa(long[],...)
+        HDC node4 = new HDC();
+        node4.set_data(shape_, array);
+        assertEquals(in_data,node4.data());
     }
 
     @Test
@@ -163,6 +181,10 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
+        // test set_dataa(long[],...)
+        HDC node4 = new HDC();
+        node4.set_data(shape_, array);
+        assertEquals(in_data,node4.data());
     }
 
     @Test
@@ -175,6 +197,8 @@ public class HDCTests {
         // test set/get data
         HDC node = new HDC();
         node.set_data(shape, array);
+        float[] out_data = node.as_float_1d();
+        assertArrayEquals(array,out_data);
         INDArray in_data = Nd4j.create(array,shape_,DataType.FLOAT);
         assertEquals(in_data,node.data());
         // test constructor
@@ -184,6 +208,10 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
+        // test set_dataa(long[],...)
+        HDC node4 = new HDC();
+        node4.set_data(shape_, array);
+        assertEquals(in_data,node4.data());
     }
 
     @Test
@@ -196,6 +224,8 @@ public class HDCTests {
         // test set/get data
         HDC node = new HDC();
         node.set_data(shape, array);
+        double[] out_data = node.as_double_1d();
+        assertArrayEquals(array,out_data);
         INDArray in_data = Nd4j.create(array,shape_,DataType.DOUBLE);
         assertEquals(in_data,node.data());
         // test constructor
@@ -205,6 +235,10 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
+        // test set_dataa(long[],...)
+        HDC node4 = new HDC();
+        node4.set_data(shape_, array);
+        assertEquals(in_data,node4.data());
     }
 
 //     @Test

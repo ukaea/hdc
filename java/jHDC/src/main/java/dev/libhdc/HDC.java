@@ -3,6 +3,8 @@ package dev.libhdc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 //import org.nd4j.linalg.api.buffer.factory.DefaultDataBufferFactory;
@@ -11,6 +13,7 @@ import org.nd4j.linalg.api.buffer.DataType;
 import java.util.LinkedHashMap;
 // import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.linalg.factory.Nd4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class HDC {
     public class HDCException extends RuntimeException {
@@ -238,6 +241,38 @@ public class HDC {
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");
         }
         return Nd4j.create(data,shape_);
+    }
+
+    public int[] as_int_1d() {
+        return data().toIntVector();
+    }
+
+    public long[] as_long_1d() {
+        return data().toLongVector();
+    }
+
+    public float[] as_float_1d() {
+        return data().toFloatVector();
+    }
+
+    public double[] as_double_1d() {
+        return data().toDoubleVector();
+    }
+
+    public int[][] as_int_2d() {
+        return data().toIntMatrix();
+    }
+    
+    public long[][] as_long_2d() {
+        return data().toLongMatrix();
+    }
+
+    public float[][] as_float_2d() {
+        return data().toFloatMatrix();
+    }
+    
+    public double[][] as_double_2d() {
+        return data().toDoubleMatrix();
     }
 
     public void set_data(INDArray data) {
