@@ -1,58 +1,11 @@
 #include "serialization/hdc_hdf5_serializer.h"
 
-#include "hdc.hpp"
-#include "hdc_errors.hpp"
-#include "hdc_helpers.h"
-#include "hdc_types.h"
-
-#include <H5Cpp.h>
-#include <hdf5.h>
-
-using namespace H5;
-
-#define HDC_HDF5_VALID_ID(hdf5_id)   hdf5_id  >= 0
-
-#define HDC_HDF5_STATUS_OK(hdf5_id)   hdf5_id  >= 0
-
-#define HDC_CHECK_HDF5_ERROR(hdf5_err, msg)                             \
-{                                                                         \
-    if( hdf5_err < 0 )                                                    \
-    {                                                                     \
-        cerr << "HDF5 Error (error code: "                                \
-            <<  hdf5_err                                                  \
-            <<  ") " << msg;                                              \
-            throw HDCException();                                         \
-    }                                                                     \
-}
-
-
-#define HDC_CHECK_HDF5_ERROR_WITH_REF(hdf5_err, ref_path, msg)          \
-{                                                                         \
-    if( hdf5_err < 0 )                                                    \
-    {                                                                     \
-        cerr << "HDF5 Error (error code: "                                \
-            <<  hdf5_err                                                  \
-            <<  ", reference path: \""                                    \
-            <<  ref_path << "\""                                          \
-            <<  ") " << msg;                                              \
-            throw HDCException();                                         \
-    }                                                                     \
-}
-
-#define HDC_HDF5_ERROR(ref_path, msg)                                   \
-{                                                                         \
-    cerr << "HDF5 Error (reference path: \"" << ref_path                  \
-                    << ref_path << "\") " <<  msg;                        \
-    throw HDCException();                                                 \
-}
-
 namespace {
 
 struct h5_read_opdata {
     unsigned recurs;     /* Recursion level.  0=root */
     struct h5_read_opdata* prev;      /* Pointer to previous opdata */
-    haddr_t addr;       /* Group address */
-
+    HDC_HDF5_ADDR_T addr;       /* H5::Group address */
     // pointer to HDC node, anchors traversal to
     HDC* node;
     std::string ref_path;
@@ -62,15 +15,26 @@ struct h5_read_opdata {
     {}
 };
 
-void write_node(const HDC& h, H5File* file, const std::string& path);
+void write_node(const HDC& h, H5::H5File& file, const std::string& path);
 hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_path);
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& dest);
-int h5_group_check(h5_read_opdata* od, haddr_t target_addr);
-herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const H5L_info_t*, void* hdf5_operator_data);
+int h5_group_check(h5_read_opdata* od, HDC_HDF5_ADDR_T target_addr);
+herr_t h5l_iterate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const H5L_info_t*, void* hdf5_operator_data);
 void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string& ref_path, HDC& dest);
 void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest);
 void hdf5_read(hid_t hdf5_id, const std::string& hdf5_path, HDC& dest);
 void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& node);
+#if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 12))
+bool hdc_h5_addr_cmp(haddr_t addr1, haddr_t addr2)
+{
+    return addr1 == addr2;
+}
+#else
+bool hdc_h5_addr_cmp(H5O_token_t& addr1, H5O_token_t& addr2)
+{
+    return (memcmp(addr1.__data, addr2.__data, H5O_MAX_TOKEN_SIZE) == 0);
+}
+#endif
 
 void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& dest)
 {
@@ -101,13 +65,10 @@ void hdf5_dataset_to_hdc(hid_t hdf5_dset_id, const std::string& ref_path, HDC& d
                                                   << hdf5_dset_id);
             dest.set_type(HDC_LIST);
             for (size_t i = 0; i < nelems; i++) {
-                // C function H5Rdereference renamed to H5Rdereference1 and deprecated in this release.
-                // https://support.hdfgroup.org/HDF5/doc/RM/RM_H5R.html#Reference-Dereference1
 #if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 10))
                 auto dsetv_id = H5Rdereference(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
 #else
-                // TODO Use the new H5Rdereference API
-                auto dsetv_id = H5Rdereference1(hdf5_dset_id, H5R_OBJECT, &ref_out[i]);
+                auto dsetv_id = H5Rdereference2(hdf5_dset_id, H5P_DEFAULT, H5R_OBJECT, &ref_out[i]);
 #endif
                 HDC h;
                 hdf5_tree_to_hdc(dsetv_id, "", h);
@@ -190,10 +151,10 @@ hdc_type_t hdf5_type_to_hdc_type(hid_t hdf5_dtype_id, const std::string& ref_pat
     return res;
 }
 
-int h5_group_check(h5_read_opdata* od, haddr_t target_addr)
+int h5_group_check(h5_read_opdata* od, HDC_HDF5_ADDR_T target_addr)
 {
-    DEBUG_STDOUT("h5_group_check(h5_read_opdata *od, haddr_t target_addr)");
-    if (od->addr == target_addr) {
+    DEBUG_STDOUT("h5_group_check(h5_read_opdata *od, HDC_HDF5_ADDR_T target_addr)");
+    if (hdc_h5_addr_cmp(od->addr,target_addr)) {
         /* Addresses match */
         return 1;
     } else if (!od->recurs) {
@@ -205,16 +166,15 @@ int h5_group_check(h5_read_opdata* od, haddr_t target_addr)
     }
 }
 
-herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const H5L_info_t*, void* hdf5_operator_data)
+herr_t h5l_iterate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const H5L_info_t*, void* hdf5_operator_data)
 {
     DEBUG_STDOUT(
             "h5_literate_traverse_op_func(hid_t hdf5_id,const char *hdf5_path,const H5L_info_t *, void *hdf5_operator_data)");
     herr_t h5_status = 0;
     herr_t h5_return_val = 0;
     H5O_info_t h5_info_buf;
-
     /* Type conversion */
-    h5_read_opdata* h5_od = (struct h5_read_opdata*)hdf5_operator_data;
+    h5_read_opdata* h5_od = (struct h5_read_opdata*) hdf5_operator_data;
 
 
     /*
@@ -222,10 +182,11 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const 
      * The name of the object is passed to this function by
      * the Library.
      */
-    h5_status = H5Oget_info_by_name(hdf5_id,
-                                    hdf5_path,
-                                    &h5_info_buf,
-                                    H5P_DEFAULT);
+#if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 12))
+    h5_status = H5Oget_info_by_name(hdf5_id, hdf5_path, &h5_info_buf, H5P_DEFAULT);
+#else
+    h5_status = H5Oget_info_by_name(hdf5_id, hdf5_path, &h5_info_buf, H5O_INFO_ALL, H5P_DEFAULT);
+#endif
 
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
                                   h5_od->ref_path,
@@ -249,7 +210,8 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const 
              * reference count was manually manipulated with
              * H5Odecr_refcount.
              */
-            if (h5_group_check(h5_od, h5_info_buf.addr)) {
+            if (h5_group_check(h5_od, h5_info_buf.HDC_HDF5_ADDR_NAME))
+            {
                 // skip cycles in the graph ...
             } else {
                 hid_t h5_group_id = H5Gopen(hdf5_id,
@@ -258,7 +220,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const 
                 HDC_CHECK_HDF5_ERROR_WITH_REF(h5_group_id,
                                               h5_od->ref_path,
                                               "Error opening HDF5 "
-                                                      << "Group: "
+                                                      << "H5::Group: "
                                                       << " parent: "
                                                       << hdf5_id
                                                       << " path:"
@@ -275,7 +237,7 @@ herr_t h5_literate_traverse_op_func(hid_t hdf5_id, const char* hdf5_path, const 
                 HDC_CHECK_HDF5_ERROR_WITH_REF(H5Gclose(h5_group_id),
                                               h5_od->ref_path,
                                               "Error closing HDF5 "
-                                                      << "Group: "
+                                                      << "H5::Group: "
                                                       << h5_group_id);
             }
             break;
@@ -322,17 +284,19 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string& ref_path, HDC& de
     DEBUG_STDOUT("void hdf5_group_to_hdc(" + to_string(hdf5_group_id) + "," + ref_path + "," + ")");
     //dest.set_type(HDC_EMPTY);
 
-    // get info, we need to get the obj addr for cycle tracking
+    // get info, we need to get the obj token for cycle tracking
     H5O_info_t h5_info_buf;
-    herr_t h5_status = H5Oget_info(hdf5_group_id,
-                                   &h5_info_buf);
-
+#if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 12))
+    herr_t h5_status = H5Oget_info(hdf5_group_id, &h5_info_buf);
+#else
+    herr_t h5_status = H5Oget_info(hdf5_group_id, &h5_info_buf, H5O_INFO_ALL);
+#endif
     // setup the callback struct we will use for  H5Literate
     struct h5_read_opdata h5_od;
     // setup linked list tracking that allows us to detect cycles
     h5_od.recurs = 0;
     h5_od.prev = nullptr;
-    h5_od.addr = h5_info_buf.addr;
+    h5_od.addr = h5_info_buf.HDC_HDF5_ADDR_NAME;
     // attach the pointer to our node
     h5_od.node = &dest;
     // keep ref path
@@ -371,7 +335,7 @@ void hdf5_group_to_hdc(hid_t hdf5_group_id, const std::string& ref_path, HDC& de
                            h5_grp_index_type,
                            H5_ITER_INC,
                            nullptr,
-                           h5_literate_traverse_op_func,
+                           h5l_iterate_traverse_op_func,
                            (void*)&h5_od);
 
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status,
@@ -387,10 +351,13 @@ void hdf5_tree_to_hdc(hid_t hdf5_id, const std::string& ref_path, HDC& dest)
     DEBUG_STDOUT("hdf5_tree_to_hdc(hid_t hdf5_id, const std::string  &ref_path, HDC& dest)");
     herr_t h5_status = 0;
     H5O_info_t h5_info_buf;
+#if ((H5_VERS_MAJOR == 1) && (H5_VERS_MINOR < 12))
     h5_status = H5Oget_info(hdf5_id, &h5_info_buf);
+#else
+    h5_status = H5Oget_info(hdf5_id, &h5_info_buf, H5O_INFO_ALL);
+#endif
     HDC_CHECK_HDF5_ERROR_WITH_REF(h5_status, ref_path, "Error fetching HDF5 object " << "info from: " << hdf5_id);
     switch (h5_info_buf.type) {
-        // if hdf5_id + hdf5_path points to a group,
         // use a H5Literate traversal
         case H5O_TYPE_GROUP: {
             hdf5_group_to_hdc(hdf5_id, ref_path, dest);
@@ -442,45 +409,50 @@ void hdf5_read(const std::string& file_path, const std::string& hdf5_path, HDC& 
 
 const char* ref_group_name = "__hdc";
 
-PredType HDCtype2HDF5(hdc_type_t t)
+H5::PredType HDCtype2HDF5(hdc_type_t t)
 {
     switch (t) {
         case HDC_STRUCT:
         case HDC_LIST:
-            return PredType::STD_REF_OBJ;
+            return H5::PredType::STD_REF_OBJ;
         case HDC_BOOL:
-            return PredType::NATIVE_UINT_LEAST8;
+            return H5::PredType::NATIVE_UINT_LEAST8;
         case HDC_INT8:
-            return PredType::NATIVE_INT_LEAST8;
+            return H5::PredType::NATIVE_INT_LEAST8;
         case HDC_INT16:
-            return PredType::NATIVE_INT_LEAST16;
+            return H5::PredType::NATIVE_INT_LEAST16;
         case HDC_INT32:
-            return PredType::NATIVE_INT_LEAST32;
+            return H5::PredType::NATIVE_INT_LEAST32;
         case HDC_INT64:
-            return PredType::NATIVE_INT_LEAST64;
+            return H5::PredType::NATIVE_INT_LEAST64;
         case HDC_UINT8:
-            return PredType::NATIVE_UINT_LEAST8;
+            return H5::PredType::NATIVE_UINT_LEAST8;
         case HDC_UINT16:
-            return PredType::NATIVE_UINT_LEAST16;
+            return H5::PredType::NATIVE_UINT_LEAST16;
         case HDC_UINT32:
-            return PredType::NATIVE_UINT_LEAST32;
+            return H5::PredType::NATIVE_UINT_LEAST32;
         case HDC_UINT64:
-            return PredType::NATIVE_UINT_LEAST64;
+            return H5::PredType::NATIVE_UINT_LEAST64;
         case HDC_FLOAT:
-            return PredType::NATIVE_FLOAT;
+            return H5::PredType::NATIVE_FLOAT;
         case HDC_DOUBLE:
-            return PredType::NATIVE_DOUBLE;
+            return H5::PredType::NATIVE_DOUBLE;
         case HDC_STRING:
-            return PredType::C_S1;
+            return H5::PredType::C_S1;
         case HDC_EMPTY:
-            return PredType::NATIVE_DOUBLE;
+            return H5::PredType::NATIVE_DOUBLE;
         default:
             throw HDCException("hdf5_tree_to_hdc(): Unknown data type: " + std::to_string(t) + "\n");
     }
-    return PredType::NATIVE_UINT_LEAST32;
+    return H5::PredType::NATIVE_UINT_LEAST32;
 }
 
-void write_node(const HDC& h, H5File* file, const std::string& path)
+bool pathExists(hid_t id, const std::string& path)
+{
+  return H5Lexists( id, path.c_str(), H5P_DEFAULT ) > 0;
+}
+
+void write_node(const HDC& h, H5::H5File& file, const std::string& path)
 {
     auto buffer = h.get_buffer();
     auto header = reinterpret_cast<hdc_header_t*>(buffer);
@@ -497,25 +469,22 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
         if (header->type == HDC_STRUCT) {
             hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
-                auto group = new Group(file->createGroup(path));
+                H5::Group group(file.createGroup(path));
                 for (const auto& child : children->get<1>()) {
                     auto key = child.key.c_str();
                     auto uuid = child.address;
                     write_node(HDC(hdc_global.storage, uuid), file, path + "/" + key);
                 }
-                delete group;
             }
             return;
         } else if (header->type == HDC_LIST) {
             hdc_map_t* children = h.get_children_ptr();
             if (children != nullptr) {
-                Group ref_group;
-                try {
-                    Exception::dontPrint(); //TODO: Do this just temporarily???
-                    ref_group = file->openGroup(ref_group_name);
-                } catch (FileIException& e) {
-                    ref_group = file->createGroup(ref_group_name);
-                }
+                H5::Group ref_group;
+                if (pathExists(file.getId(), ref_group_name))
+                    ref_group=file.openGroup(ref_group_name);
+                else
+                    ref_group=file.createGroup(ref_group_name);
                 size_t n_child = children->size();
                 auto wbuf = new hobj_ref_t[n_child];
                 size_t i = 0;
@@ -526,7 +495,7 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
                     auto _uuid = hh.get_uuid_str();
                     std::string full_path = std::string(ref_group_name) + "/" + _uuid;
                     write_node(hh, file, full_path.c_str());
-                    auto ret = H5Rcreate(&wbuf[i], file->getId(), full_path.c_str(), H5R_OBJECT, -1);
+                    auto ret = H5Rcreate(&wbuf[i], file.getId(), full_path.c_str(), H5R_OBJECT, -1);
                     if (ret < 0) {
                         throw HDCException("Could not create refference to " + full_path);
                     }
@@ -535,36 +504,36 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
 
                 hsize_t ref_dims[1];
                 ref_dims[0] = n_child;
-                DataSpace ref_dataspace(1, ref_dims);
-                DataSet ref_dataset = file->createDataSet(DATASET_NAME, PredType::STD_REF_OBJ, ref_dataspace);
-                ref_dataset.write(wbuf, PredType::STD_REF_OBJ);
+                H5::DataSpace ref_dataspace(1, ref_dims);
+                H5::DataSet ref_dataset = file.createDataSet(DATASET_NAME, H5::PredType::STD_REF_OBJ, ref_dataspace);
+                ref_dataset.write(wbuf, H5::PredType::STD_REF_OBJ);
                 delete[] wbuf;
             }
             return;
         } else if (header->type == HDC_EMPTY) {
             hsize_t dims1[] = { 1 };
-            DataSpace edataspace(1, dims1);
+            H5::DataSpace edataspace(1, dims1);
             double edata[] = { NAN };
-            DataSet dataset = file->createDataSet(DATASET_NAME, PredType::NATIVE_DOUBLE, edataspace);
-            dataset.write(edata, PredType::NATIVE_DOUBLE);
+            H5::DataSet dataset = file.createDataSet(DATASET_NAME, H5::PredType::NATIVE_DOUBLE, edataspace);
+            dataset.write(edata, H5::PredType::NATIVE_DOUBLE);
         } else {
             hsize_t rank = header->rank;
             hsize_t dimsf[10];
             for (hsize_t i = 0; i < rank; i++) {
                 dimsf[i] = header->shape[i];
             };
-            DataSpace dataspace(rank, dimsf);
+            H5::DataSpace dataspace(rank, dimsf);
             auto t = HDCtype2HDF5(header->type);
-            DataSet dataset = file->createDataSet(DATASET_NAME, t, dataspace);
+            H5::DataSet dataset = file.createDataSet(DATASET_NAME, t, dataspace);
             dataset.write(data, t);
             return;
         }
     }  // end of try block
-        // catch failure caused by the H5File operations
-    catch (FileIException& error) {
+        // catch failure caused by the H5::H5File operations
+    catch (H5::FileIException& error) {
 #ifdef H5_VERSION_GE
     #if H5_VERSION_GE(1, 8, 13)
-        Exception::printErrorStack();
+        H5::Exception::printErrorStack();
     #else
         std::cerr << "write_node(): " << "FileIException" << std::endl;
     #endif
@@ -573,10 +542,10 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
 #endif
     }
         // catch failure caused by the DataSet operations
-    catch (DataSetIException& error) {
+    catch (H5::DataSetIException& error) {
 #ifdef H5_VERSION_GE
     #if H5_VERSION_GE(1, 8, 13)
-        Exception::printErrorStack();
+        H5::Exception::printErrorStack();
     #else
         std::cerr << "write_node(): " << "DataSetIException" << std::endl;
     #endif
@@ -585,10 +554,10 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
 #endif
     }
         // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException& error) {
+    catch (H5::DataSpaceIException& error) {
 #ifdef H5_VERSION_GE
     #if H5_VERSION_GE(1, 8, 13)
-        Exception::printErrorStack();
+        H5::Exception::printErrorStack();
     #else
         std::cerr << "write_node(): " << "DataSpaceIException" << std::endl;
     #endif
@@ -597,10 +566,10 @@ void write_node(const HDC& h, H5File* file, const std::string& path)
 #endif
     }
         // catch failure caused by the DataSpace operations
-    catch (DataTypeIException& error) {
+    catch (H5::DataTypeIException& error) {
 #ifdef H5_VERSION_GE
     #if H5_VERSION_GE(1, 8, 13)
-        Exception::printErrorStack();
+        H5::Exception::printErrorStack();
     #else
         std::cerr << "write_node(): " << "DataTypeIException" << std::endl;
     #endif
@@ -628,12 +597,12 @@ void hdc::serialization::HDF5Serialiser::serialize(const HDC& hdc, const std::st
 {
     try {
         H5std_string h5_filename(filename);
-        H5File file(h5_filename, H5F_ACC_TRUNC);
-        write_node(hdc, &file, "data");
-    } catch (FileIException& error) {
+        H5::H5File file(h5_filename, H5F_ACC_TRUNC);
+        write_node(hdc, file, "data");
+    } catch (H5::FileIException& error) {
 #ifdef H5_VERSION_GE
     #if H5_VERSION_GE(1, 8, 13)
-        Exception::printErrorStack();
+        H5::Exception::printErrorStack();
     #else
         std::cerr << "to_hdf5(): " << "FileIException" << std::endl;
     #endif

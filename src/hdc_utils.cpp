@@ -25,6 +25,14 @@ boost::uuids::uuid generate_uuid()
     return u;
 }
 
+std::string uuid_to_str(char* uuid)
+{
+    boost::uuids::uuid tmp;
+    memcpy(&tmp, uuid, HDC_UUID_LENGTH);
+    return boost::uuids::to_string(tmp);
+}
+
+
 /* -------------------------  String manipulation ----------------------------- */
 
 hdc_path_t split(const std::string& s)

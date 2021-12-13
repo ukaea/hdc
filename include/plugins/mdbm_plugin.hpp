@@ -112,11 +112,9 @@ public:
             mdbm_delete_lockfiles(this->filename.c_str());
             this->db = nullptr;
         }
-        // Remove db file if the data persistence is not required
+        // Try to remove db file if the data persistence is not required
         if (!this->persistent && MDBMFileExists(filename)) {
-            if (::remove(filename.c_str()) != 0) {
-                throw std::runtime_error("MDBMStorage::cleanup(): Error deleting file\n");
-            };
+            ::remove(filename.c_str());
         }
         initialized = false;
     }

@@ -1,4 +1,4 @@
-HDC - Hierarchical Dynamic Containers                         {#mainpage}
+HDC - Hierarchical Dynamic Containers {#mainpage}
 =====================================
 
 HDC is tiny library for exchanging hierarchical data (arrays of structures) in shared memory between multiple programming languages, currently supporting C, C++, Python, Fortran and MATLAB.
@@ -11,6 +11,10 @@ The master repository lives in [IPP CAS gitlab instance](https://repo.tok.ipp.ca
 The bitbucket repo is just a read-only mirror.
 
 The access to the master repo can be requested via email *fridrich at ipp.cas.cz*
+
+API documentation
+=================
+The API documentation is available [here.](http://compass-tokamak.pages.tok.ipp.cas.cz/HDC/)
 
 Building instructions
 =====================
@@ -42,6 +46,7 @@ Currently all commits are automatically tested against:
 
  - Ubuntu 16.04 (xenial)
  - Ubuntu 18.04 (bionic)
+ - Ubuntu 20.04 (focal)
  - Fedora 31
  - Centos 7
 
@@ -50,7 +55,7 @@ But HDC should work on any not-too-obsolette distro. If you face any problems, p
 
 Building HDC
 ------------
-For building on ITM gateway, please, follow [these instructions](docs/BUILDING_ON_ITM_GATEWAY.md).
+Machine specific build instructions are available [here](docs/MACHINE_SPECIFIC_BUILD_INSTRUCTIONS.md).
 
 There are several cmake options. The most important are:
 
@@ -106,6 +111,32 @@ The example of build follows:
  ```
 You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 
+Building java HDC bindings (jHDC)
+---------------------------------
+
+jHDC build requires  `maven` and `openjdk-8-jdk-headless` or another JDK (not tested). Please ensure you have these installed.
+There are several cmake options for jHDC:
+
+  - `-DENABLE_JAVA` Enable JAVA support (`OFF` by default).
+  - `-DJAR_INSTALL_PREFIX` Where to install resulting jar(s) (Defaults to `${CMAKE_INSTALL_PREFIX}/share/java`).
+  - `-DINSTALL_JAVA_DEPENDENCIES` Whether to install also dependencies (`OFF` by default). If enabled, all jars are put into `$JAR_INSTALL_PREFIX`.
+  - `-DJAR_WITH_DEPENDENCIES` Build jar with all dependencies bundled inside. The result can be quite large, but no dependencies are needed. (`OFF` by default).
+  - `-DJAVACPP_PLATFORM` Build bundled jar with only specified arch (`linux-x86_64` by default). This reduces the jar size from ~460MB to ~80MB. Anybody loving huge jars can set empty string here. [Detailed description here.](https://github.com/bytedeco/javacpp-presets/wiki/Reducing-the-Number-of-Dependencies)
+
+Clearly, not all combinations of these options make sense, but making some of them dependent does not make sense either.
+
+Usually you would want either:
+```
+-DENABLE_JAVA=ON -DINSTALL_JAVA_DEPENDENCIES=ON --DJAR_WITH_DEPENDENCIES=OFF
+```
+or:
+```
+-DENABLE_JAVA=ON -DJAR_WITH_DEPENDENCIES=ON -DJAVACPP_PLATFORM=linux-x86_64
+```
+depending on your preferences.
+
+How to run jHDC example is described [here.](java/README.md)
+
 Building using IntelStudio
 --------------------------
 ```
@@ -150,6 +181,55 @@ Basic ideas
   + Structure/list node - the node has at least one children indexed by string path. It can only store subtrees indexed by path/integer index.
   + Array node - the node has at least one children indexed by integer. It can only store subtrees indexed by integer.
   + Data node - it only can be terminal node, it stores some data, currently char* buffer.
+
+Path syntax
+-----------
+If working directly with HDC tree (i.e.: methods like `get()`, `put()`, `set()`)
+The path string is internally converted to
+```
+hdc_path_t = std::list<hdc_index_t>
+```
+type where
+```
+hdc_index_t = boost::variant<size_t, std::string>
+```
+type represents single level of path. Therefore every tree node can be refferenced by:
+
+- **empty string** representing identity, e.g.: `"//"` is ommited unless part of protocol specification like `"json://"`
+- **key** (string) referencing children of hash map/dict
+- **index** (non-negative integer) for referencing value in list/array
+Individual keys are separated by slash, indexes are surrounded by brakets.
+
+For example the following string
+```
+"aaa/bbb//ccc[5]/ddd"
+```
+represents the following node within the HDC tree:
+```
+"aaa" -> "bbb" -> "ccc" -> 5 -> "ddd"
+```
+
+For loading from or saving to outside HDC tree (methods `load()` and `save()` ), one has to also specify protocol and file path. Is such case there are two ekvivalent options:
+
+- protocol+file path and the path within the file data are concatenated using pipe character `|`: `HDC n = HDC::load("protocol://path/to/file|path/within/the/file")`
+
+-  two arguments are provided: `HDC n = HDC::load("protocol://path/to/file", "path/within/the/file")`
+
+Internally the first option calls the second one, so usage of the second form spares some method calls.
+
+The supported protocols are:
+
+- **json**
+- **json_string**
+- **json_verbose**
+- **uda**
+- **uda_new**
+- **hdf5**
+- **hdc_file**
+- **hdc_string**
+- **flatbuffers**
+- **s3**
+
 
 
 Examples

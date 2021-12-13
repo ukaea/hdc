@@ -1,5 +1,35 @@
+test-hdc-focal:
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_JAVA=ON
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - ./run
+
+test-hdc-focal-hdf5-1.12:
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
+  script:
+    - mkdir build
+    - cd build
+    - HDF5_ROOT=/opt/hdf cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_JAVA=ON
+    - make -j
+    - make test
+    - make install
+    - cd python
+    - python3 -m pip install .
+    - pytest
+    - cd tests_binder
+    - ./run
+
 test-hdc-bionic:
-  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-bionic
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-bionic
   script:
     - mkdir build
     - cd build
@@ -14,7 +44,7 @@ test-hdc-bionic:
     - ./run
 
 test-hdc-xenial:
-  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-xenial
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-xenial
   script:
     - mkdir build
     - cd build
@@ -29,7 +59,7 @@ test-hdc-xenial:
     - ./run
 
 test-hdc-centos-7:
-  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-centos-7
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-centos-7
   script:
     - mkdir build
     - cd build
@@ -44,7 +74,7 @@ test-hdc-centos-7:
     - FC=gfortran ./run
 
 test-hdc-fedora-31:
-  image: dockerhub.tok.ipp.cas.cz:5000/test-hdc-fedora-31
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-fedora-31
   script:
     - mkdir build
     - cd build
@@ -58,3 +88,41 @@ test-hdc-fedora-31:
     #- pytest
     #- cd tests_binder
     #- FC=gfortran ./run
+
+test-pages:
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=OFF
+    - make -j5 install
+    - cd python
+    - python3 setup.py build_ext --inplace
+    - cd ..
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=ON
+    - make Sphinx
+    - mv docs/sphinx ../public
+  only:
+    - branches
+  except:
+    - master
+
+pages:
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=OFF
+    - make -j5 install
+    - cd python
+    - python3 setup.py build_ext --inplace
+    - cd ..
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_DOC=ON
+    - make Sphinx
+    - mv docs/sphinx ../public
+  artifacts:
+    paths:
+    - public
+  only:
+    - master
+

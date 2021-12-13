@@ -1,5 +1,5 @@
 
-! This file was generated on 2020-02-03 16:19:55.147040 by generate_fortran_api.py
+! This file was generated on 2021-07-26 13:29:59.076887 by generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -53,194 +53,199 @@ module hdc_fortran
             use iso_c_binding
         end subroutine hello
 
-        !> Default constructor. This is interface to C.
         function c_hdc_new_empty() result(obj) bind(c,name="hdc_new_empty")
+        ! Default constructor. This is interface to C.
             import
             type(hdc_t) :: obj
         end function c_hdc_new_empty
 
-        !> Default constructor. This is interface to C.
         function c_hdc_new_size(size) result(obj) bind(c,name="hdc_new_size")
+        ! Constructor. This is interface to C.
             import
-            integer(kind=c_size_t),value :: size
+            integer(kind=c_size_t),value :: size ! size in bytes
             type(hdc_t) :: obj
         end function c_hdc_new_size
 
-        !> Constructs HDC from string/uri
         function c_hdc_new_string(str) result(obj) bind(c,name="hdc_new_string")
+        ! Constructs HDC from string/uri
             import
             type(hdc_t) :: obj
-            character(kind=c_char), intent(in) :: str(*)
+            character(kind=c_char), intent(in) :: str(*) ! URI/string
         end function c_hdc_new_string
 
-        !> Construct empty array of type given by string.
         function c_hdc_new_array(rank, shape_, type_str) result(obj) bind(c,name="hdc_new_array")
+        ! Construct empty array of type given by string.
             import
             type(hdc_t) :: obj
-            integer(kind=c_size_t),value :: rank
-            type(c_ptr), value :: shape_
-            character(kind=c_char), intent(in) :: type_str(*)
+            integer(kind=c_size_t),value :: rank ! array rank
+            type(c_ptr), value :: shape_ ! array shape
+            character(kind=c_char), intent(in) :: type_str(*) ! type string - e.g. int8/uint16/float/double/bool/string
         end function c_hdc_new_array
 
-        function hdc_get_ptr(tree) result(ptr) bind(c, name="hdc_get_ptr")
-            import
-            type(hdc_t) :: tree
-            type(c_ptr) :: ptr
-        end function hdc_get_ptr
-
-        subroutine hdc_delete_ptr(obj) bind(c,name="hdc_delete_ptr")
-            import
-            type(c_ptr), value :: obj
-        end subroutine hdc_delete_ptr
-
-        !> Desctructor. This is interface to C.
         subroutine hdc_clean(obj) bind(c,name="hdc_clean")
-            import
-           type(hdc_t), value :: obj
+        ! Desctructor. This is interface to C.
+           import
+           type(hdc_t), value :: obj ! HDC object
         end subroutine hdc_clean
 
-        !> Performs deep copy of current node. This is interface to C.
         function c_hdc_copy(src, deep_copy) result(obj) bind(c,name="hdc_copy")
+        ! Performs deep copy of current node. This is interface to C.
             import
             type(hdc_t), value :: src
             logical(kind=c_bool), value :: deep_copy
             type(hdc_t) :: obj
         end function c_hdc_copy
 
-        !> Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. This is interface to C.
         subroutine c_hdc_add_child(obj, path, node) bind(c,name="hdc_add_child")
+        ! Adds HDC subtree as child with given path. If neccessary, recursively creates subnodes. This is interface to C.
             import
-            type(hdc_t), value :: obj
+            type(hdc_t), value :: obj ! HDC object
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value :: node
         end subroutine c_hdc_add_child
 
-        !> Initializations of HDC library
-        subroutine c_hdc_init(pluginFileName,pluginSettingsString) bind(c,name="hdc_init")
+        subroutine c_hdc_init(storagePluginFileName,storagePluginSettingsFileName) bind(c,name="hdc_init")
+        ! Initialization of HDC library
             import
-            character(kind=c_char), intent(in) :: pluginFileName(*)
-            character(kind=c_char), intent(in) :: pluginSettingsString(*)
+            character(kind=c_char), intent(in) :: storagePluginFileName(*) ! Filename of HDC storage plugin to be used.
+            character(kind=c_char), intent(in) :: storagePluginSettingsFileName(*) ! Filename of additional settings for provided storarage plugin. The file should be JSON encoded.
         end subroutine c_hdc_init
 
-        !> Sets slice to a given position. This is interface to C.
         subroutine hdc_set_slice(obj, pos, node) bind(c,name="hdc_set_slice")
+        ! Sets slice to the given position. This is interface to C.
             import
-            type(hdc_t), value :: obj
-            integer(kind=c_int32_t), value     :: pos
-            type(hdc_t), value :: node
+            type(hdc_t), value :: obj ! HDC object
+            integer(kind=c_int32_t), value     :: pos ! position/index
+            type(hdc_t), value :: node ! HDC object to be stored
         end subroutine hdc_set_slice
 
-        !> Inserts slice to a given position. This is interface to C.
         subroutine hdc_insert_slice(obj, pos, node) bind(c,name="hdc_insert_slice")
+        ! Inserts slice to the given position. This is interface to C.
             import
-            type(hdc_t), value :: obj
+            type(hdc_t), value :: obj ! HDC object
             integer(kind=c_int32_t), value     :: pos
-            type(hdc_t), value :: node
+            type(hdc_t), value :: node ! HDC object to be stored
         end subroutine hdc_insert_slice
 
-        !> Appends slice to the end of list. This is interface to C.
         subroutine hdc_append_slice(obj, node) bind(c,name="hdc_append_slice")
+        ! Appends slice to the end of list. This is interface to C.
             import
-            type(hdc_t), value :: obj
-            type(hdc_t), value :: node
+            type(hdc_t), value :: obj ! HDC object
+            type(hdc_t), value :: node ! HDC object to be stored
         end subroutine hdc_append_slice
 
 !        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
 !            import
-!            type(hdc_t), value :: obj
+!            type(hdc_t), value :: obj ! HDC object
 !            character(kind=c_char), intent(in) :: path(*)
 !            integer(kind=c_int32_t), value :: mode
 !       end subroutine c_hdc_to_json
 
-        !> Returns HDC subtree by given path. This is interface to C.
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
+        ! Returns HDC subtree by given path. This is interface to C.
             import
-            type(hdc_t), value :: obj
+            type(hdc_t), value :: obj ! HDC object
             character(kind=c_char) :: path(*)
             type(hdc_t) :: res
         end function c_hdc_get_child
 
-        !> Returns HDC subtree by given path and slice index. This is interface to C.
         function c_hdc_get_slice_path(obj, path, i) result(res) bind(c,name="hdc_get_slice")
+        ! Returns HDC subtree by given path and slice index. This is interface to C.
             import
-            type(hdc_t), value :: obj
+            type(hdc_t), value :: obj ! HDC object
             character(kind=c_char) :: path(*)
             integer(kind=c_size_t) :: i
             type(hdc_t) :: res
         end function c_hdc_get_slice_path
 
-        !> Returns HDC subtree by given slice index.  This is interface to C.
         function c_hdc_get_slice(obj, i) result(res) bind(c,name="hdc_get_slice")
+        ! Returns HDC subtree by given slice index.  This is interface to C.
             import
-            type(hdc_t), value :: obj
+            type(hdc_t), value :: obj ! HDC object
             integer(kind=c_size_t) :: i
             type(hdc_t) :: res
         end function c_hdc_get_slice
-        !> Sets HDC subtree to given path.
 
         subroutine c_hdc_set_child(obj, path, node) bind(c,name="hdc_set_child")
+        ! Sets HDC subtree to given path.
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value:: node
         end subroutine c_hdc_set_child
 
-        !> Recursively deletes subtree at given path. This is interface to C.
         subroutine c_hdc_delete_child(obj, path) bind(c,name="hdc_delete_child")
+        ! Recursively deletes subtree at given path. This is interface to C.
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
         end subroutine c_hdc_delete_child
 
-        !> Returns true if subtree with given path exists. This is interface to C.
         function c_hdc_exists(obj, path) result(res) bind(c,name="hdc_exists")
+        ! Returns true if subtree with given path exists. This is interface to C.
             import
-            type(hdc_t), value :: obj
+            type(hdc_t), value :: obj ! HDC object
             character(kind=c_char), intent(in) :: path(*)
             logical(kind=c_bool) :: res ! change this to c_bool later
         end function c_hdc_exists
 
-        !> Sets string to given path. This is interface to C.
+        function c_hdc_is_scalar(obj, path) result(res) bind(c,name="hdc_is_scalar")
+            ! Returns true if subtree with given path contains scala data. This is interface to C.
+                import
+                type(hdc_t), value :: obj ! HDC object
+                character(kind=c_char), intent(in) :: path(*)
+                logical(kind=c_bool) :: res ! change this to c_bool later
+        end function c_hdc_is_scalar
+
+        function c_hdc_is_external(obj, path) result(res) bind(c,name="hdc_is_external")
+            ! Returns true if subtree with given path contains external data. This is interface to C.
+                import
+                type(hdc_t), value :: obj ! HDC object
+                character(kind=c_char), intent(in) :: path(*)
+                logical(kind=c_bool) :: res ! change this to c_bool later
+        end function c_hdc_is_external
+
         subroutine c_hdc_set_string(obj, path, str) bind(c,name="hdc_set_string")
+        ! Sets string to given path. This is interface to C.
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
             character(kind=c_char), intent(in) :: str(*)
         end subroutine c_hdc_set_string
 
-        !> Sets arbitrary data casted to void pointer. This is interface to C.
         function c_hdc_as_voidptr(obj) result(res) bind(c,name="hdc_as_voidptr")
+        ! Sets arbitrary data casted to void pointer. This is interface to C.
             import
             type(hdc_t), value:: obj
             type(c_ptr) :: res
         end function c_hdc_as_voidptr
 
-        !> Gets hdc_data_t object. This is interface to C.
         function c_hdc_get_data(obj,path) result(res) bind(c,name="hdc_get_data")
+        ! Gets hdc_data_t object. This is interface to C.
             import
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value:: obj
             type(hdc_data_t) :: res
         end function c_hdc_get_data
 
-        !> Sets hdc_data_t object. This is interface to C.
         subroutine c_hdc_set_data(obj,path,data) bind(c,name="hdc_set_data")
+        ! Sets hdc_data_t object. This is interface to C.
             import
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value:: obj
             type(hdc_data_t),value :: data
         end subroutine c_hdc_set_data
 
-        !> Sets hdc_data_t object. This is interface to C.
         subroutine c_hdc_set_external(obj,path,data) bind(c,name="hdc_set_external")
+        ! Sets hdc_data_t object. This is interface to C.
             import
             character(kind=c_char), intent(in) :: path(*)
             type(hdc_t), value:: obj
             type(hdc_data_t),value :: data
         end subroutine c_hdc_set_external
 
-        !> Sets arbitrary data casted to void pointer. This is interface to C.
         subroutine c_hdc_as_string_fortran(obj,path,str,strlen)  bind(c,name="hdc_as_string_fortran")
+        ! Sets arbitrary data casted to void pointer. This is interface to C.
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
@@ -248,8 +253,8 @@ module hdc_fortran
             character(kind=c_char) :: str(*)
         end subroutine c_hdc_as_string_fortran
 
-        !> Sets arbitrary data casted to void pointer to given path. This is interface to C.
         function c_hdc_as_voidptr_path(obj, path) result(res) bind(c,name="hdc_as_voidptr")
+        ! Sets arbitrary data casted to void pointer to given path. This is interface to C.
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
@@ -257,6 +262,7 @@ module hdc_fortran
         end function c_hdc_as_voidptr_path
 
         subroutine hdc_dump(obj) bind(c,name="hdc_dump")
+        ! Dumps HDC(sub)tree into screen
             import
             type(hdc_t), value:: obj
         end subroutine hdc_dump
@@ -266,8 +272,8 @@ module hdc_fortran
             type(hdc_t), value:: obj
         end subroutine hdc_print_info
 
-        !> Sets scalar. This is interface to C.
         subroutine c_hdc_set_scalar(obj, path, data, type_) bind(c,name="hdc_set_scalar")
+        ! Sets scalar. This is interface to C.
             import
             type(hdc_t), value:: obj
             character(kind=c_char), intent(in) :: path(*)
@@ -275,6 +281,48 @@ module hdc_fortran
             integer(kind=c_size_t),value :: type_
         end subroutine c_hdc_set_scalar
 
+        function c_hdc_as_int8_scalar(obj, path) result(res) bind(c,name="hdc_as_int8_scalar")
+            ! Returns scalar int8
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            integer(kind=c_int8_t) :: res
+        end function c_hdc_as_int8_scalar
+        function c_hdc_as_int16_scalar(obj, path) result(res) bind(c,name="hdc_as_int16_scalar")
+            ! Returns scalar int16
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            integer(kind=c_int16_t) :: res
+        end function c_hdc_as_int16_scalar
+        function c_hdc_as_int32_scalar(obj, path) result(res) bind(c,name="hdc_as_int32_scalar")
+            ! Returns scalar int32
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            integer(kind=c_int32_t) :: res
+        end function c_hdc_as_int32_scalar
+        function c_hdc_as_int64_scalar(obj, path) result(res) bind(c,name="hdc_as_int64_scalar")
+            ! Returns scalar int64
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            integer(kind=c_int64_t) :: res
+        end function c_hdc_as_int64_scalar
+        function c_hdc_as_float_scalar(obj, path) result(res) bind(c,name="hdc_as_float_scalar")
+            ! Returns scalar float
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            real(kind=sp) :: res
+        end function c_hdc_as_float_scalar
+        function c_hdc_as_double_scalar(obj, path) result(res) bind(c,name="hdc_as_double_scalar")
+            ! Returns scalar double
+            import
+            type(hdc_t), value:: obj
+            character(kind=c_char), intent(in) :: path(*)
+            real(kind=dp) :: res
+        end function c_hdc_as_double_scalar
     end interface
 
     interface hdc_get_shape
@@ -289,8 +337,8 @@ module hdc_fortran
     end interface hdc_new
 
 
-    !> Generic set interface.
     interface hdc_set_data
+    ! Generic set interface.
         module procedure hdc_set_string
         module procedure hdc_set_string_path
         module procedure hdc_set_data_
@@ -393,14 +441,14 @@ module hdc_fortran
         module procedure hdc_set_double_7d_path
     end interface hdc_set_data
 
-    !> Genneric set_external interface.
     interface hdc_set_external
+    ! Genneric set_external interface.
         module procedure hdc_set_external_path
         module procedure hdc_set_external_
     end interface hdc_set_external
 
-    !> Generic set interface.
     interface hdc_set
+    ! Generic set interface.
         module procedure hdc_set_child
         module procedure hdc_set_string
         module procedure hdc_set_string_path
@@ -510,8 +558,8 @@ module hdc_fortran
        module procedure hdc_get_slice_path
     end interface hdc_get_slice
 
-   !> Generic hdc_get interface
    interface hdc_get
+   ! Generic hdc_get interface
        module procedure hdc_get_child_sub
        module procedure hdc_as_string_sub
        module procedure hdc_as_string_path_sub
@@ -614,8 +662,6 @@ module hdc_fortran
        module procedure hdc_as_double_path_sub
    end interface hdc_get
 
-
-
     public ::   hdc_t, &
                 hdc_data_t, &
                 dp, &
@@ -634,7 +680,6 @@ module hdc_fortran
                 hdc_get, &
                 hdc_copy, &
                 hdc_dump, &
-                hdc_delete_ptr, &
                 hdc_get_ptr_f, &
                 hdc_get_rank, &
                 hdc_insert_slice, &
@@ -644,6 +689,8 @@ module hdc_fortran
                 hdc_get_type, &
                 hdc_destroy, &
                 hdc_init, &
+                hdc_is_scalar, &
+                hdc_is_external, &
                 hdc_as_string_sub, &
                 hdc_as_string, &
                 hdc_new_string, &
@@ -701,49 +748,74 @@ module hdc_fortran
 contains
 
     subroutine hdc_add_child(this, path, node)
+    ! Adds child to the given node
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         type(hdc_t) :: node
         if (.not.present(path)) path = ""
         call c_hdc_add_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_add_child
 
     subroutine hdc_delete_child(this, path)
+    ! Deletes child on the given path
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         if (.not.present(path)) path = ""
         call c_hdc_delete_child(this, trim(path)//c_null_char)
     end subroutine hdc_delete_child
 
     function hdc_exists(this, path) result(res)
+    ! returns true if a node under given path exists
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         logical(kind=c_bool) :: res
         if (.not.present(path)) path = ""
         res = c_hdc_exists(this, trim(path)//c_null_char)
     end function hdc_exists
 
-    function hdc_get_rank(this,path) result(res)
+    function hdc_is_scalar(this, path) result(res)
+        ! returns true if a node under given path contains scalar data
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
+        logical(kind=c_bool) :: res
+        if (.not.present(path)) path = ""
+        res = c_hdc_is_scalar(this, trim(path)//c_null_char)
+     end function hdc_is_scalar
+
+    function hdc_is_external(this, path) result(res)
+    ! returns true if a node under given path contains external data
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
+        logical(kind=c_bool) :: res
+        if (.not.present(path)) path = ""
+        res = c_hdc_is_external(this, trim(path)//c_null_char)
+    end function hdc_is_external
+
+    function hdc_get_rank(this,path) result(res)
+    ! Returns rank of stored array data
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         integer(kind=c_size_t) :: res
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         if (.not.present(path)) path = ""
         data = hdc_get_data(this,path)
         res = data%rank
     end function hdc_get_rank
 
     function hdc_get_shape_path(this,path) result(res)
+    ! Returns shape of array data under given path
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_size_t) :: rank
-        character(len=*), optional :: path
+        character(len=*), optional :: path ! relative path within HDC tree
         integer(kind=c_long), allocatable :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         if (.not.present(path)) path = ""
         data = hdc_get_data(this,trim(path)//c_null_char)
         rank = data%rank
@@ -752,88 +824,98 @@ contains
     end function hdc_get_shape_path
 
     function hdc_get_shape_pos(this, pos) result(res)
+    ! Returns shape of array data under given position/index
         use iso_c_binding
-        type(hdc_t) :: this
-        integer(kind=c_int32_t) :: pos
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t) :: pos ! Position/index
         integer(kind=c_long) :: res
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,c_null_char)
         res = data%dshape(pos)
     end function hdc_get_shape_pos
 
     function hdc_get_type(this) result(res)
+    ! Retunrs numeric representation of stored data type
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_size_t) :: res
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,c_null_char)
         res = data%dtype
     end function hdc_get_type
 
     subroutine hdc_set_child(this, path, node)
+    ! Sets(replaces) node under the given path
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         type(hdc_t) :: node
         if (.not.present(path)) path = ""
         call c_hdc_set_child(this, trim(path)//c_null_char, node)
     end subroutine hdc_set_child
 
     subroutine hdc_copy(src, dest, deep_copy)
+    ! Pertorms copy of "src" node into "dest" node
         use iso_c_binding
-        type(hdc_t) :: src, dest
-        logical, optional :: deep_copy
+        type(hdc_t) :: src, dest ! HDC object
+        logical, optional :: deep_copy ! Recursively copy entire subtree
         logical(kind=c_bool) :: deep_copy_ = .false.
         if (present(deep_copy)) deep_copy_ = deep_copy
         dest = c_hdc_copy(src, deep_copy_)
     end subroutine hdc_copy
 
     subroutine hdc_set_string_path(this, path, str)
+    ! Sets string under the given path
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         character(len=*), intent(in) :: str
         call c_hdc_set_string(this, trim(path)//c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string_path
 
     subroutine hdc_set_string(this, str)
+    ! Sets string
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         character(len=*) :: str
         call c_hdc_set_string(this, c_null_char, trim(str)//c_null_char)
     end subroutine hdc_set_string
 
     function hdc_get_child(this, path) result(res)
+    ! Returns child node under the given path
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         type(hdc_t) :: res
         if (.not.present(path)) path = ""
         res = c_hdc_get_child(this, trim(path)//c_null_char)
     end function hdc_get_child
 
     subroutine hdc_get_child_sub(this, path, res)
+    ! Returns child node under the given path. The node is stored in "res".
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         type(hdc_t) :: res
         if (.not.present(path)) path = ""
         res = hdc_get_child(this, trim(path)//c_null_char)
     end subroutine hdc_get_child_sub
 
     function hdc_get_slice_path(this, path, ii) result(res)
+    ! Returns HDC onbject under the given path and position
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*) :: path
-        integer(kind=c_size_t) :: ii
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
+        integer(kind=c_size_t) :: ii ! position/index
         type(hdc_t) :: res
         res = c_hdc_get_slice_path(this, trim(path)//c_null_char, ii)
     end function hdc_get_slice_path
 
     subroutine hdc_get_slice_path_sub(this, path, ii, res)
+    ! Returns HDC onbject under the given path and position. The node is stored in "res".
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! relative path within HDC tree
         integer(kind=c_size_t) :: ii
         type(hdc_t) :: res
         if (.not.present(path)) path = ""
@@ -842,25 +924,28 @@ contains
 
 
     function hdc_get_slice_(this, ii) result(res)
+    ! Returns HDC node under the given position (int32)
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t) :: ii
         type(hdc_t) :: res
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_
 
     function hdc_get_slice_l(this, ii) result(res)
+    ! Returns HDC node under the given position (int64)
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=8) :: ii
         type(hdc_t) :: res
         res = c_hdc_get_slice(this, int(ii,c_long))
     end function hdc_get_slice_l
 
     function hdc_get_data(this, path) result(res)
+    ! Returns hdc_data_t struct containing data array and some metadata.
         use iso_c_binding
         type(hdc_t), intent(in) :: this
-        character(len=*), intent(in), optional :: path
+        character(len=*), intent(in), optional :: path ! relative path within HDC tree
         type(hdc_data_t) :: res
         if (present(path)) then
             res = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -870,6 +955,7 @@ contains
     end function hdc_get_data
 
     function C_to_F_string(c_string_pointer) result(f_string)
+    ! Converts C string into fortran one. Helper fuction.
         use, intrinsic :: iso_c_binding, only: c_ptr,c_f_pointer,c_char,c_null_char
         type(c_ptr), intent(in) :: c_string_pointer
         character(len=:), allocatable :: f_string
@@ -893,7 +979,8 @@ contains
     end function C_to_F_string
 
     subroutine hdc_as_string_sub(this, res)
-        type(hdc_t) :: this
+    ! Returns string data. The data are stored to *res*.
+        type(hdc_t) :: this ! HDC node
         type(c_ptr) :: char_ptr
         character(len=:),allocatable :: res
         char_ptr = c_hdc_as_voidptr(this)
@@ -901,6 +988,7 @@ contains
     end subroutine hdc_as_string_sub
 
     function hdc_new_array(rank, shape_, type_str) result(res)
+    ! Constructs HDC node containint array of provided shape and type
         integer(kind=c_size_t) :: rank
         integer(kind=c_long), dimension(:), target :: shape_
         character(len=*), intent(in) :: type_str
@@ -909,16 +997,18 @@ contains
     end function hdc_new_array
 
     function hdc_new_string(str) result(res)
+    ! Constructs HDC from the given string.
         character(len=*), intent(in) :: str
         type(hdc_t) :: res
         res = c_hdc_new_string(trim(str)//c_null_char)
     end function hdc_new_string
 
     function hdc_as_string(this,path) result(res)
+    ! Returns string stored under the given path
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         type(c_ptr) :: char_ptr
-        character(len=*), optional :: path
+        character(len=*), optional :: path ! Path string
         character(len=:), allocatable :: res
         if (.not.present(path)) path = ""
         char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
@@ -926,23 +1016,24 @@ contains
     end function hdc_as_string
 
     subroutine hdc_as_string_path_sub(this, path, res)
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         type(c_ptr) :: char_ptr
-        character(len=*) :: path
+        character(len=*) :: path ! relative path within HDC tree
         character(len=*) :: res
         char_ptr = c_hdc_as_voidptr_path(this,trim(path)//c_null_char)
         res = C_to_F_string(char_ptr)
     end subroutine hdc_as_string_path_sub
 
 !    subroutine hdc_to_json(this,path,mode)
-!        type(hdc_t) :: this
-!        character(len=*), optional :: path
+!        type(hdc_t) :: this ! HDC node
+!        character(len=*), optional :: path ! Path string
 !        integer(kind=c_int32_t) :: mode
 !        if (.not.present(path)) path = ""
 !        call c_hdc_to_json(this,trim(path)//c_null_char, mode)
 !    end subroutine hdc_to_json
 
     function hdc_get_ptr_f(tree) result(res)
+    ! Returns fortran pointer of HDC object. Helper fucntion. Do not use it unless you know what you are doing.
         use iso_c_binding
         type(hdc_t), target :: tree
         type(c_ptr) :: res
@@ -950,42 +1041,44 @@ contains
     end function hdc_get_ptr_f
 
     subroutine hdc_set_data_path(tree, path, data)
+    ! Sets hdc_data_t encapsulated data to the given node under the given path
         use iso_c_binding
         type(hdc_t), target :: tree
-        type(hdc_data_t) :: data
-        character(len=*), intent(in) :: path
+        type(hdc_data_t) :: data ! Encapsulated data
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         call c_hdc_set_external(tree, trim(path)//c_null_char, data)
     end subroutine hdc_set_data_path
 
     subroutine hdc_set_data_(tree, data)
+    ! Sets hdc_data_t encapsulated data under to the given node
         use iso_c_binding
         type(hdc_t), target :: tree
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         call c_hdc_set_external(tree, c_null_char, data)
     end subroutine hdc_set_data_
 
     subroutine hdc_set_external_path(tree, path, data)
         use iso_c_binding
         type(hdc_t), target :: tree
-        type(hdc_data_t) :: data
-        character(len=*), intent(in) :: path
+        type(hdc_data_t) :: data ! Encapsulated data
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         call c_hdc_set_external(tree, trim(path)//c_null_char, data)
     end subroutine hdc_set_external_path
 
     subroutine hdc_set_external_(tree, data)
         use iso_c_binding
         type(hdc_t), target :: tree
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         call c_hdc_set_external(tree, c_null_char, data)
     end subroutine hdc_set_external_
 
-    !> Destroy HDC
     subroutine hdc_destroy() bind(c,name="HDC_destroy_c")
+    ! Destroy HDC
         use iso_c_binding
     end subroutine hdc_destroy
 
-    !> Init HDC
     subroutine hdc_init(pluginFileName, pluginSettingsString)
+    ! HDC Initialization
         use iso_c_binding
         character(kind=c_char,len=*), optional :: pluginFileName
         character(kind=c_char,len=*), optional :: pluginSettingsString
@@ -995,8 +1088,9 @@ contains
     end subroutine hdc_init
 
     function hdc_new_dt(shape_, dtype) result(res)
+    ! Constructs HDC object from given shape and dtype string.
         integer(kind=c_long), dimension(:), target, optional :: shape_
-        character(len=*), intent(in), optional :: dtype
+        character(len=*), intent(in), optional :: dtype ! type string, e.g. int8/uint16/float/double/boolean/string
         integer(kind=c_size_t) :: rank
         type(hdc_t) :: res
         if (present(shape_)) then
@@ -1009,16 +1103,18 @@ contains
     end function hdc_new_dt
 
     function hdc_new_size(size) result(res)
-        integer(kind=c_size_t), value :: size
+    ! Constructs a new HDC object with given size.
+        integer(kind=c_size_t), value :: size ! Size in bytes
         type(hdc_t) :: res
         res = c_hdc_new_size(size)
     end function hdc_new_size
 
     function hdc_as_int8_1d(this, path) result(res)
+    ! Returns 1d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1027,9 +1123,10 @@ contains
     end function hdc_as_int8_1d
 
     subroutine hdc_as_int8_1d_sub(this, res)
+    ! Returns 1d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_1d_sub"
@@ -1037,10 +1134,11 @@ contains
     end subroutine hdc_as_int8_1d_sub
 
     subroutine hdc_set_int8_1d(this, data, flags_in)
+    ! Sets 1d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1054,10 +1152,11 @@ contains
     end subroutine hdc_set_int8_1d
 
     subroutine hdc_set_int8_1d_path(this, path, data, flags_in)
+    ! Sets 1d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1072,19 +1171,21 @@ contains
     end subroutine hdc_set_int8_1d_path
 
     subroutine hdc_as_int8_1d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 1d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_1d_path_sub
 
     function hdc_as_int8_2d(this, path) result(res)
+    ! Returns 2d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1093,9 +1194,10 @@ contains
     end function hdc_as_int8_2d
 
     subroutine hdc_as_int8_2d_sub(this, res)
+    ! Returns 2d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_2d_sub"
@@ -1103,10 +1205,11 @@ contains
     end subroutine hdc_as_int8_2d_sub
 
     subroutine hdc_set_int8_2d(this, data, flags_in)
+    ! Sets 2d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1120,10 +1223,11 @@ contains
     end subroutine hdc_set_int8_2d
 
     subroutine hdc_set_int8_2d_path(this, path, data, flags_in)
+    ! Sets 2d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1138,19 +1242,21 @@ contains
     end subroutine hdc_set_int8_2d_path
 
     subroutine hdc_as_int8_2d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 2d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_2d_path_sub
 
     function hdc_as_int8_3d(this, path) result(res)
+    ! Returns 3d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1159,9 +1265,10 @@ contains
     end function hdc_as_int8_3d
 
     subroutine hdc_as_int8_3d_sub(this, res)
+    ! Returns 3d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_3d_sub"
@@ -1169,10 +1276,11 @@ contains
     end subroutine hdc_as_int8_3d_sub
 
     subroutine hdc_set_int8_3d(this, data, flags_in)
+    ! Sets 3d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1186,10 +1294,11 @@ contains
     end subroutine hdc_set_int8_3d
 
     subroutine hdc_set_int8_3d_path(this, path, data, flags_in)
+    ! Sets 3d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1204,19 +1313,21 @@ contains
     end subroutine hdc_set_int8_3d_path
 
     subroutine hdc_as_int8_3d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 3d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_3d_path_sub
 
     function hdc_as_int8_4d(this, path) result(res)
+    ! Returns 4d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1225,9 +1336,10 @@ contains
     end function hdc_as_int8_4d
 
     subroutine hdc_as_int8_4d_sub(this, res)
+    ! Returns 4d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_4d_sub"
@@ -1235,10 +1347,11 @@ contains
     end subroutine hdc_as_int8_4d_sub
 
     subroutine hdc_set_int8_4d(this, data, flags_in)
+    ! Sets 4d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1252,10 +1365,11 @@ contains
     end subroutine hdc_set_int8_4d
 
     subroutine hdc_set_int8_4d_path(this, path, data, flags_in)
+    ! Sets 4d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1270,19 +1384,21 @@ contains
     end subroutine hdc_set_int8_4d_path
 
     subroutine hdc_as_int8_4d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 4d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_4d_path_sub
 
     function hdc_as_int8_5d(this, path) result(res)
+    ! Returns 5d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1291,9 +1407,10 @@ contains
     end function hdc_as_int8_5d
 
     subroutine hdc_as_int8_5d_sub(this, res)
+    ! Returns 5d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_5d_sub"
@@ -1301,10 +1418,11 @@ contains
     end subroutine hdc_as_int8_5d_sub
 
     subroutine hdc_set_int8_5d(this, data, flags_in)
+    ! Sets 5d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1318,10 +1436,11 @@ contains
     end subroutine hdc_set_int8_5d
 
     subroutine hdc_set_int8_5d_path(this, path, data, flags_in)
+    ! Sets 5d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1336,19 +1455,21 @@ contains
     end subroutine hdc_set_int8_5d_path
 
     subroutine hdc_as_int8_5d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 5d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_5d_path_sub
 
     function hdc_as_int8_6d(this, path) result(res)
+    ! Returns 6d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1357,9 +1478,10 @@ contains
     end function hdc_as_int8_6d
 
     subroutine hdc_as_int8_6d_sub(this, res)
+    ! Returns 6d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_6d_sub"
@@ -1367,10 +1489,11 @@ contains
     end subroutine hdc_as_int8_6d_sub
 
     subroutine hdc_set_int8_6d(this, data, flags_in)
+    ! Sets 6d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1384,10 +1507,11 @@ contains
     end subroutine hdc_set_int8_6d
 
     subroutine hdc_set_int8_6d_path(this, path, data, flags_in)
+    ! Sets 6d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1402,19 +1526,21 @@ contains
     end subroutine hdc_set_int8_6d_path
 
     subroutine hdc_as_int8_6d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 6d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_6d_path_sub
 
     function hdc_as_int8_7d(this, path) result(res)
+    ! Returns 7d int8 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1423,9 +1549,10 @@ contains
     end function hdc_as_int8_7d
 
     subroutine hdc_as_int8_7d_sub(this, res)
+    ! Returns 7d int8 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int8_t), pointer :: res(:,:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int8_7d_sub"
@@ -1433,10 +1560,11 @@ contains
     end subroutine hdc_as_int8_7d_sub
 
     subroutine hdc_set_int8_7d(this, data, flags_in)
+    ! Sets 7d int8 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1450,10 +1578,11 @@ contains
     end subroutine hdc_set_int8_7d
 
     subroutine hdc_set_int8_7d_path(this, path, data, flags_in)
+    ! Sets 7d int8 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1468,70 +1597,65 @@ contains
     end subroutine hdc_set_int8_7d_path
 
     subroutine hdc_as_int8_7d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 7d int8 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), pointer, intent(inout) :: res(:,:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int8_7d_path_sub
 
     subroutine hdc_set_int8_scalar(this, data)
+    ! Sets int8 data into the given node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT8)
     end subroutine hdc_set_int8_scalar
 
     subroutine hdc_set_int8_scalar_path(this, path, data)
+    ! Sets int8 data under the given path of the provided node.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_int8_t), intent(in), target :: data
         call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT8)
     end subroutine hdc_set_int8_scalar_path
 
     subroutine hdc_as_int8_sub(this, res)
-        type(hdc_t) :: this
+    ! Sets int8 data into provided variable.
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int8_t) :: res
-        integer(kind=c_int8_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int8_scalar(this, c_null_char)
     end subroutine hdc_as_int8_sub
 
 
     function hdc_as_int8(this, path) result(res)
+    ! Returns int8 scalar data.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
         integer(kind=c_int8_t) :: res
-        integer(kind=c_int8_t), pointer :: pres
-        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int8_scalar(this, trim(path)//c_null_char)
     end function hdc_as_int8
 
     subroutine hdc_as_int8_path_sub(this, path, res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets int8 scalar data under the given path and provided node to provided variable.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int8_t) :: res
-        integer(kind=c_int8_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int8_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_int8_path_sub
 
 
     function hdc_as_int16_1d(this, path) result(res)
+    ! Returns 1d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1540,9 +1664,10 @@ contains
     end function hdc_as_int16_1d
 
     subroutine hdc_as_int16_1d_sub(this, res)
+    ! Returns 1d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_1d_sub"
@@ -1550,10 +1675,11 @@ contains
     end subroutine hdc_as_int16_1d_sub
 
     subroutine hdc_set_int16_1d(this, data, flags_in)
+    ! Sets 1d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1567,10 +1693,11 @@ contains
     end subroutine hdc_set_int16_1d
 
     subroutine hdc_set_int16_1d_path(this, path, data, flags_in)
+    ! Sets 1d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1585,19 +1712,21 @@ contains
     end subroutine hdc_set_int16_1d_path
 
     subroutine hdc_as_int16_1d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 1d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_1d_path_sub
 
     function hdc_as_int16_2d(this, path) result(res)
+    ! Returns 2d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1606,9 +1735,10 @@ contains
     end function hdc_as_int16_2d
 
     subroutine hdc_as_int16_2d_sub(this, res)
+    ! Returns 2d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_2d_sub"
@@ -1616,10 +1746,11 @@ contains
     end subroutine hdc_as_int16_2d_sub
 
     subroutine hdc_set_int16_2d(this, data, flags_in)
+    ! Sets 2d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1633,10 +1764,11 @@ contains
     end subroutine hdc_set_int16_2d
 
     subroutine hdc_set_int16_2d_path(this, path, data, flags_in)
+    ! Sets 2d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1651,19 +1783,21 @@ contains
     end subroutine hdc_set_int16_2d_path
 
     subroutine hdc_as_int16_2d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 2d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_2d_path_sub
 
     function hdc_as_int16_3d(this, path) result(res)
+    ! Returns 3d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1672,9 +1806,10 @@ contains
     end function hdc_as_int16_3d
 
     subroutine hdc_as_int16_3d_sub(this, res)
+    ! Returns 3d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_3d_sub"
@@ -1682,10 +1817,11 @@ contains
     end subroutine hdc_as_int16_3d_sub
 
     subroutine hdc_set_int16_3d(this, data, flags_in)
+    ! Sets 3d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1699,10 +1835,11 @@ contains
     end subroutine hdc_set_int16_3d
 
     subroutine hdc_set_int16_3d_path(this, path, data, flags_in)
+    ! Sets 3d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1717,19 +1854,21 @@ contains
     end subroutine hdc_set_int16_3d_path
 
     subroutine hdc_as_int16_3d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 3d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_3d_path_sub
 
     function hdc_as_int16_4d(this, path) result(res)
+    ! Returns 4d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1738,9 +1877,10 @@ contains
     end function hdc_as_int16_4d
 
     subroutine hdc_as_int16_4d_sub(this, res)
+    ! Returns 4d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_4d_sub"
@@ -1748,10 +1888,11 @@ contains
     end subroutine hdc_as_int16_4d_sub
 
     subroutine hdc_set_int16_4d(this, data, flags_in)
+    ! Sets 4d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1765,10 +1906,11 @@ contains
     end subroutine hdc_set_int16_4d
 
     subroutine hdc_set_int16_4d_path(this, path, data, flags_in)
+    ! Sets 4d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1783,19 +1925,21 @@ contains
     end subroutine hdc_set_int16_4d_path
 
     subroutine hdc_as_int16_4d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 4d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_4d_path_sub
 
     function hdc_as_int16_5d(this, path) result(res)
+    ! Returns 5d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1804,9 +1948,10 @@ contains
     end function hdc_as_int16_5d
 
     subroutine hdc_as_int16_5d_sub(this, res)
+    ! Returns 5d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_5d_sub"
@@ -1814,10 +1959,11 @@ contains
     end subroutine hdc_as_int16_5d_sub
 
     subroutine hdc_set_int16_5d(this, data, flags_in)
+    ! Sets 5d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1831,10 +1977,11 @@ contains
     end subroutine hdc_set_int16_5d
 
     subroutine hdc_set_int16_5d_path(this, path, data, flags_in)
+    ! Sets 5d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1849,19 +1996,21 @@ contains
     end subroutine hdc_set_int16_5d_path
 
     subroutine hdc_as_int16_5d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 5d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_5d_path_sub
 
     function hdc_as_int16_6d(this, path) result(res)
+    ! Returns 6d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1870,9 +2019,10 @@ contains
     end function hdc_as_int16_6d
 
     subroutine hdc_as_int16_6d_sub(this, res)
+    ! Returns 6d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_6d_sub"
@@ -1880,10 +2030,11 @@ contains
     end subroutine hdc_as_int16_6d_sub
 
     subroutine hdc_set_int16_6d(this, data, flags_in)
+    ! Sets 6d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1897,10 +2048,11 @@ contains
     end subroutine hdc_set_int16_6d
 
     subroutine hdc_set_int16_6d_path(this, path, data, flags_in)
+    ! Sets 6d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1915,19 +2067,21 @@ contains
     end subroutine hdc_set_int16_6d_path
 
     subroutine hdc_as_int16_6d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 6d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_6d_path_sub
 
     function hdc_as_int16_7d(this, path) result(res)
+    ! Returns 7d int16 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -1936,9 +2090,10 @@ contains
     end function hdc_as_int16_7d
 
     subroutine hdc_as_int16_7d_sub(this, res)
+    ! Returns 7d int16 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int16_t), pointer :: res(:,:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int16_7d_sub"
@@ -1946,10 +2101,11 @@ contains
     end subroutine hdc_as_int16_7d_sub
 
     subroutine hdc_set_int16_7d(this, data, flags_in)
+    ! Sets 7d int16 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -1963,10 +2119,11 @@ contains
     end subroutine hdc_set_int16_7d
 
     subroutine hdc_set_int16_7d_path(this, path, data, flags_in)
+    ! Sets 7d int16 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -1981,70 +2138,65 @@ contains
     end subroutine hdc_set_int16_7d_path
 
     subroutine hdc_as_int16_7d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 7d int16 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), pointer, intent(inout) :: res(:,:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int16_7d_path_sub
 
     subroutine hdc_set_int16_scalar(this, data)
+    ! Sets int16 data into the given node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT16)
     end subroutine hdc_set_int16_scalar
 
     subroutine hdc_set_int16_scalar_path(this, path, data)
+    ! Sets int16 data under the given path of the provided node.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_int16_t), intent(in), target :: data
         call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT16)
     end subroutine hdc_set_int16_scalar_path
 
     subroutine hdc_as_int16_sub(this, res)
-        type(hdc_t) :: this
+    ! Sets int16 data into provided variable.
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int16_t) :: res
-        integer(kind=c_int16_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int16_scalar(this, c_null_char)
     end subroutine hdc_as_int16_sub
 
 
     function hdc_as_int16(this, path) result(res)
+    ! Returns int16 scalar data.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
         integer(kind=c_int16_t) :: res
-        integer(kind=c_int16_t), pointer :: pres
-        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int16_scalar(this, trim(path)//c_null_char)
     end function hdc_as_int16
 
     subroutine hdc_as_int16_path_sub(this, path, res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets int16 scalar data under the given path and provided node to provided variable.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int16_t) :: res
-        integer(kind=c_int16_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int16_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_int16_path_sub
 
 
     function hdc_as_int32_1d(this, path) result(res)
+    ! Returns 1d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2053,9 +2205,10 @@ contains
     end function hdc_as_int32_1d
 
     subroutine hdc_as_int32_1d_sub(this, res)
+    ! Returns 1d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_1d_sub"
@@ -2063,10 +2216,11 @@ contains
     end subroutine hdc_as_int32_1d_sub
 
     subroutine hdc_set_int32_1d(this, data, flags_in)
+    ! Sets 1d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2080,10 +2234,11 @@ contains
     end subroutine hdc_set_int32_1d
 
     subroutine hdc_set_int32_1d_path(this, path, data, flags_in)
+    ! Sets 1d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2098,19 +2253,21 @@ contains
     end subroutine hdc_set_int32_1d_path
 
     subroutine hdc_as_int32_1d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 1d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_1d_path_sub
 
     function hdc_as_int32_2d(this, path) result(res)
+    ! Returns 2d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2119,9 +2276,10 @@ contains
     end function hdc_as_int32_2d
 
     subroutine hdc_as_int32_2d_sub(this, res)
+    ! Returns 2d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_2d_sub"
@@ -2129,10 +2287,11 @@ contains
     end subroutine hdc_as_int32_2d_sub
 
     subroutine hdc_set_int32_2d(this, data, flags_in)
+    ! Sets 2d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2146,10 +2305,11 @@ contains
     end subroutine hdc_set_int32_2d
 
     subroutine hdc_set_int32_2d_path(this, path, data, flags_in)
+    ! Sets 2d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2164,19 +2324,21 @@ contains
     end subroutine hdc_set_int32_2d_path
 
     subroutine hdc_as_int32_2d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 2d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_2d_path_sub
 
     function hdc_as_int32_3d(this, path) result(res)
+    ! Returns 3d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2185,9 +2347,10 @@ contains
     end function hdc_as_int32_3d
 
     subroutine hdc_as_int32_3d_sub(this, res)
+    ! Returns 3d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_3d_sub"
@@ -2195,10 +2358,11 @@ contains
     end subroutine hdc_as_int32_3d_sub
 
     subroutine hdc_set_int32_3d(this, data, flags_in)
+    ! Sets 3d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2212,10 +2376,11 @@ contains
     end subroutine hdc_set_int32_3d
 
     subroutine hdc_set_int32_3d_path(this, path, data, flags_in)
+    ! Sets 3d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2230,19 +2395,21 @@ contains
     end subroutine hdc_set_int32_3d_path
 
     subroutine hdc_as_int32_3d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 3d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_3d_path_sub
 
     function hdc_as_int32_4d(this, path) result(res)
+    ! Returns 4d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2251,9 +2418,10 @@ contains
     end function hdc_as_int32_4d
 
     subroutine hdc_as_int32_4d_sub(this, res)
+    ! Returns 4d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_4d_sub"
@@ -2261,10 +2429,11 @@ contains
     end subroutine hdc_as_int32_4d_sub
 
     subroutine hdc_set_int32_4d(this, data, flags_in)
+    ! Sets 4d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2278,10 +2447,11 @@ contains
     end subroutine hdc_set_int32_4d
 
     subroutine hdc_set_int32_4d_path(this, path, data, flags_in)
+    ! Sets 4d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2296,19 +2466,21 @@ contains
     end subroutine hdc_set_int32_4d_path
 
     subroutine hdc_as_int32_4d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 4d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_4d_path_sub
 
     function hdc_as_int32_5d(this, path) result(res)
+    ! Returns 5d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2317,9 +2489,10 @@ contains
     end function hdc_as_int32_5d
 
     subroutine hdc_as_int32_5d_sub(this, res)
+    ! Returns 5d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_5d_sub"
@@ -2327,10 +2500,11 @@ contains
     end subroutine hdc_as_int32_5d_sub
 
     subroutine hdc_set_int32_5d(this, data, flags_in)
+    ! Sets 5d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2344,10 +2518,11 @@ contains
     end subroutine hdc_set_int32_5d
 
     subroutine hdc_set_int32_5d_path(this, path, data, flags_in)
+    ! Sets 5d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2362,19 +2537,21 @@ contains
     end subroutine hdc_set_int32_5d_path
 
     subroutine hdc_as_int32_5d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 5d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_5d_path_sub
 
     function hdc_as_int32_6d(this, path) result(res)
+    ! Returns 6d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2383,9 +2560,10 @@ contains
     end function hdc_as_int32_6d
 
     subroutine hdc_as_int32_6d_sub(this, res)
+    ! Returns 6d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_6d_sub"
@@ -2393,10 +2571,11 @@ contains
     end subroutine hdc_as_int32_6d_sub
 
     subroutine hdc_set_int32_6d(this, data, flags_in)
+    ! Sets 6d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2410,10 +2589,11 @@ contains
     end subroutine hdc_set_int32_6d
 
     subroutine hdc_set_int32_6d_path(this, path, data, flags_in)
+    ! Sets 6d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2428,19 +2608,21 @@ contains
     end subroutine hdc_set_int32_6d_path
 
     subroutine hdc_as_int32_6d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 6d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_6d_path_sub
 
     function hdc_as_int32_7d(this, path) result(res)
+    ! Returns 7d int32 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2449,9 +2631,10 @@ contains
     end function hdc_as_int32_7d
 
     subroutine hdc_as_int32_7d_sub(this, res)
+    ! Returns 7d int32 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int32_t), pointer :: res(:,:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int32_7d_sub"
@@ -2459,10 +2642,11 @@ contains
     end subroutine hdc_as_int32_7d_sub
 
     subroutine hdc_set_int32_7d(this, data, flags_in)
+    ! Sets 7d int32 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2476,10 +2660,11 @@ contains
     end subroutine hdc_set_int32_7d
 
     subroutine hdc_set_int32_7d_path(this, path, data, flags_in)
+    ! Sets 7d int32 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2494,70 +2679,65 @@ contains
     end subroutine hdc_set_int32_7d_path
 
     subroutine hdc_as_int32_7d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 7d int32 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), pointer, intent(inout) :: res(:,:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int32_7d_path_sub
 
     subroutine hdc_set_int32_scalar(this, data)
+    ! Sets int32 data into the given node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT32)
     end subroutine hdc_set_int32_scalar
 
     subroutine hdc_set_int32_scalar_path(this, path, data)
+    ! Sets int32 data under the given path of the provided node.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_int32_t), intent(in), target :: data
         call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT32)
     end subroutine hdc_set_int32_scalar_path
 
     subroutine hdc_as_int32_sub(this, res)
-        type(hdc_t) :: this
+    ! Sets int32 data into provided variable.
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int32_t) :: res
-        integer(kind=c_int32_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int32_scalar(this, c_null_char)
     end subroutine hdc_as_int32_sub
 
 
     function hdc_as_int32(this, path) result(res)
+    ! Returns int32 scalar data.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
         integer(kind=c_int32_t) :: res
-        integer(kind=c_int32_t), pointer :: pres
-        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int32_scalar(this, trim(path)//c_null_char)
     end function hdc_as_int32
 
     subroutine hdc_as_int32_path_sub(this, path, res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets int32 scalar data under the given path and provided node to provided variable.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int32_t) :: res
-        integer(kind=c_int32_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int32_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_int32_path_sub
 
 
     function hdc_as_int64_1d(this, path) result(res)
+    ! Returns 1d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2566,9 +2746,10 @@ contains
     end function hdc_as_int64_1d
 
     subroutine hdc_as_int64_1d_sub(this, res)
+    ! Returns 1d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_1d_sub"
@@ -2576,10 +2757,11 @@ contains
     end subroutine hdc_as_int64_1d_sub
 
     subroutine hdc_set_int64_1d(this, data, flags_in)
+    ! Sets 1d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2593,10 +2775,11 @@ contains
     end subroutine hdc_set_int64_1d
 
     subroutine hdc_set_int64_1d_path(this, path, data, flags_in)
+    ! Sets 1d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2611,19 +2794,21 @@ contains
     end subroutine hdc_set_int64_1d_path
 
     subroutine hdc_as_int64_1d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 1d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_1d_path_sub
 
     function hdc_as_int64_2d(this, path) result(res)
+    ! Returns 2d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2632,9 +2817,10 @@ contains
     end function hdc_as_int64_2d
 
     subroutine hdc_as_int64_2d_sub(this, res)
+    ! Returns 2d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_2d_sub"
@@ -2642,10 +2828,11 @@ contains
     end subroutine hdc_as_int64_2d_sub
 
     subroutine hdc_set_int64_2d(this, data, flags_in)
+    ! Sets 2d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2659,10 +2846,11 @@ contains
     end subroutine hdc_set_int64_2d
 
     subroutine hdc_set_int64_2d_path(this, path, data, flags_in)
+    ! Sets 2d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2677,19 +2865,21 @@ contains
     end subroutine hdc_set_int64_2d_path
 
     subroutine hdc_as_int64_2d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 2d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_2d_path_sub
 
     function hdc_as_int64_3d(this, path) result(res)
+    ! Returns 3d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2698,9 +2888,10 @@ contains
     end function hdc_as_int64_3d
 
     subroutine hdc_as_int64_3d_sub(this, res)
+    ! Returns 3d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_3d_sub"
@@ -2708,10 +2899,11 @@ contains
     end subroutine hdc_as_int64_3d_sub
 
     subroutine hdc_set_int64_3d(this, data, flags_in)
+    ! Sets 3d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2725,10 +2917,11 @@ contains
     end subroutine hdc_set_int64_3d
 
     subroutine hdc_set_int64_3d_path(this, path, data, flags_in)
+    ! Sets 3d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2743,19 +2936,21 @@ contains
     end subroutine hdc_set_int64_3d_path
 
     subroutine hdc_as_int64_3d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 3d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_3d_path_sub
 
     function hdc_as_int64_4d(this, path) result(res)
+    ! Returns 4d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2764,9 +2959,10 @@ contains
     end function hdc_as_int64_4d
 
     subroutine hdc_as_int64_4d_sub(this, res)
+    ! Returns 4d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_4d_sub"
@@ -2774,10 +2970,11 @@ contains
     end subroutine hdc_as_int64_4d_sub
 
     subroutine hdc_set_int64_4d(this, data, flags_in)
+    ! Sets 4d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2791,10 +2988,11 @@ contains
     end subroutine hdc_set_int64_4d
 
     subroutine hdc_set_int64_4d_path(this, path, data, flags_in)
+    ! Sets 4d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2809,19 +3007,21 @@ contains
     end subroutine hdc_set_int64_4d_path
 
     subroutine hdc_as_int64_4d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 4d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_4d_path_sub
 
     function hdc_as_int64_5d(this, path) result(res)
+    ! Returns 5d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2830,9 +3030,10 @@ contains
     end function hdc_as_int64_5d
 
     subroutine hdc_as_int64_5d_sub(this, res)
+    ! Returns 5d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_5d_sub"
@@ -2840,10 +3041,11 @@ contains
     end subroutine hdc_as_int64_5d_sub
 
     subroutine hdc_set_int64_5d(this, data, flags_in)
+    ! Sets 5d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2857,10 +3059,11 @@ contains
     end subroutine hdc_set_int64_5d
 
     subroutine hdc_set_int64_5d_path(this, path, data, flags_in)
+    ! Sets 5d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2875,19 +3078,21 @@ contains
     end subroutine hdc_set_int64_5d_path
 
     subroutine hdc_as_int64_5d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 5d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_5d_path_sub
 
     function hdc_as_int64_6d(this, path) result(res)
+    ! Returns 6d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2896,9 +3101,10 @@ contains
     end function hdc_as_int64_6d
 
     subroutine hdc_as_int64_6d_sub(this, res)
+    ! Returns 6d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_6d_sub"
@@ -2906,10 +3112,11 @@ contains
     end subroutine hdc_as_int64_6d_sub
 
     subroutine hdc_set_int64_6d(this, data, flags_in)
+    ! Sets 6d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2923,10 +3130,11 @@ contains
     end subroutine hdc_set_int64_6d
 
     subroutine hdc_set_int64_6d_path(this, path, data, flags_in)
+    ! Sets 6d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -2941,19 +3149,21 @@ contains
     end subroutine hdc_set_int64_6d_path
 
     subroutine hdc_as_int64_6d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 6d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_6d_path_sub
 
     function hdc_as_int64_7d(this, path) result(res)
+    ! Returns 7d int64 array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -2962,9 +3172,10 @@ contains
     end function hdc_as_int64_7d
 
     subroutine hdc_as_int64_7d_sub(this, res)
+    ! Returns 7d int64 array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         integer(kind=c_int64_t), pointer :: res(:,:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_int64_7d_sub"
@@ -2972,10 +3183,11 @@ contains
     end subroutine hdc_as_int64_7d_sub
 
     subroutine hdc_set_int64_7d(this, data, flags_in)
+    ! Sets 7d int64 array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -2989,10 +3201,11 @@ contains
     end subroutine hdc_set_int64_7d
 
     subroutine hdc_set_int64_7d_path(this, path, data, flags_in)
+    ! Sets 7d int64 array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3007,70 +3220,65 @@ contains
     end subroutine hdc_set_int64_7d_path
 
     subroutine hdc_as_int64_7d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 7d int64 array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), pointer, intent(inout) :: res(:,:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_int64_7d_path_sub
 
     subroutine hdc_set_int64_scalar(this, data)
+    ! Sets int64 data into the given node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_INT64)
     end subroutine hdc_set_int64_scalar
 
     subroutine hdc_set_int64_scalar_path(this, path, data)
+    ! Sets int64 data under the given path of the provided node.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_int64_t), intent(in), target :: data
         call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_INT64)
     end subroutine hdc_set_int64_scalar_path
 
     subroutine hdc_as_int64_sub(this, res)
-        type(hdc_t) :: this
+    ! Sets int64 data into provided variable.
+        type(hdc_t) :: this ! HDC node
         integer(kind=c_int64_t) :: res
-        integer(kind=c_int64_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int64_scalar(this, c_null_char)
     end subroutine hdc_as_int64_sub
 
 
     function hdc_as_int64(this, path) result(res)
+    ! Returns int64 scalar data.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
         integer(kind=c_int64_t) :: res
-        integer(kind=c_int64_t), pointer :: pres
-        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int64_scalar(this, trim(path)//c_null_char)
     end function hdc_as_int64
 
     subroutine hdc_as_int64_path_sub(this, path, res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets int64 scalar data under the given path and provided node to provided variable.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         integer(kind=c_int64_t) :: res
-        integer(kind=c_int64_t), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_int64_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_int64_path_sub
 
 
     function hdc_as_float_1d(this, path) result(res)
+    ! Returns 1d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3079,9 +3287,10 @@ contains
     end function hdc_as_float_1d
 
     subroutine hdc_as_float_1d_sub(this, res)
+    ! Returns 1d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_1d_sub"
@@ -3089,10 +3298,11 @@ contains
     end subroutine hdc_as_float_1d_sub
 
     subroutine hdc_set_float_1d(this, data, flags_in)
+    ! Sets 1d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3106,10 +3316,11 @@ contains
     end subroutine hdc_set_float_1d
 
     subroutine hdc_set_float_1d_path(this, path, data, flags_in)
+    ! Sets 1d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3124,19 +3335,21 @@ contains
     end subroutine hdc_set_float_1d_path
 
     subroutine hdc_as_float_1d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 1d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_1d_path_sub
 
     function hdc_as_float_2d(this, path) result(res)
+    ! Returns 2d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3145,9 +3358,10 @@ contains
     end function hdc_as_float_2d
 
     subroutine hdc_as_float_2d_sub(this, res)
+    ! Returns 2d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_2d_sub"
@@ -3155,10 +3369,11 @@ contains
     end subroutine hdc_as_float_2d_sub
 
     subroutine hdc_set_float_2d(this, data, flags_in)
+    ! Sets 2d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3172,10 +3387,11 @@ contains
     end subroutine hdc_set_float_2d
 
     subroutine hdc_set_float_2d_path(this, path, data, flags_in)
+    ! Sets 2d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3190,19 +3406,21 @@ contains
     end subroutine hdc_set_float_2d_path
 
     subroutine hdc_as_float_2d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 2d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_2d_path_sub
 
     function hdc_as_float_3d(this, path) result(res)
+    ! Returns 3d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3211,9 +3429,10 @@ contains
     end function hdc_as_float_3d
 
     subroutine hdc_as_float_3d_sub(this, res)
+    ! Returns 3d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_3d_sub"
@@ -3221,10 +3440,11 @@ contains
     end subroutine hdc_as_float_3d_sub
 
     subroutine hdc_set_float_3d(this, data, flags_in)
+    ! Sets 3d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3238,10 +3458,11 @@ contains
     end subroutine hdc_set_float_3d
 
     subroutine hdc_set_float_3d_path(this, path, data, flags_in)
+    ! Sets 3d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3256,19 +3477,21 @@ contains
     end subroutine hdc_set_float_3d_path
 
     subroutine hdc_as_float_3d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 3d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_3d_path_sub
 
     function hdc_as_float_4d(this, path) result(res)
+    ! Returns 4d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3277,9 +3500,10 @@ contains
     end function hdc_as_float_4d
 
     subroutine hdc_as_float_4d_sub(this, res)
+    ! Returns 4d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_4d_sub"
@@ -3287,10 +3511,11 @@ contains
     end subroutine hdc_as_float_4d_sub
 
     subroutine hdc_set_float_4d(this, data, flags_in)
+    ! Sets 4d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3304,10 +3529,11 @@ contains
     end subroutine hdc_set_float_4d
 
     subroutine hdc_set_float_4d_path(this, path, data, flags_in)
+    ! Sets 4d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3322,19 +3548,21 @@ contains
     end subroutine hdc_set_float_4d_path
 
     subroutine hdc_as_float_4d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 4d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_4d_path_sub
 
     function hdc_as_float_5d(this, path) result(res)
+    ! Returns 5d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3343,9 +3571,10 @@ contains
     end function hdc_as_float_5d
 
     subroutine hdc_as_float_5d_sub(this, res)
+    ! Returns 5d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_5d_sub"
@@ -3353,10 +3582,11 @@ contains
     end subroutine hdc_as_float_5d_sub
 
     subroutine hdc_set_float_5d(this, data, flags_in)
+    ! Sets 5d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3370,10 +3600,11 @@ contains
     end subroutine hdc_set_float_5d
 
     subroutine hdc_set_float_5d_path(this, path, data, flags_in)
+    ! Sets 5d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3388,19 +3619,21 @@ contains
     end subroutine hdc_set_float_5d_path
 
     subroutine hdc_as_float_5d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 5d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_5d_path_sub
 
     function hdc_as_float_6d(this, path) result(res)
+    ! Returns 6d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3409,9 +3642,10 @@ contains
     end function hdc_as_float_6d
 
     subroutine hdc_as_float_6d_sub(this, res)
+    ! Returns 6d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_6d_sub"
@@ -3419,10 +3653,11 @@ contains
     end subroutine hdc_as_float_6d_sub
 
     subroutine hdc_set_float_6d(this, data, flags_in)
+    ! Sets 6d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3436,10 +3671,11 @@ contains
     end subroutine hdc_set_float_6d
 
     subroutine hdc_set_float_6d_path(this, path, data, flags_in)
+    ! Sets 6d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3454,19 +3690,21 @@ contains
     end subroutine hdc_set_float_6d_path
 
     subroutine hdc_as_float_6d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 6d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_6d_path_sub
 
     function hdc_as_float_7d(this, path) result(res)
+    ! Returns 7d float array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3475,9 +3713,10 @@ contains
     end function hdc_as_float_7d
 
     subroutine hdc_as_float_7d_sub(this, res)
+    ! Returns 7d float array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=sp), pointer :: res(:,:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_float_7d_sub"
@@ -3485,10 +3724,11 @@ contains
     end subroutine hdc_as_float_7d_sub
 
     subroutine hdc_set_float_7d(this, data, flags_in)
+    ! Sets 7d float array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3502,10 +3742,11 @@ contains
     end subroutine hdc_set_float_7d
 
     subroutine hdc_set_float_7d_path(this, path, data, flags_in)
+    ! Sets 7d float array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data(:,:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3520,70 +3761,65 @@ contains
     end subroutine hdc_set_float_7d_path
 
     subroutine hdc_as_float_7d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 7d float array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp), pointer, intent(inout) :: res(:,:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_float_7d_path_sub
 
     subroutine hdc_set_float_scalar(this, data)
+    ! Sets float data into the given node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=sp), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_FLOAT)
     end subroutine hdc_set_float_scalar
 
     subroutine hdc_set_float_scalar_path(this, path, data)
+    ! Sets float data under the given path of the provided node.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         real(kind=sp), intent(in), target :: data
         call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_FLOAT)
     end subroutine hdc_set_float_scalar_path
 
     subroutine hdc_as_float_sub(this, res)
-        type(hdc_t) :: this
+    ! Sets float data into provided variable.
+        type(hdc_t) :: this ! HDC node
         real(kind=sp) :: res
-        real(kind=sp), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_float_scalar(this, c_null_char)
     end subroutine hdc_as_float_sub
 
 
     function hdc_as_float(this, path) result(res)
+    ! Returns float scalar data.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
         real(kind=sp) :: res
-        real(kind=sp), pointer :: pres
-        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_float_scalar(this, trim(path)//c_null_char)
     end function hdc_as_float
 
     subroutine hdc_as_float_path_sub(this, path, res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets float scalar data under the given path and provided node to provided variable.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=sp) :: res
-        real(kind=sp), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_float_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_float_path_sub
 
 
     function hdc_as_double_1d(this, path) result(res)
+    ! Returns 1d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3592,9 +3828,10 @@ contains
     end function hdc_as_double_1d
 
     subroutine hdc_as_double_1d_sub(this, res)
+    ! Returns 1d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_1d_sub"
@@ -3602,10 +3839,11 @@ contains
     end subroutine hdc_as_double_1d_sub
 
     subroutine hdc_set_double_1d(this, data, flags_in)
+    ! Sets 1d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3619,10 +3857,11 @@ contains
     end subroutine hdc_set_double_1d
 
     subroutine hdc_set_double_1d_path(this, path, data, flags_in)
+    ! Sets 1d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3637,19 +3876,21 @@ contains
     end subroutine hdc_set_double_1d_path
 
     subroutine hdc_as_double_1d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 1d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_1d_path_sub
 
     function hdc_as_double_2d(this, path) result(res)
+    ! Returns 2d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3658,9 +3899,10 @@ contains
     end function hdc_as_double_2d
 
     subroutine hdc_as_double_2d_sub(this, res)
+    ! Returns 2d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_2d_sub"
@@ -3668,10 +3910,11 @@ contains
     end subroutine hdc_as_double_2d_sub
 
     subroutine hdc_set_double_2d(this, data, flags_in)
+    ! Sets 2d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3685,10 +3928,11 @@ contains
     end subroutine hdc_set_double_2d
 
     subroutine hdc_set_double_2d_path(this, path, data, flags_in)
+    ! Sets 2d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3703,19 +3947,21 @@ contains
     end subroutine hdc_set_double_2d_path
 
     subroutine hdc_as_double_2d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 2d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_2d_path_sub
 
     function hdc_as_double_3d(this, path) result(res)
+    ! Returns 3d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3724,9 +3970,10 @@ contains
     end function hdc_as_double_3d
 
     subroutine hdc_as_double_3d_sub(this, res)
+    ! Returns 3d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_3d_sub"
@@ -3734,10 +3981,11 @@ contains
     end subroutine hdc_as_double_3d_sub
 
     subroutine hdc_set_double_3d(this, data, flags_in)
+    ! Sets 3d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3751,10 +3999,11 @@ contains
     end subroutine hdc_set_double_3d
 
     subroutine hdc_set_double_3d_path(this, path, data, flags_in)
+    ! Sets 3d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3769,19 +4018,21 @@ contains
     end subroutine hdc_set_double_3d_path
 
     subroutine hdc_as_double_3d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 3d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_3d_path_sub
 
     function hdc_as_double_4d(this, path) result(res)
+    ! Returns 4d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3790,9 +4041,10 @@ contains
     end function hdc_as_double_4d
 
     subroutine hdc_as_double_4d_sub(this, res)
+    ! Returns 4d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_4d_sub"
@@ -3800,10 +4052,11 @@ contains
     end subroutine hdc_as_double_4d_sub
 
     subroutine hdc_set_double_4d(this, data, flags_in)
+    ! Sets 4d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3817,10 +4070,11 @@ contains
     end subroutine hdc_set_double_4d
 
     subroutine hdc_set_double_4d_path(this, path, data, flags_in)
+    ! Sets 4d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3835,19 +4089,21 @@ contains
     end subroutine hdc_set_double_4d_path
 
     subroutine hdc_as_double_4d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 4d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_4d_path_sub
 
     function hdc_as_double_5d(this, path) result(res)
+    ! Returns 5d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3856,9 +4112,10 @@ contains
     end function hdc_as_double_5d
 
     subroutine hdc_as_double_5d_sub(this, res)
+    ! Returns 5d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_5d_sub"
@@ -3866,10 +4123,11 @@ contains
     end subroutine hdc_as_double_5d_sub
 
     subroutine hdc_set_double_5d(this, data, flags_in)
+    ! Sets 5d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3883,10 +4141,11 @@ contains
     end subroutine hdc_set_double_5d
 
     subroutine hdc_set_double_5d_path(this, path, data, flags_in)
+    ! Sets 5d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3901,19 +4160,21 @@ contains
     end subroutine hdc_set_double_5d_path
 
     subroutine hdc_as_double_5d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 5d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_5d_path_sub
 
     function hdc_as_double_6d(this, path) result(res)
+    ! Returns 6d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3922,9 +4183,10 @@ contains
     end function hdc_as_double_6d
 
     subroutine hdc_as_double_6d_sub(this, res)
+    ! Returns 6d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_6d_sub"
@@ -3932,10 +4194,11 @@ contains
     end subroutine hdc_as_double_6d_sub
 
     subroutine hdc_set_double_6d(this, data, flags_in)
+    ! Sets 6d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -3949,10 +4212,11 @@ contains
     end subroutine hdc_set_double_6d
 
     subroutine hdc_set_double_6d_path(this, path, data, flags_in)
+    ! Sets 6d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -3967,19 +4231,21 @@ contains
     end subroutine hdc_set_double_6d_path
 
     subroutine hdc_as_double_6d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 6d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_6d_path_sub
 
     function hdc_as_double_7d(this, path) result(res)
+    ! Returns 7d double array stored under the given path.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:,:,:,:)
         if (.not.present(path)) path = ""
         data = c_hdc_get_data(this,trim(path)//c_null_char)
@@ -3988,9 +4254,10 @@ contains
     end function hdc_as_double_7d
 
     subroutine hdc_as_double_7d_sub(this, res)
+    ! Returns 7d double array.
         use iso_c_binding
-        type(hdc_t) :: this
-        type(hdc_data_t) :: data
+        type(hdc_t) :: this ! HDC node
+        type(hdc_data_t) :: data ! Encapsulated data
         real(kind=dp), pointer :: res(:,:,:,:,:,:,:)
         data = c_hdc_get_data(this,c_null_char)
         if (data%rank /= 1) stop "incompatible ranks in hdc_as_double_7d_sub"
@@ -3998,10 +4265,11 @@ contains
     end subroutine hdc_as_double_7d_sub
 
     subroutine hdc_set_double_7d(this, data, flags_in)
+    ! Sets 7d double array to the given HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:,:,:,:)
-        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
         if (present(flags_in)) flags = flags_in
@@ -4015,10 +4283,11 @@ contains
     end subroutine hdc_set_double_7d
 
     subroutine hdc_set_double_7d_path(this, path, data, flags_in)
+    ! Sets 7d double array to the given path within the provided HDC node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data(:,:,:,:,:,:,:)
-        character(len=*), intent(in) :: path
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         integer(kind=c_size_t), intent(in), optional :: flags_in
         integer(kind=c_size_t) :: flags = HDCFortranOrder
         type(hdc_data_t) :: out
@@ -4033,62 +4302,56 @@ contains
     end subroutine hdc_set_double_7d_path
 
     subroutine hdc_as_double_7d_path_sub(this,path,res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets provided 7d double array to the the data given by path within the provided HDC node.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp), pointer, intent(inout) :: res(:,:,:,:,:,:,:)
-        type(hdc_data_t) :: data
+        type(hdc_data_t) :: data ! Encapsulated data
         data = hdc_get_data(this,path)
         call c_f_pointer(data%data, res, data%dshape(1:data%rank))
     end subroutine hdc_as_double_7d_path_sub
 
     subroutine hdc_set_double_scalar(this, data)
+    ! Sets double data into the given node.
         use iso_c_binding
-        type(hdc_t) :: this
+        type(hdc_t) :: this ! HDC node
         real(kind=dp), intent(in), target :: data
         call c_hdc_set_scalar(this, c_null_char, c_loc(data), HDC_DOUBLE)
     end subroutine hdc_set_double_scalar
 
     subroutine hdc_set_double_scalar_path(this, path, data)
+    ! Sets double data under the given path of the provided node.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), intent(in) :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), intent(in) :: path ! relative path within HDC tree
         real(kind=dp), intent(in), target :: data
         call c_hdc_set_scalar(this, trim(path)//c_null_char, c_loc(data), HDC_DOUBLE)
     end subroutine hdc_set_double_scalar_path
 
     subroutine hdc_as_double_sub(this, res)
-        type(hdc_t) :: this
+    ! Sets double data into provided variable.
+        type(hdc_t) :: this ! HDC node
         real(kind=dp) :: res
-        real(kind=dp), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_double_scalar(this, c_null_char)
     end subroutine hdc_as_double_sub
 
 
     function hdc_as_double(this, path) result(res)
+    ! Returns double scalar data.
         use iso_c_binding
-        type(hdc_t) :: this
-        character(len=*), optional :: path
+        type(hdc_t) :: this ! HDC node
+        character(len=*), optional :: path ! Path string
         real(kind=dp) :: res
-        real(kind=dp), pointer :: pres
-        type(hdc_data_t) :: data
         if (.not.present(path)) path = ""
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_double_scalar(this, trim(path)//c_null_char)
     end function hdc_as_double
 
     subroutine hdc_as_double_path_sub(this, path, res)
-        type(hdc_t) :: this
-        character(len=*) :: path
+    ! Sets double scalar data under the given path and provided node to provided variable.
+        type(hdc_t) :: this ! HDC node
+        character(len=*) :: path ! relative path within HDC tree
         real(kind=dp) :: res
-        real(kind=dp), pointer :: pres
-        type(hdc_data_t) :: data
-        data = hdc_get_data(this, trim(path)//c_null_char)
-        call c_f_pointer(data%data, pres)
-        res = pres
+        res = c_hdc_as_double_scalar(this, trim(path)//c_null_char)
     end subroutine hdc_as_double_path_sub
 
 

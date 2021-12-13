@@ -49,7 +49,7 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    DEPENDS
                    # Other docs files you want to track should go here (or in some variable)
                    ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
-                   ${CMAKE_CURRENT_SOURCE_DIR}/hdc_cpp_doxy.rst
+                   #${CMAKE_CURRENT_SOURCE_DIR}/hdc_cpp_doxy.rst
                    doc
                    MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
                    COMMENT "Generating documentation with Sphinx")

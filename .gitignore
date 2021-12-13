@@ -19,6 +19,7 @@ src/__pycache__
 *.gcno
 *.html
 *.so
+*.mod
 
 fort.*
 
@@ -40,3 +41,4 @@ utils/binder/tests/test_*_bind.f90
 utils/binder/tests/test_*_interface.py
 
 examples/interfacing_pyhdc_with_c++/cyhdcdumper.cpp
+examples/mpi/hdc_mpi_send_recv
