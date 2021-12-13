@@ -1,6 +1,7 @@
 package dev.libhdc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.nio.ByteBuffer;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -140,6 +141,42 @@ public class HDC {
     public native void set_data(ArrayList<Integer> shape, float[] data);
     public native void set_data(ArrayList<Integer> shape, double[] data);
 
+    protected ArrayList<Integer> array2arrayList(long[] arr) {
+        ArrayList<Integer> al = new ArrayList<>(arr.length);
+        for (long i : arr) {
+            al.add((int)i);
+        }
+        return al;
+    }
+
+    public void set_data(long[] shape, boolean[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, byte[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, short[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+    
+    public void set_data(long[] shape, int[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, long[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, float[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, double[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
     public native void set_data(boolean data);
     public native void set_data(byte data);
     public native void set_data(short data);
@@ -201,6 +238,33 @@ public class HDC {
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");
         }
         return Nd4j.create(data,shape_);
+    }
+
+    public void set_data(INDArray data) {
+        long[] shape_ = data.shape();
+        ArrayList<Integer> shape = new ArrayList<>(shape_.length);
+        for (long i : shape_) {
+            shape.add((int)i);
+        }
+        switch (data.dataType()) {
+            case BYTE:
+                set_data(shape, data.data().asBytes());
+                break;
+            case INT:
+                set_data(shape, data.data().asInt());
+                break;
+            case LONG:
+                set_data(shape, data.data().asLong());
+                break;
+            case FLOAT:
+                set_data(shape, data.data().asFloat());
+                break;
+            case DOUBLE:
+                set_data(shape, data.data().asDouble());
+                break;
+            default:
+                throw new HDCException("Unsupported type: " + data.dataType() );
+        }
     }
 
     public Number scalar() {
