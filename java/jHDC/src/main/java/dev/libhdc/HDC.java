@@ -1,7 +1,10 @@
 package dev.libhdc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 //import org.nd4j.linalg.api.buffer.factory.DefaultDataBufferFactory;
@@ -10,6 +13,7 @@ import org.nd4j.linalg.api.buffer.DataType;
 import java.util.LinkedHashMap;
 // import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.linalg.factory.Nd4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class HDC {
     public class HDCException extends RuntimeException {
@@ -140,6 +144,50 @@ public class HDC {
     public native void set_data(ArrayList<Integer> shape, float[] data);
     public native void set_data(ArrayList<Integer> shape, double[] data);
 
+    public native void set_external(ArrayList<Integer> shape, boolean[] data);
+    public native void set_external(ArrayList<Integer> shape, byte[] data);
+    public native void set_external(ArrayList<Integer> shape, short[] data);
+    public native void set_external(ArrayList<Integer> shape, int[] data);
+    public native void set_external(ArrayList<Integer> shape, long[] data);
+    public native void set_external(ArrayList<Integer> shape, float[] data);
+    public native void set_external(ArrayList<Integer> shape, double[] data);
+
+    protected ArrayList<Integer> array2arrayList(long[] arr) {
+        ArrayList<Integer> al = new ArrayList<>(arr.length);
+        for (long i : arr) {
+            al.add((int)i);
+        }
+        return al;
+    }
+
+    public void set_data(long[] shape, boolean[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, byte[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, short[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+    
+    public void set_data(long[] shape, int[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, long[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, float[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
+    public void set_data(long[] shape, double[] data) {
+        set_data(array2arrayList(shape),data);
+    }
+
     public native void set_data(boolean data);
     public native void set_data(byte data);
     public native void set_data(short data);
@@ -147,6 +195,34 @@ public class HDC {
     public native void set_data(long data);
     public native void set_data(float data);
     public native void set_data(double data);
+
+    public void set_external(long[] shape, boolean[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, byte[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, short[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+    
+    public void set_external(long[] shape, int[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, long[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, float[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, double[] data) {
+        set_external(array2arrayList(shape),data);
+    }
 
     public native void set_string(String str);
 
@@ -201,6 +277,65 @@ public class HDC {
                 throw new HDCException("Cannot return data of type " + get_type_str() + " as NDArray");
         }
         return Nd4j.create(data,shape_);
+    }
+
+    public int[] as_int_1d() {
+        return data().toIntVector();
+    }
+
+    public long[] as_long_1d() {
+        return data().toLongVector();
+    }
+
+    public float[] as_float_1d() {
+        return data().toFloatVector();
+    }
+
+    public double[] as_double_1d() {
+        return data().toDoubleVector();
+    }
+
+    public int[][] as_int_2d() {
+        return data().toIntMatrix();
+    }
+    
+    public long[][] as_long_2d() {
+        return data().toLongMatrix();
+    }
+
+    public float[][] as_float_2d() {
+        return data().toFloatMatrix();
+    }
+    
+    public double[][] as_double_2d() {
+        return data().toDoubleMatrix();
+    }
+
+    public void set_data(INDArray data) {
+        long[] shape_ = data.shape();
+        ArrayList<Integer> shape = new ArrayList<>(shape_.length);
+        for (long i : shape_) {
+            shape.add((int)i);
+        }
+        switch (data.dataType()) {
+            case BYTE:
+                set_data(shape, data.data().asBytes());
+                break;
+            case INT:
+                set_data(shape, data.data().asInt());
+                break;
+            case LONG:
+                set_data(shape, data.data().asLong());
+                break;
+            case FLOAT:
+                set_data(shape, data.data().asFloat());
+                break;
+            case DOUBLE:
+                set_data(shape, data.data().asDouble());
+                break;
+            default:
+                throw new HDCException("Unsupported type: " + data.dataType() );
+        }
     }
 
     public Number scalar() {

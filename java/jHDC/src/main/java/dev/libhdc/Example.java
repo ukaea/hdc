@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Iterator;
-
+import org.nd4j.linalg.api.buffer.DataType;
 
 public class Example {
     public static void main(String[] args) {
@@ -73,8 +73,12 @@ public class Example {
 
         // Add data to a subtree
         tree.get("aaa/bbb/int").set_data(shape, array);
-
         tree.add_child("aaa/bbb/bbb", dummy3);
+
+        // Add external data
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        tree.add_child("external", external);
 
         //Test tree indexes manipulations
         HDC list = new HDC();
@@ -151,7 +155,8 @@ public class Example {
         System.out.println("Buffer: " + buffer);
 
         INDArray out_data = node.data();
-        System.out.println("Data: " + out_data);
+        System.out.println("Data: ");
+        System.out.println(out_data);
 
         // On screen
         tree.dump();
