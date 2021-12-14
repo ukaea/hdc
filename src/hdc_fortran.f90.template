@@ -131,13 +131,6 @@ module hdc_fortran
             type(hdc_t), value :: node ! HDC object to be stored
         end subroutine hdc_append_slice
 
-!        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
-!            import
-!            type(hdc_t), value :: obj ! HDC object
-!            character(kind=c_char), intent(in) :: path(*)
-!            integer(kind=c_int32_t), value :: mode
-!       end subroutine c_hdc_to_json
-
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
         ! Returns HDC subtree by given path. This is interface to C.
             import
@@ -321,6 +314,12 @@ module hdc_fortran
     ! Genneric set_external interface.
         module procedure hdc_set_external_path
         module procedure hdc_set_external_
+{% for type_ in types %}
+    {% for rank in ranks %}
+        module procedure hdc_set_external_{{ type_[0] }}_{{ rank[0] }}d
+        module procedure hdc_set_external_{{ type_[0] }}_{{ rank[0] }}d_path
+    {% endfor %}
+{% endfor %}
     end interface hdc_set_external
 
     interface hdc_set
@@ -829,6 +828,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_{{ type_[0] }}_{{ rank[0] }}d_path
+
+    subroutine hdc_set_external_{{ type_[0] }}_{{ rank[0] }}d(this, data, flags_in)
+    ! Sets {{ rank[0] }}d {{ type_[0] }} array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        {{ type_[2] }}, intent(in), target :: data({{rank[1]}})
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = {{ type_[1] }}
+        out%flags = flags
+        out%rank = {{ rank[0] }}
+        out%dshape(1:{{ rank[0] }}) = shape(data)
+        out%dshape({{ 1+rank[0] }}:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_{{ type_[0] }}_{{ rank[0] }}d
+
+    subroutine hdc_set_external_{{ type_[0] }}_{{ rank[0] }}d_path(this, path, data, flags_in)
+    ! Sets {{ rank[0] }}d {{ type_[0] }} array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        {{ type_[2] }}, intent(in), target :: data({{rank[1]}})
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = {{ type_[1] }}
+        out%flags = flags
+        out%rank = {{ rank[0] }}
+        out%dshape(1:{{ rank[0] }}) = shape(data)
+        out%dshape({{ 1+rank[0] }}:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_{{ type_[0] }}_{{ rank[0] }}d_path
 
     subroutine hdc_as_{{ type_[0] }}_{{ rank[0] }}d_path_sub(this,path,res)
     ! Sets provided {{ rank[0] }}d {{ type_[0] }} array to the the data given by path within the provided HDC node.

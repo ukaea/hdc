@@ -14,6 +14,7 @@ contains
         character(len=:), allocatable :: str
         integer, parameter :: nx = 2, ny = 3
         real(kind=DP) :: array2d(nx,ny)
+        real(kind=DP) :: external(4)
         ! init array first
         array2d(:,:) = 2.22_dp
 !         array2d(:,3) = 0.0_dp
@@ -43,6 +44,10 @@ contains
         node2 = hdc_new()
         call hdc_set_data(node2,array2d)
         call hdc_add_child(tree,"2ddata",node2)
+
+        ! fill and set external data
+        external = [1._DP,2._DP,3._DP,4.4_DP]
+        call hdc_set_external(tree,"external",external)
 
         call hdc_dump(tree)
 
