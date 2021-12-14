@@ -1,5 +1,5 @@
 
-! This file was generated on 2021-07-26 13:29:59.076887 by generate_fortran_api.py
+! This file was generated on 2021-12-14 08:48:55.901226 by ./generate_fortran_api.py
 ! Please, edit the hdc_fortran.f90.template file instead and run the python script.
 
 
@@ -133,13 +133,6 @@ module hdc_fortran
             type(hdc_t), value :: obj ! HDC object
             type(hdc_t), value :: node ! HDC object to be stored
         end subroutine hdc_append_slice
-
-!        subroutine c_hdc_to_json(obj,path,mode) bind(c,name="hdc_to_json")
-!            import
-!            type(hdc_t), value :: obj ! HDC object
-!            character(kind=c_char), intent(in) :: path(*)
-!            integer(kind=c_int32_t), value :: mode
-!       end subroutine c_hdc_to_json
 
         function c_hdc_get_child(obj, path) result(res) bind(c,name="hdc_get")
         ! Returns HDC subtree by given path. This is interface to C.
@@ -445,6 +438,90 @@ module hdc_fortran
     ! Genneric set_external interface.
         module procedure hdc_set_external_path
         module procedure hdc_set_external_
+        module procedure hdc_set_external_int8_1d
+        module procedure hdc_set_external_int8_1d_path
+        module procedure hdc_set_external_int8_2d
+        module procedure hdc_set_external_int8_2d_path
+        module procedure hdc_set_external_int8_3d
+        module procedure hdc_set_external_int8_3d_path
+        module procedure hdc_set_external_int8_4d
+        module procedure hdc_set_external_int8_4d_path
+        module procedure hdc_set_external_int8_5d
+        module procedure hdc_set_external_int8_5d_path
+        module procedure hdc_set_external_int8_6d
+        module procedure hdc_set_external_int8_6d_path
+        module procedure hdc_set_external_int8_7d
+        module procedure hdc_set_external_int8_7d_path
+        module procedure hdc_set_external_int16_1d
+        module procedure hdc_set_external_int16_1d_path
+        module procedure hdc_set_external_int16_2d
+        module procedure hdc_set_external_int16_2d_path
+        module procedure hdc_set_external_int16_3d
+        module procedure hdc_set_external_int16_3d_path
+        module procedure hdc_set_external_int16_4d
+        module procedure hdc_set_external_int16_4d_path
+        module procedure hdc_set_external_int16_5d
+        module procedure hdc_set_external_int16_5d_path
+        module procedure hdc_set_external_int16_6d
+        module procedure hdc_set_external_int16_6d_path
+        module procedure hdc_set_external_int16_7d
+        module procedure hdc_set_external_int16_7d_path
+        module procedure hdc_set_external_int32_1d
+        module procedure hdc_set_external_int32_1d_path
+        module procedure hdc_set_external_int32_2d
+        module procedure hdc_set_external_int32_2d_path
+        module procedure hdc_set_external_int32_3d
+        module procedure hdc_set_external_int32_3d_path
+        module procedure hdc_set_external_int32_4d
+        module procedure hdc_set_external_int32_4d_path
+        module procedure hdc_set_external_int32_5d
+        module procedure hdc_set_external_int32_5d_path
+        module procedure hdc_set_external_int32_6d
+        module procedure hdc_set_external_int32_6d_path
+        module procedure hdc_set_external_int32_7d
+        module procedure hdc_set_external_int32_7d_path
+        module procedure hdc_set_external_int64_1d
+        module procedure hdc_set_external_int64_1d_path
+        module procedure hdc_set_external_int64_2d
+        module procedure hdc_set_external_int64_2d_path
+        module procedure hdc_set_external_int64_3d
+        module procedure hdc_set_external_int64_3d_path
+        module procedure hdc_set_external_int64_4d
+        module procedure hdc_set_external_int64_4d_path
+        module procedure hdc_set_external_int64_5d
+        module procedure hdc_set_external_int64_5d_path
+        module procedure hdc_set_external_int64_6d
+        module procedure hdc_set_external_int64_6d_path
+        module procedure hdc_set_external_int64_7d
+        module procedure hdc_set_external_int64_7d_path
+        module procedure hdc_set_external_float_1d
+        module procedure hdc_set_external_float_1d_path
+        module procedure hdc_set_external_float_2d
+        module procedure hdc_set_external_float_2d_path
+        module procedure hdc_set_external_float_3d
+        module procedure hdc_set_external_float_3d_path
+        module procedure hdc_set_external_float_4d
+        module procedure hdc_set_external_float_4d_path
+        module procedure hdc_set_external_float_5d
+        module procedure hdc_set_external_float_5d_path
+        module procedure hdc_set_external_float_6d
+        module procedure hdc_set_external_float_6d_path
+        module procedure hdc_set_external_float_7d
+        module procedure hdc_set_external_float_7d_path
+        module procedure hdc_set_external_double_1d
+        module procedure hdc_set_external_double_1d_path
+        module procedure hdc_set_external_double_2d
+        module procedure hdc_set_external_double_2d_path
+        module procedure hdc_set_external_double_3d
+        module procedure hdc_set_external_double_3d_path
+        module procedure hdc_set_external_double_4d
+        module procedure hdc_set_external_double_4d_path
+        module procedure hdc_set_external_double_5d
+        module procedure hdc_set_external_double_5d_path
+        module procedure hdc_set_external_double_6d
+        module procedure hdc_set_external_double_6d_path
+        module procedure hdc_set_external_double_7d
+        module procedure hdc_set_external_double_7d_path
     end interface hdc_set_external
 
     interface hdc_set
@@ -1170,6 +1247,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_1d_path
 
+    subroutine hdc_set_external_int8_1d(this, data, flags_in)
+    ! Sets 1d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_1d
+
+    subroutine hdc_set_external_int8_1d_path(this, path, data, flags_in)
+    ! Sets 1d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_1d_path
+
     subroutine hdc_as_int8_1d_path_sub(this,path,res)
     ! Sets provided 1d int8 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -1240,6 +1354,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_2d_path
+
+    subroutine hdc_set_external_int8_2d(this, data, flags_in)
+    ! Sets 2d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_2d
+
+    subroutine hdc_set_external_int8_2d_path(this, path, data, flags_in)
+    ! Sets 2d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_2d_path
 
     subroutine hdc_as_int8_2d_path_sub(this,path,res)
     ! Sets provided 2d int8 array to the the data given by path within the provided HDC node.
@@ -1312,6 +1463,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_3d_path
 
+    subroutine hdc_set_external_int8_3d(this, data, flags_in)
+    ! Sets 3d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_3d
+
+    subroutine hdc_set_external_int8_3d_path(this, path, data, flags_in)
+    ! Sets 3d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_3d_path
+
     subroutine hdc_as_int8_3d_path_sub(this,path,res)
     ! Sets provided 3d int8 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -1382,6 +1570,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_4d_path
+
+    subroutine hdc_set_external_int8_4d(this, data, flags_in)
+    ! Sets 4d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_4d
+
+    subroutine hdc_set_external_int8_4d_path(this, path, data, flags_in)
+    ! Sets 4d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_4d_path
 
     subroutine hdc_as_int8_4d_path_sub(this,path,res)
     ! Sets provided 4d int8 array to the the data given by path within the provided HDC node.
@@ -1454,6 +1679,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_5d_path
 
+    subroutine hdc_set_external_int8_5d(this, data, flags_in)
+    ! Sets 5d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_5d
+
+    subroutine hdc_set_external_int8_5d_path(this, path, data, flags_in)
+    ! Sets 5d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_5d_path
+
     subroutine hdc_as_int8_5d_path_sub(this,path,res)
     ! Sets provided 5d int8 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -1525,6 +1787,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_6d_path
 
+    subroutine hdc_set_external_int8_6d(this, data, flags_in)
+    ! Sets 6d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_6d
+
+    subroutine hdc_set_external_int8_6d_path(this, path, data, flags_in)
+    ! Sets 6d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_6d_path
+
     subroutine hdc_as_int8_6d_path_sub(this,path,res)
     ! Sets provided 6d int8 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -1595,6 +1894,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int8_7d_path
+
+    subroutine hdc_set_external_int8_7d(this, data, flags_in)
+    ! Sets 7d int8 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int8_7d
+
+    subroutine hdc_set_external_int8_7d_path(this, path, data, flags_in)
+    ! Sets 7d int8 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int8_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT8
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int8_7d_path
 
     subroutine hdc_as_int8_7d_path_sub(this,path,res)
     ! Sets provided 7d int8 array to the the data given by path within the provided HDC node.
@@ -1711,6 +2047,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_1d_path
 
+    subroutine hdc_set_external_int16_1d(this, data, flags_in)
+    ! Sets 1d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_1d
+
+    subroutine hdc_set_external_int16_1d_path(this, path, data, flags_in)
+    ! Sets 1d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_1d_path
+
     subroutine hdc_as_int16_1d_path_sub(this,path,res)
     ! Sets provided 1d int16 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -1781,6 +2154,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_2d_path
+
+    subroutine hdc_set_external_int16_2d(this, data, flags_in)
+    ! Sets 2d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_2d
+
+    subroutine hdc_set_external_int16_2d_path(this, path, data, flags_in)
+    ! Sets 2d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_2d_path
 
     subroutine hdc_as_int16_2d_path_sub(this,path,res)
     ! Sets provided 2d int16 array to the the data given by path within the provided HDC node.
@@ -1853,6 +2263,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_3d_path
 
+    subroutine hdc_set_external_int16_3d(this, data, flags_in)
+    ! Sets 3d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_3d
+
+    subroutine hdc_set_external_int16_3d_path(this, path, data, flags_in)
+    ! Sets 3d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_3d_path
+
     subroutine hdc_as_int16_3d_path_sub(this,path,res)
     ! Sets provided 3d int16 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -1923,6 +2370,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_4d_path
+
+    subroutine hdc_set_external_int16_4d(this, data, flags_in)
+    ! Sets 4d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_4d
+
+    subroutine hdc_set_external_int16_4d_path(this, path, data, flags_in)
+    ! Sets 4d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_4d_path
 
     subroutine hdc_as_int16_4d_path_sub(this,path,res)
     ! Sets provided 4d int16 array to the the data given by path within the provided HDC node.
@@ -1995,6 +2479,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_5d_path
 
+    subroutine hdc_set_external_int16_5d(this, data, flags_in)
+    ! Sets 5d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_5d
+
+    subroutine hdc_set_external_int16_5d_path(this, path, data, flags_in)
+    ! Sets 5d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_5d_path
+
     subroutine hdc_as_int16_5d_path_sub(this,path,res)
     ! Sets provided 5d int16 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2066,6 +2587,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_6d_path
 
+    subroutine hdc_set_external_int16_6d(this, data, flags_in)
+    ! Sets 6d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_6d
+
+    subroutine hdc_set_external_int16_6d_path(this, path, data, flags_in)
+    ! Sets 6d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_6d_path
+
     subroutine hdc_as_int16_6d_path_sub(this,path,res)
     ! Sets provided 6d int16 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2136,6 +2694,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int16_7d_path
+
+    subroutine hdc_set_external_int16_7d(this, data, flags_in)
+    ! Sets 7d int16 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int16_7d
+
+    subroutine hdc_set_external_int16_7d_path(this, path, data, flags_in)
+    ! Sets 7d int16 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int16_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT16
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int16_7d_path
 
     subroutine hdc_as_int16_7d_path_sub(this,path,res)
     ! Sets provided 7d int16 array to the the data given by path within the provided HDC node.
@@ -2252,6 +2847,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_1d_path
 
+    subroutine hdc_set_external_int32_1d(this, data, flags_in)
+    ! Sets 1d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_1d
+
+    subroutine hdc_set_external_int32_1d_path(this, path, data, flags_in)
+    ! Sets 1d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_1d_path
+
     subroutine hdc_as_int32_1d_path_sub(this,path,res)
     ! Sets provided 1d int32 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2322,6 +2954,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_2d_path
+
+    subroutine hdc_set_external_int32_2d(this, data, flags_in)
+    ! Sets 2d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_2d
+
+    subroutine hdc_set_external_int32_2d_path(this, path, data, flags_in)
+    ! Sets 2d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_2d_path
 
     subroutine hdc_as_int32_2d_path_sub(this,path,res)
     ! Sets provided 2d int32 array to the the data given by path within the provided HDC node.
@@ -2394,6 +3063,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_3d_path
 
+    subroutine hdc_set_external_int32_3d(this, data, flags_in)
+    ! Sets 3d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_3d
+
+    subroutine hdc_set_external_int32_3d_path(this, path, data, flags_in)
+    ! Sets 3d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_3d_path
+
     subroutine hdc_as_int32_3d_path_sub(this,path,res)
     ! Sets provided 3d int32 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2464,6 +3170,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_4d_path
+
+    subroutine hdc_set_external_int32_4d(this, data, flags_in)
+    ! Sets 4d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_4d
+
+    subroutine hdc_set_external_int32_4d_path(this, path, data, flags_in)
+    ! Sets 4d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_4d_path
 
     subroutine hdc_as_int32_4d_path_sub(this,path,res)
     ! Sets provided 4d int32 array to the the data given by path within the provided HDC node.
@@ -2536,6 +3279,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_5d_path
 
+    subroutine hdc_set_external_int32_5d(this, data, flags_in)
+    ! Sets 5d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_5d
+
+    subroutine hdc_set_external_int32_5d_path(this, path, data, flags_in)
+    ! Sets 5d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_5d_path
+
     subroutine hdc_as_int32_5d_path_sub(this,path,res)
     ! Sets provided 5d int32 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2607,6 +3387,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_6d_path
 
+    subroutine hdc_set_external_int32_6d(this, data, flags_in)
+    ! Sets 6d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_6d
+
+    subroutine hdc_set_external_int32_6d_path(this, path, data, flags_in)
+    ! Sets 6d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_6d_path
+
     subroutine hdc_as_int32_6d_path_sub(this,path,res)
     ! Sets provided 6d int32 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2677,6 +3494,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int32_7d_path
+
+    subroutine hdc_set_external_int32_7d(this, data, flags_in)
+    ! Sets 7d int32 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int32_7d
+
+    subroutine hdc_set_external_int32_7d_path(this, path, data, flags_in)
+    ! Sets 7d int32 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int32_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT32
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int32_7d_path
 
     subroutine hdc_as_int32_7d_path_sub(this,path,res)
     ! Sets provided 7d int32 array to the the data given by path within the provided HDC node.
@@ -2793,6 +3647,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_1d_path
 
+    subroutine hdc_set_external_int64_1d(this, data, flags_in)
+    ! Sets 1d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_1d
+
+    subroutine hdc_set_external_int64_1d_path(this, path, data, flags_in)
+    ! Sets 1d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_1d_path
+
     subroutine hdc_as_int64_1d_path_sub(this,path,res)
     ! Sets provided 1d int64 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -2863,6 +3754,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_2d_path
+
+    subroutine hdc_set_external_int64_2d(this, data, flags_in)
+    ! Sets 2d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_2d
+
+    subroutine hdc_set_external_int64_2d_path(this, path, data, flags_in)
+    ! Sets 2d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_2d_path
 
     subroutine hdc_as_int64_2d_path_sub(this,path,res)
     ! Sets provided 2d int64 array to the the data given by path within the provided HDC node.
@@ -2935,6 +3863,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_3d_path
 
+    subroutine hdc_set_external_int64_3d(this, data, flags_in)
+    ! Sets 3d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_3d
+
+    subroutine hdc_set_external_int64_3d_path(this, path, data, flags_in)
+    ! Sets 3d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_3d_path
+
     subroutine hdc_as_int64_3d_path_sub(this,path,res)
     ! Sets provided 3d int64 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3005,6 +3970,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_4d_path
+
+    subroutine hdc_set_external_int64_4d(this, data, flags_in)
+    ! Sets 4d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_4d
+
+    subroutine hdc_set_external_int64_4d_path(this, path, data, flags_in)
+    ! Sets 4d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_4d_path
 
     subroutine hdc_as_int64_4d_path_sub(this,path,res)
     ! Sets provided 4d int64 array to the the data given by path within the provided HDC node.
@@ -3077,6 +4079,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_5d_path
 
+    subroutine hdc_set_external_int64_5d(this, data, flags_in)
+    ! Sets 5d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_5d
+
+    subroutine hdc_set_external_int64_5d_path(this, path, data, flags_in)
+    ! Sets 5d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_5d_path
+
     subroutine hdc_as_int64_5d_path_sub(this,path,res)
     ! Sets provided 5d int64 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3148,6 +4187,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_6d_path
 
+    subroutine hdc_set_external_int64_6d(this, data, flags_in)
+    ! Sets 6d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_6d
+
+    subroutine hdc_set_external_int64_6d_path(this, path, data, flags_in)
+    ! Sets 6d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_6d_path
+
     subroutine hdc_as_int64_6d_path_sub(this,path,res)
     ! Sets provided 6d int64 array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3218,6 +4294,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_int64_7d_path
+
+    subroutine hdc_set_external_int64_7d(this, data, flags_in)
+    ! Sets 7d int64 array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_int64_7d
+
+    subroutine hdc_set_external_int64_7d_path(this, path, data, flags_in)
+    ! Sets 7d int64 array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        integer(kind=c_int64_t), intent(in), target :: data(:,:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_INT64
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_int64_7d_path
 
     subroutine hdc_as_int64_7d_path_sub(this,path,res)
     ! Sets provided 7d int64 array to the the data given by path within the provided HDC node.
@@ -3334,6 +4447,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_1d_path
 
+    subroutine hdc_set_external_float_1d(this, data, flags_in)
+    ! Sets 1d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_1d
+
+    subroutine hdc_set_external_float_1d_path(this, path, data, flags_in)
+    ! Sets 1d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_1d_path
+
     subroutine hdc_as_float_1d_path_sub(this,path,res)
     ! Sets provided 1d float array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3404,6 +4554,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_2d_path
+
+    subroutine hdc_set_external_float_2d(this, data, flags_in)
+    ! Sets 2d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_2d
+
+    subroutine hdc_set_external_float_2d_path(this, path, data, flags_in)
+    ! Sets 2d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_2d_path
 
     subroutine hdc_as_float_2d_path_sub(this,path,res)
     ! Sets provided 2d float array to the the data given by path within the provided HDC node.
@@ -3476,6 +4663,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_3d_path
 
+    subroutine hdc_set_external_float_3d(this, data, flags_in)
+    ! Sets 3d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_3d
+
+    subroutine hdc_set_external_float_3d_path(this, path, data, flags_in)
+    ! Sets 3d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_3d_path
+
     subroutine hdc_as_float_3d_path_sub(this,path,res)
     ! Sets provided 3d float array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3546,6 +4770,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_4d_path
+
+    subroutine hdc_set_external_float_4d(this, data, flags_in)
+    ! Sets 4d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_4d
+
+    subroutine hdc_set_external_float_4d_path(this, path, data, flags_in)
+    ! Sets 4d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_4d_path
 
     subroutine hdc_as_float_4d_path_sub(this,path,res)
     ! Sets provided 4d float array to the the data given by path within the provided HDC node.
@@ -3618,6 +4879,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_5d_path
 
+    subroutine hdc_set_external_float_5d(this, data, flags_in)
+    ! Sets 5d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_5d
+
+    subroutine hdc_set_external_float_5d_path(this, path, data, flags_in)
+    ! Sets 5d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_5d_path
+
     subroutine hdc_as_float_5d_path_sub(this,path,res)
     ! Sets provided 5d float array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3689,6 +4987,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_6d_path
 
+    subroutine hdc_set_external_float_6d(this, data, flags_in)
+    ! Sets 6d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_6d
+
+    subroutine hdc_set_external_float_6d_path(this, path, data, flags_in)
+    ! Sets 6d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_6d_path
+
     subroutine hdc_as_float_6d_path_sub(this,path,res)
     ! Sets provided 6d float array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3759,6 +5094,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_float_7d_path
+
+    subroutine hdc_set_external_float_7d(this, data, flags_in)
+    ! Sets 7d float array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_float_7d
+
+    subroutine hdc_set_external_float_7d_path(this, path, data, flags_in)
+    ! Sets 7d float array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=sp), intent(in), target :: data(:,:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_FLOAT
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_float_7d_path
 
     subroutine hdc_as_float_7d_path_sub(this,path,res)
     ! Sets provided 7d float array to the the data given by path within the provided HDC node.
@@ -3875,6 +5247,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_1d_path
 
+    subroutine hdc_set_external_double_1d(this, data, flags_in)
+    ! Sets 1d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_1d
+
+    subroutine hdc_set_external_double_1d_path(this, path, data, flags_in)
+    ! Sets 1d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 1
+        out%dshape(1:1) = shape(data)
+        out%dshape(2:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_1d_path
+
     subroutine hdc_as_double_1d_path_sub(this,path,res)
     ! Sets provided 1d double array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -3945,6 +5354,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_2d_path
+
+    subroutine hdc_set_external_double_2d(this, data, flags_in)
+    ! Sets 2d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_2d
+
+    subroutine hdc_set_external_double_2d_path(this, path, data, flags_in)
+    ! Sets 2d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 2
+        out%dshape(1:2) = shape(data)
+        out%dshape(3:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_2d_path
 
     subroutine hdc_as_double_2d_path_sub(this,path,res)
     ! Sets provided 2d double array to the the data given by path within the provided HDC node.
@@ -4017,6 +5463,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_3d_path
 
+    subroutine hdc_set_external_double_3d(this, data, flags_in)
+    ! Sets 3d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_3d
+
+    subroutine hdc_set_external_double_3d_path(this, path, data, flags_in)
+    ! Sets 3d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 3
+        out%dshape(1:3) = shape(data)
+        out%dshape(4:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_3d_path
+
     subroutine hdc_as_double_3d_path_sub(this,path,res)
     ! Sets provided 3d double array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -4087,6 +5570,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_4d_path
+
+    subroutine hdc_set_external_double_4d(this, data, flags_in)
+    ! Sets 4d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_4d
+
+    subroutine hdc_set_external_double_4d_path(this, path, data, flags_in)
+    ! Sets 4d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 4
+        out%dshape(1:4) = shape(data)
+        out%dshape(5:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_4d_path
 
     subroutine hdc_as_double_4d_path_sub(this,path,res)
     ! Sets provided 4d double array to the the data given by path within the provided HDC node.
@@ -4159,6 +5679,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_5d_path
 
+    subroutine hdc_set_external_double_5d(this, data, flags_in)
+    ! Sets 5d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_5d
+
+    subroutine hdc_set_external_double_5d_path(this, path, data, flags_in)
+    ! Sets 5d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 5
+        out%dshape(1:5) = shape(data)
+        out%dshape(6:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_5d_path
+
     subroutine hdc_as_double_5d_path_sub(this,path,res)
     ! Sets provided 5d double array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -4230,6 +5787,43 @@ contains
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_6d_path
 
+    subroutine hdc_set_external_double_6d(this, data, flags_in)
+    ! Sets 6d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_6d
+
+    subroutine hdc_set_external_double_6d_path(this, path, data, flags_in)
+    ! Sets 6d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 6
+        out%dshape(1:6) = shape(data)
+        out%dshape(7:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_6d_path
+
     subroutine hdc_as_double_6d_path_sub(this,path,res)
     ! Sets provided 6d double array to the the data given by path within the provided HDC node.
         type(hdc_t) :: this ! HDC node
@@ -4300,6 +5894,43 @@ contains
         out%data = c_loc(data)
         call c_hdc_set_data(this, trim(path)//c_null_char, out)
     end subroutine hdc_set_double_7d_path
+
+    subroutine hdc_set_external_double_7d(this, data, flags_in)
+    ! Sets 7d double array to the given HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:,:,:,:)
+        integer(kind=c_size_t), intent(in), optional :: flags_in ! Optional flags
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, c_null_char, out)
+    end subroutine hdc_set_external_double_7d
+
+    subroutine hdc_set_external_double_7d_path(this, path, data, flags_in)
+    ! Sets 7d double array to the given path within the provided HDC node.
+        use iso_c_binding
+        type(hdc_t) :: this ! HDC node
+        real(kind=dp), intent(in), target :: data(:,:,:,:,:,:,:)
+        character(len=*), intent(in) :: path ! relative path within HDC tree
+        integer(kind=c_size_t), intent(in), optional :: flags_in
+        integer(kind=c_size_t) :: flags = HDCFortranOrder
+        type(hdc_data_t) :: out
+        if (present(flags_in)) flags = flags_in
+        out%dtype = HDC_DOUBLE
+        out%flags = flags
+        out%rank = 7
+        out%dshape(1:7) = shape(data)
+        out%dshape(8:) = 0
+        out%data = c_loc(data)
+        call c_hdc_set_external(this, trim(path)//c_null_char, out)
+    end subroutine hdc_set_external_double_7d_path
 
     subroutine hdc_as_double_7d_path_sub(this,path,res)
     ! Sets provided 7d double array to the the data given by path within the provided HDC node.
