@@ -79,6 +79,29 @@ void set_data(JNIEnv* jEnv, jobject jObj, jobject jShape, T* data)
     hdc.set_data(shape, data);
 }
 
+template<typename T>
+void set_external(JNIEnv* jEnv, jobject jObj, jobject jShape, T* data)
+{
+    auto hdc = getHDC(jEnv, jObj);
+
+    jclass list_class = jEnv->FindClass("java/util/ArrayList");
+    jint jSize = jEnv->CallIntMethod(jShape, jEnv->GetMethodID(list_class, "size", "()I"));
+
+    std::vector<size_t> shape = {};
+    shape.reserve(jSize);
+
+    jclass integer_class = jEnv->FindClass("java/lang/Integer");
+
+    for (jint i = 0; i < jSize; ++i) {
+        jobject
+            element = jEnv->CallObjectMethod(jShape, jEnv->GetMethodID(list_class, "get", "(I)Ljava/lang/Object;"), i);
+        jint value = jEnv->CallIntMethod(element, jEnv->GetMethodID(integer_class, "intValue", "()I"));
+        shape.push_back(value);
+    }
+
+    hdc.set_external(shape, data);
+}
+
 } // anon namespace
 
 void Java_dev_libhdc_HDC_add_1child(JNIEnv* jEnv, jobject obj, jstring jPath, jobject child)
@@ -546,4 +569,66 @@ void Java_dev_libhdc_HDC_dump(JNIEnv* jEnv, jobject jObj)
 {
     auto hdc = getHDC(jEnv, jObj);
     hdc.dump();
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3Z (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape,
+                                                                           jbooleanArray jData)
+{
+    jboolean* data = jEnv->GetBooleanArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3B (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape,
+                                                                           jbyteArray jData)
+{
+    jbyte* data = jEnv->GetByteArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3S (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape, jshortArray jData)
+{
+    jshort* data = jEnv->GetShortArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3I (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape,
+                                                                           jintArray jData)
+{
+    jint* data = jEnv->GetIntArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3J (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape,
+                                                                           jlongArray jData)
+{
+    jlong* data = jEnv->GetLongArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3F (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape,
+                                                                           jfloatArray jData)
+{
+    jfloat* data = jEnv->GetFloatArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
+}
+
+void JNICALL Java_dev_libhdc_HDC_set_1external__Ljava_util_ArrayList_2_3D (JNIEnv* jEnv,
+                                                                           jobject obj,
+                                                                           jobject jShape,
+                                                                           jdoubleArray jData)
+{
+    jdouble* data = jEnv->GetDoubleArrayElements(jData, nullptr);
+    set_external(jEnv, obj, jShape, data);
 }

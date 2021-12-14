@@ -67,6 +67,19 @@ Building doc
 mvn site
 ```
 
+Running the example
+-------------------
+```bash
+mvn clean dependency:copy-dependencies package
+java -Djava.library.path=../../build/java -cp "target/jHDC-0.17.3.jar:target/dependency/*" Example
+```
+Alternatively for for lazy and patient:
+```bash
+mvn clean compile assembly:single
+java -Djava.library.path=../../build/java -cp target/jHDC-0.17.3-jar-with-dependencies.jar Example
+```
+
+
 Installation
 ------------
 The following command installs jHDC package into maven repository (`~/.m2` by default)
