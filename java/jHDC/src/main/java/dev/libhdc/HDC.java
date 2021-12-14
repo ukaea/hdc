@@ -144,6 +144,14 @@ public class HDC {
     public native void set_data(ArrayList<Integer> shape, float[] data);
     public native void set_data(ArrayList<Integer> shape, double[] data);
 
+    public native void set_external(ArrayList<Integer> shape, boolean[] data);
+    public native void set_external(ArrayList<Integer> shape, byte[] data);
+    public native void set_external(ArrayList<Integer> shape, short[] data);
+    public native void set_external(ArrayList<Integer> shape, int[] data);
+    public native void set_external(ArrayList<Integer> shape, long[] data);
+    public native void set_external(ArrayList<Integer> shape, float[] data);
+    public native void set_external(ArrayList<Integer> shape, double[] data);
+
     protected ArrayList<Integer> array2arrayList(long[] arr) {
         ArrayList<Integer> al = new ArrayList<>(arr.length);
         for (long i : arr) {
@@ -187,6 +195,34 @@ public class HDC {
     public native void set_data(long data);
     public native void set_data(float data);
     public native void set_data(double data);
+
+    public void set_external(long[] shape, boolean[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, byte[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, short[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+    
+    public void set_external(long[] shape, int[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, long[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, float[] data) {
+        set_external(array2arrayList(shape),data);
+    }
+
+    public void set_external(long[] shape, double[] data) {
+        set_external(array2arrayList(shape),data);
+    }
 
     public native void set_string(String str);
 

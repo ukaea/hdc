@@ -108,10 +108,17 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
-        // test set_dataa(long[],...)
+        // test set_data(long[],...)
         HDC node4 = new HDC();
         node4.set_data(shape_, array);
         assertEquals(in_data,node4.data());
+        // test set_external
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        assertEquals(in_data,external.data());
+        HDC external2 = new HDC();
+        external2.set_data(shape_, array);
+        assertEquals(in_data,external2.data());
     }
 
     @Test
@@ -135,10 +142,17 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
-        // test set_dataa(long[],...)
+        // test set_data(long[],...)
         HDC node4 = new HDC();
         node4.set_data(shape_, array);
         assertEquals(in_data,node4.data());
+        // test set_external
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        assertEquals(in_data,external.data());
+        HDC external2 = new HDC();
+        external2.set_data(shape_, array);
+        assertEquals(in_data,external2.data());
     }
 
     @Test
@@ -156,10 +170,17 @@ public class HDCTests {
         // test constructor
         HDC node2 = new HDC(shape, array);
         assertEquals(in_data,node2.data());
-        // test set_dataa(long[],...)
+        // test set_data(long[],...)
         HDC node4 = new HDC();
         node4.set_data(shape_, array);
         assertEquals(in_data,node4.data());
+        // test set_external
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        assertEquals(in_data,external.data());
+        HDC external2 = new HDC();
+        external2.set_data(shape_, array);
+        assertEquals(in_data,external2.data());
     }
 
     @Test
@@ -181,10 +202,17 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
-        // test set_dataa(long[],...)
+        // test set_data(long[],...)
         HDC node4 = new HDC();
         node4.set_data(shape_, array);
         assertEquals(in_data,node4.data());
+        // test set_external
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        assertEquals(in_data,external.data());
+        HDC external2 = new HDC();
+        external2.set_data(shape_, array);
+        assertEquals(in_data,external2.data());
     }
 
     @Test
@@ -208,10 +236,17 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
-        // test set_dataa(long[],...)
+        // test set_data(long[],...)
         HDC node4 = new HDC();
         node4.set_data(shape_, array);
         assertEquals(in_data,node4.data());
+        // test set_external
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        assertEquals(in_data,external.data());
+        HDC external2 = new HDC();
+        external2.set_data(shape_, array);
+        assertEquals(in_data,external2.data());
     }
 
     @Test
@@ -235,10 +270,17 @@ public class HDCTests {
         HDC node3 = new HDC();
         node3.set_data(in_data);
         assertEquals(in_data,node3.data());
-        // test set_dataa(long[],...)
+        // test set_data(long[],...)
         HDC node4 = new HDC();
         node4.set_data(shape_, array);
         assertEquals(in_data,node4.data());
+        // test set_external
+        HDC external = new HDC();
+        external.set_data(shape, array);
+        assertEquals(in_data,external.data());
+        HDC external2 = new HDC();
+        external2.set_data(shape_, array);
+        assertEquals(in_data,external2.data());
     }
 
 //     @Test
