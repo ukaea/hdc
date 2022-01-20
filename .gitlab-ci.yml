@@ -1,4 +1,16 @@
+stages:
+  - test-hdc-focal
+  - test-hdc-focal-hdf5-1.12
+  - test-hdc-bionic
+  - test-hdc-xenial
+  - test-hdc-centos-7
+  - test-hdc-fedora-31
+  - test-pages
+  - pages
+
+
 test-hdc-focal:
+  stage: test-hdc-focal
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
   script:
     - mkdir build
@@ -14,9 +26,8 @@ test-hdc-focal:
     - ./run
 
 test-hdc-focal-hdf5-1.12:
+  stage: test-hdc-focal-hdf5-1.12
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
-  dependencies:
-    - test-hdc-focal
   script:
     - mkdir build
     - cd build
@@ -31,9 +42,8 @@ test-hdc-focal-hdf5-1.12:
     - ./run
 
 test-hdc-bionic:
+  stage: test-hdc-bionic
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-bionic
-  dependencies:
-    - test-hdc-focal-hdf5-1.12
   script:
     - mkdir build
     - cd build
@@ -48,9 +58,8 @@ test-hdc-bionic:
     - ./run
 
 test-hdc-xenial:
+  stage: test-hdc-xenial
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-xenial
-  dependencies:
-    - test-hdc-bionic
   script:
     - mkdir build
     - cd build
@@ -65,9 +74,8 @@ test-hdc-xenial:
     - ./run
 
 test-hdc-centos-7:
+  stage: test-hdc-centos-7
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-centos-7
-  dependencies:
-    - test-hdc-xenial
   script:
     - mkdir build
     - cd build
@@ -82,9 +90,8 @@ test-hdc-centos-7:
     - FC=gfortran ./run
 
 test-hdc-fedora-31:
+  stage: test-hdc-fedora-31
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-fedora-31
-  dependencies:
-    - test-hdc-centos-7
   script:
     - mkdir build
     - cd build
@@ -100,9 +107,8 @@ test-hdc-fedora-31:
     #- FC=gfortran ./run
 
 test-pages:
+  stage: test-pages
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
-  dependencies:
-    - test-hdc-fedora-31
   script:
     - mkdir build
     - cd build
@@ -120,6 +126,7 @@ test-pages:
     - master
 
 pages:
+  stage: pages
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
   script:
     - mkdir build
