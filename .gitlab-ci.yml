@@ -1,3 +1,13 @@
+stages:
+  - test-hdc-focal
+  - test-hdc-focal-hdf5-1.12
+  - test-hdc-bionic
+  - test-hdc-xenial
+  - test-hdc-centos-7
+  - test-hdc-fedora-31
+  - test-pages
+  - pages
+
 test-hdc-focal:
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
   script:
