@@ -23,7 +23,7 @@ Prerequisites
 -------------
 
 To build HDC, you will need:
-- c++11 compliant compiler (tested with intelstudio>=2018 and gcc>=5.0)
+- c++14 compliant compiler (tested with intelstudio>=2018 and gcc>=5.0)
 - gfortran >= 4.9
 - Boost >= 1.48
 - CMake >= 3.3

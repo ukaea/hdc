@@ -31,7 +31,7 @@ extensions = [
     Extension(
         name="pyhdc.cyhdc",
         sources=["pyhdc/cyhdc.pyx"],
-        extra_compile_args=['-O2', '-std=c++11', '-lgfortran', '-lstdc++', '-lrt', '-fPIC', '-static',],
+        extra_compile_args=['-O2', '-std=c++14', '-lgfortran', '-lstdc++', '-lrt', '-fPIC', '-static',],
         language='c++',
         # TODO fix paths after headers are installed
         include_dirs=[

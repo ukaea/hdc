@@ -8,4 +8,4 @@ Description: Hierarchical Dynamic Containers library
 Version: 0.18.0
 
 Libs: -L${libdir} -lhdc -lboost_system
-Cflags: -I${includedir} -std=c++11
+Cflags: -I${includedir} -std=c++14

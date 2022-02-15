@@ -14,7 +14,7 @@ extensions = [
     Extension(
         name="cyhdcdumper",
         sources=["cyhdcdumper.pyx"],
-        extra_compile_args=['-std=c++11'],
+        extra_compile_args=['-std=c++14'],
         language='c++',
         include_dirs=[
             os.path.join(hdc_root, 'include'),
