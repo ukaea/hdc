@@ -4,7 +4,7 @@ cmake_minimum_required( VERSION 3.3 )
 # CMake configuration
 cmake_policy( SET CMP0057 NEW )
 
-project( hdc VERSION 0.18.0 )
+project( hdc VERSION 0.18.1 )
 enable_language( CXX C Fortran )
 
 set( hdc_TEST_DIR "${hdc_SOURCE_DIR}/test" )
