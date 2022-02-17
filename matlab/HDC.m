@@ -6,6 +6,13 @@ classdef HDC < handle %& matlab.mixin.CustomDisplay
     methods
         %% Constructor - Create a new C++ class instance
         function this = HDC(varargin)
+            if (length(varargin) == 2 ...
+                    && class(varargin{1}) == "string" ...
+                    && varargin{1} == "__objectHandle" ...
+                    && class(varargin{2}) == "uint64")
+                this.objectHandle = varargin{2};
+                return;
+            end
             if (length(varargin) > 0)
                 for i = 1:length(varargin)
                     data = varargin{i};

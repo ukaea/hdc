@@ -747,7 +747,7 @@ public:
     {
         DEBUG_STDOUT(std::string("template <typename T> void set_data(vector<T> data)") + to_string(data[0]));
         if (get_children_ptr() != nullptr) {
-            std::cout << "The node has already children set..." << std::endl;
+            DEBUG_STDERR("The node has already children set...");
             return;
         }
         std::vector<size_t> shape = { data.size() };
