@@ -891,7 +891,7 @@ void HDC::set_child(hdc_path_t& path, const HDC& n)
     )
     auto path2 = path;
     if (!exists(path2)) { // Nothing to set
-        std::cout << "Nothing to set, maybe you want to add..." << endl;
+        D(std::cerr << "Nothing to set, maybe you want to add..." << endl;)
         return;
     }
     auto first = path.front();
@@ -1092,7 +1092,7 @@ void HDC::insert(size_t index, const HDC& h)
         header = reinterpret_cast<hdc_header_t*>(buffer);
     }
     if (header->shape[0] < index) {
-        std::cout << "Warning: insert():: inserting behind current list length, filling with empty containers\n";
+        D(std::cerr << "Warning: insert():: inserting behind current list length, filling with empty containers\n";)
         for (size_t i = header->shape[0]; i < index; i++) {
             HDC ch;
             append(ch);
