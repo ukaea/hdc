@@ -1,3 +1,5 @@
+package dev.libhdc;
+
 import dev.libhdc.HDC;
 import java.util.ArrayList;
 import java.nio.ByteBuffer;
@@ -119,6 +121,9 @@ public class HDCTests {
         HDC external2 = new HDC();
         external2.set_data(shape_, array);
         assertEquals(in_data,external2.data());
+        HDC external3 = new HDC();
+        external3.set_external(in_data);
+        assertEquals(in_data,external3.data());
     }
 
     @Test
@@ -153,6 +158,9 @@ public class HDCTests {
         HDC external2 = new HDC();
         external2.set_data(shape_, array);
         assertEquals(in_data,external2.data());
+        HDC external3 = new HDC();
+        external3.set_external(in_data);
+        assertEquals(in_data,external3.data());
     }
 
     @Test
@@ -213,6 +221,9 @@ public class HDCTests {
         HDC external2 = new HDC();
         external2.set_data(shape_, array);
         assertEquals(in_data,external2.data());
+        HDC external3 = new HDC();
+        external3.set_external(in_data);
+        assertEquals(in_data,external3.data());
     }
 
     @Test
@@ -247,6 +258,9 @@ public class HDCTests {
         HDC external2 = new HDC();
         external2.set_data(shape_, array);
         assertEquals(in_data,external2.data());
+        HDC external3 = new HDC();
+        external3.set_external(in_data);
+        assertEquals(in_data,external3.data());
     }
 
     @Test
@@ -281,6 +295,9 @@ public class HDCTests {
         HDC external2 = new HDC();
         external2.set_data(shape_, array);
         assertEquals(in_data,external2.data());
+        HDC external3 = new HDC();
+        external3.set_external(in_data);
+        assertEquals(in_data,external3.data());
     }
 
 //     @Test
@@ -367,7 +384,7 @@ public class HDCTests {
     }
 
     @Test
-    void StringrManipulation() {
+    void StringManipulation() {
         String str_in = "test string";
         HDC node = new HDC();
         node.set_string(str_in);

@@ -2,6 +2,7 @@ build*
 install*
 cmake-build*
 .idea
+.vscode
 
 .project
 hdc_new.kdev4
