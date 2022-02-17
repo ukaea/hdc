@@ -338,6 +338,33 @@ public class HDC {
         }
     }
 
+    public void set_external(INDArray data) {
+        long[] shape_ = data.shape();
+        ArrayList<Integer> shape = new ArrayList<>(shape_.length);
+        for (long i : shape_) {
+            shape.add((int)i);
+        }
+        switch (data.dataType()) {
+            case BYTE:
+                set_external(shape, data.data().asBytes());
+                break;
+            case INT:
+                set_external(shape, data.data().asInt());
+                break;
+            case LONG:
+                set_external(shape, data.data().asLong());
+                break;
+            case FLOAT:
+                set_external(shape, data.data().asFloat());
+                break;
+            case DOUBLE:
+                set_external(shape, data.data().asDouble());
+                break;
+            default:
+                throw new HDCException("Unsupported type: " + data.dataType() );
+        }
+    }
+
     public Number scalar() {
         Number n;
         switch ((int)get_type()) {
