@@ -4,7 +4,7 @@ cmake_minimum_required( VERSION 3.3 )
 # CMake configuration
 cmake_policy( SET CMP0057 NEW )
 
-project( hdc VERSION 0.18.2 )
+project( hdc VERSION 0.18.2 ) ## TODO: switch, rename
 enable_language( C Fortran )
 
 set( hdc_SOURCE_DIR "${hdc_SOURCE_DIR}/src" )
@@ -13,7 +13,7 @@ set( CMAKE_Fortran_MODULE_DIRECTORY "mod" )
 # Extra cmake modules to find libraries
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 include( FileCopyTargets )
-##include( CHDC )
+include( FindCHDC ) ## TODO switch
 
 # Set the possible values of build type for cmake-gui
 set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE" )
