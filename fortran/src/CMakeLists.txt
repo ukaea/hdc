@@ -7,5 +7,3 @@ target_link_libraries( fhdc chdc serialization )
 
 install( TARGETS fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib )
 install( DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include/hdc )
-
-add_subdirectory( plugins )
