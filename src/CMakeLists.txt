@@ -15,10 +15,8 @@ target_link_libraries( hdc PUBLIC ${HDC_LINK_LIBRARIES} serialization )
 add_library( chdc SHARED hdc_c.cpp )
 target_link_libraries( chdc hdc stdc++ serialization )
 
-add_library( fhdc SHARED hdc_fortran.f90 )
-target_link_libraries( fhdc chdc serialization )
 
-install( TARGETS hdc chdc fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib )
+install( TARGETS hdc chdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib )
 install( DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include/hdc )
 
 add_subdirectory( plugins )
