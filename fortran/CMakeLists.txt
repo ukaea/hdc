@@ -15,10 +15,10 @@ if (ENABLE_FORTRAN)
   set ( fhdc_SOURCE_DIR "${hdc_SOURCE_DIR}" )
   set ( fhdc_BINARY_DIR "${hdc_BINARY_DIR}" )
 else()
-  project( fhdc VERSION 0.18.2 )
+  project( fhdc VERSION 0.19.0 )
   message("ENABLE_FORTRAN=TRUE => performing standalone build")
   include( FindCHDC )
-  find_package( CHDC 0.18.2 REQUIRED )
+  find_package( CHDC 0.19.0 REQUIRED )
 
   # Build options
   option( BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF )
