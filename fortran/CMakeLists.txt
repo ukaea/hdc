@@ -4,16 +4,34 @@ cmake_minimum_required( VERSION 3.3 )
 # CMake configuration
 cmake_policy( SET CMP0057 NEW )
 
-project( hdc VERSION 0.18.2 ) ## TODO: switch, rename
-enable_language( C Fortran )
-
-set( hdc_SOURCE_DIR "${hdc_SOURCE_DIR}/src" )
-set( CMAKE_Fortran_MODULE_DIRECTORY "mod" )
-
 # Extra cmake modules to find libraries
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
 include( FileCopyTargets )
-include( FindCHDC ) ## TODO switch
+enable_language( C Fortran )
+
+# Switch between standalone and embedded fortran build
+if (ENABLE_FORTRAN)
+  message("ENABLE_FORTRAN=TRUE => performing embedded build")
+  set ( fhdc_SOURCE_DIR "${hdc_SOURCE_DIR}" )
+  set ( fhdc_BINARY_DIR "${hdc_BINARY_DIR}" )
+else()
+  project( fhdc VERSION 0.18.2 )
+  message("ENABLE_FORTRAN=TRUE => performing standalone build")
+  include( FindCHDC )
+  find_package( CHDC 0.18.2 REQUIRED )
+
+  # Build options
+  option( BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF )
+  option( BUILD_EXAMPLES "Build and install examples" ON )
+  option( ENABLE_COVERAGE "Enable coverage testing (using gcovr)" ON )
+  option( DEBUG "Turns some debug output on or off." OFF )
+  option( GOPTION "adds -g to compiler flags" ON )
+
+endif(ENABLE_FORTRAN)
+
+
+set( fhdc_SOURCE_DIR "${fhdc_SOURCE_DIR}/src" )
+set( CMAKE_Fortran_MODULE_DIRECTORY "mod" )
 
 # Set the possible values of build type for cmake-gui
 set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE" )
@@ -82,14 +100,6 @@ if( "${isSystemDir}" STREQUAL "-1" )
   set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/hdc" )
 endif( "${isSystemDir}" STREQUAL "-1" )
 
-########################################################################################################################
-# Build options
-
-option( BUILD_EXAMPLES "Build and install examples" ON )
-option( ENABLE_COVERAGE "Enable coverage testing (using gcovr)" ON )
-option( DEBUG "Turns some debug output on or off." OFF )
-option( GOPTION "adds -g to compiler flags" ON )
-
 if( GOPTION )
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -g")
 endif() # GOPTION
@@ -103,8 +113,8 @@ if( CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "DEBUG" AND ENABLE_COV
   append_coverage_compiler_flags()
 endif()
 
-message( "Binary dir is: ${hdc_BINARY_DIR}" )
-message( "Source dir is: ${hdc_SOURCE_DIR}" )
+message( "Binary dir is: ${fhdc_BINARY_DIR}" )
+message( "Source dir is: ${fhdc_SOURCE_DIR}" )
 
 ########################################################################################################################
 # Source directories
