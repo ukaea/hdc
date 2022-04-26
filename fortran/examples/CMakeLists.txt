@@ -1,5 +1,5 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-message("xxxxxx ${fhdc_BINARY_DIR}")
+
 set(CMAKE_Fortran_MODULE_DIRECTORY "${fhdc_BINARY_DIR}/mod")
 add_library(hdc_fortran_module SHARED hdc_fortran_module.f90)
 target_link_libraries(hdc_fortran_module fhdc chdc hdc)

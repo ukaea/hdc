@@ -5,11 +5,11 @@ cmake_minimum_required( VERSION 3.3 )
 cmake_policy( SET CMP0057 NEW )
 
 # Extra cmake modules to find libraries
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/../cmake )
 include( FileCopyTargets )
 enable_language( C Fortran )
 
-# Switch between standalone and embedded fortran build
+# Switch between standalone and embedded build
 if (ENABLE_FORTRAN)
   message("ENABLE_FORTRAN=TRUE => performing embedded build")
   set ( fhdc_SOURCE_DIR "${hdc_SOURCE_DIR}" )
@@ -17,8 +17,9 @@ if (ENABLE_FORTRAN)
 else()
   project( fhdc VERSION 0.19.0 )
   message("ENABLE_FORTRAN=TRUE => performing standalone build")
-  include( FindCHDC )
-  find_package( CHDC 0.19.0 REQUIRED )
+
+  find_package( PkgConfig )
+  pkg_check_modules( CHDC chdc=0.19.0 REQUIRED )
 
   # Build options
   option( BUILD_BENCHMARKS "Whether to build benchmarks - uses google benchmarks." OFF )
