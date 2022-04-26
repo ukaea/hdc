@@ -1,5 +1,6 @@
 stages:
   - test-hdc-focal
+  - test-hdc-focal-standalone-fortran-build
   - test-hdc-focal-hdf5-1.12
   - test-hdc-bionic
   - test-hdc-xenial
@@ -24,6 +25,23 @@ test-hdc-focal:
     - pytest
     - cd tests_binder
     - ./run
+
+test-hdc-focal-standalone-fortran-build:
+  stage: test-hdc-focal-standalone-fortran-build
+  image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_FORTRAN=OFF
+    - make -j
+    - make test
+    - make install
+    - cd ../fortran
+    - mkdir build
+    - cd build
+    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD/../../install/lib/pkgconfig cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install
+    - make -j
+    - make install
 
 test-hdc-focal-hdf5-1.12:
   stage: test-hdc-focal-hdf5-1.12
