@@ -39,7 +39,7 @@ test-hdc-focal-standalone-fortran-build:
     - cd ../fortran
     - mkdir build
     - cd build
-    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:../../install/lib/pkgconfig -DCMAKE_INSTALL_PREFIX=$PWD/../../install
+    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD/../../install/lib/pkgconfig cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install
     - make -j
     - make install
 
