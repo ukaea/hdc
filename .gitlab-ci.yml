@@ -36,17 +36,16 @@ test-hdc-focal-standalone-builds:
     - make -j
     - make test
     - make install
-    - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD/../../install/lib/pkgconfig
     - cd ../fortran
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install
+    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD/../../install/lib/pkgconfig cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install
     - make -j
     - make install
     - cd ../../java
     - mkdir build  
     - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install
+    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD/../../install/lib/pkgconfig cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../../install
     - make -j
     - make install
 
