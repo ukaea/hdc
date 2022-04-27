@@ -9,7 +9,7 @@ if ( ENABLE_FORTRAN )
 else()
   target_include_directories( fhdc PUBLIC ${CHDC_INCLUDE_DIRS} )
   target_link_directories( fhdc PUBLIC ${CHDC_LIBRARY_DIRS} )
-  target_link_libraries( fhdc PUBLIC ${CHDC_LIBRARIES} )  ## TODO: switch
+  target_link_libraries( fhdc PUBLIC ${CHDC_LIBRARIES} )
 endif( ENABLE_FORTRAN )
 
 install( TARGETS fhdc RUNTIME DESTINATION bin LIBRARY DESTINATION lib )
