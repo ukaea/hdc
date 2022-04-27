@@ -11,7 +11,7 @@ if (ENABLE_JAVA)
   set ( jhdc_BINARY_DIR "${hdc_BINARY_DIR}/java" )
 else()
   project( jhdc VERSION 0.19.0 )
-  message("ENABLE_JAVA=TRUE => performing standalone build")
+  message("ENABLE_JAVA=FALSE => performing standalone build")
 
   find_package( PkgConfig )
   pkg_check_modules( HDC hdc=0.19.0 REQUIRED )
