@@ -414,11 +414,51 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     result = mxCreateNumericMatrix(1, n_elem, classid, mxREAL);
                 else
                     result = mxCreateNumericArray(obj.rank, obj.shape, classid, mxREAL);
+                memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
             } else {
                 result = mxCreateNumericMatrix(1, 1, classid, mxREAL);
+                //unfortunatelly, the following line has stopped working - replaced by the switch
+                //memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
+                switch (obj.type) {
+                    case HDC_BOOL:
+                        *(bool*)mxGetPr(result) = *(bool*)(&(obj.data));
+                        break;
+                    case HDC_DOUBLE:
+                        *(double*)mxGetPr(result) = *(double*)(&(obj.data));
+                        break;
+                    case HDC_FLOAT:
+                        *(float*)mxGetPr(result) = *(float*)(&(obj.data));
+                        break;
+                    case HDC_INT8:
+                        *(int8_t*)mxGetPr(result) = *(int8_t*)(&(obj.data));
+                        break;
+                    case HDC_UINT8:
+                        *(uint8_t*)mxGetPr(result) = *(uint8_t*)(&(obj.data));
+                        break;
+                    case HDC_INT16:
+                        *(int16_t*)mxGetPr(result) = *(int16_t*)(&(obj.data));
+                        break;
+                    case HDC_UINT16:
+                        *(uint16_t*)mxGetPr(result) = *(uint16_t*)(&(obj.data));
+                        break;
+                    case HDC_INT32:
+                        *(int32_t*)mxGetPr(result) = *(int32_t*)(&(obj.data));
+                        break;
+                    case HDC_UINT32:
+                        *(uint32_t*)mxGetPr(result) = *(uint32_t*)(&(obj.data));
+                        break;
+                    case HDC_INT64:
+                        *(int64_t*)mxGetPr(result) = *(int64_t*)(&(obj.data));
+                        break;
+                    case HDC_UINT64:
+                        *(uint64_t*)mxGetPr(result) = *(uint64_t*)(&(obj.data));
+                        break;
+                    default:
+                        mexErrMsgTxt("matlabClassID2HDCType(): Unknown matlab_type.");
+                }
             }
-            memcpy(mxGetPr(result), obj.data, n_elem * hdc_sizeof(obj.type));
-            // zero-copy -- so far results into segfaults
+            //
+            // zero-copy -- so far results in segfaults
             // most likely because matlab deallocates the memory
     //         result = mxCreateUninitNumericArray(rank, shape, mxDOUBLE_CLASS, mxREAL);
     //         mxSetData(result, hdc_instance->as<void*>());
