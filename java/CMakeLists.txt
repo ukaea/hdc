@@ -10,11 +10,11 @@ if (ENABLE_JAVA)
   set ( jhdc_SOURCE_DIR "${hdc_SOURCE_DIR}" )
   set ( jhdc_BINARY_DIR "${hdc_BINARY_DIR}/java" )
 else()
-  project( jhdc VERSION 0.20.0 )
+  project( jhdc VERSION 0.21.0 )
   message("ENABLE_JAVA=FALSE => performing standalone build")
 
   find_package( PkgConfig )
-  pkg_check_modules( HDC hdc=0.20.0 REQUIRED )
+  pkg_check_modules( HDC hdc=0.21.0 REQUIRED )
 
   # Build options
   option( INSTALL_JAVA_DEPENDENCIES "Install jHDC JAR dependencies" OFF )
