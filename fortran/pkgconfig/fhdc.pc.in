@@ -5,7 +5,7 @@ includedir=${prefix}/include/hdc
 
 Name: HDC
 Description: Hierarchical Dynamic Containers library (FORTRAN wrapper)
-Version: 0.19.0
+Version: 0.20.0
 
 Libs: -L${libdir}  -lboost_system -lhdc -lchdc -lfhdc
 Cflags: -I${includedir}
