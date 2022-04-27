@@ -16,11 +16,8 @@ API documentation
 =================
 The API documentation is available [here.](http://compass-tokamak.pages.tok.ipp.cas.cz/HDC/)
 
-Building instructions
-=====================
-
 Prerequisites
--------------
+=============
 
 To build HDC, you will need:
 - c++14 compliant compiler (tested with intelstudio>=2018 and gcc>=5.0)
@@ -40,7 +37,7 @@ Optionally it can use:
 - flatbuffers ((de)serialization plugin)
 
 Supported OS:
--------------
+=============
 
 Currently all commits are automatically tested against:
 
@@ -54,7 +51,7 @@ But HDC should work on any not-too-obsolette distro. If you face any problems, p
 
 
 Building HDC
-------------
+============
 Machine specific build instructions are available [here](docs/MACHINE_SPECIFIC_BUILD_INSTRUCTIONS.md).
 
 There are several cmake options. The most important are:
@@ -80,13 +77,15 @@ The example of build follows:
  ```
  2. build in a separate build directory
  ```
+ export HDC_PREFIX=$PWD/install
  mkdir build
  cd build
- cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install
+ cmake .. -DCMAKE_INSTALL_PREFIX=$HDC_PREFIX
  make -j install
  ```
-
- 3. Optionally build & install python module. Important: numpy must be installed before pyhdc.
+Building Python bindings
+------------------------
+Important: numpy must be installed before pyhdc.
  ```
  cd  python
  python setup.py build
@@ -94,7 +93,7 @@ The example of build follows:
  cd ..
  ```
 
- 4. Optionally, run Python tests (requires building HDC with HDF5).
+Optionally, run Python tests:
  ```
  cd python
  python setup.py test
@@ -103,16 +102,72 @@ The example of build follows:
  cd ..
  ```
 
- 5. Optionally build & run MATLAB mex interface
+General note for some bindings (embedded vs. standalone builds)
+---------------------------------------------------------------
+Especially for use with multiple compiler/library versions, HDC supports two ways of of building its binding interfaces. Currently this holds for FORTRAN, MATLAB and JAVA. Unless you need the same HDC with e.g. multiple MATLAB versions, you should use embedded build, which is set by adding `-DENABLE_<LANG>=TRUE` to cmake arguments - e.g.:
+```
+ cmake .. -DCMAKE_INSTALL_PREFIX=$HDC_PREFIX -DENABLE_MATLAB=TRUE -DENABLE_FORTRAN=TRUE - DENABLE_JAVA=TRUE
+```
+in this way, cmake adds specific subdirectories and tries to build everything at once.
+
+On contrary, setting `-DENABLE_<LANG>=FALSE` prevents `<LANG>` binding from being built. After you install HDC and set up `PKG_CONFIG_PATH`:
+```
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HDC_PREFIX/lib/pkgconfig
+```
+The complete how to is in the next sections.
+
+
+Building FORTRAN bindings (embedded)
+------------------------------------
+Just append `-DENABLE_FORTRAN=TRUE` to your cmake command:
+```
+ cmake .. -DCMAKE_INSTALL_PREFIX=$HDC_PREFIX -DENABLE_FORTRAN=TRUE
+```
+and you are done, make will do the rest
+
+Building FORTRAN bindings (standalone)
+--------------------------------------
+Disable fortran by adding `-DENABLE_FORTRAN=FALSE` to your cmake - e.g.:
+```
+ cmake .. -DCMAKE_INSTALL_PREFIX=$HDC_PREFIX -DENABLE_FORTRAN=FALSE
+```
+Now you can cd into binding directory and run:
+```
+cd fortran
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$HDC_PREFIX
+make -j
+make install
+```
+Done. You should have it installed.
+
+Building MATLAB bindings (embedded)
+-----------------------------------
+Make matlab and mex binaries findable (e.g. by modifying PATH environment variable, or by loading module), then you jus need to provide `-DENABLE_MATLAB=TRUE` on cmake line, i.e.:
+```
+ cmake .. -DCMAKE_INSTALL_PREFIX=$HDC_PREFIX -DENABLE_MATLAB=TRUE
+```
+
+Building MATLAB bindings (standalone)
+-------------------------------------
  ```
- cd matlab
- make -f Makefile_
- LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HDC_PREFIX/lib/pkgconfig
+cd matlab
+mkdir build
+cd build
+make -j
+LD_LIBRARY_PATH=../../install/lib matlab -nojvm -r "run('test_matlab')"
  ```
 You should see "All tests are OK..." message - in such case, the mex interface should work fine...
 
-Building java HDC bindings (jHDC)
----------------------------------
+Installation is up to you, e.g.:
+```
+cp *.m *.mexa64 /desired/matlab/stuff/dir
+```
+
+Building Java bindings (embedded)
+-------------------------------------
 
 jHDC build requires  `maven` and `openjdk-8-jdk-headless` or another JDK (not tested). Please ensure you have these installed.
 There are several cmake options for jHDC:
@@ -123,7 +178,7 @@ There are several cmake options for jHDC:
   - `-DJAR_WITH_DEPENDENCIES` Build jar with all dependencies bundled inside. The result can be quite large, but no dependencies are needed. (`OFF` by default).
   - `-DJAVACPP_PLATFORM` Build bundled jar with only specified arch (`linux-x86_64` by default). This reduces the jar size from ~460MB to ~80MB. Anybody loving huge jars can set empty string here. [Detailed description here.](https://github.com/bytedeco/javacpp-presets/wiki/Reducing-the-Number-of-Dependencies)
 
-Clearly, not all combinations of these options make sense, but making some of them dependent does not make sense either.
+Clearly, not all combinations of these options make sense, but making some of them dependent does not make the sense either.
 
 Usually you would want either:
 ```
@@ -136,6 +191,17 @@ or:
 depending on your preferences.
 
 How to run jHDC example is described [here.](java/README.md)
+
+Building Java bindings (standalone)
+-----------------------------------
+CMAKE options remain the same as for embedded build
+```
+cd java
+mkdir build
+cd build
+make -j
+make install
+```
 
 Building using IntelStudio
 --------------------------
