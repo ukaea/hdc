@@ -56,6 +56,10 @@ public:
         return _store->get_settings();
     }
 
+    void reserve(boost::uuids::uuid uuid, size_t size) {
+        _store->reserve(uuid, size);
+    }
+
     void set(boost::uuids::uuid uuid, char* data, size_t size) {
         _store->set(uuid, data, size);
     }

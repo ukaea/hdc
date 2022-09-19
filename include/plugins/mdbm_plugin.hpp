@@ -72,6 +72,26 @@ public:
         return ss.str();
     }
 
+    void reserve(boost::uuids::uuid _uuid, size_t data_size) override {
+        if (!initialized) {
+            throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
+        }
+        datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
+        datum found = mdbm_fetch(this->db, key);
+        if (found.dptr == nullptr || found.dsize == 0) {
+            throw std::runtime_error("MDBMStorage::reserve(\""+boost::lexical_cast<std::string>(_uuid)+"\"): not found\n");
+        }
+        if (static_cast<size_t>(found.dsize) > data_size) {
+            throw std::runtime_error("MDBMStorage::reserve(\""+boost::lexical_cast<std::string>(_uuid)+"\"): invalid size\n");
+        }
+        auto new_data = std::make_unique<char[]>(data_size);
+        memcpy(new_data.get(), found.dptr, found.dsize);
+        datum value = { new_data.get(), static_cast<int>(data_size) };
+        mdbm_lock_smart (this->db, &key, 0);
+        mdbm_store(this->db, key,value, MDBM_MODIFY);
+        mdbm_unlock_smart (this->db, &key, 0);
+    }
+
     void set(boost::uuids::uuid _uuid, char* data, size_t size) override {
         if (!initialized) {
             throw std::runtime_error("MDBM: cannot perform action. init() has not been called...");
@@ -89,7 +109,7 @@ public:
         }
         datum key = { reinterpret_cast<char*>(&_uuid), static_cast<int>(boost::uuids::uuid::static_size()) };
         datum found = mdbm_fetch(this->db, key);
-        if (found.dptr == NULL || found.dsize == 0) {
+        if (found.dptr == nullptr || found.dsize == 0) {
             throw std::runtime_error("MDBMStorage::get(\""+boost::lexical_cast<std::string>(_uuid)+"\"): not found\n");
         }
         return (char*) found.dptr;

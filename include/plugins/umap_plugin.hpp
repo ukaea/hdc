@@ -49,6 +49,13 @@ public:
         return false;
     }
 
+    void reserve(boost::uuids::uuid uuid, size_t data_size) override {
+        if (_map.find(uuid) == _map.end()) {
+            throw std::runtime_error("UnorderedMapStorage::extend("+boost::lexical_cast<std::string>(uuid)+"): not found\n");
+        }
+        _map[uuid].reserve(data_size);
+    }
+
     void sync() override {}
 
     std::string getDescription() override {

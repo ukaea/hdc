@@ -25,6 +25,7 @@ public:
     virtual std::string get_settings() = 0;
     virtual std::string name() = 0;
     virtual bool memory_mapped() = 0;
+    virtual void reserve(boost::uuids::uuid uuid, size_t data_size) = 0;
 };
 
 PLUMA_PROVIDER_HEADER(Storage)

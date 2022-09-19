@@ -224,14 +224,11 @@ hdc_type_t to_typeid(long a UNUSED) { return HDC_INT64; }
 
 hdc_type_t to_typeid(const std::type_info& t)
 {
-    const std::string type_str = t.name();
     if (t == typeid(std::string) || t == typeid(char) || t == typeid(char*)) {
         return HDC_STRING;
     } else if (t == typeid(double)) {
         return HDC_DOUBLE;
-    } else if (t == typeid(int)) {
-        return HDC_INT64;
-    } else if (t == typeid(short)) {
+    } else if (t == typeid(int) || t == typeid(short)) {
         return HDC_INT64;
     } else {
         return HDC_ERROR;

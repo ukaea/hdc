@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
         // Get subtree
         HDC subtree = tree.get("aaa/bbb");
         // Get node
-        HDC node = subtree.get("ccc");
+        subtree.get("ccc");
 
         // Delete subtree
         tree.delete_child("aaa/eee");

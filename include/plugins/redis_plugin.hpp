@@ -27,7 +27,7 @@ private:
     struct timeval timeout = { 1, 500000 };
  // 1.5 seconds
     bool initialized = false;
-    std::unordered_map<std::string,std::vector<char>> _cache;
+    std::unordered_map<std::string, std::vector<char>> _cache;
 public:
     RedisStorage() {
         DEBUG_STDOUT("RedisStorage()\n");
@@ -38,26 +38,26 @@ public:
         DEBUG_STDOUT("~RedisStorage()\n");
     }
 
-    void lock(boost::uuids::uuid _uuid) {
+    void lock(boost::uuids::uuid _uuid) override {
 //         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
     }
 
-    void unlock(boost::uuids::uuid _uuid) {
+    void unlock(boost::uuids::uuid _uuid) override {
 //         std::cout << "Warning: Redis is locking by design. There is no need to call this explicitly..." << std::endl;
     }
 
-    bool locked() {
+    bool locked() override {
 //         std::cout << "RedisStorage.locked(): Redis is locking by design. Hence returning false..." << std::endl;
         return false;
     }
 
-    void sync() {}
+    void sync()  override{}
 
-    string getDescription() {
+    string getDescription() override {
         return "This is Redis based storage.";
     }
 
-    std::string get_settings() {
+    std::string get_settings() override {
         Json::Value root;
         root["storage"] = "redis";
         root["hostname"] = hostname;
@@ -69,24 +69,58 @@ public:
         return ss.str();
     }
 
-    void set(boost::uuids::uuid _uuid, char* data, size_t size) {
-        if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+    void reserve(boost::uuids::uuid _uuid, size_t data_size) override {
+        if (!initialized) {
+            throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+        }
+        auto key = boost::lexical_cast<std::string>(_uuid);
+        this->reply = (redisReply*)redisCommand(this->context, "GET %b", key.c_str(), (size_t) key.size());
+        if ( !this->reply ) {
+            throw std::runtime_error("RedisStorage->reserve() [GET] has returned an error\n");
+        } else if ( this->reply->type != REDIS_REPLY_STRING ) {
+            throw std::runtime_error("RedisStorage->reserve() has returned wrong this->reply type\n");
+        } else if (static_cast<size_t>(this->reply->len) > data_size) {
+            throw std::runtime_error("RedisStorage->reserve(): invalid size\n");
+        }
+        auto new_data = std::make_unique<char[]>(data_size);
+        memcpy(new_data.get(), this->reply->str, this->reply->len);
+        freeReplyObject(this->reply);
+
+        // Still not knowing why this is needed, but it makes the tests pass...
+        this->reply = (redisReply*)redisCommand(this->context, "DEL %b", key.c_str(), (size_t)key.size());
+        if ( !this->reply ) {
+            throw std::runtime_error("RedisStorage->reserve() [DEL] has returned an error\n");
+        }
+        freeReplyObject(this->reply);
+        // Actual SET
+        this->reply = (redisReply*)redisCommand(this->context, "SET %b %b", key.c_str(), (size_t)key.size(), new_data.get(), data_size);
+        if ( !this->reply ) {
+            throw std::runtime_error("RedisStorage->reserve() [SET] has returned an error\n");
+        }
+        freeReplyObject(this->reply);
+    }
+
+    void set(boost::uuids::uuid _uuid, char* data, size_t size) override {
+        if (!initialized) {
+            throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+        }
         auto key = boost::lexical_cast<std::string>(_uuid);
         // Still not knowing why this is needed, but it makes the tests pass...
-        this->reply = (redisReply*)redisCommand(this->context,"DEL %b", key.c_str(), (size_t) key.size());
+        this->reply = (redisReply*)redisCommand(this->context, "DEL %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) throw std::runtime_error("RedisStorage->set() [DEL] has returned an error\n");
         freeReplyObject(this->reply);
         // Actual SET
-        this->reply = (redisReply*)redisCommand(this->context,"SET %b %b", key.c_str(), (size_t) key.size(), data, (size_t) size);
+        this->reply = (redisReply*)redisCommand(this->context, "SET %b %b", key.c_str(), (size_t) key.size(), data, (size_t) size);
         if ( !this->reply ) throw std::runtime_error("RedisStorage->set() [SET] has returned an error\n");
         freeReplyObject(this->reply);
-        return;
     }
 
-    char* get(boost::uuids::uuid _uuid) {
-        if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+    char* get(boost::uuids::uuid _uuid) override {
+        if (!initialized) {
+            throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+        }
         auto key = boost::lexical_cast<std::string>(_uuid);
-        this->reply = (redisReply*)redisCommand(this->context,"GET %b", key.c_str(), (size_t) key.size());
+        this->reply = (redisReply*)redisCommand(this->context, "GET %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) {
             throw std::runtime_error("RedisStorage->get() has returned an error\n");
         } else {
@@ -102,10 +136,12 @@ public:
         }
     }
 
-    size_t get_size(boost::uuids::uuid _uuid) {
-        if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+    size_t get_size(boost::uuids::uuid _uuid) override {
+        if (!initialized) {
+            throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
+        }
         auto key = boost::lexical_cast<std::string>(_uuid);
-        this->reply = (redisReply*)redisCommand(this->context,"STRLEN %b", key.c_str(), (size_t) key.size());
+        this->reply = (redisReply*)redisCommand(this->context, "STRLEN %b", key.c_str(), (size_t) key.size());
         if ( !this->reply ) {
             throw std::runtime_error("RedisStorage->get() has returned an error\n");
         } else {
@@ -119,7 +155,7 @@ public:
         }
     }
 
-    void cleanup () {
+    void cleanup () override {
         if (!initialized) return;
         DEBUG_STDOUT("RedisStorage::cleanup()\n");
         if (this->context != NULL) {
@@ -129,7 +165,7 @@ public:
         initialized = false;
     }
 
-    bool has(boost::uuids::uuid _uuid) {
+    bool has(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         auto key = boost::lexical_cast<std::string>(_uuid);
         this->reply = (redisReply*)redisCommand(this->context,"EXISTS %b", key.c_str(), (size_t) key.size());
@@ -146,7 +182,7 @@ public:
         }
     }
 
-    void remove(boost::uuids::uuid _uuid) {
+    void remove(boost::uuids::uuid _uuid) override {
         if (!initialized) throw std::runtime_error("RedisStorage: cannot perform action. init() has not been called...");
         auto key = boost::lexical_cast<std::string>(_uuid);
         this->reply = (redisReply*)redisCommand(this->context,"DEL %b", key.c_str(), (size_t) key.size());
@@ -157,7 +193,7 @@ public:
         }
     }
 
-    void init(std::string settings) {
+    void init(std::string settings) override {
         Json::Value root;
         if (settings != "") {
             std::stringstream ss(settings);
@@ -184,11 +220,11 @@ public:
         initialized = true;
     }
 
-    string name() {
+    string name() override {
         return "redis";
     }
 
-    bool memory_mapped() {
+    bool memory_mapped() override {
         return false;
     }
 
