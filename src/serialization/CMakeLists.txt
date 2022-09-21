@@ -17,7 +17,7 @@ if( ENABLE_UDA )
 endif( ENABLE_UDA )
 
 if( ENABLE_FLATBUFFERS )
-    find_package( Flatbuffers )
+    find_package( Flatbuffers QUIET )
 endif( ENABLE_FLATBUFFERS )
 if( Flatbuffers_FOUND )
     get_target_property( FLATBUFFERS_INCLUDE_DIR flatbuffers::flatbuffers INTERFACE_INCLUDE_DIRECTORIES )

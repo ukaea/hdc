@@ -144,7 +144,7 @@ public:
     *
     * @param byte_size p_byte_size: Size in bytes.
     */
-    HDC(size_t byte_size);
+    explicit HDC(size_t byte_size);
 
     /**
     * @brief Default constructor. Creates empty HDC.
@@ -234,18 +234,18 @@ public:
         size_t rank = 1;
         size_t data_size = sizeof(T) * data.size();
         auto buffer_size = data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(buffer_size, 0);
-        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        auto buffer = std::make_unique<char[]>(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.get());
         header->type = to_typeid(data[0]);
         header->flags = flags;
         header->rank = rank;
         header->data_size = data_size;
         header->buffer_size = buffer_size;
         header->shape[0] = data.size();
-        memcpy(buffer.data() + sizeof(hdc_header_t), data.data(), data_size);
+        memcpy(buffer.get() + sizeof(hdc_header_t), data.data(), data_size);
         uuid = generate_uuid();
         storage = hdc_global.storage;
-        storage->set(uuid, buffer.data(), buffer_size);
+        storage->set(uuid, buffer.get(), buffer_size);
     }
 
     /**
@@ -454,7 +454,7 @@ public:
      *
      * @param path other: a node to compare with
      */
-    inline bool operator==(const HDC& other) {
+    inline bool operator==(const HDC& other) const {
         return (this->get_storage() == other.get_storage() && this->get_uuid() == other.get_uuid());
     }
 
@@ -464,7 +464,7 @@ public:
      * @param path other: a node to compare with
      * @return bool
      */
-    inline bool operator!=(const HDC& other) {
+    inline bool operator!=(const HDC& other) const {
         return !operator==(other);
     }
 
@@ -593,9 +593,9 @@ public:
             if (!storage->memory_mapped()) storage->set(uuid, buffer, header->buffer_size);
         } else {
             // create new buffer
-            std::vector<char> new_buffer(buffer_size);
+            auto new_buffer = std::make_unique<char[]>(buffer_size);
             // set header
-            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.get());
             header->buffer_size = buffer_size;
             header->data_size = data_size;
             memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
@@ -606,11 +606,10 @@ public:
             header->type = to_typeid(data[0]);
             header->rank = rank;
             // set data
-            memcpy(new_buffer.data() + sizeof(hdc_header_t), data, data_size);
+            memcpy(new_buffer.get() + sizeof(hdc_header_t), data, data_size);
             // replace buffer
-            storage->set(uuid, new_buffer.data(), buffer_size);
+            storage->set(uuid, new_buffer.get(), buffer_size);
         }
-        return;
     }
 
     /**
@@ -649,9 +648,9 @@ public:
 
         } else {
             // create new buffer
-            std::vector<char> new_buffer(buffer_size);
+            auto new_buffer = std::make_unique<char[]>(buffer_size);
             // set header
-            header = reinterpret_cast<hdc_header_t*>(new_buffer.data());
+            header = reinterpret_cast<hdc_header_t*>(new_buffer.get());
             header->buffer_size = buffer_size;
             header->data_size = data_size;
             memset(header->shape, 0, HDC_MAX_DIMS * sizeof(size_t));
@@ -662,10 +661,9 @@ public:
             header->type = to_typeid(data[0]);
             header->rank = rank;
             // set data
-            memcpy(new_buffer.data() + sizeof(hdc_header_t), &data, data_size);
-            storage->set(uuid, new_buffer.data(), buffer_size);
+            memcpy(new_buffer.get() + sizeof(hdc_header_t), &data, data_size);
+            storage->set(uuid, new_buffer.get(), buffer_size);
         }
-        return;
     }
 
     /**
@@ -679,14 +677,14 @@ public:
     {
         auto data_size = sizeof(void*);
         auto buffer_size = data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(buffer_size);
-        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        auto buffer = std::make_unique<char[]>(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.get());
         header->type = to_typeid(*data);
         header->data_size = data_size;
         header->buffer_size = buffer_size;
         header->flags = HDCExternal;
-        memcpy(buffer.data() + sizeof(hdc_header_t), &data, data_size);
-        storage->set(uuid, buffer.data(), buffer_size);
+        memcpy(buffer.get() + sizeof(hdc_header_t), &data, data_size);
+        storage->set(uuid, buffer.get(), buffer_size);
     }
 
     /**
@@ -766,15 +764,15 @@ public:
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
-        std::vector<char> buffer(buffer_size);
-        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        auto buffer = std::make_unique<char[]>(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.get());
         header->data_size = data_size;
         header->type = HDC_STRING;
         header->rank = 1;
         header->shape[0] = str.length();
         header->buffer_size = buffer_size;
-        memcpy(buffer.data() + sizeof(hdc_header_t), str.c_str(), header->data_size);
-        storage->set(uuid, buffer.data(), header->buffer_size);
+        memcpy(buffer.get() + sizeof(hdc_header_t), str.c_str(), header->data_size);
+        storage->set(uuid, buffer.get(), header->buffer_size);
     }
 
     /**
@@ -790,16 +788,16 @@ public:
         if (storage->has(uuid)) {
             storage->remove(uuid);
         }
-        std::vector<char> buffer(buffer_size);
-        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        auto buffer = std::make_unique<char[]>(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.get());
         header->data_size = data_size;
         header->type = HDC_STRING;
         header->rank = 1;
         header->shape[0] = len;
         header->buffer_size = buffer_size;
-        memcpy(buffer.data() + sizeof(hdc_header_t), str, len);
-        *(buffer.data() + sizeof(hdc_header_t) + len) = '\0';
-        storage->set(uuid, buffer.data(), header->buffer_size);
+        memcpy(buffer.get() + sizeof(hdc_header_t), str, len);
+        *(buffer.get() + sizeof(hdc_header_t) + len) = '\0';
+        storage->set(uuid, buffer.get(), header->buffer_size);
     }
 
     /**
@@ -867,13 +865,13 @@ public:
     {
         auto data_size = sizeof(T);
         auto buffer_size = data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(buffer_size);
-        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        auto buffer = std::make_unique<char[]>(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.get());
         header->type = to_typeid(data);
         header->data_size = data_size;
         header->buffer_size = buffer_size;
-        memcpy(buffer.data() + sizeof(hdc_header_t), &data, data_size);
-        storage->set(uuid, buffer.data(), buffer_size);
+        memcpy(buffer.get() + sizeof(hdc_header_t), &data, data_size);
+        storage->set(uuid, buffer.get(), buffer_size);
     }
 
     /**
@@ -886,13 +884,13 @@ public:
     {
         auto data_size = hdc_sizeof(_type);
         auto buffer_size = data_size + sizeof(hdc_header_t);
-        std::vector<char> buffer(buffer_size);
-        auto header = reinterpret_cast<hdc_header_t*>(buffer.data());
+        auto buffer = std::make_unique<char[]>(buffer_size);
+        auto header = reinterpret_cast<hdc_header_t*>(buffer.get());
         header->type = _type;
         header->data_size = data_size;
         header->buffer_size = buffer_size;
-        memcpy(buffer.data() + sizeof(hdc_header_t), data, data_size);
-        storage->set(uuid, buffer.data(), buffer_size);
+        memcpy(buffer.get() + sizeof(hdc_header_t), data, data_size);
+        storage->set(uuid, buffer.get(), buffer_size);
     }
 
     /**
@@ -1301,7 +1299,7 @@ public:
     * @param extra_size p_extra_size: extra size of which the new buffer size shoul increase.
     * @return char*
     */
-    static std::vector<char> buffer_grow(char* old_buffer, size_t extra_size);
+    static std::unique_ptr<char[]> buffer_grow(char* old_buffer, size_t extra_size);
 
     /**
      * @brief Returns list of available serializers

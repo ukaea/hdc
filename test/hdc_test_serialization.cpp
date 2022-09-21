@@ -24,7 +24,7 @@ TEST_CASE("SerializeDeserialize", "[HDC]")
     CHECK(strcmp(fname.c_str(), fname_out.c_str()) == 0);
     HDC::destroy();
     // load back from the file
-    HDC tree2 = HDC::deserialize("hdc_string",ser);
+    HDC tree2 = HDC::deserialize("hdc_string", ser);
     auto tree2_dump = tree2.serialize("json");
     CHECK(strcmp(tree_dump.c_str(), tree2_dump.c_str()) == 0);
     HDC::destroy();
