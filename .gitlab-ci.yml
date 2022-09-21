@@ -32,7 +32,7 @@ test-hdc-focal-standalone-builds:
   script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_FORTRAN=OFF -DENABLE_JAVA=OFF
+    - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_FORTRAN=OFF -DENABLE_JAVA=OFF -DENABLE_HDF5=OFF
     - make -j
     - make test
     - make install
