@@ -14,8 +14,6 @@ test-hdc-focal:
   stage: test-hdc-focal
   image: repo.tok.ipp.cas.cz:5050/compass-tokamak/hdc/test-hdc-focal
   script:
-    - apt update
-    - apt install 
     - cd build
     - cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../install -DENABLE_JAVA=ON -DENABLE_HDF5=OFF
     - make -j
